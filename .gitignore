@@ -46,8 +46,9 @@ app.*.map.json
 
 # Firebase
 android/app/google-services.json
-google-services-info.plist
+ios/Runner/google-services-info.plist
 lib/firebase_options.dart
+firebase.json
 
 # iOS/macOS Pods 
 **/ios/Pods/
