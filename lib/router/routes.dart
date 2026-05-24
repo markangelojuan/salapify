@@ -1,6 +1,6 @@
 import 'package:salapify/features/authentication/presentation/screens/sign_in_screen.dart';
 import 'package:salapify/features/authentication/presentation/screens/sign_up_screen.dart';
-import 'package:salapify/features/budget_management/presentation/screens/home_screen.dart';
+import 'package:salapify/core/screens/home_screen.dart';
 import 'package:salapify/router/go_router_refresh_stream.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
