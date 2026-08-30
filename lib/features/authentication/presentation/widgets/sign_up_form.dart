@@ -47,7 +47,11 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
     if (_formKey.currentState!.validate()) {
       ref
           .read(authControllerProvider.notifier)
-          .createUserWithEmailAndPassword(email: email, password: password);
+          .createUserWithEmailAndPassword(
+            email: email,
+            password: password,
+            username: _usernameController.text.trim(),
+          );
     }
   }
 
