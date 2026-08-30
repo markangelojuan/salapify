@@ -54,8 +54,9 @@ String _$authRepositoryHash() => r'fa5b8337b7daf1a6e6ab14268c91ea9089629ec0';
 final authStateChangesProvider = AuthStateChangesProvider._();
 
 final class AuthStateChangesProvider
-    extends $FunctionalProvider<AsyncValue<User?>, User?, Stream<User?>>
-    with $FutureModifier<User?>, $StreamProvider<User?> {
+    extends
+        $FunctionalProvider<AsyncValue<AppUser?>, AppUser?, Stream<AppUser?>>
+    with $FutureModifier<AppUser?>, $StreamProvider<AppUser?> {
   AuthStateChangesProvider._()
     : super(
         from: null,
@@ -72,22 +73,23 @@ final class AuthStateChangesProvider
 
   @$internal
   @override
-  $StreamProviderElement<User?> $createElement($ProviderPointer pointer) =>
+  $StreamProviderElement<AppUser?> $createElement($ProviderPointer pointer) =>
       $StreamProviderElement(pointer);
 
   @override
-  Stream<User?> create(Ref ref) {
+  Stream<AppUser?> create(Ref ref) {
     return authStateChanges(ref);
   }
 }
 
-String _$authStateChangesHash() => r'e0ba298df256aa0e5c67aded5bc4dcbe1a433cdf';
+String _$authStateChangesHash() => r'199a9132d64e85888f728def3717a5163d8558aa';
 
 @ProviderFor(currentUser)
 final currentUserProvider = CurrentUserProvider._();
 
-final class CurrentUserProvider extends $FunctionalProvider<User?, User?, User?>
-    with $Provider<User?> {
+final class CurrentUserProvider
+    extends $FunctionalProvider<AppUser?, AppUser?, AppUser?>
+    with $Provider<AppUser?> {
   CurrentUserProvider._()
     : super(
         from: null,
@@ -104,21 +106,21 @@ final class CurrentUserProvider extends $FunctionalProvider<User?, User?, User?>
 
   @$internal
   @override
-  $ProviderElement<User?> $createElement($ProviderPointer pointer) =>
+  $ProviderElement<AppUser?> $createElement($ProviderPointer pointer) =>
       $ProviderElement(pointer);
 
   @override
-  User? create(Ref ref) {
+  AppUser? create(Ref ref) {
     return currentUser(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(User? value) {
+  Override overrideWithValue(AppUser? value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<User?>(value),
+      providerOverride: $SyncValueProvider<AppUser?>(value),
     );
   }
 }
 
-String _$currentUserHash() => r'b367f58b96bb951a08bf3875efc474d0fcada754';
+String _$currentUserHash() => r'9d6e30a689922f6fe57145ed48929283483cba40';

@@ -22,6 +22,11 @@ class UserRepository {
       'createdAt': FieldValue.serverTimestamp(),
     });
   }
+
+  Future<String?> getUsername(String uid) async {
+    final doc = await _users.doc(uid).get();
+    return doc.data()?['username'] as String?;
+  }
 }
 
 @Riverpod(keepAlive: true)

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:salapify/core/widgets/app_drawer.dart';
+import 'package:salapify/core/layout/app_drawer.dart';
 import 'package:salapify/features/notification/presentation/screens/notification_screen.dart';
 import 'package:salapify/features/budget/presentation/screens/budget_screen.dart';
 import 'package:salapify/features/budget/presentation/screens/split_bills_screen.dart';

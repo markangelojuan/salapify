@@ -1,12 +1,14 @@
 import 'package:salapify/features/authentication/presentation/screens/sign_in_screen.dart';
 import 'package:salapify/features/authentication/presentation/screens/sign_up_screen.dart';
-import 'package:salapify/features/authentication/data/auth_repository.dart';
+import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
+import 'package:salapify/features/budget/domain/entities/budget_category.dart';
+import 'package:salapify/features/budget/presentation/screens/category_form_screen.dart';
 import 'package:salapify/features/settings/presentation/screens/account_screen.dart';
 import 'package:salapify/features/settings/presentation/screens/settings_screen.dart';
 import 'package:salapify/features/settings/presentation/screens/help_screen.dart';
-import 'package:salapify/core/screens/home_screen.dart';
+import 'package:salapify/features/dashboard/presentation/screens/home_screen.dart';
 import 'package:salapify/router/go_router_refresh_stream.dart';
-import 'package:salapify/router/guest_controller.dart';
+import 'package:salapify/features/authentication/presentation/controllers/guest_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:go_router/go_router.dart';
@@ -15,7 +17,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'routes.g.dart';
 
 enum AppRoutes {
-  home, signIn, signUp, account, settings, help
+  home, signIn, signUp, account, settings, help, categoryForm
 }
 
 @Riverpod(keepAlive: true)
@@ -69,6 +71,14 @@ GoRouter goRouter(Ref ref) {
         path: "/help",
         name: AppRoutes.help.name,
         builder: (ctx, state) => const HelpScreen(),
+      ),
+      GoRoute(
+        path: "/category-form",
+        name: AppRoutes.categoryForm.name,
+        builder: (ctx, state) {
+          final existingCategory = state.extra as BudgetCategory?;
+          return CategoryFormScreen(existingCategory: existingCategory);
+        },
       ),
     ],
   );

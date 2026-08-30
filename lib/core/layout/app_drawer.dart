@@ -2,25 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:salapify/core/theme/theme_controller.dart';
-import 'package:salapify/features/authentication/data/auth_repository.dart';
 import 'package:salapify/features/authentication/presentation/controllers/auth_controller.dart';
-import 'package:salapify/router/guest_controller.dart';
+import 'package:salapify/features/authentication/presentation/controllers/guest_controller.dart';
+import 'package:salapify/features/authentication/presentation/controllers/app_user_controller.dart';
+
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(currentUserProvider);
+    final userAsync = ref.watch(currentAppUserProvider);
+    final user = userAsync.value;
     final isGuest = ref.watch(guestModeProvider);
     final themeMode = ref.watch(themeControllerProvider);
+    
 
     return Drawer(
       child: SafeArea(
         child: Column(
           children: [
             UserAccountsDrawerHeader(
-              accountName: Text(user?.displayName ?? "User"),
+              accountName: Text(user?.username ?? "User"),
               accountEmail: Text(user?.email ?? ""),
               currentAccountPicture: const CircleAvatar(
                 child: Icon(Icons.person),

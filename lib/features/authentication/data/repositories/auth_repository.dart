@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:salapify/features/authentication/data/mappers/app_user_mapper.dart';
+import 'package:salapify/features/authentication/domain/entities/app_user.dart';
 
 part 'auth_repository.g.dart';
 
@@ -25,12 +27,12 @@ class AuthRepository {
     );
   }
 
-  User? get currentUser {
-    return _auth.currentUser;
+  AppUser? get currentUser {
+    return _auth.currentUser?.toDomain();
   }
 
-  Stream<User?> authStateChanges() {
-    return _auth.authStateChanges();
+  Stream<AppUser?> authStateChanges() {
+    return _auth.authStateChanges().map((user) => user?.toDomain());
   }
 
   Future<void> signOut() async {
@@ -44,13 +46,13 @@ AuthRepository authRepository(Ref ref) {
 }
 
 @Riverpod(keepAlive: true)
-Stream<User?> authStateChanges(Ref ref) {
+Stream<AppUser?> authStateChanges(Ref ref) {
   final authRepository = ref.watch(authRepositoryProvider);
   return authRepository.authStateChanges();
 }
 
 @Riverpod(keepAlive: true)
-User? currentUser(Ref ref) {
-  final authRepository = ref.watch(authRepositoryProvider);
-  return authRepository.currentUser;
+AppUser? currentUser(Ref ref) {
+  final authState = ref.watch(authStateChangesProvider);
+  return authState.value;
 }
