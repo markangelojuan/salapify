@@ -7,6 +7,7 @@ import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/features/authentication/presentation/controllers/auth_controller.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:salapify/router/guest_controller.dart';
 
 class SignInForm extends ConsumerStatefulWidget {
   const SignInForm({super.key});
@@ -104,7 +105,10 @@ class _SignInFormState extends ConsumerState<SignInForm> {
           const SizedBox(height: 8),
           Center(
             child: TextButton(
-              onPressed: () {},
+              onPressed: () {
+                ref.read(guestModeProvider.notifier).enable();
+                context.go('/home');
+              },
               child: const Text("Continue as guest"),
             ),
           ),

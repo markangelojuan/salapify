@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:salapify/core/widgets/app_drawer.dart';
 import 'package:salapify/features/notification/presentation/screens/notification_screen.dart';
-import 'package:salapify/features/authentication/presentation/screens/account_screen.dart';
 import 'package:salapify/features/budget/presentation/screens/budget_screen.dart';
 import 'package:salapify/features/budget/presentation/screens/split_bills_screen.dart';
 import 'package:salapify/features/budget/presentation/screens/transaction_screen.dart';
@@ -20,12 +20,15 @@ class _HomeScreenState extends State<HomeScreen> {
     TransactionScreen(),
     SplitBillsScreen(),
     NotificationScreen(),
-    AccountScreen(),
   ];
+
+  static const _titles = ['Budget', 'Transactions', 'Split Bill', 'Notifications'];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text(_titles[currentIndex])),
+      drawer: const AppDrawer(),
       body: IndexedStack(
         index: currentIndex,
         children: _screens,
@@ -51,11 +54,6 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.notifications_outlined),
             activeIcon: Icon(Icons.notifications),
             label: 'Notifications',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outlined),
-            activeIcon: Icon(Icons.person),
-            label: 'Account',
           ),
         ],
         currentIndex: currentIndex,

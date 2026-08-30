@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:salapify/features/authentication/presentation/controllers/auth_controller.dart';
 
 class BudgetScreen extends ConsumerStatefulWidget {
   const BudgetScreen({super.key});
@@ -18,12 +17,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text("Budget Screen"),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () =>
-                  ref.read(authControllerProvider.notifier).signOut(),
-              child: const Text("Logout (temp)"),
-            ),
+            
           ],
         ),
       ),
