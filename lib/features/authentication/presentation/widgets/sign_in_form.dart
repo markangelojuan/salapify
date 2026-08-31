@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/widgets/common_button.dart';
@@ -66,7 +67,12 @@ class _SignInFormState extends ConsumerState<SignInForm> {
               }
               return null;
             },
-          ),
+          ).animate().fadeIn(duration: 300.ms).slideY(
+                begin: 0.1,
+                end: 0,
+                duration: 300.ms,
+                curve: Curves.easeOut,
+              ),
           const SizedBox(height: 18),
           CommonTextField(
             controller: _passwordController,
@@ -91,7 +97,13 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                 color: AppColors.background,
               ),
             ),
-          ),
+          ).animate().fadeIn(delay: 60.ms, duration: 300.ms).slideY(
+                begin: 0.1,
+                end: 0,
+                delay: 60.ms,
+                duration: 300.ms,
+                curve: Curves.easeOut,
+              ),
           const SizedBox(height: 24),
           CommonButton(
             label: "Sign In",
@@ -99,7 +111,13 @@ class _SignInFormState extends ConsumerState<SignInForm> {
             labelColor: AppColors.white,
             isLoading: authState.isLoading,
             onPressed: _submit,
-          ),
+          ).animate().fadeIn(delay: 120.ms, duration: 300.ms).slideY(
+                begin: 0.1,
+                end: 0,
+                delay: 120.ms,
+                duration: 300.ms,
+                curve: Curves.easeOut,
+              ),
           const SizedBox(height: 16),
           const Divider(),
           const SizedBox(height: 8),

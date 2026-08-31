@@ -50,6 +50,40 @@ final class BudgetCategoriesProvider
 
 String _$budgetCategoriesHash() => r'148a98a48faae9cea9830e2ba82978fbd10c26e5';
 
+@ProviderFor(hasUnsyncedCategories)
+final hasUnsyncedCategoriesProvider = HasUnsyncedCategoriesProvider._();
+
+final class HasUnsyncedCategoriesProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, Stream<bool>>
+    with $FutureModifier<bool>, $StreamProvider<bool> {
+  HasUnsyncedCategoriesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'hasUnsyncedCategoriesProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$hasUnsyncedCategoriesHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<bool> create(Ref ref) {
+    return hasUnsyncedCategories(ref);
+  }
+}
+
+String _$hasUnsyncedCategoriesHash() =>
+    r'060e5053facd17195377ff41abe8d9ef80b33295';
+
 @ProviderFor(BudgetActions)
 final budgetActionsProvider = BudgetActionsProvider._();
 
@@ -61,7 +95,7 @@ final class BudgetActionsProvider
         argument: null,
         retry: null,
         name: r'budgetActionsProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -74,7 +108,7 @@ final class BudgetActionsProvider
   BudgetActions create() => BudgetActions();
 }
 
-String _$budgetActionsHash() => r'56600066aaec163c7983891adfe7b2f180d00b03';
+String _$budgetActionsHash() => r'ada0c98a179cd91679f653b444c99246cc62750a';
 
 abstract class _$BudgetActions extends $AsyncNotifier<void> {
   FutureOr<void> build();

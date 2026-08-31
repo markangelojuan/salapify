@@ -5,6 +5,8 @@ import 'package:salapify/features/authentication/data/repositories/auth_reposito
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
 import 'package:salapify/features/budget/data/services/budget_sync_service.dart';
 import 'package:salapify/features/budget/data/repositories/budget_repository.dart';
+import 'package:salapify/features/settings/data/settings_repository.dart';
+import 'package:salapify/features/settings/data/services/settings_sync_service.dart'; // NEW
 
 part 'auth_controller.g.dart';
 
@@ -33,9 +35,22 @@ class AuthController extends _$AuthController {
           .read(userRepositoryProvider)
           .createUserProfile(uid: uid, username: username, email: email);
 
-      // Guest data (if any) must migrate BEFORE any pull, or an empty
-      // remote collection would overwrite local data on first pull.
       await ref.read(budgetSyncServiceProvider).migrateGuestDataToAccount(uid);
+
+      final settingsRepository = ref.read(settingsRepositoryProvider);
+      final settingsSyncService = ref.read(settingsSyncServiceProvider);
+      try {
+        await settingsSyncService.pushBudgetingPeriod(
+          uid,
+          await settingsRepository.getLocalBudgetingPeriod(),
+        );
+        await settingsSyncService.pushFirstHalfEndDay(
+          uid,
+          await settingsRepository.getLocalFirstHalfEndDay(),
+        );
+      } catch (_) {
+        // Offline during signup — retryPendingSettingsSync will pick it up.
+      }
     });
   }
 
@@ -52,10 +67,10 @@ class AuthController extends _$AuthController {
       );
 
       final uid = authRepository.currentUser!.uid;
-      // Existing account signing in on this device: pull their remote data
-      // down, then push anything that only exists locally.
       await ref.read(budgetSyncServiceProvider).pullRemoteCategories(uid);
       await ref.read(budgetSyncServiceProvider).pushUnsyncedCategories(uid);
+
+      await ref.read(settingsSyncServiceProvider).pullRemoteSettings(uid);
     });
   }
 

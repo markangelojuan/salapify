@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -6,7 +8,6 @@ import 'package:salapify/features/budget/data/mappers/budget_category_mapper.dar
 import 'package:salapify/features/budget/domain/entities/budget_category.dart';
 import 'package:salapify/features/budget/domain/entities/budget_category_type.dart';
 import 'package:salapify/features/budget/domain/entities/budget_frequency.dart';
-import 'package:flutter/foundation.dart';
 
 part 'budget_sync_service.g.dart';
 
@@ -15,6 +16,10 @@ class BudgetSyncService {
 
   final AppDatabase _db;
   final FirebaseFirestore _firestore;
+
+  // offline persistence otherwise queues the write and leaves this Future
+  // pending until reconnect, blocking any await'ing caller indefinitely.
+  static const _firestoreTimeout = Duration(seconds: 8);
 
   CollectionReference<Map<String, dynamic>> _remoteCollection(String uid) {
     return _firestore
@@ -55,25 +60,24 @@ class BudgetSyncService {
       iconName: data['iconName'] as String,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
-      isSynced: true, // came from remote, so it's synced by definition
+      isSynced: true,
       isDeleted: data['isDeleted'] as bool? ?? false,
     );
   }
 
   /// Pushes a single category to Firestore, then marks it synced locally.
-  /// Call this after every local write (add/update/delete) when signed in.
   Future<void> pushCategory(String uid, BudgetCategory category) async {
-    await _remoteCollection(
-      uid,
-    ).doc(category.id).set(_toFirestoreMap(category));
+    await _remoteCollection(uid)
+        .doc(category.id)
+        .set(_toFirestoreMap(category))
+        .timeout(_firestoreTimeout);
 
     await (_db.update(_db.budgetCategories)
           ..where((t) => t.id.equals(category.id)))
         .write(const BudgetCategoriesCompanion(isSynced: Value(true)));
   }
 
-  /// Pushes all locally unsynced categories. Call on app start and whenever
-  /// connectivity is restored, to catch up on writes that failed while offline.
+  /// Pushes all locally unsynced categories.
   Future<void> pushUnsyncedCategories(String uid) async {
     final unsynced = await (_db.select(
       _db.budgetCategories,
@@ -84,12 +88,7 @@ class BudgetSyncService {
     }
   }
 
-  /// One-time migration: pushes ALL local categories (guest data) to Firestore
-  /// under the newly created/signed-into uid. Duplicate names (if the account
-  /// already has a matching category) are allowed through intentionally —
-  /// the user can review and delete whichever one is wrong from the UI.
-  /// Must run BEFORE pullRemoteCategories, or an empty remote collection
-  /// would wipe local guest data on pull.
+  /// One-time migration: pushes ALL local categories (guest data) to Firestore.
   Future<void> migrateGuestDataToAccount(String uid) async {
     final allLocal = await _db.select(_db.budgetCategories).get();
 
@@ -98,11 +97,11 @@ class BudgetSyncService {
     }
   }
 
-  /// Pulls remote categories and merges into local using last-write-wins
-  /// (by updatedAt, falling back to createdAt if updatedAt is null).
-  /// Call after sign-in (after migration, if any) and periodically after.
+  /// Pulls remote categories and merges into local using last-write-wins.
   Future<void> pullRemoteCategories(String uid) async {
-    final remoteSnapshot = await _remoteCollection(uid).get();
+    final remoteSnapshot = await _remoteCollection(
+      uid,
+    ).get().timeout(_firestoreTimeout);
     final localRows = await _db.select(_db.budgetCategories).get();
     final localById = {for (final row in localRows) row.id: row};
 
@@ -111,7 +110,6 @@ class BudgetSyncService {
       final local = localById[remote.id];
 
       if (local == null) {
-        // Exists remotely but not locally (e.g. another device created it) — insert.
         await _db
             .into(_db.budgetCategories)
             .insert(remote.toCompanion(), mode: InsertMode.insertOrReplace);
@@ -124,8 +122,6 @@ class BudgetSyncService {
       if (remoteTimestamp.isAfter(localTimestamp)) {
         await _db.update(_db.budgetCategories).replace(remote.toCompanion());
       }
-      // else: local is newer or equal — keep local, it'll get pushed by
-      // pushUnsyncedCategories if it hasn't been synced yet.
     }
   }
 }

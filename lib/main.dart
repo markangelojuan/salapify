@@ -1,8 +1,10 @@
 import 'package:salapify/core/services/sync_trigger_service.dart';
+import 'package:salapify/core/services/connectivity_service.dart';
 import 'package:salapify/core/theme/app_theme.dart';
 import 'package:salapify/core/theme/theme_controller.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/budget/data/services/budget_sync_service.dart';
+import 'package:salapify/features/settings/data/services/settings_sync_service.dart';
 import 'package:salapify/firebase_options.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -31,21 +33,40 @@ class _MyAppState extends ConsumerState<MyApp> {
   }
 
   Future<void> _runStartupSync() async {
-    final uid = ref.read(authRepositoryProvider).currentUser?.uid;
-    if (uid == null) return; // guest at startup — nothing to sync
+    final user = await ref.read(authStateChangesProvider.future);
+    if (!mounted) return; 
+
+    final uid = user?.uid;
+    if (uid == null) return; // guest mode, nothing to sync
 
     try {
       final syncService = ref.read(budgetSyncServiceProvider);
       await syncService.pullRemoteCategories(uid);
+      if (!mounted) return;
       await syncService.pushUnsyncedCategories(uid);
-    } catch (_) {
-      // Offline at startup — connectivity listener will catch up later.
+    } catch (e) {
+      if (!mounted) return;
+      _logIfRealError(e, context: 'startupSync: budget pull/push');
     }
+
+    if (!mounted) return;
+
+    try {
+      await ref.read(settingsSyncServiceProvider).retryPendingSettingsSync(uid);
+    } catch (e) {
+      if (!mounted) return;
+      _logIfRealError(e, context: 'startupSync: retryPendingSettingsSync');
+    }
+  }
+
+  void _logIfRealError(Object e, {required String context}) {
+    final isOnline = ref.read(isOnlineProvider).value ?? true;
+    if (!isOnline) return; // expected — offline, will retry later
+    // FirebaseCrashlytics.instance.recordError(e, StackTrace.current, reason: context);
   }
 
   @override
   Widget build(BuildContext context) {
-    // Keeps the connectivity-triggered sync listener alive for the whole session.
     ref.watch(syncTriggerProvider);
 
     return MaterialApp.router(

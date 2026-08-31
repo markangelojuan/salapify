@@ -1,4 +1,3 @@
-// core/widgets/common_snackbar.dart
 import 'package:flutter/material.dart';
 
 class CommonSnackbar {
@@ -19,6 +18,19 @@ class CommonSnackbar {
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.green.shade700,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
+
+
+  static void showWarning(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.amber.shade800,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),

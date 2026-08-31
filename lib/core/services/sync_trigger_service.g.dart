@@ -8,23 +8,11 @@ part of 'sync_trigger_service.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Listens for connectivity changes and triggers a catch-up sync push
-/// whenever the device comes back online, for signed-in users only.
-/// Keep this provider alive for the whole app session (watched once from
-/// the root widget) so the listener is never torn down.
 
 @ProviderFor(SyncTrigger)
 final syncTriggerProvider = SyncTriggerProvider._();
 
-/// Listens for connectivity changes and triggers a catch-up sync push
-/// whenever the device comes back online, for signed-in users only.
-/// Keep this provider alive for the whole app session (watched once from
-/// the root widget) so the listener is never torn down.
 final class SyncTriggerProvider extends $NotifierProvider<SyncTrigger, void> {
-  /// Listens for connectivity changes and triggers a catch-up sync push
-  /// whenever the device comes back online, for signed-in users only.
-  /// Keep this provider alive for the whole app session (watched once from
-  /// the root widget) so the listener is never torn down.
   SyncTriggerProvider._()
     : super(
         from: null,
@@ -52,12 +40,7 @@ final class SyncTriggerProvider extends $NotifierProvider<SyncTrigger, void> {
   }
 }
 
-String _$syncTriggerHash() => r'866873f391d2905c2bb21df4e3059c0a679caf01';
-
-/// Listens for connectivity changes and triggers a catch-up sync push
-/// whenever the device comes back online, for signed-in users only.
-/// Keep this provider alive for the whole app session (watched once from
-/// the root widget) so the listener is never torn down.
+String _$syncTriggerHash() => r'd9ebb225012299800a0aa1aae3bcc83291eedd5d';
 
 abstract class _$SyncTrigger extends $Notifier<void> {
   void build();

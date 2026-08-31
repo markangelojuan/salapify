@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 enum BackgroundVariant { signIn, signUp }
 
@@ -48,8 +49,11 @@ class BackgroundDecoration extends StatelessWidget {
   }
 
   Widget _blob(double size, Color color) => Container(
-    width: size,
-    height: size,
-    decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-  );
+        width: size,
+        height: size,
+        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+      )
+          .animate(onPlay: (controller) => controller.repeat(reverse: true))
+          .scaleXY(end: 1.08, duration: 4.seconds, curve: Curves.easeInOut)
+          .moveY(end: -12, duration: 4.seconds, curve: Curves.easeInOut);
 }

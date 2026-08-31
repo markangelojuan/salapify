@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart'; // NEW
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 
@@ -16,9 +17,10 @@ class SettingsScreen extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         title: const Text('Change Budgeting Period'),
         content: const Text(
-          'Your existing categories\' amounts will NOT be automatically '
-          'adjusted. Please review and update them yourself after switching. '
-          'Continue?',
+          'Existing categories will be converted to match the new period '
+          '(amounts stay the same). Categories set for a specific half will '
+          'now count toward the full month, or vice versa — you may want to '
+          'review and consolidate any duplicates afterward. Continue?',
         ),
         actions: [
           TextButton(
@@ -41,6 +43,13 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final periodAsync = ref.watch(budgetingPeriodSettingProvider);
+
+    ref.listen<String?>(settingsSyncWarningProvider, (previous, next) {
+      if (next != null) {
+        CommonSnackbar.showWarning(context, next);
+        ref.read(settingsSyncWarningProvider.notifier).set(null);
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -89,10 +98,12 @@ class SettingsScreen extends ConsumerWidget {
                     data: (day) => DropdownButton<int>(
                       value: day,
                       items: List.generate(28, (i) => i + 1)
-                          .map((d) => DropdownMenuItem(
-                                value: d,
-                                child: Text('Day $d'),
-                              ))
+                          .map(
+                            (d) => DropdownMenuItem(
+                              value: d,
+                              child: Text('Day $d'),
+                            ),
+                          )
                           .toList(),
                       onChanged: (v) {
                         if (v != null) {

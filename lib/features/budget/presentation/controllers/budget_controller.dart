@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:salapify/core/services/connectivity_service.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/budget/data/repositories/budget_repository.dart';
 import 'package:salapify/features/budget/data/services/budget_sync_service.dart';
 import 'package:salapify/features/budget/domain/entities/budget_category.dart';
+import 'package:salapify/features/settings/domain/budgeting_period.dart';
 
 part 'budget_controller.g.dart';
 
@@ -15,6 +17,12 @@ Stream<List<BudgetCategory>> budgetCategories(Ref ref) {
 }
 
 @riverpod
+Stream<bool> hasUnsyncedCategories(Ref ref) {
+  final repository = ref.watch(budgetRepositoryProvider);
+  return repository.watchHasUnsynced();
+}
+
+@Riverpod(keepAlive: true)
 class BudgetActions extends _$BudgetActions {
   @override
   FutureOr<void> build() {
@@ -22,45 +30,72 @@ class BudgetActions extends _$BudgetActions {
   }
 
   Future<void> _syncIfSignedIn(BudgetCategory category) async {
-    final uid = ref.read(authRepositoryProvider).currentUser?.uid;
+    final uid = ref.read(currentUserProvider)?.uid;
     if (uid == null) return; // guest — local only, nothing to sync
 
     try {
       await ref.read(budgetSyncServiceProvider).pushCategory(uid, category);
-    } catch (_) {
-      // Offline or push failed — safe to ignore here. The category stays
-      // isSynced = false locally and will be retried by
-      // pushUnsyncedCategories on next app start / reconnect.
+    } catch (e) {
+      _logIfRealError(e, context: 'syncIfSignedIn');
     }
   }
 
+  void _logIfRealError(Object e, {required String context}) {
+    final isOnline = ref.read(isOnlineProvider).value ?? true;
+    if (!isOnline) return; // expected — offline, will retry via pushUnsyncedCategories
+    // FirebaseCrashlytics.instance.recordError(e, StackTrace.current, reason: context);
+  }
+
   Future<void> addCategory(BudgetCategory category) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
+    final result = await AsyncValue.guard(() async {
       await ref.read(budgetRepositoryProvider).addCategory(category);
       await _syncIfSignedIn(category);
     });
+    if (result.hasError) state = result;
   }
 
   Future<void> updateCategory(BudgetCategory category) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
+    final result = await AsyncValue.guard(() async {
       final updated = category.copyWith(updatedAt: DateTime.now());
       await ref.read(budgetRepositoryProvider).updateCategory(updated);
       await _syncIfSignedIn(updated);
     });
+    if (result.hasError) state = result;
   }
 
   Future<void> deleteCategory(BudgetCategory category) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
+    final result = await AsyncValue.guard(() async {
       await ref.read(budgetRepositoryProvider).deleteCategory(category.id);
-      // Soft-delete counts as an update — sync the isDeleted flag too.
       final deleted = category.copyWith(
         isDeleted: true,
         updatedAt: DateTime.now(),
       );
       await _syncIfSignedIn(deleted);
+    });
+    if (result.hasError) state = result;
+  }
+
+  /// Bulk-converts all active categories to match a new global budgeting
+  /// period. Called from BudgetingPeriodSetting.set() before the period
+  /// setting itself is persisted, so category data and period setting never
+  /// briefly disagree from the UI's perspective.
+  Future<void> convertCategoriesForPeriodChange(
+    BudgetingPeriod newPeriod,
+  ) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(budgetRepositoryProvider)
+          .convertCategoriesToPeriod(newPeriod);
+
+      final uid = ref.read(currentUserProvider)?.uid;
+      if (uid == null) return; // guest mode only
+
+      try {
+        await ref.read(budgetSyncServiceProvider).pushUnsyncedCategories(uid);
+      } catch (e) {
+        _logIfRealError(e, context: 'convertCategoriesForPeriodChange');
+      }
     });
   }
 }

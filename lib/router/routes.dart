@@ -9,7 +9,6 @@ import 'package:salapify/features/settings/presentation/screens/help_screen.dart
 import 'package:salapify/features/dashboard/presentation/screens/home_screen.dart';
 import 'package:salapify/router/go_router_refresh_stream.dart';
 import 'package:salapify/features/authentication/presentation/controllers/guest_controller.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
