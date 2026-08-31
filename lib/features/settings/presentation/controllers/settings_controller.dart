@@ -1,4 +1,3 @@
-// settings_controller.dart
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -28,6 +27,7 @@ class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
 
   Future<void> set(BudgetingPeriod period) async {
     final previous = state;
+    // ignore: invalid_use_of_internal_member
     state = const AsyncLoading<BudgetingPeriod>().copyWithPrevious(
       previous,
       isRefresh: true,
@@ -58,6 +58,7 @@ class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
         );
       }
     } catch (e, st) {
+      // ignore: invalid_use_of_internal_member
       state = AsyncError<BudgetingPeriod>(e, st).copyWithPrevious(previous);
     }
   }

@@ -59,7 +59,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final globalPeriod =
-      ref.read(budgetingPeriodSettingProvider).value ?? BudgetingPeriod.monthly;
+        ref.read(budgetingPeriodSettingProvider).value ??
+        BudgetingPeriod.monthly;
     final now = DateTime.now();
 
     final category = BudgetCategory(
@@ -81,9 +82,10 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
 
     future.then((_) {
       final state = ref.read(budgetActionsProvider);
+      if (!context.mounted) return;
       if (state.hasError) {
         CommonSnackbar.showError(context, state.error!);
-      } else if (mounted) {
+      } else {
         context.pop();
       }
     });
@@ -126,7 +128,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   @override
   Widget build(BuildContext context) {
     final globalPeriod =
-      ref.watch(budgetingPeriodSettingProvider).value ?? BudgetingPeriod.monthly;
+        ref.watch(budgetingPeriodSettingProvider).value ??
+        BudgetingPeriod.monthly;
     final actionsState = ref.watch(budgetActionsProvider);
 
     return Scaffold(
