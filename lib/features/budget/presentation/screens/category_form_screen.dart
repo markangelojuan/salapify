@@ -46,7 +46,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
 
     _nameController.text = existing?.name ?? '';
     _amountController.text = existing?.amount.toString() ?? '';
-    _type = existing?.type ?? BudgetCategoryType.flexible;
+    _type = existing?.type ?? BudgetCategoryType.variable;
     _frequency = existing?.frequency ?? BudgetFrequency.monthly;
     _period = existing?.period ??
       (globalPeriod == BudgetingPeriod.biMonthly ? BudgetPeriod.both : null);
@@ -188,8 +188,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                       label: Text('Fixed'),
                     ),
                     ButtonSegment(
-                      value: BudgetCategoryType.flexible,
-                      label: Text('Flexible'),
+                      value: BudgetCategoryType.variable,
+                      label: Text('Variable'),
                     ),
                   ],
                   selected: {_type},

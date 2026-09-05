@@ -73,7 +73,7 @@ class CategoryCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   _TypeChip(
-                    label: _isFixed ? 'Fixed' : 'Flexible',
+                    label: _isFixed ? 'Fixed' : 'Variable',
                     color: _accentColor,
                   ),
                   const SizedBox(width: 8),

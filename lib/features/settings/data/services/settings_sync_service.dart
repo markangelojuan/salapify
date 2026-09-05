@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:salapify/features/settings/data/settings_repository.dart';
+import 'package:salapify/features/settings/data/repositories/settings_repository.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
 
 part 'settings_sync_service.g.dart';

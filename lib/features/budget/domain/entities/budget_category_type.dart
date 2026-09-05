@@ -1,6 +1,6 @@
 enum BudgetCategoryType {
   fixed,
-  flexible;
+  variable;
 
   static BudgetCategoryType fromString(String value) {
     return BudgetCategoryType.values.firstWhere(

@@ -4,7 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:salapify/core/services/connectivity_service.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/budget/presentation/controllers/budget_controller.dart';
-import 'package:salapify/features/settings/data/settings_repository.dart';
+import 'package:salapify/features/settings/data/repositories/settings_repository.dart';
 import 'package:salapify/features/settings/data/services/settings_sync_service.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
 

@@ -9,7 +9,7 @@ import 'package:salapify/features/budget/domain/entities/budget_category.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/domain/period_key.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
-import 'package:salapify/features/settings/data/settings_repository.dart';
+import 'package:salapify/features/settings/data/repositories/settings_repository.dart';
 
 part 'budget_controller.g.dart';
 
