@@ -154,13 +154,16 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                 visualDensity: VisualDensity.compact,
                 onChanged: (value) => setState(() => _isChecked = value!),
               ),
-              GestureDetector(
-                onTap: () => _showPolicyDialog(),
-                child: Text(
-                  'I agree to the Terms of Service and Privacy Policy',
-                  style: TextStyle(
-                    color: AppColors.black,
-                    decoration: TextDecoration.underline,
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _showPolicyDialog(),
+                  child: Text(
+                    'I agree to the Terms of Service and Privacy Policy',
+                    softWrap: true,
+                    style: TextStyle(
+                      color: AppColors.black,
+                      decoration: TextDecoration.underline,
+                    ),
                   ),
                 ),
               ),

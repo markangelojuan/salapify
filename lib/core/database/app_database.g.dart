@@ -80,6 +80,18 @@ class $BudgetCategoriesTable extends BudgetCategories
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -133,6 +145,21 @@ class $BudgetCategoriesTable extends BudgetCategories
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _isCompletedMeta = const VerificationMeta(
+    'isCompleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isCompleted = GeneratedColumn<bool>(
+    'is_completed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_completed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -142,10 +169,12 @@ class $BudgetCategoriesTable extends BudgetCategories
     frequency,
     period,
     iconName,
+    sortOrder,
     createdAt,
     updatedAt,
     isSynced,
     isDeleted,
+    isCompleted,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -210,6 +239,12 @@ class $BudgetCategoriesTable extends BudgetCategories
     } else if (isInserting) {
       context.missing(_iconNameMeta);
     }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -232,6 +267,15 @@ class $BudgetCategoriesTable extends BudgetCategories
       context.handle(
         _isDeletedMeta,
         isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    if (data.containsKey('is_completed')) {
+      context.handle(
+        _isCompletedMeta,
+        isCompleted.isAcceptableOrUnknown(
+          data['is_completed']!,
+          _isCompletedMeta,
+        ),
       );
     }
     return context;
@@ -271,6 +315,10 @@ class $BudgetCategoriesTable extends BudgetCategories
         DriftSqlType.string,
         data['${effectivePrefix}icon_name'],
       )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -286,6 +334,10 @@ class $BudgetCategoriesTable extends BudgetCategories
       isDeleted: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_deleted'],
+      )!,
+      isCompleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_completed'],
       )!,
     );
   }
@@ -305,10 +357,12 @@ class BudgetCategoryRow extends DataClass
   final String frequency;
   final String? period;
   final String iconName;
+  final int sortOrder;
   final DateTime createdAt;
   final DateTime? updatedAt;
   final bool isSynced;
   final bool isDeleted;
+  final bool isCompleted;
   const BudgetCategoryRow({
     required this.id,
     required this.name,
@@ -317,10 +371,12 @@ class BudgetCategoryRow extends DataClass
     required this.frequency,
     this.period,
     required this.iconName,
+    required this.sortOrder,
     required this.createdAt,
     this.updatedAt,
     required this.isSynced,
     required this.isDeleted,
+    required this.isCompleted,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -334,12 +390,14 @@ class BudgetCategoryRow extends DataClass
       map['period'] = Variable<String>(period);
     }
     map['icon_name'] = Variable<String>(iconName);
+    map['sort_order'] = Variable<int>(sortOrder);
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || updatedAt != null) {
       map['updated_at'] = Variable<DateTime>(updatedAt);
     }
     map['is_synced'] = Variable<bool>(isSynced);
     map['is_deleted'] = Variable<bool>(isDeleted);
+    map['is_completed'] = Variable<bool>(isCompleted);
     return map;
   }
 
@@ -354,12 +412,14 @@ class BudgetCategoryRow extends DataClass
           ? const Value.absent()
           : Value(period),
       iconName: Value(iconName),
+      sortOrder: Value(sortOrder),
       createdAt: Value(createdAt),
       updatedAt: updatedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(updatedAt),
       isSynced: Value(isSynced),
       isDeleted: Value(isDeleted),
+      isCompleted: Value(isCompleted),
     );
   }
 
@@ -376,10 +436,12 @@ class BudgetCategoryRow extends DataClass
       frequency: serializer.fromJson<String>(json['frequency']),
       period: serializer.fromJson<String?>(json['period']),
       iconName: serializer.fromJson<String>(json['iconName']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
       isSynced: serializer.fromJson<bool>(json['isSynced']),
       isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+      isCompleted: serializer.fromJson<bool>(json['isCompleted']),
     );
   }
   @override
@@ -393,10 +455,12 @@ class BudgetCategoryRow extends DataClass
       'frequency': serializer.toJson<String>(frequency),
       'period': serializer.toJson<String?>(period),
       'iconName': serializer.toJson<String>(iconName),
+      'sortOrder': serializer.toJson<int>(sortOrder),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
       'isSynced': serializer.toJson<bool>(isSynced),
       'isDeleted': serializer.toJson<bool>(isDeleted),
+      'isCompleted': serializer.toJson<bool>(isCompleted),
     };
   }
 
@@ -408,10 +472,12 @@ class BudgetCategoryRow extends DataClass
     String? frequency,
     Value<String?> period = const Value.absent(),
     String? iconName,
+    int? sortOrder,
     DateTime? createdAt,
     Value<DateTime?> updatedAt = const Value.absent(),
     bool? isSynced,
     bool? isDeleted,
+    bool? isCompleted,
   }) => BudgetCategoryRow(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -420,10 +486,12 @@ class BudgetCategoryRow extends DataClass
     frequency: frequency ?? this.frequency,
     period: period.present ? period.value : this.period,
     iconName: iconName ?? this.iconName,
+    sortOrder: sortOrder ?? this.sortOrder,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
     isSynced: isSynced ?? this.isSynced,
     isDeleted: isDeleted ?? this.isDeleted,
+    isCompleted: isCompleted ?? this.isCompleted,
   );
   BudgetCategoryRow copyWithCompanion(BudgetCategoriesCompanion data) {
     return BudgetCategoryRow(
@@ -434,10 +502,14 @@ class BudgetCategoryRow extends DataClass
       frequency: data.frequency.present ? data.frequency.value : this.frequency,
       period: data.period.present ? data.period.value : this.period,
       iconName: data.iconName.present ? data.iconName.value : this.iconName,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
       isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+      isCompleted: data.isCompleted.present
+          ? data.isCompleted.value
+          : this.isCompleted,
     );
   }
 
@@ -451,10 +523,12 @@ class BudgetCategoryRow extends DataClass
           ..write('frequency: $frequency, ')
           ..write('period: $period, ')
           ..write('iconName: $iconName, ')
+          ..write('sortOrder: $sortOrder, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('isSynced: $isSynced, ')
-          ..write('isDeleted: $isDeleted')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('isCompleted: $isCompleted')
           ..write(')'))
         .toString();
   }
@@ -468,10 +542,12 @@ class BudgetCategoryRow extends DataClass
     frequency,
     period,
     iconName,
+    sortOrder,
     createdAt,
     updatedAt,
     isSynced,
     isDeleted,
+    isCompleted,
   );
   @override
   bool operator ==(Object other) =>
@@ -484,10 +560,12 @@ class BudgetCategoryRow extends DataClass
           other.frequency == this.frequency &&
           other.period == this.period &&
           other.iconName == this.iconName &&
+          other.sortOrder == this.sortOrder &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.isSynced == this.isSynced &&
-          other.isDeleted == this.isDeleted);
+          other.isDeleted == this.isDeleted &&
+          other.isCompleted == this.isCompleted);
 }
 
 class BudgetCategoriesCompanion extends UpdateCompanion<BudgetCategoryRow> {
@@ -498,10 +576,12 @@ class BudgetCategoriesCompanion extends UpdateCompanion<BudgetCategoryRow> {
   final Value<String> frequency;
   final Value<String?> period;
   final Value<String> iconName;
+  final Value<int> sortOrder;
   final Value<DateTime> createdAt;
   final Value<DateTime?> updatedAt;
   final Value<bool> isSynced;
   final Value<bool> isDeleted;
+  final Value<bool> isCompleted;
   final Value<int> rowid;
   const BudgetCategoriesCompanion({
     this.id = const Value.absent(),
@@ -511,10 +591,12 @@ class BudgetCategoriesCompanion extends UpdateCompanion<BudgetCategoryRow> {
     this.frequency = const Value.absent(),
     this.period = const Value.absent(),
     this.iconName = const Value.absent(),
+    this.sortOrder = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.isDeleted = const Value.absent(),
+    this.isCompleted = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   BudgetCategoriesCompanion.insert({
@@ -525,10 +607,12 @@ class BudgetCategoriesCompanion extends UpdateCompanion<BudgetCategoryRow> {
     required String frequency,
     this.period = const Value.absent(),
     required String iconName,
+    this.sortOrder = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.isDeleted = const Value.absent(),
+    this.isCompleted = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
@@ -544,10 +628,12 @@ class BudgetCategoriesCompanion extends UpdateCompanion<BudgetCategoryRow> {
     Expression<String>? frequency,
     Expression<String>? period,
     Expression<String>? iconName,
+    Expression<int>? sortOrder,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<bool>? isSynced,
     Expression<bool>? isDeleted,
+    Expression<bool>? isCompleted,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -558,10 +644,12 @@ class BudgetCategoriesCompanion extends UpdateCompanion<BudgetCategoryRow> {
       if (frequency != null) 'frequency': frequency,
       if (period != null) 'period': period,
       if (iconName != null) 'icon_name': iconName,
+      if (sortOrder != null) 'sort_order': sortOrder,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (isSynced != null) 'is_synced': isSynced,
       if (isDeleted != null) 'is_deleted': isDeleted,
+      if (isCompleted != null) 'is_completed': isCompleted,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -574,10 +662,12 @@ class BudgetCategoriesCompanion extends UpdateCompanion<BudgetCategoryRow> {
     Value<String>? frequency,
     Value<String?>? period,
     Value<String>? iconName,
+    Value<int>? sortOrder,
     Value<DateTime>? createdAt,
     Value<DateTime?>? updatedAt,
     Value<bool>? isSynced,
     Value<bool>? isDeleted,
+    Value<bool>? isCompleted,
     Value<int>? rowid,
   }) {
     return BudgetCategoriesCompanion(
@@ -588,10 +678,12 @@ class BudgetCategoriesCompanion extends UpdateCompanion<BudgetCategoryRow> {
       frequency: frequency ?? this.frequency,
       period: period ?? this.period,
       iconName: iconName ?? this.iconName,
+      sortOrder: sortOrder ?? this.sortOrder,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isSynced: isSynced ?? this.isSynced,
       isDeleted: isDeleted ?? this.isDeleted,
+      isCompleted: isCompleted ?? this.isCompleted,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -620,6 +712,9 @@ class BudgetCategoriesCompanion extends UpdateCompanion<BudgetCategoryRow> {
     if (iconName.present) {
       map['icon_name'] = Variable<String>(iconName.value);
     }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -631,6 +726,9 @@ class BudgetCategoriesCompanion extends UpdateCompanion<BudgetCategoryRow> {
     }
     if (isDeleted.present) {
       map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (isCompleted.present) {
+      map['is_completed'] = Variable<bool>(isCompleted.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -648,10 +746,12 @@ class BudgetCategoriesCompanion extends UpdateCompanion<BudgetCategoryRow> {
           ..write('frequency: $frequency, ')
           ..write('period: $period, ')
           ..write('iconName: $iconName, ')
+          ..write('sortOrder: $sortOrder, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('isSynced: $isSynced, ')
           ..write('isDeleted: $isDeleted, ')
+          ..write('isCompleted: $isCompleted, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -680,10 +780,12 @@ typedef $$BudgetCategoriesTableCreateCompanionBuilder =
       required String frequency,
       Value<String?> period,
       required String iconName,
+      Value<int> sortOrder,
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
       Value<bool> isSynced,
       Value<bool> isDeleted,
+      Value<bool> isCompleted,
       Value<int> rowid,
     });
 typedef $$BudgetCategoriesTableUpdateCompanionBuilder =
@@ -695,10 +797,12 @@ typedef $$BudgetCategoriesTableUpdateCompanionBuilder =
       Value<String> frequency,
       Value<String?> period,
       Value<String> iconName,
+      Value<int> sortOrder,
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
       Value<bool> isSynced,
       Value<bool> isDeleted,
+      Value<bool> isCompleted,
       Value<int> rowid,
     });
 
@@ -746,6 +850,11 @@ class $$BudgetCategoriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
@@ -763,6 +872,11 @@ class $$BudgetCategoriesTableFilterComposer
 
   ColumnFilters<bool> get isDeleted => $composableBuilder(
     column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -811,6 +925,11 @@ class $$BudgetCategoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -828,6 +947,11 @@ class $$BudgetCategoriesTableOrderingComposer
 
   ColumnOrderings<bool> get isDeleted => $composableBuilder(
     column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -862,6 +986,9 @@ class $$BudgetCategoriesTableAnnotationComposer
   GeneratedColumn<String> get iconName =>
       $composableBuilder(column: $table.iconName, builder: (column) => column);
 
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -873,6 +1000,11 @@ class $$BudgetCategoriesTableAnnotationComposer
 
   GeneratedColumn<bool> get isDeleted =>
       $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  GeneratedColumn<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
+    builder: (column) => column,
+  );
 }
 
 class $$BudgetCategoriesTableTableManager
@@ -919,10 +1051,12 @@ class $$BudgetCategoriesTableTableManager
                 Value<String> frequency = const Value.absent(),
                 Value<String?> period = const Value.absent(),
                 Value<String> iconName = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isCompleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => BudgetCategoriesCompanion(
                 id: id,
@@ -932,10 +1066,12 @@ class $$BudgetCategoriesTableTableManager
                 frequency: frequency,
                 period: period,
                 iconName: iconName,
+                sortOrder: sortOrder,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 isSynced: isSynced,
                 isDeleted: isDeleted,
+                isCompleted: isCompleted,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -947,10 +1083,12 @@ class $$BudgetCategoriesTableTableManager
                 required String frequency,
                 Value<String?> period = const Value.absent(),
                 required String iconName,
+                Value<int> sortOrder = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
+                Value<bool> isCompleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => BudgetCategoriesCompanion.insert(
                 id: id,
@@ -960,10 +1098,12 @@ class $$BudgetCategoriesTableTableManager
                 frequency: frequency,
                 period: period,
                 iconName: iconName,
+                sortOrder: sortOrder,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 isSynced: isSynced,
                 isDeleted: isDeleted,
+                isCompleted: isCompleted,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

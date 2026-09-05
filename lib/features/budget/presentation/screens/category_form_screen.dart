@@ -40,11 +40,16 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   void initState() {
     super.initState();
     final existing = widget.existingCategory;
+    final globalPeriod =
+      ref.read(budgetingPeriodSettingProvider).value ??
+      BudgetingPeriod.monthly;
+
     _nameController.text = existing?.name ?? '';
     _amountController.text = existing?.amount.toString() ?? '';
     _type = existing?.type ?? BudgetCategoryType.flexible;
     _frequency = existing?.frequency ?? BudgetFrequency.monthly;
-    _period = existing?.period;
+    _period = existing?.period ??
+      (globalPeriod == BudgetingPeriod.biMonthly ? BudgetPeriod.both : null);
     _iconKey = existing?.iconName ?? CategoryIcons.keys.first;
   }
 
@@ -162,7 +167,6 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                   icon: Icons.attach_money_rounded,
                   hint: '0.00',
                   label: 'Amount',
-                  // keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Amount is required';
@@ -256,7 +260,11 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
           selected: {_frequency},
           onSelectionChanged: (selection) => setState(() {
             _frequency = selection.first;
-            if (_frequency == BudgetFrequency.once) _period = null;
+            if (_frequency == BudgetFrequency.once) {
+              _period = null;
+            } else {
+              _period ??= BudgetPeriod.both; 
+            }
           }),
         ),
         if (_frequency == BudgetFrequency.biMonthly) ...[

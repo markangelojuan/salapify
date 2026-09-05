@@ -7,6 +7,9 @@ import 'package:salapify/features/budget/data/repositories/budget_repository.dar
 import 'package:salapify/features/budget/data/services/budget_sync_service.dart';
 import 'package:salapify/features/budget/domain/entities/budget_category.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
+import 'package:salapify/features/settings/domain/period_key.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/features/settings/data/settings_repository.dart';
 
 part 'budget_controller.g.dart';
 
@@ -20,6 +23,31 @@ Stream<List<BudgetCategory>> budgetCategories(Ref ref) {
 Stream<bool> hasUnsyncedCategories(Ref ref) {
   final repository = ref.watch(budgetRepositoryProvider);
   return repository.watchHasUnsynced();
+}
+
+@Riverpod(keepAlive: true)
+class PeriodResetGuard extends _$PeriodResetGuard {
+  @override
+  Future<void> build() async {
+    final globalPeriod =
+        await ref.watch(budgetingPeriodSettingProvider.future);
+    final firstHalfEndDay =
+        await ref.watch(firstHalfEndDaySettingProvider.future);
+    final settingsRepo = ref.read(settingsRepositoryProvider);
+
+    final currentKey = computeCurrentPeriodKey(
+      globalPeriod: globalPeriod,
+      firstHalfEndDay: firstHalfEndDay,
+      now: DateTime.now(),
+    );
+
+    final lastKey = await settingsRepo.getLastResetPeriodKey();
+
+    if (lastKey != currentKey) {
+      await ref.read(budgetRepositoryProvider).resetAllCompleted();
+      await settingsRepo.setLastResetPeriodKey(currentKey);
+    }
+  }
 }
 
 @Riverpod(keepAlive: true)
@@ -42,7 +70,9 @@ class BudgetActions extends _$BudgetActions {
 
   void _logIfRealError(Object e, {required String context}) {
     final isOnline = ref.read(isOnlineProvider).value ?? true;
-    if (!isOnline) return; // expected — offline, will retry via pushUnsyncedCategories
+    if (!isOnline) {
+      return; // expected — offline, will retry via pushUnsyncedCategories
+    }
     // FirebaseCrashlytics.instance.recordError(e, StackTrace.current, reason: context);
   }
 
@@ -71,6 +101,37 @@ class BudgetActions extends _$BudgetActions {
         updatedAt: DateTime.now(),
       );
       await _syncIfSignedIn(deleted);
+    });
+    if (result.hasError) state = result;
+  }
+
+  Future<void> setCompleted(String id, bool isCompleted) async {
+    final result = await AsyncValue.guard(() async {
+      await ref.read(budgetRepositoryProvider).setCompleted(id, isCompleted);
+      final uid = ref.read(currentUserProvider)?.uid;
+      if (uid == null) return;
+      try {
+        await ref.read(budgetSyncServiceProvider).pushUnsyncedCategories(uid);
+      } catch (e) {
+        _logIfRealError(e, context: 'setCompleted');
+      }
+    });
+    if (result.hasError) state = result;
+  }
+
+  Future<void> reorderCategories(List<String> orderedIdsInGroup) async {
+    final result = await AsyncValue.guard(() async {
+      await ref
+          .read(budgetRepositoryProvider)
+          .reorderCategories(orderedIdsInGroup);
+
+      final uid = ref.read(currentUserProvider)?.uid;
+      if (uid == null) return;
+      try {
+        await ref.read(budgetSyncServiceProvider).pushUnsyncedCategories(uid);
+      } catch (e) {
+        _logIfRealError(e, context: 'reorderCategories');
+      }
     });
     if (result.hasError) state = result;
   }

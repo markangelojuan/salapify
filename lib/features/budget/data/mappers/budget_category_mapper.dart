@@ -14,10 +14,12 @@ extension BudgetCategoryMapper on BudgetCategoryRow {
       frequency: BudgetFrequency.fromString(frequency),
       period: period != null ? BudgetPeriod.fromString(period!) : null,
       iconName: iconName,
+      sortOrder: sortOrder, 
       createdAt: createdAt,
       updatedAt: updatedAt,
       isSynced: isSynced,
       isDeleted: isDeleted,
+      isCompleted: isCompleted
     );
   }
 }
@@ -32,9 +34,12 @@ extension BudgetCategoryCompanionMapper on BudgetCategory {
       frequency: frequency.name,
       period: Value(period?.name),
       iconName: iconName,
+      sortOrder: Value(sortOrder), 
+      createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       isSynced: Value(isSynced),
       isDeleted: Value(isDeleted),
+      isCompleted: Value(isCompleted)
     );
   }
 }

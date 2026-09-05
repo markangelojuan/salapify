@@ -7,6 +7,7 @@ part 'settings_repository.g.dart';
 class SettingsRepository {
   static const _periodKey = 'budgeting_period';
   static const _firstHalfEndDayKey = 'first_half_end_day';
+  static const _lastResetPeriodKeyKey = 'last_reset_period_key';
 
   Future<BudgetingPeriod> getLocalBudgetingPeriod() async {
     final prefs = await SharedPreferences.getInstance();
@@ -31,6 +32,16 @@ class SettingsRepository {
   Future<void> setLocalFirstHalfEndDay(int day) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_firstHalfEndDayKey, day);
+  }
+
+  Future<String?> getLastResetPeriodKey() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_lastResetPeriodKeyKey);
+  }
+
+  Future<void> setLastResetPeriodKey(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_lastResetPeriodKeyKey, key);
   }
 }
 

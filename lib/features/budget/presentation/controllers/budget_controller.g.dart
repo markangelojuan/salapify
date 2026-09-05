@@ -84,6 +84,50 @@ final class HasUnsyncedCategoriesProvider
 String _$hasUnsyncedCategoriesHash() =>
     r'060e5053facd17195377ff41abe8d9ef80b33295';
 
+@ProviderFor(PeriodResetGuard)
+final periodResetGuardProvider = PeriodResetGuardProvider._();
+
+final class PeriodResetGuardProvider
+    extends $AsyncNotifierProvider<PeriodResetGuard, void> {
+  PeriodResetGuardProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'periodResetGuardProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$periodResetGuardHash();
+
+  @$internal
+  @override
+  PeriodResetGuard create() => PeriodResetGuard();
+}
+
+String _$periodResetGuardHash() => r'8ad1bb1ef971c6d7e7bfb48eeb85576f31a84a82';
+
+abstract class _$PeriodResetGuard extends $AsyncNotifier<void> {
+  FutureOr<void> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<void>, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>, void>,
+              AsyncValue<void>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(BudgetActions)
 final budgetActionsProvider = BudgetActionsProvider._();
 
@@ -108,7 +152,7 @@ final class BudgetActionsProvider
   BudgetActions create() => BudgetActions();
 }
 
-String _$budgetActionsHash() => r'ada0c98a179cd91679f653b444c99246cc62750a';
+String _$budgetActionsHash() => r'db8e243986396a221c3ef4e09dde6212f72c21ba';
 
 abstract class _$BudgetActions extends $AsyncNotifier<void> {
   FutureOr<void> build();

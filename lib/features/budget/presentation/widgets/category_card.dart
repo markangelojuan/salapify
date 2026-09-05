@@ -5,24 +5,17 @@ import 'package:salapify/features/budget/domain/entities/budget_category_type.da
 import 'package:salapify/features/budget/domain/entities/budget_frequency.dart';
 import 'package:salapify/features/budget/presentation/constants/category_icons.dart';
 
-class CategoryCard extends StatefulWidget {
+class CategoryCard extends StatelessWidget {
   const CategoryCard({
     super.key,
     required this.category,
     required this.onTap,
+    required this.onToggleComplete,
   });
 
   final BudgetCategory category;
   final VoidCallback onTap;
-
-  @override
-  State<CategoryCard> createState() => _CategoryCardState();
-}
-
-class _CategoryCardState extends State<CategoryCard> {
-  bool _isChecked = false;
-
-  BudgetCategory get category => widget.category;
+  final ValueChanged<bool> onToggleComplete;
 
   bool get _isFixed => category.type == BudgetCategoryType.fixed;
 
@@ -59,7 +52,7 @@ class _CategoryCardState extends State<CategoryCard> {
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
-        onTap: widget.onTap,
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(
@@ -85,8 +78,8 @@ class _CategoryCardState extends State<CategoryCard> {
                   ),
                   const SizedBox(width: 8),
                   _BigCheckbox(
-                    checked: _isChecked,
-                    onTap: () => setState(() => _isChecked = !_isChecked),
+                    checked: category.isCompleted,
+                    onTap: () => onToggleComplete(!category.isCompleted),
                   ),
                 ],
               ),

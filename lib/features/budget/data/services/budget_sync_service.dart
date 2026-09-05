@@ -36,6 +36,8 @@ class BudgetSyncService {
       'frequency': category.frequency.name,
       'period': category.period?.name,
       'iconName': category.iconName,
+      'sortOrder': category.sortOrder,
+      'isCompleted': category.isCompleted,
       'createdAt': Timestamp.fromDate(category.createdAt),
       'updatedAt': category.updatedAt != null
           ? Timestamp.fromDate(category.updatedAt!)
@@ -58,10 +60,12 @@ class BudgetSyncService {
           ? BudgetPeriod.fromString(data['period'] as String)
           : null,
       iconName: data['iconName'] as String,
+      sortOrder: data['sortOrder'] as int? ?? 0,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
       isSynced: true,
       isDeleted: data['isDeleted'] as bool? ?? false,
+      isCompleted: data['isCompleted'] as bool? ?? false,
     );
   }
 

@@ -4,6 +4,8 @@ import 'package:salapify/features/authentication/data/repositories/auth_reposito
 import 'package:salapify/features/authentication/domain/entities/app_user.dart';
 import 'package:salapify/features/budget/data/services/budget_sync_service.dart';
 import 'package:salapify/features/settings/data/services/settings_sync_service.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 part 'sync_trigger_service.g.dart';
 
@@ -14,6 +16,7 @@ class SyncTrigger extends _$SyncTrigger {
 
   @override
   void build() {
+    _previousUid = FirebaseAuth.instance.currentUser?.uid;
     ref.listen<AsyncValue<bool>>(isOnlineProvider, (previous, next) {
       final isOnlineNow = next.value ?? false;
       if (isOnlineNow && !_wasOnline) {
@@ -56,6 +59,8 @@ class SyncTrigger extends _$SyncTrigger {
       final settingsService = ref.read(settingsSyncServiceProvider);
       await settingsService.pushLocalSettingsOnSignIn(uid);
       await settingsService.pullRemoteSettings(uid);
+      ref.invalidate(budgetingPeriodSettingProvider);
+      ref.invalidate(firstHalfEndDaySettingProvider);
     } catch (e) {
       _logIfRealError(e, context: 'onSignedIn: settings push/pull');
     }

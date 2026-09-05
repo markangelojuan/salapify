@@ -11,13 +11,21 @@ class BudgetTotalsCalculator {
     int firstHalfEndDay = 15,
     DateTime? now,
   }) {
-    final active = categories.where((c) => !c.isDeleted);
+    final today = now ?? DateTime.now();
+    final active = categories.where(
+      (c) =>
+          !c.isDeleted &&
+          c.isActiveFor(
+            globalPeriod: globalPeriod,
+            firstHalfEndDay: firstHalfEndDay,
+            now: today,
+          ),
+    );
 
     if (globalPeriod == BudgetingPeriod.monthly) {
       return active.fold(0.0, (sum, c) => sum + c.amount);
     }
 
-    final today = now ?? DateTime.now();
     final currentHalf = today.day <= firstHalfEndDay
         ? BudgetPeriod.firstHalf
         : BudgetPeriod.secondHalf;

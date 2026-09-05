@@ -28,19 +28,22 @@ class BudgetRepository {
     return rows.any((r) => r.id != excludingId);
   }
 
+  Future<int> _maxSortOrder() async {
+    final query = _db.selectOnly(_db.budgetCategories)
+      ..addColumns([_db.budgetCategories.sortOrder.max()])
+      ..where(_db.budgetCategories.isDeleted.equals(false));
+    final row = await query.getSingleOrNull();
+    return row?.read(_db.budgetCategories.sortOrder.max()) ?? 0;
+  }
+
   Future<void> addCategory(BudgetCategory category) async {
-    final exists = await nameExists(category.name);
-    if (exists) {
-      throw StateError('Category name "${category.name}" already exists');
-    }
-    await _db.into(_db.budgetCategories).insert(category.toCompanion());
+    final maxOrder = await _maxSortOrder();
+    await _db
+        .into(_db.budgetCategories)
+        .insert(category.copyWith(sortOrder: maxOrder + 1).toCompanion());
   }
 
   Future<void> updateCategory(BudgetCategory category) async {
-    final exists = await nameExists(category.name, excludingId: category.id);
-    if (exists) {
-      throw StateError('Category name "${category.name}" already exists');
-    }
     await _db.update(_db.budgetCategories).replace(category.toCompanion());
   }
 
@@ -60,6 +63,46 @@ class BudgetRepository {
 
   Future<void> clearAllCategories() async {
     await _db.delete(_db.budgetCategories).go();
+  }
+
+  Future<void> setCompleted(String id, bool isCompleted) async {
+    await (_db.update(
+      _db.budgetCategories,
+    )..where((t) => t.id.equals(id))).write(
+      BudgetCategoriesCompanion(
+        isCompleted: Value(isCompleted),
+        updatedAt: Value(DateTime.now()),
+        isSynced: const Value(false),
+      ),
+    );
+  }
+
+  Future<void> resetAllCompleted() async {
+    await (_db.update(
+          _db.budgetCategories,
+        )..where((t) => t.isDeleted.equals(false) & t.isCompleted.equals(true)))
+        .write(
+          BudgetCategoriesCompanion(
+            isCompleted: const Value(false),
+            updatedAt: Value(DateTime.now()),
+            isSynced: const Value(false),
+          ),
+        );
+  }
+
+  Future<void> reorderCategories(List<String> orderedIdsInGroup) async {
+    await _db.transaction(() async {
+      for (var i = 0; i < orderedIdsInGroup.length; i++) {
+        await (_db.update(
+          _db.budgetCategories,
+        )..where((t) => t.id.equals(orderedIdsInGroup[i]))).write(
+          BudgetCategoriesCompanion(
+            sortOrder: Value(i),
+            isSynced: const Value(false),
+          ),
+        );
+      }
+    });
   }
 
   // Converts all active (non-deleted) categories to match [newPeriod].
