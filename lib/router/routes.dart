@@ -7,8 +7,12 @@ import 'package:salapify/features/settings/presentation/screens/account_screen.d
 import 'package:salapify/features/settings/presentation/screens/settings_screen.dart';
 import 'package:salapify/features/settings/presentation/screens/help_screen.dart';
 import 'package:salapify/features/dashboard/presentation/screens/home_screen.dart';
+import 'package:salapify/features/transaction/domain/entities/income_source.dart';
+import 'package:salapify/features/transaction/presentation/screens/expense_form_screen.dart';
+import 'package:salapify/features/transaction/presentation/screens/income_form_screen.dart';
 import 'package:salapify/router/go_router_refresh_stream.dart';
 import 'package:salapify/features/authentication/presentation/controllers/guest_controller.dart';
+import 'package:salapify/features/transaction/domain/entities/transaction_entry.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -16,7 +20,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'routes.g.dart';
 
 enum AppRoutes {
-  home, signIn, signUp, account, settings, help, categoryForm
+  home, signIn, signUp, account, settings, help, categoryForm, expenseForm, incomeForm
 }
 
 @Riverpod(keepAlive: true)
@@ -77,6 +81,22 @@ GoRouter goRouter(Ref ref) {
         builder: (ctx, state) {
           final existingCategory = state.extra as BudgetCategory?;
           return CategoryFormScreen(existingCategory: existingCategory);
+        },
+      ),
+            GoRoute(
+        path: "/expense-form",
+        name: AppRoutes.expenseForm.name,
+        builder: (ctx, state) {
+          final existingTransaction = state.extra as TransactionEntry?;
+          return ExpenseFormScreen(existingTransaction: existingTransaction);
+        },
+      ),
+      GoRoute(
+        path: "/income-form",
+        name: AppRoutes.incomeForm.name,
+        builder: (ctx, state) {
+          final existingSource = state.extra as IncomeSource?;
+          return IncomeFormScreen(existingSource: existingSource);
         },
       ),
     ],

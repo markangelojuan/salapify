@@ -1,12 +1,15 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:salapify/core/database/app_database.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
 // import 'package:salapify/features/budget/data/services/budget_sync_service.dart';
 import 'package:salapify/features/budget/data/repositories/budget_repository.dart';
 // import 'package:salapify/features/settings/data/settings_repository.dart';
 // import 'package:salapify/features/settings/data/services/settings_sync_service.dart';
+import 'package:salapify/features/transaction/data/repositories/transaction_repository.dart';
+import 'package:salapify/features/transaction/data/repositories/income_source_repository.dart';
 part 'auth_controller.g.dart';
 
 @Riverpod(keepAlive: true)
@@ -74,10 +77,15 @@ class AuthController extends _$AuthController {
   }
 
   Future<void> signOut() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      await ref.read(authRepositoryProvider).signOut();
+  state = const AsyncLoading();
+  state = await AsyncValue.guard(() async {
+    await ref.read(authRepositoryProvider).signOut();
+
+    await ref.read(appDatabaseProvider).transaction(() async {
+      await ref.read(transactionRepositoryProvider).clearAllTransactions();
+      await ref.read(incomeSourceRepositoryProvider).clearAllSources();
       await ref.read(budgetRepositoryProvider).clearAllCategories();
     });
-  }
+  });
+}
 }

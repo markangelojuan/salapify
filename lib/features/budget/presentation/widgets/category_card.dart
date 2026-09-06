@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/budget/domain/entities/budget_category.dart';
 import 'package:salapify/features/budget/domain/entities/budget_category_type.dart';
 import 'package:salapify/features/budget/domain/entities/budget_frequency.dart';
 import 'package:salapify/features/budget/presentation/constants/category_icons.dart';
+import 'package:salapify/features/settings/domain/budgeting_period.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/features/transaction/domain/transaction_totals_calculator.dart';
+import 'package:salapify/features/transaction/presentation/controllers/transaction_controller.dart';
 
-class CategoryCard extends StatelessWidget {
+class CategoryCard extends ConsumerWidget {
   const CategoryCard({
     super.key,
     required this.category,
@@ -46,7 +51,28 @@ class CategoryCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final globalPeriod =
+        ref.watch(budgetingPeriodSettingProvider).value ??
+        BudgetingPeriod.monthly;
+    final firstHalfEndDay =
+        ref.watch(firstHalfEndDaySettingProvider).value ?? 15;
+    final transactions = ref.watch(transactionsProvider).value ?? [];
+
+    final spent = TransactionTotalsCalculator.totalSpentForCategory(
+      transactions: transactions,
+      categoryId: category.id,
+      globalPeriod: globalPeriod,
+      firstHalfEndDay: firstHalfEndDay,
+    );
+    final progress = category.amount > 0
+        ? (spent / category.amount).clamp(0.0, 1.0)
+        : 0.0;
+    final isOver = spent > category.amount;
+    final progressColor = isOver
+        ? Colors.red
+        : (progress >= 0.8 ? Colors.orange : AppColors.primary);
+
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 1,
@@ -95,13 +121,24 @@ class CategoryCard extends StatelessWidget {
               ),
               const SizedBox(height: 3),
               Text(
-                category.amount.toStringAsFixed(2),
-                style: const TextStyle(
+                '${spent.toStringAsFixed(0)} / ${category.amount.toStringAsFixed(0)}',
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 17,
+                  fontSize: 15,
+                  color: isOver ? Colors.red : null,
                 ),
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: 6),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 5,
+                  backgroundColor: AppColors.border.withValues(alpha: 0.4),
+                  valueColor: AlwaysStoppedAnimation(progressColor),
+                ),
+              ),
+              const SizedBox(height: 6),
               Row(
                 children: [
                   Icon(
@@ -131,6 +168,7 @@ class CategoryCard extends StatelessWidget {
   }
 }
 
+// _BigCheckbox and _TypeChip unchanged from before
 class _BigCheckbox extends StatelessWidget {
   const _BigCheckbox({required this.checked, required this.onTap});
 

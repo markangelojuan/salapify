@@ -10,7 +10,10 @@ import 'package:salapify/features/budget/presentation/widgets/budget_summary_car
 import 'package:salapify/features/budget/presentation/widgets/category_card.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/features/transaction/domain/transaction_totals_calculator.dart';
+import 'package:salapify/features/transaction/presentation/controllers/transaction_controller.dart';
 import 'package:salapify/router/routes.dart';
+import 'package:lottie/lottie.dart';
 
 class BudgetScreen extends ConsumerWidget {
   const BudgetScreen({super.key});
@@ -22,6 +25,7 @@ class BudgetScreen extends ConsumerWidget {
       return const Center(child: CircularProgressIndicator());
     }
     final categoriesAsync = ref.watch(budgetCategoriesProvider);
+    final transactionsAsync = ref.watch(transactionsProvider);
     final globalPeriod =
         ref.watch(budgetingPeriodSettingProvider).value ??
         BudgetingPeriod.monthly;
@@ -39,7 +43,11 @@ class BudgetScreen extends ConsumerWidget {
           globalPeriod: globalPeriod,
           firstHalfEndDay: firstHalfEndDay,
         );
-        const totalSpent = 0.0; // TODO: wire up once transactions exist
+        final totalSpent = TransactionTotalsCalculator.totalSpent(
+          transactions: transactionsAsync.value ?? [],
+          globalPeriod: globalPeriod,
+          firstHalfEndDay: firstHalfEndDay,
+        );
 
         final grouped = _groupCategories(
           categories: categories,
@@ -83,10 +91,31 @@ class BudgetScreen extends ConsumerWidget {
                 ),
               ),
               if (grouped.current.isEmpty && grouped.other.isEmpty)
-                const SliverFillRemaining(
+                SliverFillRemaining(
                   hasScrollBody: false,
-                  child: Center(
-                    child: Text('No categories yet. Tap + to add one.'),
+                  child: Transform.translate(
+                    offset: const Offset(0, -60),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Lottie.asset(
+                            'assets/lottie/sleeping_squirrel.json',
+                            width: 180,
+                            height: 180,
+                          ),
+                          Text(
+                            'No categories yet',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 )
               else ...[
@@ -177,11 +206,9 @@ class BudgetScreen extends ConsumerWidget {
 class _GroupedCategories {
   const _GroupedCategories({required this.current, required this.other});
   final List<BudgetCategory> current;
-  final List<BudgetCategory> other; // empty when globalPeriod is monthly
+  final List<BudgetCategory> other;
 }
 
-/// One reorderable group of category cards (either "current half" or
-/// "other half").
 class _ReorderableCategoryGrid extends ConsumerWidget {
   const _ReorderableCategoryGrid({
     super.key,
@@ -207,7 +234,7 @@ class _ReorderableCategoryGrid extends ConsumerWidget {
               ),
               onToggleComplete: (value) => ref
                   .read(budgetActionsProvider.notifier)
-                  .setCompleted(category.id, value),
+                  .setCompleted(category, value),
             ),
           ),
         )

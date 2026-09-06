@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:salapify/core/layout/app_drawer.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/notification/presentation/screens/notification_screen.dart';
 import 'package:salapify/features/budget/presentation/screens/budget_screen.dart';
 import 'package:salapify/features/budget/presentation/screens/split_bills_screen.dart';
-import 'package:salapify/features/budget/presentation/screens/transaction_screen.dart';
+import 'package:salapify/features/transaction/presentation/controllers/transaction_tab_state.dart';
+import 'package:salapify/features/transaction/presentation/screens/transaction_screen.dart';
 import 'package:salapify/router/routes.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _currentIndex = 0;
 
   static const List<Widget> _screens = [
@@ -36,6 +38,11 @@ class _HomeScreenState extends State<HomeScreen> {
     switch (index) {
       case 0:
         return () => context.pushNamed(AppRoutes.categoryForm.name);
+      case 1:
+        final activeTab = ref.watch(transactionTabStateProvider);
+        return activeTab == TransactionTab.expenses
+            ? () => context.pushNamed(AppRoutes.expenseForm.name)
+            : () => context.pushNamed(AppRoutes.incomeForm.name);
       default:
         return null;
     }
