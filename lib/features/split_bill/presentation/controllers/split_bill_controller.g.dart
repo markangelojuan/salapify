@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'auth_controller.dart';
+part of 'split_bill_controller.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,33 +9,34 @@ part of 'auth_controller.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(AuthController)
-final authControllerProvider = AuthControllerProvider._();
+@ProviderFor(SplitBillController)
+final splitBillControllerProvider = SplitBillControllerProvider._();
 
-final class AuthControllerProvider
-    extends $AsyncNotifierProvider<AuthController, void> {
-  AuthControllerProvider._()
+final class SplitBillControllerProvider
+    extends $AsyncNotifierProvider<SplitBillController, void> {
+  SplitBillControllerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'authControllerProvider',
+        name: r'splitBillControllerProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$authControllerHash();
+  String debugGetCreateSourceHash() => _$splitBillControllerHash();
 
   @$internal
   @override
-  AuthController create() => AuthController();
+  SplitBillController create() => SplitBillController();
 }
 
-String _$authControllerHash() => r'85812c41f48d9461c42e3dcca168d72ae31f00f0';
+String _$splitBillControllerHash() =>
+    r'e8d822fb31d8324126bfd42f22c4821c8ef51dca';
 
-abstract class _$AuthController extends $AsyncNotifier<void> {
+abstract class _$SplitBillController extends $AsyncNotifier<void> {
   FutureOr<void> build();
   @$mustCallSuper
   @override

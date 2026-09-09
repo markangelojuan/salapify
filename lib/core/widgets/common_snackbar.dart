@@ -25,7 +25,6 @@ class CommonSnackbar {
     );
   }
 
-
   static void showWarning(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -41,7 +40,6 @@ class CommonSnackbar {
   static String _sanitizeError(Object error) {
     final message = error.toString();
 
-    // Firebase error mapping
     const errorMap = {
       'user-not-found': 'No account found with this email.',
       'wrong-password': 'Incorrect password.',
@@ -56,6 +54,9 @@ class CommonSnackbar {
     for (final entry in errorMap.entries) {
       if (message.contains(entry.key)) return entry.value;
     }
+
+
+    if (error is String) return message;
 
     return 'Something went wrong. Please try again.';
   }

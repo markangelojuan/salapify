@@ -1,3 +1,4 @@
+import 'package:salapify/core/services/push_notification_service.dart';
 import 'package:salapify/core/services/sync_trigger_service.dart';
 import 'package:salapify/core/services/connectivity_service.dart';
 import 'package:salapify/core/theme/app_theme.dart';
@@ -57,6 +58,8 @@ class _MyAppState extends ConsumerState<MyApp> {
       if (!mounted) return;
       _logIfRealError(e, context: 'startupSync: retryPendingSettingsSync');
     }
+
+    await ref.read(pushNotificationServiceProvider).initForUser(uid);
   }
 
   void _logIfRealError(Object e, {required String context}) {

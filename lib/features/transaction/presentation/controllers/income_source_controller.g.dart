@@ -75,7 +75,7 @@ final class IncomeSourceActionsProvider
 }
 
 String _$incomeSourceActionsHash() =>
-    r'2e362ca7375b7e5561e376dece0560dc35b172ea';
+    r'e2ed04d825c55ebcb310f19304ae685026f28417';
 
 abstract class _$IncomeSourceActions extends $AsyncNotifier<void> {
   FutureOr<void> build();

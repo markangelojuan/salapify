@@ -73,94 +73,107 @@ class CategoryCard extends ConsumerWidget {
         ? Colors.red
         : (progress >= 0.8 ? Colors.orange : AppColors.primary);
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor:
-                        AppColors.primary.withValues(alpha: 0.15),
-                    child: Icon(
-                      CategoryIcons.iconFor(category.iconName),
-                      color: AppColors.primary,
-                      size: 20,
-                    ),
-                  ),
-                  const Spacer(),
-                  _TypeChip(
-                    label: _isFixed ? 'Fixed' : 'Variable',
-                    color: _accentColor,
-                  ),
-                  const SizedBox(width: 8),
-                  _BigCheckbox(
-                    checked: category.isCompleted,
-                    onTap: () => onToggleComplete(!category.isCompleted),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                category.name,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 3),
-              Text(
-                '${spent.toStringAsFixed(0)} / ${category.amount.toStringAsFixed(0)}',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: isOver ? Colors.red : null,
-                ),
-              ),
-              const SizedBox(height: 6),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 5,
-                  backgroundColor: AppColors.border.withValues(alpha: 0.4),
-                  valueColor: AlwaysStoppedAnimation(progressColor),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  Icon(
-                    Icons.event_repeat_rounded,
-                    size: 13,
-                    color: AppColors.textPrimary.withValues(alpha: 0.5),
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      _frequencyLabel,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textPrimary.withValues(alpha: 0.6),
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: MediaQuery.textScalerOf(
+          context,
+        ).clamp(maxScaleFactor: 1.15),
+      ),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        elevation: 1,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundColor: AppColors.primary.withValues(
+                        alpha: 0.15,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      child: Icon(
+                        CategoryIcons.iconFor(category.iconName),
+                        color: AppColors.primary,
+                        size: 18,
+                      ),
+                    ),
+                    const Spacer(),
+                    _TypeChip(
+                      label: _isFixed ? 'Fixed' : 'Variable',
+                      color: _accentColor,
+                    ),
+                    const SizedBox(width: 8),
+                    _BigCheckbox(
+                      checked: category.isCompleted,
+                      onTap: () => onToggleComplete(!category.isCompleted),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  category.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '${spent.toStringAsFixed(0)} / ${category.amount.toStringAsFixed(0)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: isOver ? Colors.red : null,
                     ),
                   ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(height: 5),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 5,
+                    backgroundColor: AppColors.border.withValues(alpha: 0.4),
+                    valueColor: AlwaysStoppedAnimation(progressColor),
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.event_repeat_rounded,
+                      size: 12,
+                      color: AppColors.textPrimary.withValues(alpha: 0.5),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        _frequencyLabel,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textPrimary.withValues(alpha: 0.6),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -231,7 +244,11 @@ class _TypeChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color),
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:salapify/core/database/app_database.dart';
+import 'package:salapify/core/services/push_notification_service.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
 // import 'package:salapify/features/budget/data/services/budget_sync_service.dart';
@@ -36,7 +37,7 @@ class AuthController extends _$AuthController {
       await ref
           .read(userRepositoryProvider)
           .createUserProfile(uid: uid, username: username, email: email);
-
+      await ref.read(pushNotificationServiceProvider).initForUser(uid);
       // await ref.read(budgetSyncServiceProvider).migrateGuestDataToAccount(uid);
 
       // final settingsRepository = ref.read(settingsRepositoryProvider);
@@ -68,24 +69,32 @@ class AuthController extends _$AuthController {
         password: password,
       );
 
-      // final uid = authRepository.currentUser!.uid;
-      // await ref.read(budgetSyncServiceProvider).pullRemoteCategories(uid);
-      // await ref.read(budgetSyncServiceProvider).pushUnsyncedCategories(uid);
+      final uid = authRepository.currentUser!.uid;
 
-      // await ref.read(settingsSyncServiceProvider).pullRemoteSettings(uid);
+      await ref.read(pushNotificationServiceProvider).initForUser(uid);
     });
   }
 
   Future<void> signOut() async {
-  state = const AsyncLoading();
-  state = await AsyncValue.guard(() async {
-    await ref.read(authRepositoryProvider).signOut();
+    state = const AsyncLoading();
 
-    await ref.read(appDatabaseProvider).transaction(() async {
-      await ref.read(transactionRepositoryProvider).clearAllTransactions();
-      await ref.read(incomeSourceRepositoryProvider).clearAllSources();
-      await ref.read(budgetRepositoryProvider).clearAllCategories();
+    state = await AsyncValue.guard(() async {
+      final authRepository = ref.read(authRepositoryProvider);
+      final pushNotificationService = ref.read(pushNotificationServiceProvider);
+
+      final uid = authRepository.currentUser?.uid;
+
+      if (uid != null) {
+        await pushNotificationService.clearForUser(uid);
+      }
+
+      await authRepository.signOut();
+
+      await ref.read(appDatabaseProvider).transaction(() async {
+        await ref.read(transactionRepositoryProvider).clearAllTransactions();
+        await ref.read(incomeSourceRepositoryProvider).clearAllSources();
+        await ref.read(budgetRepositoryProvider).clearAllCategories();
+      });
     });
-  });
-}
+  }
 }

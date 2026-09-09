@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/widgets/common_button.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/core/widgets/common_text_field.dart';
 import 'package:salapify/features/budget/domain/entities/budget_category.dart';
 import 'package:salapify/features/budget/presentation/constants/category_icons.dart';
@@ -65,9 +66,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCategoryId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a category')),
-      );
+      CommonSnackbar.showError(context, 'Please select a category');
       return;
     }
 
@@ -95,7 +94,14 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       await actions.addTransaction(newTransaction);
     }
 
-    if (mounted) context.pop();
+    if (!mounted) return;
+
+    final state = ref.read(transactionActionsProvider);
+    if (state.hasError) {
+      CommonSnackbar.showError(context, state.error!);
+    } else {
+      context.pop();
+    }
   }
 
   List<BudgetCategory> _visibleCategories(List<BudgetCategory> all) {
@@ -125,6 +131,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
   @override
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(budgetCategoriesProvider);
+    final actionsState = ref.watch(transactionActionsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -158,7 +165,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 Text('Category', style: TextStyle(color: AppColors.textPrimary)),
                 const SizedBox(height: 8),
                 categoriesAsync.when(
-                  loading: () => const CircularProgressIndicator(),
+                  loading: () => const Center(child: CircularProgressIndicator()),
                   error: (e, _) => Text('Failed to load categories: $e'),
                   data: (categories) =>
                       _CategoryPicker(
@@ -173,15 +180,18 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 const SizedBox(height: 8),
                 InkWell(
                   onTap: _pickDate,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 14,
                     ),
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.border),
-                      borderRadius: BorderRadius.circular(12),
+                      color: AppColors.primary.withValues(alpha: 0.05),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.15),
+                      ),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: Row(
                       children: [
@@ -210,6 +220,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                   label: widget.isEditing ? 'Save Changes' : 'Add Expense',
                   btnColor: AppColors.black,
                   labelColor: AppColors.white,
+                  isLoading: actionsState.isLoading,
                   onPressed: _submit,
                 ),
               ],
@@ -248,7 +259,9 @@ class _CategoryPicker extends StatelessWidget {
         final selected = category.id == selectedId;
         return GestureDetector(
           onTap: () => onSelected(category.id),
-          child: Container(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: selected

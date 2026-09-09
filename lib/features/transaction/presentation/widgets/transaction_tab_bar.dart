@@ -18,14 +18,23 @@ class TransactionTabBar extends StatelessWidget {
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(
+          22,
+        ), // was 14 — full stadium for height 44
       ),
       child: TabBar(
         controller: controller,
         splashBorderRadius: BorderRadius.circular(10),
         indicator: BoxDecoration(
           color: AppColors.primary,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,

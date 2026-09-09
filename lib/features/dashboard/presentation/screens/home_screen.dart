@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:salapify/core/layout/app_drawer.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/notification/presentation/screens/notification_screen.dart';
 import 'package:salapify/features/budget/presentation/screens/budget_screen.dart';
-import 'package:salapify/features/budget/presentation/screens/split_bills_screen.dart';
+import 'package:salapify/features/split_bill/presentation/screens/split_bills_screen.dart';
 import 'package:salapify/features/transaction/presentation/controllers/transaction_tab_state.dart';
 import 'package:salapify/features/transaction/presentation/screens/transaction_screen.dart';
 import 'package:salapify/router/routes.dart';
 
+final homeTabIndexProvider = StateProvider<int>((ref) => 0);
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -43,6 +45,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return activeTab == TransactionTab.expenses
             ? () => context.pushNamed(AppRoutes.expenseForm.name)
             : () => context.pushNamed(AppRoutes.incomeForm.name);
+      case 2:
+        return () => context.pushNamed(AppRoutes.groupForm.name);
       default:
         return null;
     }

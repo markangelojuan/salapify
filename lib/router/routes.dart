@@ -13,6 +13,10 @@ import 'package:salapify/features/transaction/presentation/screens/income_form_s
 import 'package:salapify/router/go_router_refresh_stream.dart';
 import 'package:salapify/features/authentication/presentation/controllers/guest_controller.dart';
 import 'package:salapify/features/transaction/domain/entities/transaction_entry.dart';
+import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
+import 'package:salapify/features/split_bill/presentation/screens/group_form_screen.dart';
+import 'package:salapify/features/split_bill/presentation/screens/split_group_detail_screen.dart';
+import 'package:salapify/features/split_bill/presentation/screens/bill_form_screen.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -20,7 +24,18 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'routes.g.dart';
 
 enum AppRoutes {
-  home, signIn, signUp, account, settings, help, categoryForm, expenseForm, incomeForm
+  home,
+  signIn,
+  signUp,
+  account,
+  settings,
+  help,
+  categoryForm,
+  expenseForm,
+  incomeForm,
+  groupForm,
+  splitGroupDetail,
+  billForm,
 }
 
 @Riverpod(keepAlive: true)
@@ -83,7 +98,7 @@ GoRouter goRouter(Ref ref) {
           return CategoryFormScreen(existingCategory: existingCategory);
         },
       ),
-            GoRoute(
+      GoRoute(
         path: "/expense-form",
         name: AppRoutes.expenseForm.name,
         builder: (ctx, state) {
@@ -97,6 +112,33 @@ GoRouter goRouter(Ref ref) {
         builder: (ctx, state) {
           final existingSource = state.extra as IncomeSource?;
           return IncomeFormScreen(existingSource: existingSource);
+        },
+      ),
+      GoRoute(
+        path: "/group-form",
+        name: AppRoutes.groupForm.name,
+        builder: (ctx, state) {
+          final existingGroup = state.extra as SplitGroup?;
+          return GroupFormScreen(existingGroup: existingGroup);
+        },
+      ),
+      GoRoute(
+        path: "/split-group-detail/:groupId",
+        name: AppRoutes.splitGroupDetail.name,
+        builder: (ctx, state) {
+          final groupId = state.pathParameters['groupId']!;
+          return SplitGroupDetailScreen(groupId: groupId);
+        },
+      ),
+      GoRoute(
+        path: "/bill-form",
+        name: AppRoutes.billForm.name,
+        builder: (ctx, state) {
+          final args = state.extra as BillFormArgs;
+          return BillFormScreen(
+            group: args.group,
+            existingBill: args.existingBill,
+          );
         },
       ),
     ],

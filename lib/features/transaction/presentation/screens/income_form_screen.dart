@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/widgets/common_button.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/core/widgets/common_text_field.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
@@ -68,6 +69,16 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
     if (picked != null) setState(() => _recurringDay = picked.day);
   }
 
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) setState(() => _date = picked);
+  }
+
   String _currentPeriodLabel(BudgetingPeriod period, int firstHalfEndDay) {
     final now = DateTime.now();
     final monthLabel = '${_monthNames[now.month - 1]} ${now.year}';
@@ -99,13 +110,20 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
         amount: amount,
         isRecurring: _isRecurring,
         recurringDay: _isRecurring ? _recurringDay : null,
-        date: DateTime.now(),
+        date: _isRecurring ? DateTime.now() : _date,
         createdAt: DateTime.now(),
       );
       await actions.addSource(newSource);
     }
 
-    if (mounted) context.pop();
+    if (!mounted) return;
+
+    final state = ref.read(incomeSourceActionsProvider);
+    if (state.hasError) {
+      CommonSnackbar.showError(context, state.error!);
+    } else {
+      context.pop();
+    }
   }
 
   @override
@@ -115,6 +133,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
         BudgetingPeriod.monthly;
     final firstHalfEndDay =
         ref.watch(firstHalfEndDaySettingProvider).value ?? 15;
+    final actionsState = ref.watch(incomeSourceActionsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -179,46 +198,37 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                     style: TextStyle(color: AppColors.textPrimary),
                   ),
                   const SizedBox(height: 8),
-                  InkWell(
+                  _DateField(
+                    icon: Icons.event_repeat_rounded,
+                    label: 'Every month on day ${_recurringDay ?? '-'}',
                     onTap: _pickRecurringDay,
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.event_repeat_rounded,
-                            size: 18,
-                            color: AppColors.primary,
-                          ),
-                          const SizedBox(width: 10),
-                          Text('Every month on day ${_recurringDay ?? '-'}'),
-                        ],
-                      ),
-                    ),
                   ),
                 ] else ...[
+                  Text('Date', style: TextStyle(color: AppColors.textPrimary)),
+                  const SizedBox(height: 8),
+                  _DateField(
+                    icon: Icons.calendar_today_rounded,
+                    label:
+                        '${_date.year}-${_date.month.toString().padLeft(2, '0')}-${_date.day.toString().padLeft(2, '0')}',
+                    onTap: _pickDate,
+                  ),
+                  const SizedBox(height: 12),
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: AppColors.border.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(12),
+                      color: AppColors.primary.withValues(alpha: 0.05),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.15),
+                      ),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           Icons.info_outline_rounded,
                           size: 18,
-                          color: AppColors.textPrimary,
+                          color: AppColors.primary,
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -237,11 +247,50 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                   label: widget.isEditing ? 'Save Changes' : 'Add Income',
                   btnColor: AppColors.black,
                   labelColor: AppColors.white,
+                  isLoading: actionsState.isLoading,
                   onPressed: _submit,
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Shared pill-bordered date/day field, matching ExpenseFormScreen's date
+/// picker styling (primary-tinted fill + border, radius 14).
+class _DateField extends StatelessWidget {
+  const _DateField({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.05),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: AppColors.primary),
+            const SizedBox(width: 10),
+            Text(label),
+          ],
         ),
       ),
     );
