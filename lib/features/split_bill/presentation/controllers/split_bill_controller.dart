@@ -82,7 +82,6 @@ class SplitBillController extends _$SplitBillController {
     });
   }
 
-
   Future<void> markGroupRead(String groupId) async {
     final currentUser = ref.read(authRepositoryProvider).currentUser;
     if (currentUser == null) return;
@@ -103,8 +102,8 @@ class SplitBillController extends _$SplitBillController {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(splitBillRepositoryProvider);
-      await repo.createBill(bill);
-      await repo.addActivity(
+      await repo.createBillWithActivity(
+        bill,
         ActivityEntry(
           id: '',
           groupId: bill.groupId,

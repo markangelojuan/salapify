@@ -5,10 +5,7 @@ import 'package:salapify/core/database/app_database.dart';
 import 'package:salapify/core/services/push_notification_service.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
-// import 'package:salapify/features/budget/data/services/budget_sync_service.dart';
 import 'package:salapify/features/budget/data/repositories/budget_repository.dart';
-// import 'package:salapify/features/settings/data/settings_repository.dart';
-// import 'package:salapify/features/settings/data/services/settings_sync_service.dart';
 import 'package:salapify/features/transaction/data/repositories/transaction_repository.dart';
 import 'package:salapify/features/transaction/data/repositories/income_source_repository.dart';
 part 'auth_controller.g.dart';
@@ -38,22 +35,6 @@ class AuthController extends _$AuthController {
           .read(userRepositoryProvider)
           .createUserProfile(uid: uid, username: username, email: email);
       await ref.read(pushNotificationServiceProvider).initForUser(uid);
-      // await ref.read(budgetSyncServiceProvider).migrateGuestDataToAccount(uid);
-
-      // final settingsRepository = ref.read(settingsRepositoryProvider);
-      // final settingsSyncService = ref.read(settingsSyncServiceProvider);
-      // try {
-      //   await settingsSyncService.pushBudgetingPeriod(
-      //     uid,
-      //     await settingsRepository.getLocalBudgetingPeriod(),
-      //   );
-      //   await settingsSyncService.pushFirstHalfEndDay(
-      //     uid,
-      //     await settingsRepository.getLocalFirstHalfEndDay(),
-      //   );
-      // } catch (_) {
-      //   // Offline during signup — retryPendingSettingsSync will pick it up.
-      // }
     });
   }
 

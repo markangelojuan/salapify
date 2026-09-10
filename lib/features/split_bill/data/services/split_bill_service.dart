@@ -32,7 +32,22 @@ class SplitBillFirestoreService {
     return _groups.add(data);
   }
 
-  Future<void> deleteGroup(String groupId) => _groups.doc(groupId).delete();
+  Future<void> deleteGroup(String groupId) async {
+    final batch = _firestore.batch();
+
+    final billsSnap = await _bills(groupId).get();
+    for (final doc in billsSnap.docs) {
+      batch.delete(doc.reference);
+    }
+
+    final activitySnap = await _activity(groupId).get();
+    for (final doc in activitySnap.docs) {
+      batch.delete(doc.reference);
+    }
+
+    batch.delete(_groups.doc(groupId));
+    await batch.commit();
+  }
 
   Future<void> updateGroup(String groupId, Map<String, dynamic> data) {
     return _groups.doc(groupId).update(data);
@@ -88,7 +103,6 @@ class SplitBillFirestoreService {
     ).orderBy('createdAt', descending: true).snapshots();
   }
 
-
   Future<void> addActivity(String groupId, Map<String, dynamic> data) async {
     final groupRef = _groups.doc(groupId);
     final activityRef = _activity(groupId).doc();
@@ -128,5 +142,61 @@ class SplitBillFirestoreService {
     Map<String, dynamic> data,
   ) {
     return _bills(groupId).doc(billId).update(data);
+  }
+
+  Future<void> updateShareStatusAtomic(
+    String groupId,
+    String billId,
+    String userId,
+    Map<String, dynamic> shareUpdate,
+  ) async {
+    final billRef = _bills(groupId).doc(billId);
+
+    await _firestore.runTransaction((txn) async {
+      final snap = await txn.get(billRef);
+      if (!snap.exists) throw StateError('Bill not found');
+
+      final shares = List<Map<String, dynamic>>.from(
+        (snap.data()?['shares'] as List?) ?? const [],
+      );
+
+      final idx = shares.indexWhere((s) => s['userId'] == userId);
+      if (idx == -1) throw StateError('Share not found for user');
+
+      shares[idx] = {...shares[idx], ...shareUpdate};
+      txn.update(billRef, {'shares': shares});
+    });
+  }
+
+  Future<void> createBillWithActivity(
+    String groupId,
+    Map<String, dynamic> billData,
+    Map<String, dynamic> activityData,
+  ) async {
+    final groupRef = _groups.doc(groupId);
+    final billRef = _bills(groupId).doc();
+    final activityRef = _activity(groupId).doc();
+
+    await _firestore.runTransaction((txn) async {
+      final groupSnap = await txn.get(groupRef);
+
+      txn.set(billRef, billData);
+      txn.set(activityRef, activityData);
+
+      if (!groupSnap.exists) return;
+
+      final memberIds = List<String>.from(
+        groupSnap.data()?['memberIds'] as List? ?? const [],
+      );
+      final senderId = activityData['senderId'] as String?;
+      final updates = <String, dynamic>{
+        'lastActivityAt': activityData['createdAt'] ?? Timestamp.now(),
+      };
+      for (final id in memberIds) {
+        if (id == senderId) continue;
+        updates['unreadCounts.$id'] = FieldValue.increment(1);
+      }
+      txn.update(groupRef, updates);
+    });
   }
 }

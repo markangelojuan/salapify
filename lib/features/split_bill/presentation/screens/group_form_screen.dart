@@ -6,6 +6,7 @@ import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/widgets/common_button.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/core/widgets/common_text_field.dart';
+import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 import 'package:salapify/features/split_bill/presentation/controllers/split_bill_controller.dart';
@@ -24,15 +25,17 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
   final _searchController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  // uid -> username, for chip display. Creator is always included implicitly
-  // (never shown as a removable chip) and re-added on save.
+
   final Map<String, String> _selectedMembers = {};
 
   List<Map<String, String>> _suggestions = [];
   Timer? _debounce;
   bool _isSearching = false;
+  bool _hasSearched = false;
   bool _isSaving = false;
   bool _isLoadingMembers = false;
+
+  static const int _minSearchLength = 3;
 
   bool get _isEditing => widget.existingGroup != null;
 
@@ -75,21 +78,33 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
 
   void _onSearchChanged(String value) {
     _debounce?.cancel();
-    if (value.trim().isEmpty) {
-      setState(() => _suggestions = []);
+    final trimmed = value.trim();
+
+    if (trimmed.length < _minSearchLength) {
+      setState(() {
+        _suggestions = [];
+        _isSearching = false;
+        _hasSearched = false;
+      });
       return;
     }
+
     _debounce = Timer(const Duration(milliseconds: 350), () async {
       setState(() => _isSearching = true);
       final results = await ref
           .read(userRepositoryProvider)
-          .searchUsernames(value.trim());
+          .searchUsernames(trimmed);
       if (!mounted) return;
+
+      final currentUid = ref.read(currentUserProvider)?.uid;
       setState(() {
         _suggestions = results
-            .where((r) => !_selectedMembers.containsKey(r['uid']))
+            .where((r) =>
+                !_selectedMembers.containsKey(r['uid']) &&
+                r['uid'] != currentUid) // exclude yourself from results
             .toList();
         _isSearching = false;
+        _hasSearched = true;
       });
     });
   }
@@ -98,6 +113,7 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
     setState(() {
       _selectedMembers[user['uid']!] = user['username']!;
       _suggestions = [];
+      _hasSearched = false;
       _searchController.clear();
     });
   }
@@ -166,9 +182,10 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
                 isSearching: _isSearching,
                 onChanged: _onSearchChanged,
               ),
-              if (_suggestions.isNotEmpty)
+              if (_hasSearched && !_isSearching)
                 Container(
                   margin: const EdgeInsets.only(top: 8),
+                  constraints: const BoxConstraints(maxHeight: 220),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.05),
                     border: Border.all(
@@ -176,37 +193,51 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
                     ),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _suggestions
-                        .map(
-                          (user) => ListTile(
-                            dense: true,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            leading: CircleAvatar(
-                              radius: 16,
-                              backgroundColor:
-                                  AppColors.primary.withValues(alpha: 0.15),
-                              child: Icon(
-                                Icons.person_outline_rounded,
-                                size: 16,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                            title: Text(
-                              user['username']!,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
+                  child: _suggestions.isEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Center(
+                            child: Text(
+                              'No user found',
+                              style: TextStyle(
                                 fontSize: 13,
+                                color: AppColors.textPrimary.withValues(alpha: 0.5),
                               ),
                             ),
-                            onTap: () => _addMember(user),
                           ),
                         )
-                        .toList(),
-                  ),
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          padding: EdgeInsets.zero,
+                          itemCount: _suggestions.length,
+                          itemBuilder: (context, i) {
+                            final user = _suggestions[i];
+                            return ListTile(
+                              dense: true,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              leading: CircleAvatar(
+                                radius: 16,
+                                backgroundColor:
+                                    AppColors.primary.withValues(alpha: 0.15),
+                                child: Icon(
+                                  Icons.person_outline_rounded,
+                                  size: 16,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              title: Text(
+                                user['username']!,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              onTap: () => _addMember(user),
+                            );
+                          },
+                        ),
                 ),
               if (_isLoadingMembers)
                 const Padding(

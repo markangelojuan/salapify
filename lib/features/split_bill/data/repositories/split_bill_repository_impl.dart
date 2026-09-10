@@ -89,7 +89,7 @@ class SplitBillRepositoryImpl implements SplitBillRepository {
         );
   }
 
-    @override
+  @override
   Future<void> removeMember(String groupId, String memberId) {
     return _service.removeMember(groupId, memberId);
   }
@@ -129,19 +129,20 @@ class SplitBillRepositoryImpl implements SplitBillRepository {
     required String billId,
     required String userId,
     required PaymentStatus status,
-  }) async {
-    final billDoc = await _service.getBill(groupId, billId);
-    final bill = SplitBillMapper.fromFirestore(billDoc.id, billDoc.data()!);
+  }) {
+    return _service.updateShareStatusAtomic(groupId, billId, userId, {
+      'status': status.name,
+      'statusUpdatedAt': DateTime.now()
+          .toIso8601String(), 
+    });
+  }
 
-    final updatedShares = bill.shares.map((s) {
-      if (s.userId != userId) return s;
-      return s.copyWith(status: status, statusUpdatedAt: DateTime.now());
-    }).toList();
-
-    await _service.updateBillShares(
-      groupId,
-      billId,
-      updatedShares.map((s) => s.toMap()).toList(),
+  @override
+  Future<void> createBillWithActivity(SplitBill bill, ActivityEntry activity) {
+    return _service.createBillWithActivity(
+      bill.groupId,
+      bill.toFirestore(),
+      activity.toFirestore(),
     );
   }
 }

@@ -19,6 +19,7 @@ class UserRepository {
     await _users.doc(uid).set({
       'username': username,
       'email': email,
+      'avatarId': null,
       'createdAt': FieldValue.serverTimestamp(),
     });
   }
@@ -59,6 +60,15 @@ class UserRepository {
     await _users.doc(uid).update({
       'fcmTokens': FieldValue.arrayRemove([token]),
     });
+  }
+
+  Future<Map<String, dynamic>?> getUserProfile(String uid) async {
+    final doc = await _users.doc(uid).get();
+    return doc.data();
+  }
+
+  Future<void> setAvatarId(String uid, String avatarId) async {
+    await _users.doc(uid).update({'avatarId': avatarId});
   }
 }
 

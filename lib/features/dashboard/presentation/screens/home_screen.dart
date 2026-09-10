@@ -9,6 +9,9 @@ import 'package:salapify/features/budget/presentation/screens/budget_screen.dart
 import 'package:salapify/features/split_bill/presentation/screens/split_bills_screen.dart';
 import 'package:salapify/features/transaction/presentation/controllers/transaction_tab_state.dart';
 import 'package:salapify/features/transaction/presentation/screens/transaction_screen.dart';
+import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
+import 'package:salapify/core/widgets/nav_badge.dart';
+
 import 'package:salapify/router/routes.dart';
 
 final homeTabIndexProvider = StateProvider<int>((ref) => 0);
@@ -133,7 +136,7 @@ class _FloatingNavBar extends StatelessWidget {
   }
 }
 
-class _Pill extends StatelessWidget {
+class _Pill extends ConsumerWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
   final bool reserveCenterGap;
@@ -145,7 +148,8 @@ class _Pill extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unreadSplitCount = ref.watch(totalUnreadSplitCountProvider);
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -161,35 +165,30 @@ class _Pill extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
         child: NavigationBarTheme(
-          data: NavigationBarThemeData(
-            height: 64,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            surfaceTintColor: Colors.transparent,
-            indicatorColor: AppColors.primary.withValues(alpha: 0.15),
-            indicatorShape: const StadiumBorder(),
-            labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-          ),
+          data: NavigationBarThemeData(/* unchanged */),
           child: NavigationBar(
             selectedIndex: currentIndex,
             onDestinationSelected: onTap,
-            destinations: const [
-              NavigationDestination(
+            destinations: [
+              const NavigationDestination(
                 icon: Icon(Icons.account_balance_wallet_outlined),
                 selectedIcon: Icon(Icons.account_balance_wallet_rounded),
                 label: 'Budget',
               ),
-              NavigationDestination(
+              const NavigationDestination(
                 icon: Icon(Icons.payments_outlined),
                 selectedIcon: Icon(Icons.payments_rounded),
                 label: 'Transactions',
               ),
               NavigationDestination(
-                icon: Icon(Icons.receipt_long_outlined),
-                selectedIcon: Icon(Icons.receipt_long_rounded),
+                icon: NavBadge(
+                  count: unreadSplitCount,
+                  child: const Icon(Icons.receipt_long_outlined),
+                ),
+                selectedIcon: const Icon(Icons.receipt_long_rounded),
                 label: 'Split Bill',
               ),
-              NavigationDestination(
+              const NavigationDestination(
                 icon: Icon(Icons.notifications_outlined),
                 selectedIcon: Icon(Icons.notifications_rounded),
                 label: 'Notifications',

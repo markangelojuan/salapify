@@ -16,6 +16,8 @@ abstract class SplitBillRepository {
     required List<String> memberIds,
   });
 
+  Future<void> createBillWithActivity(SplitBill bill, ActivityEntry activity);
+
   /// Resets [userId]'s unread badge count for [groupId] to 0.
   Future<void> markGroupRead(String groupId, String userId);
 

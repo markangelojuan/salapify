@@ -447,3 +447,45 @@ final class SplitGroupFamily extends $Family
   @override
   String toString() => r'splitGroupProvider';
 }
+
+@ProviderFor(totalUnreadSplitCount)
+final totalUnreadSplitCountProvider = TotalUnreadSplitCountProvider._();
+
+final class TotalUnreadSplitCountProvider
+    extends $FunctionalProvider<int, int, int>
+    with $Provider<int> {
+  TotalUnreadSplitCountProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'totalUnreadSplitCountProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$totalUnreadSplitCountHash();
+
+  @$internal
+  @override
+  $ProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  int create(Ref ref) {
+    return totalUnreadSplitCount(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int>(value),
+    );
+  }
+}
+
+String _$totalUnreadSplitCountHash() =>
+    r'413f5e57b9f3bfe73eb178667c32107ddb5dcff5';

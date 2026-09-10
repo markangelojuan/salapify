@@ -10,14 +10,16 @@ import 'package:salapify/features/dashboard/presentation/screens/home_screen.dar
 import 'package:salapify/features/transaction/domain/entities/income_source.dart';
 import 'package:salapify/features/transaction/presentation/screens/expense_form_screen.dart';
 import 'package:salapify/features/transaction/presentation/screens/income_form_screen.dart';
-import 'package:salapify/router/go_router_refresh_stream.dart';
 import 'package:salapify/features/authentication/presentation/controllers/guest_controller.dart';
 import 'package:salapify/features/transaction/domain/entities/transaction_entry.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 import 'package:salapify/features/split_bill/presentation/screens/group_form_screen.dart';
 import 'package:salapify/features/split_bill/presentation/screens/split_group_detail_screen.dart';
 import 'package:salapify/features/split_bill/presentation/screens/bill_form_screen.dart';
+import 'package:salapify/features/authentication/presentation/controllers/app_user_controller.dart';
+import 'package:salapify/features/authentication/presentation/screens/avatar_picker_screen.dart';
 
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -27,6 +29,7 @@ enum AppRoutes {
   home,
   signIn,
   signUp,
+  avatarPicker,
   account,
   settings,
   help,
@@ -38,27 +41,59 @@ enum AppRoutes {
   billForm,
 }
 
+/// Notifies GoRouter's `redirect` to re-run whenever auth state, guest mode,
+/// or the current user's profile (e.g. avatarId) changes — WITHOUT rebuilding
+/// the GoRouter instance itself (that's what was resetting screen state).
+class _RouterRefreshNotifier extends ChangeNotifier {
+  _RouterRefreshNotifier(Ref ref) {
+    ref.listen(authStateChangesProvider, (_, __) => notifyListeners());
+    ref.listen(currentAppUserProvider, (_, __) => notifyListeners());
+    ref.listen(guestModeProvider, (_, __) => notifyListeners());
+  }
+}
+
 @Riverpod(keepAlive: true)
 GoRouter goRouter(Ref ref) {
-  final authRepository = ref.watch(authRepositoryProvider);
+  final refreshNotifier = _RouterRefreshNotifier(ref);
+  ref.onDispose(refreshNotifier.dispose);
 
   return GoRouter(
     initialLocation: "/home",
     debugLogDiagnostics: true,
     redirect: (ctx, state) {
-      final isLoggedIn = authRepository.currentUser != null;
-      final isGuest = ref.watch(guestModeProvider);
+      final isLoggedIn = ref.read(authRepositoryProvider).currentUser != null;
+      final isGuest = ref.read(guestModeProvider);
       final loc = state.matchedLocation;
 
-      if ((isLoggedIn || isGuest) && (loc == "/sign-in" || loc == "/sign-up")) {
-        return "/home";
-      } else if (!isLoggedIn && !isGuest && loc.startsWith("/home")) {
-        return "/sign-in";
+      if (!isLoggedIn && !isGuest) {
+        return (loc.startsWith("/home") || loc == "/avatar-picker")
+            ? "/sign-in"
+            : null;
       }
 
+      if (isGuest && !isLoggedIn) {
+        return (loc == "/sign-in" || loc == "/sign-up") ? "/home" : null;
+      }
+
+      final appUserAsync = ref.read(currentAppUserProvider);
+      if (appUserAsync.isLoading || appUserAsync.hasError) {
+        return null;
+      }
+
+      final needsAvatar = appUserAsync.value?.avatarId == null;
+
+      if (needsAvatar) {
+        return loc == "/avatar-picker" ? null : "/avatar-picker";
+      }
+
+      // Only block sign-in/sign-up once logged in — /avatar-picker stays
+      // freely revisitable (e.g. "Change" button on Account screen).
+      if (loc == "/sign-in" || loc == "/sign-up") {
+        return "/home";
+      }
       return null;
     },
-    refreshListenable: GoRouterRefreshStream(authRepository.authStateChanges()),
+    refreshListenable: refreshNotifier,
     routes: [
       GoRoute(
         path: "/home",
@@ -74,6 +109,11 @@ GoRouter goRouter(Ref ref) {
         path: "/sign-up",
         name: AppRoutes.signUp.name,
         builder: (ctx, state) => const SignUpScreen(),
+      ),
+      GoRoute(
+        path: "/avatar-picker",
+        name: AppRoutes.avatarPicker.name,
+        builder: (ctx, state) => const AvatarPickerScreen(),
       ),
       GoRoute(
         path: "/account",

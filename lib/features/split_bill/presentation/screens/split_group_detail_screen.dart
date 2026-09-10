@@ -36,7 +36,9 @@ class _SplitGroupDetailScreenState
     super.initState();
     // Clear this user's unread badge for the group now that they're
     // viewing it. Doesn't affect the controller's `state`
-    ref.read(splitBillControllerProvider.notifier).markGroupRead(widget.groupId);
+    ref
+        .read(splitBillControllerProvider.notifier)
+        .markGroupRead(widget.groupId);
   }
 
   @override
@@ -511,8 +513,36 @@ class _BillCard extends ConsumerWidget {
     if (status == PaymentStatus.disputed) {
       return Row(
         children: [
-          const Expanded(
-            child: _StatusPill(label: 'Disputed — recheck', color: Colors.red),
+          Expanded(
+            child: Text(
+              'Disputed',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.red[600],
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(0, 0),
+              foregroundColor: AppColors.primary,
+            ),
+            onPressed: () => ref
+                .read(splitBillControllerProvider.notifier)
+                .updateShareStatus(
+                  groupId: bill.groupId,
+                  billId: bill.id,
+                  userId: currentUid!,
+                  status: PaymentStatus.markedPaid,
+                ),
+            child: const Text(
+              'Mark paid again',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       );

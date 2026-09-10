@@ -59,3 +59,11 @@ Future<Map<String, String>> groupMemberNames(Ref ref, String groupId) async {
 Future<SplitGroup?> splitGroup(Ref ref, String groupId) {
   return ref.watch(splitBillRepositoryProvider).getGroup(groupId);
 }
+
+@riverpod
+int totalUnreadSplitCount(Ref ref) {
+  final uid = ref.watch(currentUserProvider)?.uid;
+  if (uid == null) return 0;
+  final groups = ref.watch(splitGroupsProvider).value ?? [];
+  return groups.fold(0, (sum, g) => sum + (g.unreadCounts[uid] ?? 0));
+}

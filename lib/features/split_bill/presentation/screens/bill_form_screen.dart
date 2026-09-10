@@ -810,7 +810,7 @@ class _PaymentStatusSection extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
               shrinkWrap: true,
               itemCount: owerShares.length,
-              separatorBuilder: (_, __) => Divider(
+              separatorBuilder: (_, _) => Divider(
                 height: 1,
                 indent: 14,
                 endIndent: 14,

@@ -7,16 +7,15 @@ part 'app_user_controller.g.dart';
 
 @riverpod
 Future<AppUser?> currentAppUser(Ref ref) async {
-  final sessionUser = ref.watch(currentUserProvider); // AppUser? with uid+email, from auth_repository
+  final sessionUser = ref.watch(currentUserProvider);
   if (sessionUser == null) return null;
 
-  final username = await ref
-      .watch(userRepositoryProvider)
-      .getUsername(sessionUser.uid);
+  final profile = await ref.watch(userRepositoryProvider).getUserProfile(sessionUser.uid);
 
   return AppUser(
     uid: sessionUser.uid,
     email: sessionUser.email,
-    username: username,
+    username: profile?['username'] as String?,
+    avatarId: profile?['avatarId'] as String?,
   );
 }
