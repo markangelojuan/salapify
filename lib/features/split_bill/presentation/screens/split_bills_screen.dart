@@ -9,6 +9,7 @@ import 'package:salapify/features/split_bill/domain/entities/split_bill.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 import 'package:salapify/features/split_bill/domain/split_balance_calculator.dart';
 import 'package:salapify/features/split_bill/presentation/controllers/split_bill_controller.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/router/routes.dart';
 
 class SplitBillsScreen extends ConsumerWidget {
@@ -52,14 +53,17 @@ class SplitBillsScreen extends ConsumerWidget {
 
     final error = ref.read(splitBillControllerProvider).error;
     if (error != null && context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed: $error')));
+      CommonSnackbar.showError(context, error);
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<AsyncValue<void>>(splitBillControllerProvider, (previous, next) {
+      if (next.hasError) {
+        CommonSnackbar.showError(context, next.error!);
+      }
+    });
     final groupsAsync = ref.watch(splitGroupsProvider);
     final currentUid = ref.watch(currentUserProvider)?.uid;
 

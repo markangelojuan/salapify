@@ -18,12 +18,19 @@ import 'package:salapify/features/split_bill/presentation/screens/split_group_de
 import 'package:salapify/features/split_bill/presentation/screens/bill_form_screen.dart';
 import 'package:salapify/features/authentication/presentation/controllers/app_user_controller.dart';
 import 'package:salapify/features/authentication/presentation/screens/avatar_picker_screen.dart';
-
-import 'package:flutter/foundation.dart';
+import 'package:salapify/core/theme/app_colors.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'routes.g.dart';
+
+Widget _withGradientBackground(Widget child) {
+  return DecoratedBox(
+    decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+    child: child,
+  );
+}
 
 enum AppRoutes {
   home,
@@ -98,44 +105,48 @@ GoRouter goRouter(Ref ref) {
       GoRoute(
         path: "/home",
         name: AppRoutes.home.name,
-        builder: (ctx, state) => const HomeScreen(),
+        builder: (ctx, state) => _withGradientBackground(const HomeScreen()),
       ),
       GoRoute(
         path: "/sign-in",
         name: AppRoutes.signIn.name,
-        builder: (ctx, state) => const SignInScreen(),
+        builder: (ctx, state) => _withGradientBackground(const SignInScreen()),
       ),
       GoRoute(
         path: "/sign-up",
         name: AppRoutes.signUp.name,
-        builder: (ctx, state) => const SignUpScreen(),
+        builder: (ctx, state) => _withGradientBackground(const SignUpScreen()),
       ),
       GoRoute(
         path: "/avatar-picker",
         name: AppRoutes.avatarPicker.name,
-        builder: (ctx, state) => const AvatarPickerScreen(),
+        builder: (ctx, state) =>
+            _withGradientBackground(const AvatarPickerScreen()),
       ),
       GoRoute(
         path: "/account",
         name: AppRoutes.account.name,
-        builder: (ctx, state) => const AccountScreen(),
+        builder: (ctx, state) => _withGradientBackground(const AccountScreen()),
       ),
       GoRoute(
         path: "/settings",
         name: AppRoutes.settings.name,
-        builder: (ctx, state) => const SettingsScreen(),
+        builder: (ctx, state) =>
+            _withGradientBackground(const SettingsScreen()),
       ),
       GoRoute(
         path: "/help",
         name: AppRoutes.help.name,
-        builder: (ctx, state) => const HelpScreen(),
+        builder: (ctx, state) => _withGradientBackground(const HelpScreen()),
       ),
       GoRoute(
         path: "/category-form",
         name: AppRoutes.categoryForm.name,
         builder: (ctx, state) {
           final existingCategory = state.extra as BudgetCategory?;
-          return CategoryFormScreen(existingCategory: existingCategory);
+          return _withGradientBackground(
+            CategoryFormScreen(existingCategory: existingCategory),
+          );
         },
       ),
       GoRoute(
@@ -143,7 +154,9 @@ GoRouter goRouter(Ref ref) {
         name: AppRoutes.expenseForm.name,
         builder: (ctx, state) {
           final existingTransaction = state.extra as TransactionEntry?;
-          return ExpenseFormScreen(existingTransaction: existingTransaction);
+          return _withGradientBackground(
+            ExpenseFormScreen(existingTransaction: existingTransaction),
+          );
         },
       ),
       GoRoute(
@@ -151,7 +164,9 @@ GoRouter goRouter(Ref ref) {
         name: AppRoutes.incomeForm.name,
         builder: (ctx, state) {
           final existingSource = state.extra as IncomeSource?;
-          return IncomeFormScreen(existingSource: existingSource);
+          return _withGradientBackground(
+            IncomeFormScreen(existingSource: existingSource),
+          );
         },
       ),
       GoRoute(
@@ -159,7 +174,9 @@ GoRouter goRouter(Ref ref) {
         name: AppRoutes.groupForm.name,
         builder: (ctx, state) {
           final existingGroup = state.extra as SplitGroup?;
-          return GroupFormScreen(existingGroup: existingGroup);
+          return _withGradientBackground(
+            GroupFormScreen(existingGroup: existingGroup),
+          );
         },
       ),
       GoRoute(
@@ -167,7 +184,9 @@ GoRouter goRouter(Ref ref) {
         name: AppRoutes.splitGroupDetail.name,
         builder: (ctx, state) {
           final groupId = state.pathParameters['groupId']!;
-          return SplitGroupDetailScreen(groupId: groupId);
+          return _withGradientBackground(
+            SplitGroupDetailScreen(groupId: groupId),
+          );
         },
       ),
       GoRoute(
@@ -175,9 +194,8 @@ GoRouter goRouter(Ref ref) {
         name: AppRoutes.billForm.name,
         builder: (ctx, state) {
           final args = state.extra as BillFormArgs;
-          return BillFormScreen(
-            group: args.group,
-            existingBill: args.existingBill,
+          return _withGradientBackground(
+            BillFormScreen(group: args.group, existingBill: args.existingBill),
           );
         },
       ),

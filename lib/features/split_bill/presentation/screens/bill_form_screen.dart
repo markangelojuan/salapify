@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/widgets/common_button.dart';
@@ -15,6 +16,8 @@ import 'package:salapify/features/split_bill/domain/entities/split_type.dart';
 import 'package:salapify/features/split_bill/domain/split_balance_calculator.dart';
 import 'package:salapify/features/split_bill/presentation/controllers/split_bill_controller.dart';
 import 'package:salapify/features/split_bill/domain/entities/payment_status.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 
 class BillFormArgs {
   const BillFormArgs({required this.group, this.existingBill});
@@ -142,17 +145,23 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
     _namesBeingResolved.addAll(missing);
     final userRepo = ref.read(userRepositoryProvider);
     Future.wait(
-      missing.map((id) async {
-        final username = await userRepo.getUsername(id);
-        return MapEntry(id, username ?? 'Unknown');
-      }),
-    ).then((entries) {
-      if (!mounted) return;
-      setState(() {
-        _resolvedNames.addEntries(entries);
-        _namesBeingResolved.removeAll(missing);
-      });
-    });
+          missing.map((id) async {
+            final username = await userRepo.getUsername(id);
+            return MapEntry(id, username ?? 'Unknown');
+          }),
+        )
+        .then((entries) {
+          if (!mounted) return;
+          setState(() {
+            _resolvedNames.addEntries(entries);
+            _namesBeingResolved.removeAll(missing);
+          });
+        })
+        .catchError((e) {
+          if (!mounted) return;
+          setState(() => _namesBeingResolved.removeAll(missing));
+          CommonSnackbar.showError(context, e);
+        });
   }
 
   Map<String, double> _computeShares() {
@@ -277,8 +286,13 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final namesAsync = ref.watch(groupMemberNamesProvider(widget.group.id));
-    final groupNames = namesAsync.value ?? {};
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
+    final membersAsync = ref.watch(groupMembersProvider(widget.group.id));
+    final groupNames = {
+      for (final e in (membersAsync.value ?? {}).entries)
+        e.key: e.value.username,
+    };
     if (_isEditingExisting) {
       _resolveMissingNames(_participantIds, groupNames);
     }
@@ -309,130 +323,208 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
               widget.existingBill)
         : null;
 
+    // Once any share has been marked paid, confirmed, or disputed,
+    // changing the total (or the split) would silently change what each
+    // person owes without touching their recorded status — e.g. someone's
+    // "confirmed ₱500" could quietly become "confirmed ₱750". Lock those
+    // two fields once that's happened; the title is still safe to edit.
+    final hasPaymentActivity =
+        liveBill?.shares.any((s) => s.status != PaymentStatus.unpaid) ?? false;
+    final lockTotalAndSplit = _isEditingExisting && hasPaymentActivity;
+
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(title: Text(title)),
       body: SafeArea(
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
             children: [
-              if (_isEditingExisting && !canEdit)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline_rounded,
-                        size: 16,
-                        color: AppColors.textPrimary.withValues(alpha: 0.5),
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          'Only the person who paid can edit this bill.',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textPrimary.withValues(alpha: 0.6),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+              if (_isEditingExisting && !canEdit) ...[
+                _ReadOnlyBanner(
+                  text: 'Only the person who paid can edit this bill.',
                 ),
+                const SizedBox(height: 16),
+              ],
+              if (_isEditingExisting && canEdit && lockTotalAndSplit) ...[
+                _ReadOnlyBanner(
+                  text:
+                      'Total amount and split are locked — someone already '
+                      'has payment activity on this bill.',
+                ),
+                const SizedBox(height: 16),
+              ],
               AbsorbPointer(
                 absorbing: !canEdit,
                 child: Opacity(
                   opacity: canEdit ? 1 : 0.6,
                   child: Column(
-                    // Matches ExpenseFormScreen / IncomeFormScreen: labels and
-                    // controls start-aligned instead of the default centered
-                    // Column cross-axis.
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CommonTextField(
-                        controller: _titleController,
+                      _SectionCard(
+                        title: 'Bill details',
                         icon: Icons.receipt_long_rounded,
-                        hint: 'e.g. Dinner @ KFC',
-                        label: 'Title',
-                        validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Enter a title'
-                            : null,
-                      ),
-                      const SizedBox(height: 18),
-                      CommonTextField(
-                        controller: _totalController,
-                        icon: Icons.attach_money_rounded,
-                        hint: '0.00',
-                        label: 'Total amount',
-                        validator: (v) {
-                          final val = double.tryParse(v ?? '');
-                          if (val == null || val <= 0) {
-                            return 'Enter a valid amount';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 18),
-                      Text(
-                        'Paid by',
-                        style: TextStyle(color: AppColors.textPrimary),
-                      ),
-                      const SizedBox(height: 8),
-                      _PaidByField(
-                        value: _paidBy,
-                        names: names,
-                        memberIds: _participantIds,
-                        // Payer is fixed once a bill exists — reassigning it
-                        // would invalidate how shares were computed.
-                        onChanged: _isEditingExisting
-                            ? null
-                            : (val) => setState(() => _paidBy = val),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        'Split',
-                        style: TextStyle(color: AppColors.textPrimary),
-                      ),
-                      const SizedBox(height: 8),
-                      SegmentedButton<SplitType>(
-                        segments: const [
-                          ButtonSegment(
-                            value: SplitType.equal,
-                            label: Text('Equally'),
-                          ),
-                          ButtonSegment(
-                            value: SplitType.custom,
-                            label: Text('Custom'),
-                          ),
-                        ],
-                        selected: {_splitType},
-                        onSelectionChanged: (s) =>
-                            setState(() => _splitType = s.first),
-                      ),
-                      const SizedBox(height: 12),
-                      if (_splitType == SplitType.equal)
-                        ...others.map(
-                          (id) => Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: _SharePreviewRow(
-                              name: names[id] ?? '...',
-                              amount: equalPreview[id] ?? 0,
-                              isFormerMember: !currentMemberIds.contains(id),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CommonTextField(
+                              controller: _titleController,
+                              icon: Icons.receipt_long_rounded,
+                              hint: 'e.g. Dinner @ KFC',
+                              label: 'Title',
+                              validator: (v) => (v == null || v.trim().isEmpty)
+                                  ? 'Enter a title'
+                                  : null,
                             ),
-                          ),
-                        )
-                      else
-                        ...others.map(
-                          (id) => Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: _CustomShareField(
-                              name: names[id] ?? '...',
-                              controller: _customControllers[id]!,
-                              isFormerMember: !currentMemberIds.contains(id),
+                            const SizedBox(height: 18),
+                            AbsorbPointer(
+                              absorbing: lockTotalAndSplit,
+                              child: Opacity(
+                                opacity: lockTotalAndSplit ? 0.55 : 1,
+                                child: CommonTextField(
+                                  controller: _totalController,
+                                  icon: Icons.attach_money_rounded,
+                                  prefixText: currency.symbol,
+                                  hint: '0.00',
+                                  label: 'Total amount',
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp(r'^\d*\.?\d{0,2}'),
+                                    ),
+                                  ],
+                                  validator: (v) {
+                                    final val = double.tryParse(v ?? '');
+                                    if (val == null || val <= 0) {
+                                      return 'Enter a valid amount';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
                             ),
-                          ),
+                            if (lockTotalAndSplit) ...[
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.lock_outline_rounded,
+                                    size: 12,
+                                    color: AppColors.textPrimary.withValues(
+                                      alpha: 0.4,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Locked — payment activity exists',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.textPrimary.withValues(
+                                        alpha: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ],
                         ),
+                      ),
+                      _SectionCard(
+                        title: 'Split',
+                        icon: Icons.call_split_rounded,
+                        trailing: others.isEmpty
+                            ? null
+                            : _CountPill(count: others.length),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Paid by',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary.withValues(
+                                  alpha: 0.6,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            _PaidByField(
+                              value: _paidBy,
+                              names: names,
+                              memberIds: _participantIds,
+                              // Payer is fixed once a bill exists —
+                              // reassigning it would invalidate how shares
+                              // were computed.
+                              onChanged: _isEditingExisting
+                                  ? null
+                                  : (val) => setState(() => _paidBy = val),
+                            ),
+                            const SizedBox(height: 18),
+                            AbsorbPointer(
+                              absorbing: lockTotalAndSplit,
+                              child: Opacity(
+                                opacity: lockTotalAndSplit ? 0.55 : 1,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Kept as the app's standard pill-style
+                                    // choice control, matching other option
+                                    // pickers.
+                                    SegmentedButton<SplitType>(
+                                      segments: const [
+                                        ButtonSegment(
+                                          value: SplitType.equal,
+                                          label: Text('Equally'),
+                                        ),
+                                        ButtonSegment(
+                                          value: SplitType.custom,
+                                          label: Text('Custom'),
+                                        ),
+                                      ],
+                                      selected: {_splitType},
+                                      onSelectionChanged: (s) =>
+                                          setState(() => _splitType = s.first),
+                                    ),
+                                    if (others.isNotEmpty) ...[
+                                      const SizedBox(height: 14),
+                                      _ScrollablePanel(
+                                        itemCount: others.length,
+                                        itemBuilder: (context, i) {
+                                          final id = others[i];
+                                          final isFormerMember =
+                                              !currentMemberIds.contains(id);
+                                          return _splitType == SplitType.equal
+                                              ? _SharePreviewRow(
+                                                  name: names[id] ?? '...',
+                                                  amount: equalPreview[id] ?? 0,
+                                                  currency: currency,
+                                                  isFormerMember:
+                                                      isFormerMember,
+                                                )
+                                              : _CustomShareField(
+                                                  name: names[id] ?? '...',
+                                                  controller:
+                                                      _customControllers[id]!,
+                                                  currency: currency,
+                                                  isFormerMember:
+                                                      isFormerMember,
+                                                );
+                                        },
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -440,17 +532,16 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
               // Per-member payment status + payer confirm/decline actions.
               // Lives here rather than on the bill card since it needs to
               // scale to any number of members.
-              if (_isEditingExisting && liveBill != null) ...[
-                const SizedBox(height: 24),
+              if (_isEditingExisting && liveBill != null)
                 _PaymentStatusSection(
                   bill: liveBill,
                   names: names,
                   isPayer: canEdit,
                   currentMemberIds: currentMemberIds,
+                  currency: currency,
                 ),
-              ],
               if (canEdit) ...[
-                const SizedBox(height: 28),
+                const SizedBox(height: 8),
                 CommonButton(
                   label: _isEditingExisting ? 'Save Changes' : 'Add Bill',
                   btnColor: AppColors.black,
@@ -472,6 +563,179 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Rounded white "grouped card" shell used to give each form section
+/// (bill details, split, payment status) a consistent, modern container
+/// instead of loose fields floating directly on the screen background.
+class _SectionCard extends StatelessWidget {
+  const _SectionCard({
+    required this.child,
+    this.title,
+    this.icon,
+    this.trailing,
+  });
+
+  final Widget child;
+  final String? title;
+  final IconData? icon;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (title != null) ...[
+            Row(
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 16, color: AppColors.primary),
+                  const SizedBox(width: 6),
+                ],
+                Text(
+                  title!,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const Spacer(),
+                if (trailing != null) trailing!,
+              ],
+            ),
+            const SizedBox(height: 14),
+          ],
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+/// Small numeric pill used next to section titles (e.g. participant count),
+/// matching the pill language already used elsewhere in this feature.
+class _CountPill extends StatelessWidget {
+  const _CountPill({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        '$count',
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: AppColors.primary,
+        ),
+      ),
+    );
+  }
+}
+
+/// Shared bounded, internally-scrollable list panel. Used by both the
+/// Split section and the Payment Status section so neither one grows
+/// unbounded as group membership grows — keeps the Save/Delete buttons at
+/// a predictable position regardless of group size.
+class _ScrollablePanel extends StatelessWidget {
+  const _ScrollablePanel({
+    required this.itemCount,
+    required this.itemBuilder,
+    this.maxHeight = 260,
+  });
+
+  final int itemCount;
+  final Widget Function(BuildContext, int) itemBuilder;
+  final double maxHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.04),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Scrollbar(
+        child: ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          shrinkWrap: true,
+          itemCount: itemCount,
+          separatorBuilder: (_, __) => Divider(
+            height: 1,
+            indent: 14,
+            endIndent: 14,
+            color: AppColors.primary.withValues(alpha: 0.10),
+          ),
+          itemBuilder: itemBuilder,
+        ),
+      ),
+    );
+  }
+}
+
+/// Restyled "view only" notice as a soft banner chip instead of bare
+/// centered icon+text, matching the app's pill/banner language.
+class _ReadOnlyBanner extends StatelessWidget {
+  const _ReadOnlyBanner({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.textPrimary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.info_outline_rounded,
+            size: 16,
+            color: AppColors.textPrimary.withValues(alpha: 0.5),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textPrimary.withValues(alpha: 0.6),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -568,27 +832,26 @@ class _FormerMemberBadge extends StatelessWidget {
   }
 }
 
-/// Read-only equal-split preview row, styled like RecurringIncomeRow's
-/// bordered list rows.
+/// Read-only equal-split preview row. No border of its own — separation
+/// comes from _ScrollablePanel's Divider — so rows read as one continuous
+/// list rather than stacked cards.
 class _SharePreviewRow extends StatelessWidget {
   const _SharePreviewRow({
     required this.name,
     required this.amount,
+    required this.currency,
     this.isFormerMember = false,
   });
 
   final String name;
   final double amount;
+  final AppCurrency currency;
   final bool isFormerMember;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       child: Row(
         children: [
           Expanded(
@@ -609,7 +872,7 @@ class _SharePreviewRow extends StatelessWidget {
             ),
           ),
           Text(
-            '₱${amount.toStringAsFixed(2)}',
+            '${currency.symbol}${amount.toStringAsFixed(2)}',
             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
           ),
         ],
@@ -618,28 +881,26 @@ class _SharePreviewRow extends StatelessWidget {
   }
 }
 
-/// Editable custom-split amount row — same bordered shell as
+/// Editable custom-split amount row — same borderless shell as
 /// _SharePreviewRow, with a compact inline text field instead of a static
 /// amount, so equal/custom modes read as the same component.
 class _CustomShareField extends StatelessWidget {
   const _CustomShareField({
     required this.name,
     required this.controller,
+    required this.currency,
     this.isFormerMember = false,
   });
 
   final String name;
   final TextEditingController controller;
+  final AppCurrency currency;
   final bool isFormerMember;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       child: Row(
         children: [
           Expanded(
@@ -659,25 +920,37 @@ class _CustomShareField extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(
-            width: 100,
-            child: TextFormField(
-              controller: controller,
-              textAlign: TextAlign.right,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-              decoration: InputDecoration(
-                isDense: true,
-                border: InputBorder.none,
-                prefixText: '₱',
-                prefixStyle: TextStyle(
-                  color: AppColors.textPrimary.withValues(alpha: 0.6),
-                  fontWeight: FontWeight.w500,
-                  fontSize: 13,
+          Text(
+            currency.symbol,
+            style: TextStyle(
+              color: AppColors.textPrimary.withValues(alpha: 0.6),
+              fontWeight: FontWeight.w500,
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(width: 2),
+          IntrinsicWidth(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 40, maxWidth: 90),
+              child: TextFormField(
+                controller: controller,
+                textAlign: TextAlign.right,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
                 ),
-                hintText: '0.00',
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                ],
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
+                decoration: const InputDecoration(
+                  isDense: true,
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                  hintText: '0.00',
+                ),
               ),
             ),
           ),
@@ -691,25 +964,24 @@ class _CustomShareField extends StatelessWidget {
 /// everyone except the payer, who gets Confirm/Decline actions on any
 /// share currently marked paid.
 ///
-/// Wrapped in a bordered, primary-tinted "panel" (matching the info card
-/// style used in IncomeFormScreen) with a capped height. Once the member
-/// count exceeds what fits comfortably, the panel scrolls internally
-/// instead of pushing the Save/Delete buttons further and further down —
-/// keeps the form height predictable regardless of group size.
+/// Uses the same _SectionCard shell as the fields above so the whole form
+/// reads as one set of consistent grouped panels, and the same
+/// _ScrollablePanel as the Split section so it scrolls internally instead
+/// of pushing the Save/Delete buttons further down as group size grows.
 class _PaymentStatusSection extends ConsumerWidget {
   const _PaymentStatusSection({
     required this.bill,
     required this.names,
     required this.isPayer,
     required this.currentMemberIds,
+    required this.currency,
   });
 
   final SplitBill bill;
   final Map<String, String> names;
   final bool isPayer;
   final Set<String> currentMemberIds;
-
-  static const _maxPanelHeight = 260.0;
+  final AppCurrency currency;
 
   Future<void> _updateStatus(
     BuildContext context,
@@ -726,6 +998,7 @@ class _PaymentStatusSection extends ConsumerWidget {
           userId: userId,
           status: status,
           actorId: actorId,
+          payerId: bill.paidBy,
         );
 
     final error = ref.read(splitBillControllerProvider).error;
@@ -745,102 +1018,58 @@ class _PaymentStatusSection extends ConsumerWidget {
         .where((s) => s.status == PaymentStatus.markedPaid)
         .length;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              'Payment status',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(width: 8),
+    return _SectionCard(
+      title: 'Payment status',
+      icon: Icons.fact_check_rounded,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _CountPill(count: owerShares.length),
+          if (isPayer && pendingCount > 0) ...[
+            const SizedBox(width: 6),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.10),
+                color: Colors.orange.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                '${owerShares.length}',
+                '$pendingCount awaiting review',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.primary,
+                  color: Colors.orange[700],
                 ),
               ),
             ),
-            if (isPayer && pendingCount > 0) ...[
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '$pendingCount awaiting review',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.orange[700],
-                  ),
-                ),
-              ),
-            ],
           ],
-        ),
-        const SizedBox(height: 8),
-        Container(
-          constraints: const BoxConstraints(maxHeight: _maxPanelHeight),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.05),
-            border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.15),
+        ],
+      ),
+      child: _ScrollablePanel(
+        itemCount: owerShares.length,
+        itemBuilder: (context, i) {
+          final share = owerShares[i];
+          return _ShareStatusRow(
+            share: share,
+            name: names[share.userId] ?? '...',
+            currency: currency,
+            isFormerMember: !currentMemberIds.contains(share.userId),
+            canAct: isPayer && share.status == PaymentStatus.markedPaid,
+            onConfirm: () => _updateStatus(
+              context,
+              ref,
+              share.userId,
+              PaymentStatus.confirmed,
             ),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Scrollbar(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-              shrinkWrap: true,
-              itemCount: owerShares.length,
-              separatorBuilder: (_, _) => Divider(
-                height: 1,
-                indent: 14,
-                endIndent: 14,
-                color: AppColors.primary.withValues(alpha: 0.10),
-              ),
-              itemBuilder: (context, i) {
-                final share = owerShares[i];
-                return _ShareStatusRow(
-                  share: share,
-                  name: names[share.userId] ?? '...',
-                  isFormerMember: !currentMemberIds.contains(share.userId),
-                  canAct: isPayer && share.status == PaymentStatus.markedPaid,
-                  onConfirm: () => _updateStatus(
-                    context,
-                    ref,
-                    share.userId,
-                    PaymentStatus.confirmed,
-                  ),
-                  onDispute: () => _updateStatus(
-                    context,
-                    ref,
-                    share.userId,
-                    PaymentStatus.disputed,
-                  ),
-                );
-              },
+            onDispute: () => _updateStatus(
+              context,
+              ref,
+              share.userId,
+              PaymentStatus.disputed,
             ),
-          ),
-        ),
-      ],
+          );
+        },
+      ),
     );
   }
 }
@@ -855,6 +1084,7 @@ class _ShareStatusRow extends StatelessWidget {
     required this.canAct,
     required this.onConfirm,
     required this.onDispute,
+    required this.currency,
     this.isFormerMember = false,
   });
 
@@ -863,6 +1093,7 @@ class _ShareStatusRow extends StatelessWidget {
   final bool canAct;
   final VoidCallback onConfirm;
   final VoidCallback onDispute;
+  final AppCurrency currency;
   final bool isFormerMember;
 
   (String, Color) get _statusMeta {
@@ -906,7 +1137,7 @@ class _ShareStatusRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '₱${share.amountOwed.toStringAsFixed(2)} · $label',
+                  '${currency.symbol}${share.amountOwed.toStringAsFixed(2)} · $label',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,

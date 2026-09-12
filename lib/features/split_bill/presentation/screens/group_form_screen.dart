@@ -25,7 +25,6 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
   final _searchController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-
   final Map<String, String> _selectedMembers = {};
 
   List<Map<String, String>> _suggestions = [];
@@ -54,18 +53,25 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
 
     final userRepo = ref.read(userRepositoryProvider);
     final otherIds = group.memberIds.where((id) => id != group.createdBy);
-    final entries = await Future.wait(
-      otherIds.map((id) async {
-        final username = await userRepo.getUsername(id);
-        return MapEntry(id, username ?? 'Unknown');
-      }),
-    );
 
-    if (!mounted) return;
-    setState(() {
-      _selectedMembers.addEntries(entries);
-      _isLoadingMembers = false;
-    });
+    try {
+      final entries = await Future.wait(
+        otherIds.map((id) async {
+          final username = await userRepo.getUsername(id);
+          return MapEntry(id, username ?? 'Unknown');
+        }),
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _selectedMembers.addEntries(entries);
+        _isLoadingMembers = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoadingMembers = false);
+      CommonSnackbar.showError(context, e);
+    }
   }
 
   @override
@@ -91,21 +97,30 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
 
     _debounce = Timer(const Duration(milliseconds: 350), () async {
       setState(() => _isSearching = true);
-      final results = await ref
-          .read(userRepositoryProvider)
-          .searchUsernames(trimmed);
-      if (!mounted) return;
+      try {
+        final results = await ref
+            .read(userRepositoryProvider)
+            .searchUsernames(trimmed);
+        if (!mounted) return;
 
-      final currentUid = ref.read(currentUserProvider)?.uid;
-      setState(() {
-        _suggestions = results
-            .where((r) =>
-                !_selectedMembers.containsKey(r['uid']) &&
-                r['uid'] != currentUid) // exclude yourself from results
-            .toList();
-        _isSearching = false;
-        _hasSearched = true;
-      });
+        final currentUid = ref.read(currentUserProvider)?.uid;
+        setState(() {
+          _suggestions = results
+              .where(
+                (r) =>
+                    !_selectedMembers.containsKey(r['uid']) &&
+                    r['uid'] != currentUid,
+              )
+              .toList();
+          _hasSearched = true;
+        });
+      } catch (e) {
+        if (!mounted) return;
+        setState(() => _suggestions = []);
+        CommonSnackbar.showError(context, e);
+      } finally {
+        if (mounted) setState(() => _isSearching = false);
+      }
     });
   }
 
@@ -175,7 +190,10 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
                     : null,
               ),
               const SizedBox(height: 18),
-              Text('Add members', style: TextStyle(color: AppColors.textPrimary)),
+              Text(
+                'Add members',
+                style: TextStyle(color: AppColors.textPrimary),
+              ),
               const SizedBox(height: 8),
               _MemberSearchField(
                 controller: _searchController,
@@ -201,7 +219,9 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
                               'No user found',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: AppColors.textPrimary.withValues(alpha: 0.5),
+                                color: AppColors.textPrimary.withValues(
+                                  alpha: 0.5,
+                                ),
                               ),
                             ),
                           ),
@@ -219,8 +239,9 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
                               ),
                               leading: CircleAvatar(
                                 radius: 16,
-                                backgroundColor:
-                                    AppColors.primary.withValues(alpha: 0.15),
+                                backgroundColor: AppColors.primary.withValues(
+                                  alpha: 0.15,
+                                ),
                                 child: Icon(
                                   Icons.person_outline_rounded,
                                   size: 16,
@@ -256,10 +277,12 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
                   spacing: 8,
                   runSpacing: 8,
                   children: _selectedMembers.entries
-                      .map((e) => _MemberChip(
-                            name: e.value,
-                            onRemove: () => _removeMember(e.key),
-                          ))
+                      .map(
+                        (e) => _MemberChip(
+                          name: e.value,
+                          onRemove: () => _removeMember(e.key),
+                        ),
+                      )
                       .toList(),
                 ),
               ],

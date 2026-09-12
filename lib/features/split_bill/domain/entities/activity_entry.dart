@@ -5,6 +5,7 @@ enum ActivityType {
   paymentMarked,
   paymentConfirmed,
   paymentDisputed,
+  memberAdded
 }
 
 class ActivityEntry {

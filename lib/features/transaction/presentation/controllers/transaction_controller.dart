@@ -20,9 +20,12 @@ class TransactionActions extends _$TransactionActions {
   @override
   FutureOr<void> build() => null;
 
+  bool get _isOnline => ref.read(isOnlineProvider).value ?? true;
+
   Future<void> _syncIfSignedIn(TransactionEntry transaction) async {
     final uid = ref.read(currentUserProvider)?.uid;
     if (uid == null) return;
+    if (!_isOnline) return; // offline — SyncTrigger picks it up on reconnect
 
     try {
       await ref
@@ -34,8 +37,7 @@ class TransactionActions extends _$TransactionActions {
   }
 
   void _logIfRealError(Object e, {required String context}) {
-    final isOnline = ref.read(isOnlineProvider).value ?? true;
-    if (!isOnline) return;
+    if (!_isOnline) return;
     // FirebaseCrashlytics.instance.recordError(e, StackTrace.current, reason: context);
   }
 
@@ -60,7 +62,7 @@ class TransactionActions extends _$TransactionActions {
     final result = await AsyncValue.guard(() async {
       await ref.read(transactionRepositoryProvider).deleteTransaction(id);
       final uid = ref.read(currentUserProvider)?.uid;
-      if (uid == null) return;
+      if (uid == null || !_isOnline) return;
       try {
         await ref
             .read(transactionSyncServiceProvider)

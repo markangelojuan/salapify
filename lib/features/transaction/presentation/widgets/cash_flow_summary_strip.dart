@@ -20,47 +20,75 @@ class CashFlowSummaryStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.primary.withValues(alpha: 0.10),
-            AppColors.primary.withValues(alpha: 0.02),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.info_outline_rounded,
+                size: 12,
+                color: AppColors.textPrimary.withValues(alpha: 0.4),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Resets at the start of each period',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: AppColors.textPrimary.withValues(alpha: 0.5),
+                ),
+              ),
+            ],
+          ),
         ),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.08)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _SummaryItem(
-              label: 'Income',
-              amount: income,
-              color: Colors.green[700]!,
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.primary.withValues(alpha: 0.10),
+                AppColors.primary.withValues(alpha: 0.02),
+              ],
+            ),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.08),
             ),
           ),
-          _VerticalDivider(colorScheme: colorScheme),
-          Expanded(
-            child: _SummaryItem(
-              label: 'Spent',
-              amount: spent,
-              color: Colors.red[600]!,
-            ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _SummaryItem(
+                  label: 'Income',
+                  amount: income,
+                  color: Colors.green[700]!,
+                ),
+              ),
+              _VerticalDivider(colorScheme: colorScheme),
+              Expanded(
+                child: _SummaryItem(
+                  label: 'Spent',
+                  amount: spent,
+                  color: Colors.red[600]!,
+                ),
+              ),
+              _VerticalDivider(colorScheme: colorScheme),
+              Expanded(
+                child: _SummaryItem(
+                  label: 'Savings',
+                  amount: savings,
+                  color: Colors.blue[400]!,
+                ),
+              ),
+            ],
           ),
-          _VerticalDivider(colorScheme: colorScheme),
-          Expanded(
-            child: _SummaryItem(
-              label: 'Savings',
-              amount: savings,
-              color: Colors.blue[400]!,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

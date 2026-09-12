@@ -152,7 +152,7 @@ final class BudgetActionsProvider
   BudgetActions create() => BudgetActions();
 }
 
-String _$budgetActionsHash() => r'8f901ce6d207e15183a0706938cf389dd834852a';
+String _$budgetActionsHash() => r'70b3a03404e676fdc7fd3d52ea0bbf69a7c22a57';
 
 abstract class _$BudgetActions extends $AsyncNotifier<void> {
   FutureOr<void> build();

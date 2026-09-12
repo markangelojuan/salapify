@@ -79,14 +79,30 @@ class SplitBillRepositoryImpl implements SplitBillRepository {
   }
 
   @override
-  Stream<List<ActivityEntry>> watchActivity(String groupId) {
+  Stream<List<ActivityEntry>> watchActivity(String groupId, {int limit = 50}) {
     return _service
-        .watchActivity(groupId)
+        .watchActivity(groupId, limit: limit)
         .map(
           (snap) => snap.docs
               .map((d) => ActivityEntryMapper.fromFirestore(d.id, d.data()))
               .toList(),
         );
+  }
+
+  @override
+  Future<List<ActivityEntry>> fetchOlderActivity({
+    required String groupId,
+    required DateTime before,
+    int limit = 50,
+  }) async {
+    final snap = await _service.fetchOlderActivity(
+      groupId,
+      before: before,
+      limit: limit,
+    );
+    return snap.docs
+        .map((d) => ActivityEntryMapper.fromFirestore(d.id, d.data()))
+        .toList();
   }
 
   @override
@@ -132,8 +148,7 @@ class SplitBillRepositoryImpl implements SplitBillRepository {
   }) {
     return _service.updateShareStatusAtomic(groupId, billId, userId, {
       'status': status.name,
-      'statusUpdatedAt': DateTime.now()
-          .toIso8601String(), 
+      'statusUpdatedAt': DateTime.now().toIso8601String(),
     });
   }
 

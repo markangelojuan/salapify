@@ -7,6 +7,7 @@ import 'package:salapify/features/budget/presentation/controllers/budget_control
 import 'package:salapify/features/settings/data/repositories/settings_repository.dart';
 import 'package:salapify/features/settings/data/services/settings_sync_service.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
 
 part 'settings_controller.g.dart';
 
@@ -24,6 +25,8 @@ class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
   Future<BudgetingPeriod> build() {
     return ref.watch(settingsRepositoryProvider).getLocalBudgetingPeriod();
   }
+
+  bool get _isOnline => ref.read(isOnlineProvider).value ?? true;
 
   Future<void> set(BudgetingPeriod period) async {
     final previous = state;
@@ -44,7 +47,8 @@ class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
       state = AsyncData(period);
 
       final uid = ref.read(currentUserProvider)?.uid;
-      if (uid == null) return; // guest — local only
+      if (uid == null || !_isOnline)
+        return; // guest, or offline — synced on reconnect
 
       try {
         await ref
@@ -64,8 +68,7 @@ class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
   }
 
   void _warnIfRealError(Object e, {required String fallback}) {
-    final isOnline = ref.read(isOnlineProvider).value ?? true;
-    if (!isOnline || e is TimeoutException) return;
+    if (!_isOnline || e is TimeoutException) return;
     // Online but still failed - a real error
     ref.read(settingsSyncWarningProvider.notifier).set(fallback);
   }
@@ -78,13 +81,23 @@ class FirstHalfEndDaySetting extends _$FirstHalfEndDaySetting {
     return ref.watch(settingsRepositoryProvider).getLocalFirstHalfEndDay();
   }
 
+  bool get _isOnline => ref.read(isOnlineProvider).value ?? true;
+
   Future<void> set(int day) async {
+    final previous = state;
     state = AsyncData(day);
     final repository = ref.read(settingsRepositoryProvider);
-    await repository.setLocalFirstHalfEndDay(day);
+
+    try {
+      await repository.setLocalFirstHalfEndDay(day);
+    } catch (e, st) {
+      // ignore: invalid_use_of_internal_member
+      state = AsyncError<int>(e, st).copyWithPrevious(previous);
+      return;
+    }
 
     final uid = ref.read(currentUserProvider)?.uid;
-    if (uid == null) return;
+    if (uid == null || !_isOnline) return;
 
     try {
       await ref.read(settingsSyncServiceProvider).pushFirstHalfEndDay(uid, day);
@@ -98,8 +111,50 @@ class FirstHalfEndDaySetting extends _$FirstHalfEndDaySetting {
   }
 
   void _warnIfRealError(Object e, {required String fallback}) {
-    final isOnline = ref.read(isOnlineProvider).value ?? true;
-    if (!isOnline || e is TimeoutException) return;
+    if (!_isOnline || e is TimeoutException) return;
+    ref.read(settingsSyncWarningProvider.notifier).set(fallback);
+  }
+}
+
+
+@Riverpod(keepAlive: true)
+class CurrencySetting extends _$CurrencySetting {
+  @override
+  Future<AppCurrency> build() {
+    return ref.watch(settingsRepositoryProvider).getLocalCurrency();
+  }
+
+  bool get _isOnline => ref.read(isOnlineProvider).value ?? true;
+
+  Future<void> set(AppCurrency currency) async {
+    final previous = state;
+    state = AsyncData(currency);
+    final repository = ref.read(settingsRepositoryProvider);
+
+    try {
+      await repository.setLocalCurrency(currency);
+    } catch (e, st) {
+      // ignore: invalid_use_of_internal_member
+      state = AsyncError<AppCurrency>(e, st).copyWithPrevious(previous);
+      return;
+    }
+
+    final uid = ref.read(currentUserProvider)?.uid;
+    if (uid == null || !_isOnline) return;
+
+    try {
+      await ref.read(settingsSyncServiceProvider).pushCurrency(uid, currency);
+    } catch (e) {
+      _warnIfRealError(
+        e,
+        fallback:
+            "Currency saved on this device, but couldn't sync to your account.",
+      );
+    }
+  }
+
+  void _warnIfRealError(Object e, {required String fallback}) {
+    if (!_isOnline || e is TimeoutException) return;
     ref.read(settingsSyncWarningProvider.notifier).set(fallback);
   }
 }

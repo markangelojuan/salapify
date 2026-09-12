@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
 
 part 'settings_repository.g.dart';
 
@@ -8,6 +9,7 @@ class SettingsRepository {
   static const _periodKey = 'budgeting_period';
   static const _firstHalfEndDayKey = 'first_half_end_day';
   static const _lastResetPeriodKeyKey = 'last_reset_period_key';
+  static const _currencyKey = 'currency';
 
   Future<BudgetingPeriod> getLocalBudgetingPeriod() async {
     final prefs = await SharedPreferences.getInstance();
@@ -42,6 +44,21 @@ class SettingsRepository {
   Future<void> setLastResetPeriodKey(String key) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_lastResetPeriodKeyKey, key);
+  }
+
+    Future<AppCurrency> getLocalCurrency() async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getString(_currencyKey);
+    if (value == null) return AppCurrency.php;
+    return AppCurrency.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => AppCurrency.php,
+    );
+  }
+
+  Future<void> setLocalCurrency(AppCurrency currency) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_currencyKey, currency.name);
   }
 }
 

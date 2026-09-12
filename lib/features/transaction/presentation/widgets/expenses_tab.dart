@@ -7,6 +7,7 @@ import 'package:salapify/features/budget/presentation/controllers/budget_control
 import 'package:salapify/features/transaction/domain/entities/transaction_entry.dart';
 import 'package:salapify/features/transaction/presentation/controllers/transaction_controller.dart';
 import 'package:salapify/features/transaction/presentation/widgets/expense_row.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:lottie/lottie.dart';
 
@@ -84,6 +85,11 @@ class ExpensesTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<AsyncValue<void>>(transactionActionsProvider, (previous, next) {
+    if (next.hasError) {
+      CommonSnackbar.showError(context, next.error!);
+    }
+  });
     final transactionsAsync = ref.watch(transactionsProvider);
     final categoriesAsync = ref.watch(budgetCategoriesProvider);
 

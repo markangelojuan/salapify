@@ -11,6 +11,7 @@ import 'package:salapify/router/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:salapify/core/theme/app_colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +36,7 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   Future<void> _runStartupSync() async {
     final user = await ref.read(authStateChangesProvider.future);
-    if (!mounted) return; 
+    if (!mounted) return;
 
     final uid = user?.uid;
     if (uid == null) return; // guest mode, nothing to sync

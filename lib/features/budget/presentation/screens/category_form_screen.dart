@@ -13,6 +13,8 @@ import 'package:salapify/features/budget/presentation/controllers/budget_control
 import 'package:salapify/features/budget/presentation/constants/category_icons.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:flutter/services.dart';
 
 class CategoryFormScreen extends ConsumerStatefulWidget {
   const CategoryFormScreen({super.key, this.existingCategory});
@@ -41,15 +43,20 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
     super.initState();
     final existing = widget.existingCategory;
     final globalPeriod =
-      ref.read(budgetingPeriodSettingProvider).value ??
-      BudgetingPeriod.monthly;
+        ref.read(budgetingPeriodSettingProvider).value ??
+        BudgetingPeriod.monthly;
 
     _nameController.text = existing?.name ?? '';
     _amountController.text = existing?.amount.toString() ?? '';
     _type = existing?.type ?? BudgetCategoryType.variable;
-    _frequency = existing?.frequency ?? BudgetFrequency.monthly;
-    _period = existing?.period ??
-      (globalPeriod == BudgetingPeriod.biMonthly ? BudgetPeriod.both : null);
+    _frequency =
+        existing?.frequency ??
+        (globalPeriod == BudgetingPeriod.biMonthly
+            ? BudgetFrequency.biMonthly
+            : BudgetFrequency.monthly);
+    _period =
+        existing?.period ??
+        (globalPeriod == BudgetingPeriod.biMonthly ? BudgetPeriod.both : null);
     _iconKey = existing?.iconName ?? CategoryIcons.keys.first;
   }
 
@@ -76,6 +83,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
       frequency: _frequency,
       period: globalPeriod == BudgetingPeriod.biMonthly ? _period : null,
       iconName: _iconKey,
+      sortOrder: widget.existingCategory?.sortOrder ?? 0,
+      isCompleted: widget.existingCategory?.isCompleted ?? false,
       createdAt: widget.existingCategory?.createdAt ?? now,
       updatedAt: widget.isEditing ? now : null,
     );
@@ -136,6 +145,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
         ref.watch(budgetingPeriodSettingProvider).value ??
         BudgetingPeriod.monthly;
     final actionsState = ref.watch(budgetActionsProvider);
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
 
     return Scaffold(
       appBar: AppBar(
@@ -165,8 +176,17 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                 CommonTextField(
                   controller: _amountController,
                   icon: Icons.attach_money_rounded,
+                  prefixText: currency.symbol,
                   hint: '0.00',
-                  label: 'Amount',
+                  label: 'Amount (${currency.symbol})',
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'^\d*\.?\d{0,2}'),
+                    ),
+                  ],
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Amount is required';
@@ -263,7 +283,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
             if (_frequency == BudgetFrequency.once) {
               _period = null;
             } else {
-              _period ??= BudgetPeriod.both; 
+              _period ??= BudgetPeriod.both;
             }
           }),
         ),

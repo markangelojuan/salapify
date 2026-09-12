@@ -5,15 +5,22 @@ class AppTheme {
   static ThemeData light = ThemeData(
     brightness: Brightness.light,
     useMaterial3: true,
-    scaffoldBackgroundColor: AppColors.background,
+    scaffoldBackgroundColor: Colors.transparent,
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      },
+    ),
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppColors.primary,
       brightness: Brightness.light,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.primary,
-      foregroundColor: Colors.white,
-      centerTitle: true,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      foregroundColor: AppColors.primary,
+      centerTitle: false,
     ),
     navigationBarTheme: NavigationBarThemeData(
       height: 72,
@@ -22,27 +29,16 @@ class AppTheme {
       indicatorColor: AppColors.primary.withValues(alpha: 0.15),
 
       labelTextStyle: const WidgetStatePropertyAll(
-        TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
+        TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
       ),
 
-      iconTheme: WidgetStateProperty.resolveWith(
-        (states) {
-          if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(
-              color: AppColors.primary,
-              size: 24,
-            );
-          }
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const IconThemeData(color: AppColors.primary, size: 24);
+        }
 
-          return const IconThemeData(
-            color: AppColors.textPrimary,
-            size: 22,
-          );
-        },
-      ),
+        return const IconThemeData(color: AppColors.textPrimary, size: 22);
+      }),
     ),
   );
 
@@ -51,6 +47,12 @@ class AppTheme {
     useMaterial3: true,
 
     scaffoldBackgroundColor: const Color(0xFF121212),
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      },
+    ),
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppColors.primary,
       brightness: Brightness.dark,
@@ -58,7 +60,7 @@ class AppTheme {
     appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFF1E1E1E),
       foregroundColor: Colors.white,
-      centerTitle: true,
+      centerTitle: false,
     ),
 
     navigationBarTheme: NavigationBarThemeData(
@@ -68,27 +70,17 @@ class AppTheme {
       indicatorColor: AppColors.primary.withValues(alpha: 0.20),
 
       labelTextStyle: const WidgetStatePropertyAll(
-        TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
+        TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
       ),
 
-      iconTheme: WidgetStateProperty.resolveWith(
-        (states) {
-          if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(
-              color: AppColors.primary,
-              size: 24,
-            );
-          }
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const IconThemeData(color: AppColors.primary, size: 24);
+        }
 
-          return const IconThemeData(
-            color: Colors.grey,
-            size: 22,
-          );
-        },
-      ),
+        return const IconThemeData(color: Colors.grey, size: 22);
+      }),
     ),
   );
 }
+

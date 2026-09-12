@@ -1,12 +1,10 @@
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
-// const { onSchedule } = require("firebase-functions/v2/scheduler");
 const admin = require("firebase-admin");
 admin.initializeApp();
 
 const db = admin.firestore();
 const messaging = admin.messaging();
 
-// ── Activity notifications: messages, bills, payment events ──
 exports.onActivityCreated = onDocumentCreated(
   "splitGroups/{groupId}/activity/{activityId}",
   async (event) => {
@@ -20,73 +18,114 @@ exports.onActivityCreated = onDocumentCreated(
     if (!groupDoc.exists) return;
     const group = groupDoc.data();
 
-    const recipientIds = (group.memberIds || []).filter(
-      (id) => id !== activity.senderId
-    );
+    const recipientIds = resolveRecipients(activity, group);
     if (recipientIds.length === 0) return;
 
     const senderDoc = await db.collection("users").doc(activity.senderId).get();
     const senderName = senderDoc.data()?.username || "Someone";
 
-    const { title, body } = buildNotification(activity, senderName, group.name);
-    if (!title) return; // unrecognized type, skip silently
+    const notif = buildNotification(activity, senderName, group.name);
+    if (!notif.notificationType) return; // unrecognized/unsupported type, skip silently
 
+    const createdAt = activity.createdAt || admin.firestore.Timestamp.now();
+
+    // Write a persisted notification doc per recipient + collect their tokens
     const tokens = [];
     await Promise.all(
       recipientIds.map(async (uid) => {
         const userDoc = await db.collection("users").doc(uid).get();
-        const userTokens = userDoc.data()?.fcmTokens || [];
+        const userData = userDoc.data();
+        const userTokens = userData?.fcmTokens || [];
         tokens.push(...userTokens);
+
+        await db
+          .collection("notifications")
+          .doc(uid)
+          .collection("items")
+          .add({
+            type: notif.notificationType,
+            groupId,
+            groupName: group.name,
+            senderId: activity.senderId,
+            senderName,
+            read: false,
+            createdAt,
+            metadata: activity.metadata || null,
+          });
       })
     );
+
     if (tokens.length === 0) return;
 
     await messaging.sendEachForMulticast({
       tokens,
-      notification: { title, body },
+      notification: { title: notif.title, body: notif.body },
       data: { groupId, type: activity.type || "" },
     });
   }
 );
 
-function buildNotification(activity, senderName, groupName) {
+/** Who should be notified for this activity type — deliberately narrow
+ * per event, not "everyone in the group except the sender". */
+function resolveRecipients(activity, group) {
+  const memberIds = group.memberIds || [];
+  const others = memberIds.filter((id) => id !== activity.senderId);
+
   switch (activity.type) {
     case "message":
-      return { title: groupName, body: `${senderName}: ${activity.text || ""}` };
-    case "billAdded": {
-      const billTitle = activity.metadata?.billTitle || "a bill";
-      return { title: groupName, body: `${senderName} added "${billTitle}"` };
+      return []; // push-only, handled separately if you re-add message pushes; no notification-list entry
+    case "billAdded":
+    case "memberAdded":
+      return others;
+    case "paymentMarked": {
+      const payerId = activity.metadata?.payerId;
+      return payerId && payerId !== activity.senderId ? [payerId] : [];
     }
-    case "paymentMarked":
-      return { title: groupName, body: `${senderName} marked their share as paid` };
     case "paymentConfirmed":
-      return { title: groupName, body: `${senderName} confirmed a payment` };
-    case "paymentDisputed":
-      return { title: groupName, body: `${senderName} disputed a payment` };
+    case "paymentDisputed": {
+      const targetId = activity.metadata?.targetUserId;
+      return targetId && targetId !== activity.senderId ? [targetId] : [];
+    }
     default:
-      return { title: null, body: null };
+      return [];
   }
 }
 
-// ── Budget reminder: simple daily nudge, not tied to split-bill data ──
-// Commented out for now — re-enable when ready.
-// exports.budgetReminder = onSchedule("every day 20:00", async () => {
-//   const usersSnap = await db.collection("users").get();
-//   const tokens = [];
-//   usersSnap.forEach((doc) => {
-//     const t = doc.data().fcmTokens;
-//     if (Array.isArray(t)) tokens.push(...t);
-//   });
-//   if (tokens.length === 0) return;
-//
-//   for (let i = 0; i < tokens.length; i += 500) {
-//     const chunk = tokens.slice(i, i + 500);
-//     await messaging.sendEachForMulticast({
-//       tokens: chunk,
-//       notification: {
-//         title: "Budget Reminder",
-//         body: "Don't forget to log today's expenses!",
-//       },
-//     });
-//   }
-// });
+function buildNotification(activity, senderName, groupName) {
+  switch (activity.type) {
+    case "billAdded": {
+      const billTitle = activity.metadata?.billTitle || "a bill";
+      return {
+        notificationType: "billAdded",
+        title: groupName,
+        body: `${senderName} added "${billTitle}"`,
+      };
+    }
+    case "memberAdded":
+      return {
+        notificationType: "addedToGroup",
+        title: groupName,
+        body: `${senderName} added you to the group`,
+      };
+    case "paymentMarked":
+      return {
+        notificationType: "paymentMarked",
+        title: groupName,
+        body: `${senderName} marked their share as paid`,
+      };
+    case "paymentConfirmed":
+      return {
+        notificationType: "paymentConfirmed",
+        title: groupName,
+        body: `${senderName} confirmed your payment`,
+      };
+    case "paymentDisputed":
+      return {
+        notificationType: "paymentDisputed",
+        title: groupName,
+        body: `${senderName} disputed your payment`,
+      };
+    default:
+      return { notificationType: null, title: null, body: null };
+  }
+}

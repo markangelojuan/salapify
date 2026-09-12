@@ -162,9 +162,11 @@ class SplitBillController extends _$SplitBillController {
   Future<void> updateShareStatus({
     required String groupId,
     required String billId,
-    required String userId, // whose share this is (the ower)
+    required String userId,
     required PaymentStatus status,
-    String? actorId, // who performed the action; defaults to userId
+    required String
+    payerId, // NEW — needed so paymentMarked can notify the payer
+    String? actorId,
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
@@ -184,9 +186,6 @@ class SplitBillController extends _$SplitBillController {
       };
       if (activityType == null) return;
 
-      final isActorEvent =
-          status == PaymentStatus.confirmed || status == PaymentStatus.disputed;
-
       await repo.addActivity(
         ActivityEntry(
           id: '',
@@ -194,7 +193,12 @@ class SplitBillController extends _$SplitBillController {
           senderId: actorId ?? userId,
           type: activityType,
           createdAt: DateTime.now(),
-          metadata: isActorEvent ? {'targetUserId': userId} : null,
+          metadata: switch (status) {
+            PaymentStatus.markedPaid => {'payerId': payerId},
+            PaymentStatus.confirmed ||
+            PaymentStatus.disputed => {'targetUserId': userId},
+            PaymentStatus.unpaid => null,
+          },
         ),
       );
     });

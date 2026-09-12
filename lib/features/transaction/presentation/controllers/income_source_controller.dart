@@ -20,9 +20,12 @@ class IncomeSourceActions extends _$IncomeSourceActions {
   @override
   FutureOr<void> build() => null;
 
+  bool get _isOnline => ref.read(isOnlineProvider).value ?? true;
+
   Future<void> _syncIfSignedIn(IncomeSource source) async {
     final uid = ref.read(currentUserProvider)?.uid;
     if (uid == null) return; // guest — local only, nothing to sync
+    if (!_isOnline) return; // offline — SyncTrigger picks it up on reconnect
 
     try {
       await ref.read(incomeSourceSyncServiceProvider).pushSource(uid, source);
@@ -32,8 +35,7 @@ class IncomeSourceActions extends _$IncomeSourceActions {
   }
 
   void _logIfRealError(Object e, {required String context}) {
-    final isOnline = ref.read(isOnlineProvider).value ?? true;
-    if (!isOnline) {
+    if (!_isOnline) {
       return; // expected — offline, will retry via pushUnsyncedSources
     }
     // FirebaseCrashlytics.instance.recordError(e, StackTrace.current, reason: context);
@@ -60,7 +62,7 @@ class IncomeSourceActions extends _$IncomeSourceActions {
     final result = await AsyncValue.guard(() async {
       await ref.read(incomeSourceRepositoryProvider).deleteSource(id);
       final uid = ref.read(currentUserProvider)?.uid;
-      if (uid == null) return;
+      if (uid == null || !_isOnline) return;
       try {
         await ref.read(incomeSourceSyncServiceProvider).pushUnsyncedSources(uid);
       } catch (e) {

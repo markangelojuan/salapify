@@ -10,11 +10,13 @@ import 'package:salapify/features/split_bill/presentation/screens/split_bills_sc
 import 'package:salapify/features/transaction/presentation/controllers/transaction_tab_state.dart';
 import 'package:salapify/features/transaction/presentation/screens/transaction_screen.dart';
 import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
+import 'package:salapify/features/notification/data/providers/notification_providers.dart';
 import 'package:salapify/core/widgets/nav_badge.dart';
 
 import 'package:salapify/router/routes.dart';
 
 final homeTabIndexProvider = StateProvider<int>((ref) => 0);
+
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -150,13 +152,15 @@ class _Pill extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final unreadSplitCount = ref.watch(totalUnreadSplitCountProvider);
+    final unreadNotifCount = ref.watch(unreadNotificationCountProvider);
+
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: AppColors.textPrimary.withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -165,7 +169,27 @@ class _Pill extends ConsumerWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
         child: NavigationBarTheme(
-          data: NavigationBarThemeData(/* unchanged */),
+          data: NavigationBarThemeData(
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
+            indicatorColor: AppColors.primary.withValues(alpha: 0.25),
+            labelTextStyle: WidgetStateProperty.resolveWith((states) {
+              final selected = states.contains(WidgetState.selected);
+              return TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: selected ? Colors.white : Colors.white60,
+              );
+            }),
+            iconTheme: WidgetStateProperty.resolveWith((states) {
+              final selected = states.contains(WidgetState.selected);
+              return IconThemeData(
+                color: selected ? Colors.white : Colors.white60,
+                size: selected ? 24 : 22,
+              );
+            }),
+          ),
           child: NavigationBar(
             selectedIndex: currentIndex,
             onDestinationSelected: onTap,
@@ -188,9 +212,12 @@ class _Pill extends ConsumerWidget {
                 selectedIcon: const Icon(Icons.receipt_long_rounded),
                 label: 'Split Bill',
               ),
-              const NavigationDestination(
-                icon: Icon(Icons.notifications_outlined),
-                selectedIcon: Icon(Icons.notifications_rounded),
+              NavigationDestination(
+                icon: NavBadge(
+                  count: unreadNotifCount,
+                  child: const Icon(Icons.notifications_outlined),
+                ),
+                selectedIcon: const Icon(Icons.notifications_rounded),
                 label: 'Notifications',
               ),
             ],

@@ -12,6 +12,7 @@ import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/transaction/domain/transaction_totals_calculator.dart';
 import 'package:salapify/features/transaction/presentation/controllers/transaction_controller.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:lottie/lottie.dart';
 
@@ -20,10 +21,21 @@ class BudgetScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<AsyncValue<void>>(budgetActionsProvider, (previous, next) {
+      if (next.hasError) {
+        CommonSnackbar.showError(context, next.error!);
+      }
+    });
     final resetGuard = ref.watch(periodResetGuardProvider);
+    ref.listen<AsyncValue<void>>(periodResetGuardProvider, (previous, next) {
+      if (next.hasError) {
+        CommonSnackbar.showError(context, next.error!);
+      }
+    });
     if (resetGuard.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
+
     final categoriesAsync = ref.watch(budgetCategoriesProvider);
     final transactionsAsync = ref.watch(transactionsProvider);
     final globalPeriod =
@@ -31,8 +43,6 @@ class BudgetScreen extends ConsumerWidget {
         BudgetingPeriod.monthly;
     final firstHalfEndDay =
         ref.watch(firstHalfEndDaySettingProvider).value ?? 15;
-    final isOnline = ref.watch(isOnlineProvider).value ?? true;
-    final hasUnsynced = ref.watch(hasUnsyncedCategoriesProvider).value ?? false;
 
     return categoriesAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),

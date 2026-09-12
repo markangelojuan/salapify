@@ -63,9 +63,12 @@ class BudgetActions extends _$BudgetActions {
     return null;
   }
 
+  bool get _isOnline => ref.read(isOnlineProvider).value ?? true;
+
   Future<void> _syncIfSignedIn(BudgetCategory category) async {
     final uid = ref.read(currentUserProvider)?.uid;
     if (uid == null) return; // guest — local only, nothing to sync
+    if (!_isOnline) return; // offline — SyncTrigger picks it up on reconnect
 
     try {
       await ref.read(budgetSyncServiceProvider).pushCategory(uid, category);
@@ -112,12 +115,10 @@ class BudgetActions extends _$BudgetActions {
         isDeleted: true,
         updatedAt: DateTime.now(),
       );
-      await _syncIfSignedIn(deleted);
+      await _syncIfSignedIn(deleted); // already guarded above
 
-      // Also push the transactions that got soft-deleted as a side effect —
-      // they were marked isSynced: false locally but nothing else pushes them.
       final uid = ref.read(currentUserProvider)?.uid;
-      if (uid != null) {
+      if (uid != null && _isOnline) {
         try {
           await ref
               .read(transactionSyncServiceProvider)
@@ -184,7 +185,7 @@ class BudgetActions extends _$BudgetActions {
       });
 
       final uid = ref.read(currentUserProvider)?.uid;
-      if (uid == null) return;
+      if (uid == null || !_isOnline) return;
       try {
         await ref.read(budgetSyncServiceProvider).pushUnsyncedCategories(uid);
         await ref
@@ -204,7 +205,7 @@ class BudgetActions extends _$BudgetActions {
           .reorderCategories(orderedIdsInGroup);
 
       final uid = ref.read(currentUserProvider)?.uid;
-      if (uid == null) return;
+      if (uid == null || !_isOnline) return;
       try {
         await ref.read(budgetSyncServiceProvider).pushUnsyncedCategories(uid);
       } catch (e) {
@@ -228,7 +229,7 @@ class BudgetActions extends _$BudgetActions {
           .convertCategoriesToPeriod(newPeriod);
 
       final uid = ref.read(currentUserProvider)?.uid;
-      if (uid == null) return; // guest mode only
+      if (uid == null || !_isOnline) return;
 
       try {
         await ref.read(budgetSyncServiceProvider).pushUnsyncedCategories(uid);

@@ -13,6 +13,8 @@ import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/transaction/domain/entities/transaction_entry.dart';
 import 'package:salapify/features/transaction/presentation/controllers/transaction_controller.dart';
+import 'package:flutter/services.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
 
 class ExpenseFormScreen extends ConsumerStatefulWidget {
   const ExpenseFormScreen({super.key, this.existingTransaction});
@@ -112,18 +114,19 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         ref.watch(firstHalfEndDaySettingProvider).value ?? 15;
     final now = DateTime.now();
 
-    final active = all
-        .where(
-          (c) =>
-              !c.isDeleted &&
-              c.isActiveFor(
-                globalPeriod: globalPeriod,
-                firstHalfEndDay: firstHalfEndDay,
-                now: now,
-              ),
-        )
-        .toList()
-      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    final active =
+        all
+            .where(
+              (c) =>
+                  !c.isDeleted &&
+                  c.isActiveFor(
+                    globalPeriod: globalPeriod,
+                    firstHalfEndDay: firstHalfEndDay,
+                    now: now,
+                  ),
+            )
+            .toList()
+          ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
 
     return active;
   }
@@ -132,6 +135,8 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(budgetCategoriesProvider);
     final actionsState = ref.watch(transactionActionsProvider);
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
 
     return Scaffold(
       appBar: AppBar(
@@ -148,8 +153,17 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 CommonTextField(
                   controller: _amountController,
                   icon: Icons.attach_money_rounded,
+                  prefixText: currency.symbol,
                   hint: '0.00',
                   label: 'Amount',
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'^\d*\.?\d{0,2}'),
+                    ),
+                  ],
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Amount is required';
@@ -162,18 +176,21 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                   },
                 ),
                 const SizedBox(height: 18),
-                Text('Category', style: TextStyle(color: AppColors.textPrimary)),
+                Text(
+                  'Category',
+                  style: TextStyle(color: AppColors.textPrimary),
+                ),
                 const SizedBox(height: 8),
                 categoriesAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (e, _) => Text('Failed to load categories: $e'),
-                  data: (categories) =>
-                      _CategoryPicker(
-                        categories: _visibleCategories(categories),
-                        selectedId: _selectedCategoryId,
-                        onSelected: (id) =>
-                            setState(() => _selectedCategoryId = id),
-                      ),
+                  data: (categories) => _CategoryPicker(
+                    categories: _visibleCategories(categories),
+                    selectedId: _selectedCategoryId,
+                    onSelected: (id) =>
+                        setState(() => _selectedCategoryId = id),
+                  ),
                 ),
                 const SizedBox(height: 18),
                 Text('Date', style: TextStyle(color: AppColors.textPrimary)),

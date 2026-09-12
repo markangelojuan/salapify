@@ -31,7 +31,7 @@ abstract class SplitBillRepository {
   );
   Future<void> deleteBill(String groupId, String billId);
 
-  Stream<List<ActivityEntry>> watchActivity(String groupId);
+  Stream<List<ActivityEntry>> watchActivity(String groupId, {int limit = 50});
   Future<void> addActivity(ActivityEntry entry);
 
   Future<SplitGroup?> getGroup(String groupId);
@@ -40,5 +40,11 @@ abstract class SplitBillRepository {
     required String billId,
     required String userId,
     required PaymentStatus status,
+  });
+
+  Future<List<ActivityEntry>> fetchOlderActivity({
+    required String groupId,
+    required DateTime before,
+    int limit = 50,
   });
 }

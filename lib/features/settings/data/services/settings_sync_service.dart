@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:salapify/features/settings/data/repositories/settings_repository.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
 
 part 'settings_sync_service.g.dart';
 
@@ -16,6 +17,8 @@ class SettingsSyncService {
 
   static const _periodSyncedKey = 'budgeting_period_synced';
   static const _firstHalfEndDaySyncedKey = 'first_half_end_day_synced';
+
+  static const _currencySyncedKey = 'currency_synced';
 
   Future<void> pushBudgetingPeriod(String uid, BudgetingPeriod period) async {
     try {
@@ -72,6 +75,16 @@ class SettingsSyncService {
       await _repository.setLocalFirstHalfEndDay(remoteDay);
       await _setFirstHalfEndDaySynced(true);
     }
+
+    final remoteCurrencyName = data['currency'] as String?;
+    if (remoteCurrencyName != null) {
+      final currency = AppCurrency.values.firstWhere(
+        (e) => e.name == remoteCurrencyName,
+        orElse: () => AppCurrency.php,
+      );
+      await _repository.setLocalCurrency(currency);
+      await _setCurrencySynced(true);
+    }
   }
 
   /// Re-pushes whichever setting(s) failed to sync last time
@@ -82,9 +95,7 @@ class SettingsSyncService {
           uid,
           await _repository.getLocalBudgetingPeriod(),
         );
-      } catch (_) {
-        // still failing  flag stays false
-      }
+      } catch (_) {}
     }
     if (!await isFirstHalfEndDaySynced()) {
       try {
@@ -92,6 +103,11 @@ class SettingsSyncService {
           uid,
           await _repository.getLocalFirstHalfEndDay(),
         );
+      } catch (_) {}
+    }
+    if (!await isCurrencySynced()) {
+      try {
+        await pushCurrency(uid, await _repository.getLocalCurrency());
       } catch (_) {}
     }
   }
@@ -122,15 +138,40 @@ class SettingsSyncService {
         uid,
         await _repository.getLocalBudgetingPeriod(),
       );
-    } catch (_) {
-      // flagged unsynced by pushBudgetingPeriod's own catch; retried later
-    }
+    } catch (_) {}
     try {
       await pushFirstHalfEndDay(
         uid,
         await _repository.getLocalFirstHalfEndDay(),
       );
     } catch (_) {}
+    try {
+      await pushCurrency(uid, await _repository.getLocalCurrency());
+    } catch (_) {}
+  }
+
+  Future<void> pushCurrency(String uid, AppCurrency currency) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(uid)
+          .set({'currency': currency.name}, SetOptions(merge: true))
+          .timeout(_firestoreTimeout);
+      await _setCurrencySynced(true);
+    } catch (_) {
+      await _setCurrencySynced(false);
+      rethrow;
+    }
+  }
+
+  Future<bool> isCurrencySynced() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_currencySyncedKey) ?? true;
+  }
+
+  Future<void> _setCurrencySynced(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_currencySyncedKey, value);
   }
 }
 

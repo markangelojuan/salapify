@@ -97,10 +97,25 @@ class SplitBillFirestoreService {
   }
 
   // Activity
-  Stream<QuerySnapshot<Map<String, dynamic>>> watchActivity(String groupId) {
+  Stream<QuerySnapshot<Map<String, dynamic>>> watchActivity(
+    String groupId, {
+    int limit = 50,
+  }) {
     return _activity(
       groupId,
-    ).orderBy('createdAt', descending: true).snapshots();
+    ).orderBy('createdAt', descending: true).limit(limit).snapshots();
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> fetchOlderActivity(
+    String groupId, {
+    required DateTime before,
+    int limit = 50,
+  }) {
+    return _activity(groupId)
+        .orderBy('createdAt', descending: true)
+        .startAfter([Timestamp.fromDate(before)])
+        .limit(limit)
+        .get();
   }
 
   Future<void> addActivity(String groupId, Map<String, dynamic> data) async {

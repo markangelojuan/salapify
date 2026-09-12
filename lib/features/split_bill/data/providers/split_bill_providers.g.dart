@@ -296,55 +296,66 @@ final class SplitActivityFamily extends $Family
   String toString() => r'splitActivityProvider';
 }
 
-@ProviderFor(groupMemberNames)
-final groupMemberNamesProvider = GroupMemberNamesFamily._();
+/// Replaces the old `groupMemberNamesProvider`. Same single read per member
+/// as before (`getUserProfile` returns the whole doc, same cost as the old
+/// `getUsername`), just keeps `avatarId` instead of discarding it.
 
-final class GroupMemberNamesProvider
+@ProviderFor(groupMembers)
+final groupMembersProvider = GroupMembersFamily._();
+
+/// Replaces the old `groupMemberNamesProvider`. Same single read per member
+/// as before (`getUserProfile` returns the whole doc, same cost as the old
+/// `getUsername`), just keeps `avatarId` instead of discarding it.
+
+final class GroupMembersProvider
     extends
         $FunctionalProvider<
-          AsyncValue<Map<String, String>>,
-          Map<String, String>,
-          FutureOr<Map<String, String>>
+          AsyncValue<Map<String, GroupMemberInfo>>,
+          Map<String, GroupMemberInfo>,
+          FutureOr<Map<String, GroupMemberInfo>>
         >
     with
-        $FutureModifier<Map<String, String>>,
-        $FutureProvider<Map<String, String>> {
-  GroupMemberNamesProvider._({
-    required GroupMemberNamesFamily super.from,
+        $FutureModifier<Map<String, GroupMemberInfo>>,
+        $FutureProvider<Map<String, GroupMemberInfo>> {
+  /// Replaces the old `groupMemberNamesProvider`. Same single read per member
+  /// as before (`getUserProfile` returns the whole doc, same cost as the old
+  /// `getUsername`), just keeps `avatarId` instead of discarding it.
+  GroupMembersProvider._({
+    required GroupMembersFamily super.from,
     required String super.argument,
   }) : super(
          retry: null,
-         name: r'groupMemberNamesProvider',
+         name: r'groupMembersProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$groupMemberNamesHash();
+  String debugGetCreateSourceHash() => _$groupMembersHash();
 
   @override
   String toString() {
-    return r'groupMemberNamesProvider'
+    return r'groupMembersProvider'
         ''
         '($argument)';
   }
 
   @$internal
   @override
-  $FutureProviderElement<Map<String, String>> $createElement(
+  $FutureProviderElement<Map<String, GroupMemberInfo>> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<Map<String, String>> create(Ref ref) {
+  FutureOr<Map<String, GroupMemberInfo>> create(Ref ref) {
     final argument = this.argument as String;
-    return groupMemberNames(ref, argument);
+    return groupMembers(ref, argument);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is GroupMemberNamesProvider && other.argument == argument;
+    return other is GroupMembersProvider && other.argument == argument;
   }
 
   @override
@@ -353,24 +364,36 @@ final class GroupMemberNamesProvider
   }
 }
 
-String _$groupMemberNamesHash() => r'81144d649646e9dcf3317d100ce3cc752a8dfe8e';
+String _$groupMembersHash() => r'16133a043aa44f9302bc75d6ed6386bb3dc79617';
 
-final class GroupMemberNamesFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<Map<String, String>>, String> {
-  GroupMemberNamesFamily._()
+/// Replaces the old `groupMemberNamesProvider`. Same single read per member
+/// as before (`getUserProfile` returns the whole doc, same cost as the old
+/// `getUsername`), just keeps `avatarId` instead of discarding it.
+
+final class GroupMembersFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<Map<String, GroupMemberInfo>>,
+          String
+        > {
+  GroupMembersFamily._()
     : super(
         retry: null,
-        name: r'groupMemberNamesProvider',
+        name: r'groupMembersProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
 
-  GroupMemberNamesProvider call(String groupId) =>
-      GroupMemberNamesProvider._(argument: groupId, from: this);
+  /// Replaces the old `groupMemberNamesProvider`. Same single read per member
+  /// as before (`getUserProfile` returns the whole doc, same cost as the old
+  /// `getUsername`), just keeps `avatarId` instead of discarding it.
+
+  GroupMembersProvider call(String groupId) =>
+      GroupMembersProvider._(argument: groupId, from: this);
 
   @override
-  String toString() => r'groupMemberNamesProvider';
+  String toString() => r'groupMembersProvider';
 }
 
 @ProviderFor(splitGroup)
@@ -489,3 +512,184 @@ final class TotalUnreadSplitCountProvider
 
 String _$totalUnreadSplitCountHash() =>
     r'413f5e57b9f3bfe73eb178667c32107ddb5dcff5';
+
+@ProviderFor(ActivityFeed)
+final activityFeedProvider = ActivityFeedFamily._();
+
+final class ActivityFeedProvider
+    extends $AsyncNotifierProvider<ActivityFeed, List<ActivityEntry>> {
+  ActivityFeedProvider._({
+    required ActivityFeedFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'activityFeedProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$activityFeedHash();
+
+  @override
+  String toString() {
+    return r'activityFeedProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  ActivityFeed create() => ActivityFeed();
+
+  @override
+  bool operator ==(Object other) {
+    return other is ActivityFeedProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$activityFeedHash() => r'98ada509951d91bc84a47c9c33a31f18de0fd2f9';
+
+final class ActivityFeedFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          ActivityFeed,
+          AsyncValue<List<ActivityEntry>>,
+          List<ActivityEntry>,
+          FutureOr<List<ActivityEntry>>,
+          String
+        > {
+  ActivityFeedFamily._()
+    : super(
+        retry: null,
+        name: r'activityFeedProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  ActivityFeedProvider call(String groupId) =>
+      ActivityFeedProvider._(argument: groupId, from: this);
+
+  @override
+  String toString() => r'activityFeedProvider';
+}
+
+abstract class _$ActivityFeed extends $AsyncNotifier<List<ActivityEntry>> {
+  late final _$args = ref.$arg as String;
+  String get groupId => _$args;
+
+  FutureOr<List<ActivityEntry>> build(String groupId);
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<List<ActivityEntry>>, List<ActivityEntry>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<List<ActivityEntry>>, List<ActivityEntry>>,
+              AsyncValue<List<ActivityEntry>>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, () => build(_$args));
+  }
+}
+
+@ProviderFor(ActivityLoadingMore)
+final activityLoadingMoreProvider = ActivityLoadingMoreFamily._();
+
+final class ActivityLoadingMoreProvider
+    extends $NotifierProvider<ActivityLoadingMore, bool> {
+  ActivityLoadingMoreProvider._({
+    required ActivityLoadingMoreFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'activityLoadingMoreProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$activityLoadingMoreHash();
+
+  @override
+  String toString() {
+    return r'activityLoadingMoreProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  ActivityLoadingMore create() => ActivityLoadingMore();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ActivityLoadingMoreProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$activityLoadingMoreHash() =>
+    r'9448846f9a26275822e8a10e25333716cd3521eb';
+
+final class ActivityLoadingMoreFamily extends $Family
+    with $ClassFamilyOverride<ActivityLoadingMore, bool, bool, bool, String> {
+  ActivityLoadingMoreFamily._()
+    : super(
+        retry: null,
+        name: r'activityLoadingMoreProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  ActivityLoadingMoreProvider call(String groupId) =>
+      ActivityLoadingMoreProvider._(argument: groupId, from: this);
+
+  @override
+  String toString() => r'activityLoadingMoreProvider';
+}
+
+abstract class _$ActivityLoadingMore extends $Notifier<bool> {
+  late final _$args = ref.$arg as String;
+  String get groupId => _$args;
+
+  bool build(String groupId);
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, () => build(_$args));
+  }
+}

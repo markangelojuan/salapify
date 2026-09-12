@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 
 class CommonTextField extends StatelessWidget {
@@ -8,8 +9,11 @@ class CommonTextField extends StatelessWidget {
   final bool isPassword;
   final bool isPasswordVisible;
   final Widget? suffix;
+  final String? prefixText;
   final TextEditingController? controller;
   final String? Function(String?)? validator;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CommonTextField({
     super.key,
@@ -19,8 +23,11 @@ class CommonTextField extends StatelessWidget {
     this.isPassword = false,
     this.isPasswordVisible = false,
     this.suffix,
+    this.prefixText,
     this.controller,
     this.validator,
+    this.keyboardType,
+    this.inputFormatters,
   });
 
   @override
@@ -45,6 +52,8 @@ class CommonTextField extends StatelessWidget {
           controller: controller,
           obscureText: isPassword && !isPasswordVisible,
           validator: validator,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           style: const TextStyle(
             color: AppColors.textPrimary,
@@ -56,9 +65,27 @@ class CommonTextField extends StatelessWidget {
               color: AppColors.textPrimary.withOpacity(0.4),
               fontSize: 15,
             ),
-            prefixIcon: Icon(icon, color: AppColors.primary, size: 22),
+            prefixIcon: prefixText != null
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 16, right: 8),
+                    child: Center(
+                      widthFactor: 1,
+                      child: Text(
+                        prefixText!,
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  )
+                : Icon(icon, color: AppColors.primary, size: 22),
             suffixIcon: suffix,
-            contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 18,
+              horizontal: 16,
+            ),
             filled: true,
             fillColor: Colors.white,
             errorStyle: const TextStyle(

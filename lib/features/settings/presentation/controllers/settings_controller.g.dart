@@ -87,7 +87,7 @@ final class BudgetingPeriodSettingProvider
 }
 
 String _$budgetingPeriodSettingHash() =>
-    r'86584160b52d3d1146f246efadd5ee2f3cb68243';
+    r'b4e93c683ad1176821a0475ab6cff640948ffd21';
 
 abstract class _$BudgetingPeriodSetting
     extends $AsyncNotifier<BudgetingPeriod> {
@@ -133,7 +133,7 @@ final class FirstHalfEndDaySettingProvider
 }
 
 String _$firstHalfEndDaySettingHash() =>
-    r'6bbc748b793d8a1e347516413d64ffdb59da2ae4';
+    r'35ca16cb063c32144915b189953035541603bf4a';
 
 abstract class _$FirstHalfEndDaySetting extends $AsyncNotifier<int> {
   FutureOr<int> build();
@@ -146,6 +146,50 @@ abstract class _$FirstHalfEndDaySetting extends $AsyncNotifier<int> {
             as $ClassProviderElement<
               AnyNotifier<AsyncValue<int>, int>,
               AsyncValue<int>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(CurrencySetting)
+final currencySettingProvider = CurrencySettingProvider._();
+
+final class CurrencySettingProvider
+    extends $AsyncNotifierProvider<CurrencySetting, AppCurrency> {
+  CurrencySettingProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currencySettingProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currencySettingHash();
+
+  @$internal
+  @override
+  CurrencySetting create() => CurrencySetting();
+}
+
+String _$currencySettingHash() => r'8533d95fb58d773afa6ca5a03c1e6e528a8725b3';
+
+abstract class _$CurrencySetting extends $AsyncNotifier<AppCurrency> {
+  FutureOr<AppCurrency> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<AppCurrency>, AppCurrency>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<AppCurrency>, AppCurrency>,
+              AsyncValue<AppCurrency>,
               Object?,
               Object?
             >;

@@ -5,6 +5,7 @@ import 'package:lottie/lottie.dart';
 import 'package:salapify/features/transaction/presentation/controllers/income_source_controller.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:salapify/features/transaction/presentation/widgets/recurring_income_row.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
 
 class IncomeTab extends ConsumerWidget {
   const IncomeTab({super.key});
@@ -40,6 +41,11 @@ class IncomeTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<AsyncValue<void>>(incomeSourceActionsProvider, (previous, next) {
+    if (next.hasError) {
+      CommonSnackbar.showError(context, next.error!);
+    }
+  });
     final sourcesAsync = ref.watch(incomeSourcesProvider);
 
     return sourcesAsync.when(

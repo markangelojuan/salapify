@@ -10,10 +10,22 @@ import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/transaction/domain/entities/income_source.dart';
 import 'package:salapify/features/transaction/presentation/controllers/income_source_controller.dart';
+import 'package:flutter/services.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
 
 const _monthNames = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 class IncomeFormScreen extends ConsumerStatefulWidget {
@@ -134,6 +146,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
     final firstHalfEndDay =
         ref.watch(firstHalfEndDaySettingProvider).value ?? 15;
     final actionsState = ref.watch(incomeSourceActionsProvider);
+    final currency = ref.watch(currencySettingProvider).value ?? AppCurrency.php;
 
     return Scaffold(
       appBar: AppBar(
@@ -166,8 +179,17 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                 CommonTextField(
                   controller: _amountController,
                   icon: Icons.attach_money_rounded,
+                  prefixText: currency.symbol,
                   hint: '0.00',
                   label: 'Amount',
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'^\d*\.?\d{0,2}'),
+                    ),
+                  ],
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Amount is required';
