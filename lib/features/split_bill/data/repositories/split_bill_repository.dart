@@ -3,6 +3,7 @@ import 'package:salapify/features/split_bill/domain/entities/bill_share.dart';
 import 'package:salapify/features/split_bill/domain/entities/payment_status.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_bill.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
+import 'dart:io';
 
 abstract class SplitBillRepository {
   Stream<List<SplitGroup>> watchGroupsForUser(String userId);
@@ -46,5 +47,10 @@ abstract class SplitBillRepository {
     required String groupId,
     required DateTime before,
     int limit = 50,
+  });
+
+  Future<String> uploadActivityPhoto({
+    required String groupId,
+    required File file,
   });
 }

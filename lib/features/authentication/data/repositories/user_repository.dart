@@ -70,6 +70,19 @@ class UserRepository {
   Future<void> setAvatarId(String uid, String avatarId) async {
     await _users.doc(uid).update({'avatarId': avatarId});
   }
+
+  Future<String> generateUniqueUsername({required String base}) async {
+    final sanitized = base.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+    final fallback = sanitized.isEmpty ? 'user' : sanitized;
+
+    String candidate = fallback;
+    int suffix = 0;
+    while (await findUidByUsername(candidate) != null) {
+      suffix++;
+      candidate = '$fallback$suffix';
+    }
+    return candidate;
+  }
 }
 
 @Riverpod(keepAlive: true)

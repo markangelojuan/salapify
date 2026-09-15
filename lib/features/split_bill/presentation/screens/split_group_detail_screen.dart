@@ -13,6 +13,8 @@ import 'package:salapify/features/split_bill/presentation/widgets/bills_carousel
 import 'package:salapify/features/split_bill/presentation/widgets/message_input.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class SplitGroupDetailScreen extends ConsumerStatefulWidget {
   const SplitGroupDetailScreen({super.key, required this.groupId});
@@ -71,6 +73,26 @@ class _SplitGroupDetailScreenState
     if (error != null && mounted) {
       _messageController.text = text;
     }
+  }
+
+  Future<void> _sendPoke() async {
+    await ref
+        .read(splitBillControllerProvider.notifier)
+        .pokeGroup(widget.groupId);
+  }
+
+  Future<void> _pickAndSendPhoto() async {
+    final picker = ImagePicker();
+    final xfile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+      maxWidth: 1600,
+    );
+    if (xfile == null || !mounted) return;
+
+    await ref
+        .read(splitBillControllerProvider.notifier)
+        .sendPhoto(groupId: widget.groupId, file: File(xfile.path));
   }
 
   @override
@@ -170,6 +192,8 @@ class _SplitGroupDetailScreenState
                 MessageInput(
                   controller: _messageController,
                   onSend: _sendMessage,
+                  onPoke: _sendPoke,
+                  onAddPhoto: _pickAndSendPhoto,
                 ),
               ],
             );

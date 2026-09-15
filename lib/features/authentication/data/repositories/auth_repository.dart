@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:salapify/features/authentication/data/mappers/app_user_mapper.dart';
 import 'package:salapify/features/authentication/domain/entities/app_user.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 part 'auth_repository.g.dart';
 
@@ -37,6 +38,30 @@ class AuthRepository {
 
   Future<void> signOut() async {
     await _auth.signOut();
+  }
+
+  Future<void> sendEmailVerification() async {
+    final user = _auth.currentUser;
+    if (user != null && !user.emailVerified) {
+      await user.sendEmailVerification();
+    }
+  }
+
+  Future<void> reloadCurrentUser() async {
+    await _auth.currentUser?.reload();
+  }
+
+  bool get isEmailVerified => _auth.currentUser?.emailVerified ?? false;
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
+
+  Future<UserCredential> signInWithGoogle() async {
+    final googleUser = await GoogleSignIn.instance.authenticate();
+    final idToken = googleUser.authentication.idToken;
+    final credential = GoogleAuthProvider.credential(idToken: idToken);
+    return _auth.signInWithCredential(credential);
   }
 }
 

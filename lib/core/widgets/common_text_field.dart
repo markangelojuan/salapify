@@ -32,6 +32,8 @@ class CommonTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -43,7 +45,7 @@ class CommonTextField extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary.withOpacity(0.8),
+                color: colors.textPrimary.withValues(alpha: 0.8),
                 letterSpacing: 1.2,
               ),
             ),
@@ -55,16 +57,13 @@ class CommonTextField extends StatelessWidget {
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
+          style: TextStyle(
+            color: colors.textPrimary,
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(
-              color: AppColors.textPrimary.withOpacity(0.4),
-              fontSize: 15,
-            ),
+            hintStyle: TextStyle(color: colors.textSecondary, fontSize: 15),
             prefixIcon: prefixText != null
                 ? Padding(
                     padding: const EdgeInsets.only(left: 16, right: 8),
@@ -72,42 +71,42 @@ class CommonTextField extends StatelessWidget {
                       widthFactor: 1,
                       child: Text(
                         prefixText!,
-                        style: const TextStyle(
-                          color: AppColors.primary,
+                        style: TextStyle(
+                          color: colors.primary,
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
                         ),
                       ),
                     ),
                   )
-                : Icon(icon, color: AppColors.primary, size: 22),
+                : Icon(icon, color: colors.primary, size: 22),
             suffixIcon: suffix,
             contentPadding: const EdgeInsets.symmetric(
               vertical: 18,
               horizontal: 16,
             ),
             filled: true,
-            fillColor: Colors.white,
-            errorStyle: const TextStyle(
-              color: Colors.red,
+            fillColor: colors.surface,
+            errorStyle: TextStyle(
+              color: colors.error,
               fontSize: 12,
               height: 1.4,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: AppColors.border, width: 1.5),
+              borderSide: BorderSide(color: colors.border, width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+              borderSide: BorderSide(color: colors.primary, width: 1.5),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Colors.red, width: 1.5),
+              borderSide: BorderSide(color: colors.error, width: 1.5),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Colors.red, width: 1.5),
+              borderSide: BorderSide(color: colors.error, width: 1.5),
             ),
           ),
         ),

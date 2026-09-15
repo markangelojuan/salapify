@@ -57,6 +57,54 @@ final class SplitBillFirestoreServiceProvider
 String _$splitBillFirestoreServiceHash() =>
     r'639968fae4b3b9ccdb968265a205a3f93638fd77';
 
+@ProviderFor(splitBillStorageService)
+final splitBillStorageServiceProvider = SplitBillStorageServiceProvider._();
+
+final class SplitBillStorageServiceProvider
+    extends
+        $FunctionalProvider<
+          SplitBillStorageService,
+          SplitBillStorageService,
+          SplitBillStorageService
+        >
+    with $Provider<SplitBillStorageService> {
+  SplitBillStorageServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'splitBillStorageServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$splitBillStorageServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<SplitBillStorageService> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  SplitBillStorageService create(Ref ref) {
+    return splitBillStorageService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SplitBillStorageService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SplitBillStorageService>(value),
+    );
+  }
+}
+
+String _$splitBillStorageServiceHash() =>
+    r'776f401b3358b0a8b75c044e95c33ee91f742ba1';
+
 @ProviderFor(splitBillRepository)
 final splitBillRepositoryProvider = SplitBillRepositoryProvider._();
 
@@ -103,7 +151,7 @@ final class SplitBillRepositoryProvider
 }
 
 String _$splitBillRepositoryHash() =>
-    r'd1b872330e8046837b20b9950a5062e229fb4ac1';
+    r'50e5e9b8ac05ce3f473dd13e8c29a6a5f5dd1751';
 
 @ProviderFor(splitGroups)
 final splitGroupsProvider = SplitGroupsProvider._();

@@ -13,20 +13,21 @@ class AppTheme {
       },
     ),
     colorScheme: ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
+      seedColor: AppColorsExt.light.primary,
       brightness: Brightness.light,
     ),
-    appBarTheme: const AppBarTheme(
+    extensions: const [AppColorsExt.light],
+    appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      foregroundColor: AppColors.primary,
+      foregroundColor: AppColorsExt.light.primary,
       centerTitle: false,
     ),
     navigationBarTheme: NavigationBarThemeData(
       height: 72,
       elevation: 0,
-      backgroundColor: AppColors.white,
-      indicatorColor: AppColors.primary.withValues(alpha: 0.15),
+      backgroundColor: AppColorsExt.light.surface,
+      indicatorColor: AppColorsExt.light.primary.withValues(alpha: 0.15),
 
       labelTextStyle: const WidgetStatePropertyAll(
         TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
@@ -34,10 +35,10 @@ class AppTheme {
 
       iconTheme: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
-          return const IconThemeData(color: AppColors.primary, size: 24);
+          return IconThemeData(color: AppColorsExt.light.primary, size: 24);
         }
 
-        return const IconThemeData(color: AppColors.textPrimary, size: 22);
+        return IconThemeData(color: AppColorsExt.light.textPrimary, size: 22);
       }),
     ),
   );
@@ -46,7 +47,7 @@ class AppTheme {
     brightness: Brightness.dark,
     useMaterial3: true,
 
-    scaffoldBackgroundColor: const Color(0xFF121212),
+    scaffoldBackgroundColor: Colors.transparent,
     pageTransitionsTheme: const PageTransitionsTheme(
       builders: {
         TargetPlatform.android: CupertinoPageTransitionsBuilder(),
@@ -54,11 +55,13 @@ class AppTheme {
       },
     ),
     colorScheme: ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
+      seedColor: AppColorsExt.dark.primary,
       brightness: Brightness.dark,
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFF1E1E1E),
+    extensions: const [AppColorsExt.dark],
+    appBarTheme: AppBarTheme(
+      
+      backgroundColor: AppColorsExt.dark.surface,
       foregroundColor: Colors.white,
       centerTitle: false,
     ),
@@ -66,8 +69,8 @@ class AppTheme {
     navigationBarTheme: NavigationBarThemeData(
       height: 72,
       elevation: 0,
-      backgroundColor: const Color(0xFF1E1E1E),
-      indicatorColor: AppColors.primary.withValues(alpha: 0.20),
+      backgroundColor: AppColorsExt.dark.surface,
+      indicatorColor: AppColorsExt.dark.primary.withValues(alpha: 0.20),
 
       labelTextStyle: const WidgetStatePropertyAll(
         TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
@@ -75,12 +78,15 @@ class AppTheme {
 
       iconTheme: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
-          return const IconThemeData(color: AppColors.primary, size: 24);
+          // FIX: was AppColors.primary (light theme's green) — now uses
+          // the dark theme's own primary so selection is visible in dark mode.
+          return IconThemeData(color: AppColorsExt.dark.primary, size: 24);
         }
-
-        return const IconThemeData(color: Colors.grey, size: 22);
+        return IconThemeData(
+          color: AppColorsExt.dark.textSecondary,
+          size: 22,
+        );
       }),
     ),
   );
 }
-

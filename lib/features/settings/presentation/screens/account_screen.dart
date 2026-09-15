@@ -10,20 +10,22 @@ class AccountScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final userAsync = ref.watch(currentAppUserProvider);
     final user = userAsync.value;
     final avatar = avatarById(user?.avatarId);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+
+      backgroundColor: Colors.transparent,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: 260,
             pinned: true,
-            backgroundColor: AppColors.primary,
+            backgroundColor: colors.primary,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+              icon: Icon(Icons.arrow_back_rounded, color: colors.onPrimary),
               onPressed: () => context.pop(),
             ),
             flexibleSpace: FlexibleSpaceBar(
@@ -32,7 +34,10 @@ class AccountScreen extends ConsumerWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
+                    colors: [
+                      colors.primary,
+                      colors.primary.withValues(alpha: 0.8),
+                    ],
                   ),
                 ),
                 child: SafeArea(
@@ -46,27 +51,36 @@ class AccountScreen extends ConsumerWidget {
                           children: [
                             Container(
                               padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
+                              decoration: BoxDecoration(
+                                color: colors.onPrimary,
                                 shape: BoxShape.circle,
                               ),
                               child: CircleAvatar(
                                 radius: 46,
-                                backgroundColor: AppColors.background,
-                                backgroundImage:
-                                    avatar != null ? AssetImage(avatar.assetPath) : null,
+                                backgroundColor: colors.background,
+                                backgroundImage: avatar != null
+                                    ? AssetImage(avatar.assetPath)
+                                    : null,
                                 child: avatar == null
-                                    ? const Icon(Icons.person_rounded, size: 40)
+                                    ? Icon(
+                                        Icons.person_rounded,
+                                        size: 40,
+                                        color: colors.textSecondary,
+                                      )
                                     : null,
                               ),
                             ),
                             Container(
                               padding: const EdgeInsets.all(6),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
+                              decoration: BoxDecoration(
+                                color: colors.onPrimary,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.edit_rounded, size: 14),
+                              child: Icon(
+                                Icons.edit_rounded,
+                                size: 14,
+                                color: colors.primary,
+                              ),
                             ),
                           ],
                         ),
@@ -74,8 +88,8 @@ class AccountScreen extends ConsumerWidget {
                       const SizedBox(height: 14),
                       Text(
                         user?.username ?? 'User',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: colors.onPrimary,
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
                         ),
@@ -83,14 +97,17 @@ class AccountScreen extends ConsumerWidget {
                       if (avatar != null) ...[
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: colors.onPrimary.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             avatar.name,
-                            style: const TextStyle(color: Colors.white, fontSize: 12),
+                            style: TextStyle(color: colors.onPrimary, fontSize: 12),
                           ),
                         ),
                       ],
@@ -110,31 +127,38 @@ class AccountScreen extends ConsumerWidget {
                     'Profile info',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: AppColors.black.withOpacity(0.6),
+                          color: colors.textSecondary,
                         ),
                   ),
                   const SizedBox(height: 12),
                   _InfoCard(
+                    colors: colors,
                     children: [
                       _InfoRow(
+                        colors: colors,
                         icon: Icons.alternate_email_rounded,
                         label: 'Username',
                         value: user?.username ?? '—',
                       ),
-                      const Divider(height: 1),
+                      Divider(height: 1, color: colors.border),
                       _InfoRow(
+                        colors: colors,
                         icon: Icons.mail_outline_rounded,
                         label: 'Email',
                         value: user?.email ?? '—',
                       ),
-                      const Divider(height: 1),
+                      Divider(height: 1, color: colors.border),
                       _InfoRow(
+                        colors: colors,
                         icon: Icons.pets_rounded,
                         label: 'Avatar',
                         value: avatar?.name ?? 'Not selected',
                         trailing: TextButton(
                           onPressed: () => context.push('/avatar-picker'),
-                          child: const Text('Change'),
+                          child: Text(
+                            'Change',
+                            style: TextStyle(color: colors.primary),
+                          ),
                         ),
                       ),
                     ],
@@ -150,18 +174,19 @@ class AccountScreen extends ConsumerWidget {
 }
 
 class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.children});
+  const _InfoCard({required this.children, required this.colors});
   final List<Widget> children;
+  final AppColorsExt colors;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -177,12 +202,14 @@ class _InfoRow extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
+    required this.colors,
     this.trailing,
   });
 
   final IconData icon;
   final String label;
   final String value;
+  final AppColorsExt colors;
   final Widget? trailing;
 
   @override
@@ -191,7 +218,7 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: AppColors.black.withOpacity(0.5)),
+          Icon(icon, size: 20, color: colors.textSecondary),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -199,12 +226,16 @@ class _InfoRow extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(fontSize: 12, color: AppColors.black.withOpacity(0.5)),
+                  style: TextStyle(fontSize: 12, color: colors.textSecondary),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
+                  ),
                 ),
               ],
             ),

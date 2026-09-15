@@ -1,19 +1,33 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:salapify/core/theme/app_colors.dart';
 
 class CommonSnackbar {
   static OverlayEntry? _currentEntry;
   static String? _currentMessage;
 
   static void showError(BuildContext context, Object error) {
-    _show(context, _sanitizeError(error), Colors.red.shade700, Icons.error_outline_rounded);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    _show(
+      context,
+      _sanitizeError(error),
+      colors.error,
+      Icons.error_outline_rounded,
+    );
   }
 
   static void showSuccess(BuildContext context, String message) {
-    _show(context, message, Colors.green.shade700, Icons.check_circle_outline_rounded);
+    _show(
+      context,
+      message,
+      Colors.green.shade700,
+      Icons.check_circle_outline_rounded,
+    );
   }
 
   static void showWarning(BuildContext context, String message) {
-    _show(context, message, Colors.amber.shade800, Icons.warning_amber_rounded);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    _show(context, message, colors.warning, Icons.warning_amber_rounded);
   }
 
   static void _show(
@@ -68,26 +82,23 @@ class CommonSnackbar {
   }
 
   static String _sanitizeError(Object error) {
-    final message = error.toString();
-
-    const errorMap = {
-      'user-not-found': 'No account found with this email.',
-      'wrong-password': 'Incorrect password.',
-      'invalid-credential': 'Invalid email or password.',
-      'email-already-in-use': 'This email is already registered.',
-      'weak-password': 'Password is too weak.',
-      'network-request-failed': 'No internet connection.',
-      'too-many-requests': 'Too many attempts. Please try again later.',
-      'user-disabled': 'This account has been disabled.',
-    };
-
-    for (final entry in errorMap.entries) {
-      if (message.contains(entry.key)) return entry.value;
+    if (error is FirebaseAuthException) {
+      const codeMap = {
+        'user-not-found': "Hmm… we couldn't find that account.",
+        'invalid-credential': "Those login details don't look right.",
+        'email-already-in-use': 'This email is already part of the club.',
+        'network-request-failed':
+            'The internet wandered off. Check your connection and try again.',
+        'too-many-requests':
+            'You just requested a code. Give it a minute before trying again.',
+        'user-disabled': 'This account is currently taking a vacation.',
+      };
+      return codeMap[error.code] ?? 'A tiny hiccup! Try again?';
     }
 
-    if (error is String) return message;
+    if (error is String) return error;
 
-    return 'Something went wrong. Please try again.';
+    return 'A tiny hiccup! Try again?';
   }
 }
 
@@ -188,7 +199,10 @@ class _SnackbarBannerState extends State<_SnackbarBanner>
               child: Stack(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: color.withValues(alpha: 0.97),
                       borderRadius: BorderRadius.circular(_radius),

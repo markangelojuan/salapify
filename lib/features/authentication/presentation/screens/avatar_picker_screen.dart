@@ -53,6 +53,7 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final avatarState = ref.watch(avatarControllerProvider);
 
     ref.listen<AsyncValue<void>>(avatarControllerProvider, (previous, next) {
@@ -62,7 +63,7 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
     final selected = kAvatarOptions[_selectedIndex];
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -75,17 +76,20 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
                       const SizedBox(height: 8),
                       SizedBox(
                         height: 130,
-                        child: Lottie.asset('assets/lottie/sleeping_squirrel.json'),
+                        child: Lottie.asset(
+                          'assets/lottie/sleeping_squirrel.json',
+                        ),
                       ),
                       Text(
-                        'Pick your money avatar',
-                        style: Theme.of(context).textTheme.headlineSmall,
+                        'Which little money beast are you?',
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(color: colors.textPrimary),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'You can change this anytime',
-                        style: TextStyle(color: AppColors.black.withOpacity(0.6)),
+                        style: TextStyle(color: colors.textSecondary),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 24),
@@ -94,24 +98,30 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
                         child: PageView.builder(
                           controller: _pageController,
                           itemCount: kAvatarOptions.length,
-                          onPageChanged: (i) => setState(() => _selectedIndex = i),
+                          onPageChanged: (i) =>
+                              setState(() => _selectedIndex = i),
                           itemBuilder: (context, index) {
                             return AnimatedBuilder(
                               animation: _pageController,
                               builder: (context, child) {
                                 double scale = 1.0;
                                 if (_pageController.position.haveDimensions) {
-                                  final page = _pageController.page ?? index.toDouble();
+                                  final page =
+                                      _pageController.page ?? index.toDouble();
                                   final diff = (page - index).abs();
                                   scale = (1 - (diff * 0.35)).clamp(0.65, 1.0);
                                 }
                                 return Center(
-                                  child: Transform.scale(scale: scale, child: child),
+                                  child: Transform.scale(
+                                    scale: scale,
+                                    child: child,
+                                  ),
                                 );
                               },
                               child: _AvatarCircle(
                                 avatar: kAvatarOptions[index],
                                 isSelected: index == _selectedIndex,
+                                colors: colors,
                               ),
                             );
                           },
@@ -123,9 +133,10 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
                         child: Text(
                           selected.name,
                           key: ValueKey(selected.id),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
+                            color: colors.textPrimary,
                           ),
                         ),
                       ),
@@ -142,8 +153,8 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
                         ),
                         child: CommonButton(
                           label: 'Confirm',
-                          btnColor: AppColors.black,
-                          labelColor: AppColors.white,
+                          btnColor: colors.textPrimary,
+                          labelColor: colors.background,
                           onPressed: _confirm,
                           isLoading: avatarState.isLoading,
                         ),
@@ -161,9 +172,14 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
 }
 
 class _AvatarCircle extends StatelessWidget {
-  const _AvatarCircle({required this.avatar, required this.isSelected});
+  const _AvatarCircle({
+    required this.avatar,
+    required this.isSelected,
+    required this.colors,
+  });
   final AvatarOption avatar;
   final bool isSelected;
+  final AppColorsExt colors;
 
   @override
   Widget build(BuildContext context) {
@@ -174,13 +190,13 @@ class _AvatarCircle extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: isSelected ? AppColors.primary : Colors.transparent,
+          color: isSelected ? colors.primary : Colors.transparent,
           width: 3,
         ),
         boxShadow: isSelected
             ? [
                 BoxShadow(
-                  color: AppColors.primary.withOpacity(0.3),
+                  color: colors.primary.withValues(alpha: 0.3),
                   blurRadius: 16,
                   spreadRadius: 2,
                 ),

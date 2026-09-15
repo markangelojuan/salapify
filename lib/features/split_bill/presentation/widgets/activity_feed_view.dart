@@ -4,7 +4,8 @@ import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
 import 'package:salapify/features/split_bill/domain/entities/activity_entry.dart';
 import 'package:salapify/features/split_bill/presentation/widgets/member_avatar.dart';
-import 'package:intl/intl.dart';
+import 'package:salapify/features/authentication/domain/entities/avatar_option.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ActivityFeedView extends StatelessWidget {
   const ActivityFeedView({
@@ -67,6 +68,13 @@ class ActivityFeedView extends StatelessWidget {
             ? (names[targetId] ?? '...')
             : 'someone';
         return '$senderName added $targetName to the group';
+      case ActivityType.poke:
+        final character =
+            avatarById(members[entry.senderId]?.avatarId)?.name ?? 'Someone';
+        final article = 'AEIOU'.contains(character[0]) ? 'An' : 'A';
+        return '$article $character poked the group!';
+      case ActivityType.photo:
+        return '$senderName sent a photo';
     }
   }
 
@@ -145,7 +153,9 @@ class ActivityFeedView extends StatelessWidget {
 
         final entry = item as ActivityEntry;
         final isMine = entry.senderId == currentUid;
-        final isMessage = entry.type == ActivityType.message;
+        final isMessage =
+            entry.type == ActivityType.message ||
+            entry.type == ActivityType.photo;
 
         if (!isMessage) {
           return Padding(
@@ -181,10 +191,12 @@ class ActivityFeedView extends StatelessWidget {
                 ],
                 Flexible(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
-                    ),
+                    padding: entry.type == ActivityType.photo
+                        ? const EdgeInsets.all(2)
+                        : const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
                     constraints: BoxConstraints(
                       maxWidth: MediaQuery.of(context).size.width * 0.7,
                     ),
@@ -199,18 +211,35 @@ class ActivityFeedView extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (!isMine)
-                          Text(
-                            senderName,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primary,
+                          Padding(
+                            padding: entry.type == ActivityType.photo
+                                ? const EdgeInsets.only(
+                                    left: 8,
+                                    top: 6,
+                                    bottom: 6,
+                                  )
+                                : EdgeInsets.zero,
+                            child: Text(
+                              senderName,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primary,
+                              ),
                             ),
                           ),
-                        Text(
-                          _label(entry),
-                          style: const TextStyle(fontSize: 15),
-                        ),
+                        if (entry.type == ActivityType.photo)
+                          _ActivityPhoto(
+                            url: entry.metadata?['photoUrl'] as String?,
+                            expiresAt: DateTime.tryParse(
+                              entry.metadata?['expiresAt'] as String? ?? '',
+                            ),
+                          )
+                        else
+                          Text(
+                            _label(entry),
+                            style: const TextStyle(fontSize: 15),
+                          ),
                       ],
                     ),
                   ),
@@ -245,8 +274,15 @@ class _SystemActivityPill extends StatelessWidget {
         return (Icons.error_rounded, Colors.red[600]!);
       case ActivityType.memberAdded:
         return (Icons.person_add_rounded, AppColors.primary);
+      case ActivityType.poke:
+        return (
+          Icons.back_hand_rounded,
+          const Color.fromARGB(255, 43, 27, 185),
+        );
       case ActivityType.message:
         return (Icons.chat_bubble_rounded, AppColors.primary);
+      case ActivityType.photo:
+        return (Icons.image_rounded, AppColors.primary);
     }
   }
 
@@ -305,6 +341,121 @@ class _DayDivider extends StatelessWidget {
               color: AppColors.textPrimary.withValues(alpha: 0.5),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ActivityPhoto extends StatelessWidget {
+  const _ActivityPhoto({required this.url, required this.expiresAt});
+
+  final String? url;
+  final DateTime? expiresAt;
+
+  bool get _isExpired =>
+      expiresAt != null && DateTime.now().isAfter(expiresAt!);
+
+  @override
+  Widget build(BuildContext context) {
+    if (url == null || _isExpired) {
+      return Container(
+        width: 220,
+        height: 120,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.black12,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: const Text(
+          'Photo expired',
+          style: TextStyle(color: Colors.black54, fontSize: 13),
+        ),
+      );
+    }
+    return GestureDetector(
+      onTap: () => showDialog(
+        context: context,
+        barrierColor: Colors.black87,
+        builder: (_) => _PhotoViewerDialog(url: url!),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            CachedNetworkImage(
+              imageUrl: url!,
+              width: 220,
+              height: 220,
+              fit: BoxFit.cover,
+              memCacheWidth: 220, // decode at display size, not full res
+              placeholder: (context, url) => const SizedBox(
+                width: 220,
+                height: 220,
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              ),
+              errorWidget: (context, url, error) => const SizedBox(
+                width: 220,
+                height: 220,
+                child: Center(child: Icon(Icons.broken_image_rounded)),
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              color: Colors.black.withValues(alpha: 0.45),
+              child: const Text(
+                'This photo will expire in 3 days',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white, fontSize: 10),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PhotoViewerDialog extends StatelessWidget {
+  const _PhotoViewerDialog({required this.url});
+
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(12),
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: Stack(
+          children: [
+            InteractiveViewer(
+              minScale: 1,
+              maxScale: 4,
+              child: Center(
+                child: CachedNetworkImage(
+                  imageUrl: url,
+                  fit: BoxFit.contain,
+                  errorWidget: (context, url, error) => const Icon(
+                    Icons.broken_image_rounded,
+                    color: Colors.white,
+                    size: 48,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                icon: const Icon(Icons.close_rounded, color: Colors.white),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+          ],
         ),
       ),
     );

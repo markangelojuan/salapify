@@ -7,6 +7,7 @@ import 'package:salapify/features/budget/presentation/controllers/budget_control
 import 'package:salapify/features/settings/data/repositories/settings_repository.dart';
 import 'package:salapify/features/settings/data/services/settings_sync_service.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
+import 'package:salapify/features/settings/domain/period_key.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
 
 part 'settings_controller.g.dart';
@@ -43,6 +44,15 @@ class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
 
       final repository = ref.read(settingsRepositoryProvider);
       await repository.setLocalBudgetingPeriod(period);
+
+      final firstHalfEndDay =
+          ref.read(firstHalfEndDaySettingProvider).value ?? 15;
+      final newKey = computeCurrentPeriodKey(
+        globalPeriod: period,
+        firstHalfEndDay: firstHalfEndDay,
+        now: DateTime.now(),
+      );
+      await repository.setLastResetPeriodKey(newKey);
 
       state = AsyncData(period);
 
@@ -115,7 +125,6 @@ class FirstHalfEndDaySetting extends _$FirstHalfEndDaySetting {
     ref.read(settingsSyncWarningProvider.notifier).set(fallback);
   }
 }
-
 
 @Riverpod(keepAlive: true)
 class CurrencySetting extends _$CurrencySetting {

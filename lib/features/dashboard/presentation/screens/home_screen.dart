@@ -85,8 +85,8 @@ class _FloatingNavBar extends StatelessWidget {
   });
 
   static const double _pillHeight = 64;
-  static const double _fabSize = 56;
-  static const double _fabPopOut = 22; // how far the FAB pokes above the pill
+  static const double _fabSize = 50;
+  static const double _fabPopOut = 22; 
 
   @override
   Widget build(BuildContext context) {
@@ -151,12 +151,14 @@ class _Pill extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final unreadSplitCount = ref.watch(totalUnreadSplitCountProvider);
     final unreadNotifCount = ref.watch(unreadNotificationCountProvider);
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.textPrimary.withValues(alpha: 0.95),
+     
+        color: _pillBackground.withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
@@ -173,7 +175,7 @@ class _Pill extends ConsumerWidget {
             backgroundColor: Colors.transparent,
             surfaceTintColor: Colors.transparent,
             elevation: 0,
-            indicatorColor: AppColors.primary.withValues(alpha: 0.25),
+            indicatorColor: colors.primary.withValues(alpha: 0.25),
             labelTextStyle: WidgetStateProperty.resolveWith((states) {
               final selected = states.contains(WidgetState.selected);
               return TextStyle(
@@ -226,6 +228,8 @@ class _Pill extends ConsumerWidget {
       ),
     );
   }
+
+  static const _pillBackground = Color(0xFF2E302E);
 }
 
 class _PopOutFab extends StatelessWidget {
@@ -236,21 +240,23 @@ class _PopOutFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppColors.primary,
+        color: colors.primary,
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.35),
+            color: colors.primary.withValues(alpha: 0.35),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
         ],
+
         border: Border.all(
-          color: Theme.of(context).scaffoldBackgroundColor,
+          color: colors.background,
           width: 4,
         ),
       ),

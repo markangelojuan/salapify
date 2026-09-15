@@ -19,33 +19,36 @@ class CommonButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final resolvedBtnColor = btnColor ?? colors.primary;
+
+    final resolvedLabelColor = labelColor ?? colors.onPrimary;
+
     return SizedBox(
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: btnColor ?? AppColors.primary,
-          disabledBackgroundColor: (btnColor ?? AppColors.primary).withOpacity(
-            0.6,
-          ),
+          backgroundColor: resolvedBtnColor,
+          disabledBackgroundColor: resolvedBtnColor.withValues(alpha: 0.6),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
         ),
         child: isLoading
-            ? const SizedBox(
+            ? SizedBox(
                 width: 22,
                 height: 22,
                 child: CircularProgressIndicator(
-                  color: Colors.white,
+                  color: resolvedLabelColor,
                   strokeWidth: 2.5,
                 ),
               )
             : Text(
                 label,
                 style: TextStyle(
-                  color: labelColor ?? Colors.white,
+                  color: resolvedLabelColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,

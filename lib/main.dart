@@ -1,6 +1,7 @@
 import 'package:salapify/core/services/push_notification_service.dart';
 import 'package:salapify/core/services/sync_trigger_service.dart';
 import 'package:salapify/core/services/connectivity_service.dart';
+import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/theme/app_theme.dart';
 import 'package:salapify/core/theme/theme_controller.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
@@ -11,12 +12,29 @@ import 'package:salapify/router/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:salapify/core/theme/app_colors.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const ProviderScope(child: MyApp()));
+
+  await GoogleSignIn.instance.initialize(
+    serverClientId: '1017841458128-psiglpuppigqrakhe4qfkmjnvjnd58a0.apps.googleusercontent.com',
+  );
+
+  final prefs = await SharedPreferences.getInstance();
+  final savedTheme = prefs.getString('theme_mode');
+  final initialThemeMode = savedTheme == 'dark' ? ThemeMode.dark : ThemeMode.light;
+
+  runApp(
+    ProviderScope(
+      overrides: [
+        themeControllerProvider.overrideWith(() => ThemeController(initialThemeMode)), 
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends ConsumerStatefulWidget {
@@ -80,6 +98,13 @@ class _MyAppState extends ConsumerState<MyApp> {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ref.watch(themeControllerProvider),
+      builder: (context, child) {
+        final colors = Theme.of(context).extension<AppColorsExt>()!;
+        return Container(
+          decoration: BoxDecoration(gradient: colors.backgroundGradient),
+          child: child,
+        );
+      },
     );
   }
 }

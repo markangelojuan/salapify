@@ -108,22 +108,28 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   Future<void> _confirmDelete() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Category'),
-        content: Text(
-          'Are you sure you want to delete "${widget.existingCategory!.name}"? This cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+      builder: (ctx) {
+        final dialogColors = Theme.of(ctx).extension<AppColorsExt>()!;
+        return AlertDialog(
+          title: const Text('Delete Category'),
+          content: Text(
+            'Are you sure you want to delete "${widget.existingCategory!.name}"? This cannot be undone.',
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(
+                'Delete',
+                style: TextStyle(color: dialogColors.error),
+              ),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed != true || !mounted) return;
@@ -141,6 +147,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final globalPeriod =
         ref.watch(budgetingPeriodSettingProvider).value ??
         BudgetingPeriod.monthly;
@@ -199,7 +206,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                   },
                 ),
                 const SizedBox(height: 18),
-                Text('Type', style: TextStyle(color: AppColors.textPrimary)),
+                Text('Type', style: TextStyle(color: colors.textPrimary)),
                 const SizedBox(height: 8),
                 SegmentedButton<BudgetCategoryType>(
                   segments: const [
@@ -217,18 +224,18 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                       setState(() => _type = selection.first),
                 ),
                 const SizedBox(height: 18),
-                Text('Repeat', style: TextStyle(color: AppColors.textPrimary)),
+                Text('Repeat', style: TextStyle(color: colors.textPrimary)),
                 const SizedBox(height: 8),
                 _buildFrequencyOptions(globalPeriod),
                 const SizedBox(height: 18),
-                Text('Icon', style: TextStyle(color: AppColors.textPrimary)),
+                Text('Icon', style: TextStyle(color: colors.textPrimary)),
                 const SizedBox(height: 8),
-                _buildIconPicker(),
+                _buildIconPicker(colors),
                 const SizedBox(height: 28),
                 CommonButton(
                   label: widget.isEditing ? 'Save Changes' : 'Add Category',
-                  btnColor: AppColors.black,
-                  labelColor: AppColors.white,
+                  btnColor: colors.textPrimary,
+                  labelColor: colors.background,
                   isLoading: actionsState.isLoading,
                   onPressed: _submit,
                 ),
@@ -236,8 +243,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                   const SizedBox(height: 12),
                   CommonButton(
                     label: "Delete Category",
-                    btnColor: AppColors.white,
-                    labelColor: Colors.red,
+                    btnColor: colors.surface,
+                    labelColor: colors.error,
                     onPressed: _confirmDelete,
                   ),
                 ],
@@ -313,7 +320,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
     );
   }
 
-  Widget _buildIconPicker() {
+  Widget _buildIconPicker(AppColorsExt colors) {
     return Wrap(
       spacing: 10,
       runSpacing: 10,
@@ -324,11 +331,11 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
           child: CircleAvatar(
             radius: 22,
             backgroundColor: selected
-                ? AppColors.primary
-                : AppColors.primary.withValues(alpha: 0.1),
+                ? colors.primary
+                : colors.primary.withValues(alpha: 0.1),
             child: Icon(
               CategoryIcons.iconFor(key),
-              color: selected ? AppColors.white : AppColors.primary,
+              color: selected ? AppColors.white : colors.primary,
             ),
           ),
         );

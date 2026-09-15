@@ -60,8 +60,9 @@ class BudgetSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final remaining = totalAllocated - totalSpent;
-    final statusColor = _isOverBudget ? Colors.red : AppColors.primary;
+    final statusColor = _isOverBudget ? colors.error : colors.primary;
 
     return Container(
       decoration: BoxDecoration(
@@ -70,12 +71,12 @@ class BudgetSummaryCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primary.withValues(alpha: 0.10),
-            AppColors.primary.withValues(alpha: 0.02),
+            colors.primary.withValues(alpha: 0.10),
+            colors.primary.withValues(alpha: 0.02),
           ],
         ),
         border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.08),
+          color: colors.primary.withValues(alpha: 0.08),
         ),
       ),
       padding: const EdgeInsets.all(20),
@@ -89,7 +90,7 @@ class BudgetSummaryCard extends StatelessWidget {
               vertical: 5,
             ),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
+              color: colors.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -98,7 +99,7 @@ class BudgetSummaryCard extends StatelessWidget {
                 Icon(
                   Icons.calendar_today_rounded,
                   size: 12,
-                  color: AppColors.primary,
+                  color: colors.primary,
                 ),
                 const SizedBox(width: 6),
                 Text(
@@ -106,7 +107,7 @@ class BudgetSummaryCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+                    color: colors.primary,
                   ),
                 ),
               ],
@@ -127,7 +128,7 @@ class BudgetSummaryCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     border: Border(
                       right: BorderSide(
-                        color: AppColors.primary.withValues(alpha: 0.25),
+                        color: colors.primary.withValues(alpha: 0.25),
                         width: 1,
                       ),
                     ),
@@ -152,7 +153,7 @@ class BudgetSummaryCard extends StatelessWidget {
                               ),
                               PieChartSectionData(
                                 value: (1 - _percentUsed) * 100,
-                                color: AppColors.primary.withValues(
+                                color: colors.primary.withValues(
                                   alpha: 0.06,
                                 ),
                                 showTitle: false,
@@ -166,18 +167,17 @@ class BudgetSummaryCard extends StatelessWidget {
                           children: [
                             Text(
                               '${(_percentUsed * 100).toStringAsFixed(0)}%',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 22,
+                                color: colors.textPrimary,
                               ),
                             ),
                             Text(
                               'used',
                               style: TextStyle(
                                 fontSize: 11,
-                                color: AppColors.textPrimary.withValues(
-                                  alpha: 0.6,
-                                ),
+                                color: colors.textSecondary,
                               ),
                             ),
                           ],
@@ -200,9 +200,7 @@ class BudgetSummaryCard extends StatelessWidget {
                       _isOverBudget ? 'Over budget' : 'Remaining',
                       style: TextStyle(
                         fontSize: 13,
-                        color: AppColors.textPrimary.withValues(
-                          alpha: 0.7,
-                        ),
+                        color: colors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -211,9 +209,8 @@ class BudgetSummaryCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
-                        color: _isOverBudget
-                            ? Colors.red
-                            : Colors.green[700],
+                       
+                        color: statusColor,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -239,7 +236,7 @@ class BudgetSummaryCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: _percentUsed,
               minHeight: 6,
-              backgroundColor: AppColors.background,
+              backgroundColor: colors.border,
               valueColor: AlwaysStoppedAnimation(statusColor),
             ),
           ),
@@ -260,6 +257,7 @@ class _AmountRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -267,14 +265,15 @@ class _AmountRow extends StatelessWidget {
           '$label: ',
           style: TextStyle(
             fontSize: 12,
-            color: AppColors.textPrimary.withValues(alpha: 0.7),
+            color: colors.textSecondary,
           ),
         ),
         Text(
           amount.toStringAsFixed(2),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
+            color: colors.textPrimary,
           ),
         ),
       ],

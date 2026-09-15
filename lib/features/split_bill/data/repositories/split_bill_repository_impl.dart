@@ -9,10 +9,14 @@ import 'package:salapify/features/split_bill/domain/entities/bill_share.dart';
 import 'package:salapify/features/split_bill/domain/entities/payment_status.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_bill.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
+import 'dart:io';
+import 'package:salapify/features/split_bill/data/services/split_bill_storage_service.dart';
+
 
 class SplitBillRepositoryImpl implements SplitBillRepository {
-  SplitBillRepositoryImpl(this._service);
+  SplitBillRepositoryImpl(this._service, this._storageService);
   final SplitBillFirestoreService _service;
+  final SplitBillStorageService _storageService;
 
   @override
   Stream<List<SplitGroup>> watchGroupsForUser(String userId) {
@@ -159,5 +163,13 @@ class SplitBillRepositoryImpl implements SplitBillRepository {
       bill.toFirestore(),
       activity.toFirestore(),
     );
+  }
+
+  @override
+  Future<String> uploadActivityPhoto({
+    required String groupId,
+    required File file,
+  }) {
+    return _storageService.uploadActivityPhoto(groupId: groupId, file: file);
   }
 }

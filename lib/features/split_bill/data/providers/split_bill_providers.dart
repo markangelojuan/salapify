@@ -10,6 +10,9 @@ import 'package:salapify/features/split_bill/data/services/split_bill_service.da
 import 'package:salapify/features/split_bill/domain/entities/activity_entry.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_bill.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:salapify/features/split_bill/data/services/split_bill_storage_service.dart';
+
 
 part 'split_bill_providers.g.dart';
 
@@ -29,8 +32,16 @@ SplitBillFirestoreService splitBillFirestoreService(Ref ref) {
 }
 
 @Riverpod(keepAlive: true)
+SplitBillStorageService splitBillStorageService(Ref ref) {
+  return SplitBillStorageService(FirebaseStorage.instance);
+}
+
+@Riverpod(keepAlive: true)
 SplitBillRepository splitBillRepository(Ref ref) {
-  return SplitBillRepositoryImpl(ref.watch(splitBillFirestoreServiceProvider));
+  return SplitBillRepositoryImpl(
+    ref.watch(splitBillFirestoreServiceProvider),
+    ref.watch(splitBillStorageServiceProvider),
+  );
 }
 
 @riverpod

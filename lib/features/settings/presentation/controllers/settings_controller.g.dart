@@ -87,7 +87,7 @@ final class BudgetingPeriodSettingProvider
 }
 
 String _$budgetingPeriodSettingHash() =>
-    r'b4e93c683ad1176821a0475ab6cff640948ffd21';
+    r'5930734ee86632ba103cb20c8fc080608257fa37';
 
 abstract class _$BudgetingPeriodSetting
     extends $AsyncNotifier<BudgetingPeriod> {

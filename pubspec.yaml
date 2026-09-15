@@ -57,6 +57,10 @@ dependencies:
   collection: ^1.18.0
   firebase_messaging: ^16.6.0
   flutter_local_notifications: ^22.3.0
+  image_picker: ^1.1.2
+  firebase_storage: ^13.0.5
+  cached_network_image: ^3.4.1
+  google_sign_in: ^7.2.0
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +74,12 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   build_runner: ^2.14.1
   riverpod_generator: ^4.0.3
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/app_logo.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -97,6 +107,7 @@ flutter:
     - assets/images/savvy_monkey.png
     - assets/images/stingy_turtle.png
     - assets/images/thrifty_pig.png
+    - assets/images/google_logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

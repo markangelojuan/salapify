@@ -20,6 +20,8 @@ class PushNotificationService {
     'General Notifications',
     description: 'Chat, bill activity, and payment updates',
     importance: Importance.high,
+    sound: RawResourceAndroidNotificationSound('message_tone'),
+    playSound: true,
   );
 
   Future<void> initForUser(String uid) async {
@@ -74,6 +76,8 @@ class PushNotificationService {
             channelDescription: _channel.description,
             importance: Importance.high,
             priority: Priority.high,
+            sound: RawResourceAndroidNotificationSound('message_tone'),
+            playSound: true,
           ),
         ),
         payload:

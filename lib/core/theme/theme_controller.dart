@@ -8,8 +8,12 @@ const _themeKey = 'theme_mode';
 
 @Riverpod(keepAlive: true)
 class ThemeController extends _$ThemeController {
+  ThemeController([this._initialMode]);
+  final ThemeMode? _initialMode;
+
   @override
   ThemeMode build() {
+    if (_initialMode != null) return _initialMode;
     _loadTheme();
     return ThemeMode.light;
   }

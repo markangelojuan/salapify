@@ -113,19 +113,11 @@ class _DrawerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final avatar = avatarById(avatarId);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.backgroundGradientStart,
-            AppColors.backgroundGradientEnd,
-          ],
-        ),
-      ),
+      decoration: BoxDecoration(gradient: colors.backgroundGradient),
       child: SafeArea(
         bottom: false,
         child: Row(
@@ -155,7 +147,7 @@ class _DrawerHeader extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: AppColors.primary,
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -164,7 +156,7 @@ class _DrawerHeader extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: AppColors.primary,
                     ),
                   ),
                 ],

@@ -24,6 +24,11 @@ class CategoryCard extends ConsumerWidget {
 
   bool get _isFixed => category.type == BudgetCategoryType.fixed;
 
+  // Fixed/Variable chip colors intentionally stay flat blue/orange —
+  // they're a category-type indicator, not a brand/status color.
+  // NOTE: flat colors may read harsher on the dark surface (0xFF121212)
+  // than on the light background — revisit once _TypeChip's rendering
+  // is confirmed, if contrast turns out to be an issue in dark mode.
   Color get _accentColor => _isFixed ? Colors.blue : Colors.orange;
 
   String get _frequencyLabel {
@@ -52,6 +57,7 @@ class CategoryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final globalPeriod =
         ref.watch(budgetingPeriodSettingProvider).value ??
         BudgetingPeriod.monthly;
@@ -70,8 +76,8 @@ class CategoryCard extends ConsumerWidget {
         : 0.0;
     final isOver = spent > category.amount;
     final progressColor = isOver
-        ? Colors.red
-        : (progress >= 0.8 ? Colors.orange : AppColors.primary);
+        ? colors.error
+        : (progress >= 0.8 ? colors.warning : colors.primary);
 
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
@@ -82,6 +88,7 @@ class CategoryCard extends ConsumerWidget {
       child: Card(
         clipBehavior: Clip.antiAlias,
         elevation: 1,
+        color: colors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: InkWell(
           onTap: onTap,
@@ -95,12 +102,12 @@ class CategoryCard extends ConsumerWidget {
                   children: [
                     CircleAvatar(
                       radius: 18,
-                      backgroundColor: AppColors.primary.withValues(
+                      backgroundColor: colors.primary.withValues(
                         alpha: 0.15,
                       ),
                       child: Icon(
                         CategoryIcons.iconFor(category.iconName),
-                        color: AppColors.primary,
+                        color: colors.primary,
                         size: 18,
                       ),
                     ),
@@ -119,9 +126,10 @@ class CategoryCard extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Text(
                   category.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
+                    color: colors.textPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -136,7 +144,7 @@ class CategoryCard extends ConsumerWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: isOver ? Colors.red : null,
+                      color: isOver ? colors.error : colors.textPrimary,
                     ),
                   ),
                 ),
@@ -146,7 +154,7 @@ class CategoryCard extends ConsumerWidget {
                   child: LinearProgressIndicator(
                     value: progress,
                     minHeight: 5,
-                    backgroundColor: AppColors.border.withValues(alpha: 0.4),
+                    backgroundColor: colors.border,
                     valueColor: AlwaysStoppedAnimation(progressColor),
                   ),
                 ),
@@ -156,7 +164,7 @@ class CategoryCard extends ConsumerWidget {
                     Icon(
                       Icons.event_repeat_rounded,
                       size: 12,
-                      color: AppColors.textPrimary.withValues(alpha: 0.5),
+                      color: colors.textSecondary,
                     ),
                     const SizedBox(width: 4),
                     Expanded(
@@ -164,7 +172,7 @@ class CategoryCard extends ConsumerWidget {
                         _frequencyLabel,
                         style: TextStyle(
                           fontSize: 11,
-                          color: AppColors.textPrimary.withValues(alpha: 0.6),
+                          color: colors.textSecondary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -181,7 +189,6 @@ class CategoryCard extends ConsumerWidget {
   }
 }
 
-// _BigCheckbox and _TypeChip unchanged from before
 class _BigCheckbox extends StatelessWidget {
   const _BigCheckbox({required this.checked, required this.onTap});
 
@@ -190,6 +197,7 @@ class _BigCheckbox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -200,11 +208,9 @@ class _BigCheckbox extends StatelessWidget {
         height: 22,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(7),
-          color: checked ? AppColors.primary : Colors.transparent,
+          color: checked ? colors.primary : Colors.transparent,
           border: Border.all(
-            color: checked
-                ? AppColors.primary
-                : AppColors.textPrimary.withValues(alpha: 0.22),
+            color: checked ? colors.primary : colors.border,
             width: 1.6,
           ),
         ),
@@ -227,7 +233,6 @@ class _BigCheckbox extends StatelessWidget {
     );
   }
 }
-
 class _TypeChip extends StatelessWidget {
   const _TypeChip({required this.label, required this.color});
 

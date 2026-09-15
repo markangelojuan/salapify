@@ -7,6 +7,7 @@ import 'package:salapify/features/split_bill/domain/entities/activity_entry.dart
 import 'package:salapify/features/split_bill/domain/entities/payment_status.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_bill.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
+import 'dart:io';
 
 part 'split_bill_controller.g.dart';
 
@@ -199,6 +200,45 @@ class SplitBillController extends _$SplitBillController {
             PaymentStatus.disputed => {'targetUserId': userId},
             PaymentStatus.unpaid => null,
           },
+        ),
+      );
+    });
+  }
+
+  Future<void> pokeGroup(String groupId) async {
+    final currentUser = ref.read(authRepositoryProvider).currentUser;
+    if (currentUser == null) return;
+
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(splitBillRepositoryProvider)
+          .addActivity(
+            ActivityEntry(
+              id: '',
+              groupId: groupId,
+              senderId: currentUser.uid,
+              type: ActivityType.poke,
+              createdAt: DateTime.now(),
+            ),
+          );
+    });
+  }
+
+  Future<void> sendPhoto({required String groupId, required File file}) async {
+    final currentUser = ref.read(authRepositoryProvider).currentUser;
+    if (currentUser == null) return;
+
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(splitBillRepositoryProvider);
+      final url = await repo.uploadActivityPhoto(groupId: groupId, file: file);
+      await repo.addActivity(
+        ActivityEntry(
+          id: '',
+          groupId: groupId,
+          senderId: currentUser.uid,
+          type: ActivityType.photo,
+          createdAt: DateTime.now(),
+          metadata: {'photoUrl': url, 'expiresAt': DateTime.now().add(const Duration(days: 3)).toIso8601String(),},
         ),
       );
     });

@@ -22,13 +22,19 @@ import 'package:salapify/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:salapify/features/authentication/presentation/screens/verify_email_screen.dart';
 
 part 'routes.g.dart';
 
 Widget _withGradientBackground(Widget child) {
-  return DecoratedBox(
-    decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
-    child: child,
+  return Builder(
+    builder: (context) {
+      final colors = Theme.of(context).extension<AppColorsExt>()!;
+      return DecoratedBox(
+        decoration: BoxDecoration(gradient: colors.backgroundGradient),
+        child: child,
+      );
+    },
   );
 }
 
@@ -36,6 +42,7 @@ enum AppRoutes {
   home,
   signIn,
   signUp,
+  verifyEmail,
   avatarPicker,
   account,
   settings,
@@ -68,18 +75,29 @@ GoRouter goRouter(Ref ref) {
     initialLocation: "/home",
     debugLogDiagnostics: true,
     redirect: (ctx, state) {
-      final isLoggedIn = ref.read(authRepositoryProvider).currentUser != null;
+      final authRepository = ref.read(authRepositoryProvider);
+      final isLoggedIn = authRepository.currentUser != null;
       final isGuest = ref.read(guestModeProvider);
       final loc = state.matchedLocation;
 
       if (!isLoggedIn && !isGuest) {
-        return (loc.startsWith("/home") || loc == "/avatar-picker")
+        return (loc.startsWith("/home") ||
+                loc == "/avatar-picker" ||
+                loc == "/verify-email")
             ? "/sign-in"
             : null;
       }
 
       if (isGuest && !isLoggedIn) {
         return (loc == "/sign-in" || loc == "/sign-up") ? "/home" : null;
+      }
+
+      if (isLoggedIn && !authRepository.isEmailVerified) {
+        return loc == "/verify-email" ? null : "/verify-email";
+      }
+
+      if (loc == "/verify-email") {
+        return "/home";
       }
 
       final appUserAsync = ref.read(currentAppUserProvider);
@@ -93,8 +111,6 @@ GoRouter goRouter(Ref ref) {
         return loc == "/avatar-picker" ? null : "/avatar-picker";
       }
 
-      // Only block sign-in/sign-up once logged in — /avatar-picker stays
-      // freely revisitable (e.g. "Change" button on Account screen).
       if (loc == "/sign-in" || loc == "/sign-up") {
         return "/home";
       }
@@ -116,6 +132,12 @@ GoRouter goRouter(Ref ref) {
         path: "/sign-up",
         name: AppRoutes.signUp.name,
         builder: (ctx, state) => _withGradientBackground(const SignUpScreen()),
+      ),
+      GoRoute(
+        path: "/verify-email",
+        name: AppRoutes.verifyEmail.name,
+        builder: (ctx, state) =>
+            _withGradientBackground(const VerifyEmailScreen()),
       ),
       GoRoute(
         path: "/avatar-picker",
