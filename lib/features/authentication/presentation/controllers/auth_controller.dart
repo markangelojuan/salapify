@@ -6,6 +6,7 @@ import 'package:salapify/core/database/app_database.dart';
 import 'package:salapify/core/services/push_notification_service.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
+import 'package:salapify/features/authentication/domain/exceptions/auth_exceptions.dart';
 import 'package:salapify/features/budget/data/repositories/budget_repository.dart';
 import 'package:salapify/features/transaction/data/repositories/transaction_repository.dart';
 import 'package:salapify/features/transaction/data/repositories/income_source_repository.dart';
@@ -27,16 +28,29 @@ class AuthController extends _$AuthController {
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      final trimmedUsername = username.trim();
+      final userRepository = ref.read(userRepositoryProvider);
+
+      final existingUid = await userRepository.findUidByUsername(
+        trimmedUsername,
+      );
+      if (existingUid != null) {
+        throw const UsernameTakenException();
+      }
+
       final authRepository = ref.read(authRepositoryProvider);
+      // Email uniqueness is enforced by Firebase Auth itself 
       await authRepository.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
       final uid = authRepository.currentUser!.uid;
-      await ref
-          .read(userRepositoryProvider)
-          .createUserProfile(uid: uid, username: username, email: email);
+      await userRepository.createUserProfile(
+        uid: uid,
+        username: trimmedUsername,
+        email: email,
+      );
       await authRepository.sendEmailVerification();
       await ref.read(pushNotificationServiceProvider).initForUser(uid);
     });
@@ -92,7 +106,6 @@ class AuthController extends _$AuthController {
       try {
         userCredential = await authRepository.signInWithGoogle();
       } on GoogleSignInException catch (e) {
-        // User closed the picker — not a real error, don't show a snackbar.
         if (e.code == GoogleSignInExceptionCode.canceled) return;
         rethrow;
       }
@@ -126,7 +139,6 @@ class AuthController extends _$AuthController {
     });
   }
 
-  /// Reloads the Firebase user and returns whether they're verified now.
   Future<bool> checkEmailVerified() async {
     final authRepository = ref.read(authRepositoryProvider);
     await authRepository.reloadCurrentUser();

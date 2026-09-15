@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:salapify/features/authentication/data/mappers/app_user_mapper.dart';
 import 'package:salapify/features/authentication/domain/entities/app_user.dart';
+import 'package:salapify/features/authentication/domain/exceptions/auth_exceptions.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 part 'auth_repository.g.dart';
@@ -22,10 +23,17 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
-    await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    try {
+      await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        throw const EmailAlreadyInUseException();
+      }
+      rethrow;
+    }
   }
 
   AppUser? get currentUser {

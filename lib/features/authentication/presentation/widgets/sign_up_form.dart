@@ -5,6 +5,8 @@ import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/widgets/common_button.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/core/widgets/common_text_field.dart';
+import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
+import 'package:salapify/features/authentication/domain/exceptions/auth_exceptions.dart';
 import 'package:salapify/features/authentication/presentation/controllers/auth_controller.dart';
 
 class SignUpForm extends ConsumerStatefulWidget {
@@ -19,17 +21,27 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _isChecked = false;
+  bool _isCheckingUsername = false;
 
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
+  String? _usernameError;
+  String? _emailError;
+
   @override
   void initState() {
     super.initState();
     _passwordController.addListener(() => setState(() {}));
     _confirmPasswordController.addListener(() => setState(() {}));
+    _usernameController.addListener(() {
+      if (_usernameError != null) setState(() => _usernameError = null);
+    });
+    _emailController.addListener(() {
+      if (_emailError != null) setState(() => _emailError = null);
+    });
   }
 
   @override
@@ -41,17 +53,42 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
     super.dispose();
   }
 
-  void _submit() {
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
-    if (_formKey.currentState!.validate()) {
-      ref
-          .read(authControllerProvider.notifier)
-          .createUserWithEmailAndPassword(
-            email: email,
-            password: password,
-            username: _usernameController.text.trim(),
-          );
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final username = _usernameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    // Pre-check username availability before attempting account creation.
+    setState(() => _isCheckingUsername = true);
+    final existingUid = await ref
+        .read(userRepositoryProvider)
+        .findUidByUsername(username);
+    if (!mounted) return;
+    setState(() {
+      _isCheckingUsername = false;
+      _usernameError = existingUid != null ? 'Username is already taken' : null;
+    });
+    if (existingUid != null) {
+      _formKey.currentState!.validate();
+      return;
+    }
+
+    await ref
+        .read(authControllerProvider.notifier)
+        .createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+          username: username,
+        );
+    if (!mounted) return;
+
+    // Email uniqueness is only known after the create attempt.
+    final error = ref.read(authControllerProvider).error;
+    if (error is EmailAlreadyInUseException) {
+      setState(() => _emailError = 'Email is already registered');
+      _formKey.currentState!.validate();
     }
   }
 
@@ -60,7 +97,15 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
     final authState = ref.watch(authControllerProvider);
     ref.listen<AsyncValue<void>>(authControllerProvider, (_, state) {
       state.whenOrNull(
-        error: (error, _) => CommonSnackbar.showError(context, error),
+        error: (error, _) {
+          // Username/email duplicate errors are shown inline under their
+          // fields instead of a snackbar.
+          if (error is UsernameTakenException ||
+              error is EmailAlreadyInUseException) {
+            return;
+          }
+          CommonSnackbar.showError(context, error);
+        },
       );
     });
     return Form(
@@ -76,6 +121,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             validator: (value) {
               if (value == null || value.isEmpty) return "Username is required";
               if (value.length < 3) return "Minimum 3 characters";
+              if (_usernameError != null) return _usernameError;
               return null;
             },
           ),
@@ -88,6 +134,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             validator: (value) {
               if (value == null || value.isEmpty) return "Email is required";
               if (!value.contains("@")) return "Enter a valid email";
+              if (_emailError != null) return _emailError;
               return null;
             },
           ),
@@ -175,7 +222,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             btnColor: AppColors.black,
             labelColor: AppColors.white,
             onPressed: _isChecked ? _submit : null,
-            isLoading: authState.isLoading,
+            isLoading: authState.isLoading || _isCheckingUsername,
           ),
           const SizedBox(height: 12),
           CommonButton(

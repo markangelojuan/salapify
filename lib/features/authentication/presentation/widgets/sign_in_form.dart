@@ -51,7 +51,11 @@ class _SignInFormState extends ConsumerState<SignInForm> {
     }
   }
 
-  void _showForgotPasswordDialog() {
+  void _showForgotPasswordSheet() {
+
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final capturedTheme = Theme.of(context);
+
     final resetEmailController = TextEditingController(
       text: _emailController.text.trim(),
     );
@@ -59,102 +63,165 @@ class _SignInFormState extends ConsumerState<SignInForm> {
     bool isSending = false;
     bool emailSent = false;
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (dialogCtx) => StatefulBuilder(
-        builder: (dialogCtx, setDialogState) {
-          Future<void> submit() async {
-            if (!dialogFormKey.currentState!.validate()) return;
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
 
-            setDialogState(() => isSending = true);
-            try {
-              await ref
-                  .read(authControllerProvider.notifier)
-                  .sendPasswordResetEmail(resetEmailController.text.trim());
-              setDialogState(() {
-                isSending = false;
-                emailSent = true;
-              });
-            } catch (e) {
-              setDialogState(() => isSending = false);
-              if (dialogCtx.mounted) {
-                CommonSnackbar.showError(dialogCtx, e);
+      builder: (sheetCtx) => Theme(
+        data: capturedTheme,
+        child: StatefulBuilder(
+          builder: (sheetCtx, setSheetState) {
+            Future<void> submit() async {
+              if (!dialogFormKey.currentState!.validate()) return;
+
+              setSheetState(() => isSending = true);
+              try {
+                await ref
+                    .read(authControllerProvider.notifier)
+                    .sendPasswordResetEmail(resetEmailController.text.trim());
+                setSheetState(() {
+                  isSending = false;
+                  emailSent = true;
+                });
+              } catch (e) {
+                setSheetState(() => isSending = false);
+                if (sheetCtx.mounted) {
+                  CommonSnackbar.showError(sheetCtx, e);
+                }
               }
             }
-          }
 
-          return AlertDialog(
-            insetPadding: const EdgeInsets.symmetric(
-              horizontal: 24,
-              vertical: 80,
-            ),
-            title: const Text("Reset your password"),
-            content: emailSent
-                ? const Text(
-                    "If an account exists for that email, a reset link is on its way. Check your inbox (and spam folder).",
-                  )
-                : Form(
-                    key: dialogFormKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Enter your email address and we'll send you a link to reset your password.",
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
+                ),
+                child: Container(
+                  margin: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                  decoration: BoxDecoration(
+                    color: colors.background,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Align(
+                        alignment: Alignment.center,
+                        child: Container(
+                          width: 36,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: colors.border,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
                         ),
-                        const SizedBox(height: 16),
-                        CommonTextField(
-                          controller: resetEmailController,
-                          icon: Icons.mail_outline_rounded,
-                          hint: "Enter your email",
-                          label: "Email Address",
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "Email is required";
-                            }
-                            final emailRegex = RegExp(
-                              r'^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}$',
-                            );
-                            if (!emailRegex.hasMatch(value.trim())) {
-                              return "Enter a valid email";
-                            }
-                            return null;
-                          },
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        "Reset your password",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 17,
+                          color: colors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      if (emailSent) ...[
+                        Text(
+                          "If an account exists for that email, a reset link is on its way. Check your inbox (and spam folder).",
+                          style: TextStyle(color: colors.textPrimary),
+                        ),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: double.infinity,
+                          child: CommonButton(
+                            label: "Done",
+                            btnColor: colors.textPrimary,
+                            labelColor: colors.background,
+                            onPressed: () => Navigator.pop(sheetCtx),
+                          ),
+                        ),
+                      ] else ...[
+                        Form(
+                          key: dialogFormKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Enter your email address and we'll send you a link to reset your password.",
+                                style: TextStyle(color: colors.textPrimary),
+                              ),
+                              const SizedBox(height: 16),
+                              CommonTextField(
+                                controller: resetEmailController,
+                                icon: Icons.mail_outline_rounded,
+                                hint: "Enter your email",
+                                label: "Email Address",
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return "Email is required";
+                                  }
+                                  final emailRegex = RegExp(
+                                    r'^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}$',
+                                  );
+                                  if (!emailRegex.hasMatch(value.trim())) {
+                                    return "Enter a valid email";
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () => Navigator.pop(sheetCtx),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  side: BorderSide(color: colors.border),
+                                  foregroundColor: colors.textPrimary,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                ),
+                                child: const Text("Cancel"),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: CommonButton(
+                                label: "Send link",
+                                btnColor: colors.textPrimary,
+                                labelColor: colors.background,
+                                isLoading: isSending,
+                                onPressed: isSending ? null : submit,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
-                    ),
+                    ],
                   ),
-            actions: emailSent
-                ? [
-                    TextButton(
-                      onPressed: () => Navigator.pop(dialogCtx),
-                      child: const Text("Done"),
-                    ),
-                  ]
-                : [
-                    TextButton(
-                      onPressed: () => Navigator.pop(dialogCtx),
-                      child: const Text("Cancel"),
-                    ),
-                    TextButton(
-                      onPressed: isSending ? null : submit,
-                      child: isSending
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text("Send link"),
-                    ),
-                  ],
-          );
-        },
+                ),
+              ),
+            );
+          },
+        ),
       ),
     ).then((_) => resetEmailController.dispose());
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final authState = ref.watch(authControllerProvider);
     final isEmailSignInLoading = authState.isLoading && !_isGoogleLoading;
 
@@ -169,7 +236,6 @@ class _SignInFormState extends ConsumerState<SignInForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // --- Email ---
           CommonTextField(
                 controller: _emailController,
                 icon: Icons.mail_outline_rounded,
@@ -196,7 +262,6 @@ class _SignInFormState extends ConsumerState<SignInForm> {
               ),
           const SizedBox(height: 18),
 
-          // --- Password ---
           CommonTextField(
                 controller: _passwordController,
                 icon: Icons.lock_open_rounded,
@@ -219,7 +284,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                         ? Icons.visibility_rounded
                         : Icons.visibility_off_rounded,
                     size: 20,
-                    color: AppColors.background,
+                    color: colors.textSecondary,
                   ),
                 ),
               )
@@ -236,16 +301,17 @@ class _SignInFormState extends ConsumerState<SignInForm> {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
-              onPressed: _showForgotPasswordDialog,
+              onPressed: _showForgotPasswordSheet,
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                foregroundColor: colors.textPrimary,
               ),
               child: Text(
                 "Forgot password?",
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),
@@ -256,8 +322,8 @@ class _SignInFormState extends ConsumerState<SignInForm> {
 
           CommonButton(
                 label: "Sign In",
-                btnColor: AppColors.black,
-                labelColor: AppColors.white,
+                btnColor: colors.textPrimary,
+                labelColor: colors.background,
                 isLoading: isEmailSignInLoading,
                 onPressed: authState.isLoading ? null : _submit,
               )
@@ -274,15 +340,15 @@ class _SignInFormState extends ConsumerState<SignInForm> {
 
           Row(
             children: [
-              Expanded(child: Divider(color: AppColors.border)),
+              Expanded(child: Divider(color: colors.border)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Text(
                   "Or continue with",
-                  style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
+                  style: TextStyle(color: colors.textSecondary, fontSize: 13),
                 ),
               ),
-              Expanded(child: Divider(color: AppColors.border)),
+              Expanded(child: Divider(color: colors.border)),
             ],
           ),
           const SizedBox(height: 16),
@@ -293,10 +359,13 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                 child: OutlinedButton.icon(
                   onPressed: authState.isLoading ? null : _continueWithGoogle,
                   icon: _isGoogleLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: colors.textPrimary,
+                          ),
                         )
                       : Image.asset(
                           'assets/images/google_logo.png',
@@ -306,13 +375,14 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                   label: Text(
                     "Continue with Google",
                     style: TextStyle(
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    side: BorderSide(color: AppColors.border),
+                    side: BorderSide(color: colors.border),
+                    foregroundColor: colors.textPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -333,15 +403,22 @@ class _SignInFormState extends ConsumerState<SignInForm> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("Don't have an account? "),
+              Text(
+                "Don't have an account? ",
+                style: TextStyle(color: colors.textPrimary),
+              ),
               TextButton(
                 onPressed: () => context.pushNamed(AppRoutes.signUp.name),
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.zero,
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  foregroundColor: colors.textPrimary,
                 ),
-                child: const Text("Sign Up"),
+                child: const Text(
+                  "Sign Up",
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
               ),
             ],
           ),
@@ -356,7 +433,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
               child: Text(
                 "Continue as guest",
                 style: TextStyle(
-                  color: AppColors.textPrimary.withOpacity(0.6),
+                  color: colors.textSecondary,
                   fontSize: 13,
                 ),
               ),

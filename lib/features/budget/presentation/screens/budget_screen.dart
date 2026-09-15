@@ -3,9 +3,12 @@ import 'package:flutter_reorderable_grid_view/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:salapify/core/services/connectivity_service.dart';
+import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/budget/domain/budget_totals_calculator.dart';
 import 'package:salapify/features/budget/domain/entities/budget_category.dart';
 import 'package:salapify/features/budget/presentation/controllers/budget_controller.dart';
+import 'package:salapify/features/budget/domain/entities/budget_filter.dart';
+import 'package:salapify/features/budget/presentation/widgets/budget_filter_sheet.dart';
 import 'package:salapify/features/budget/presentation/widgets/budget_summary_card.dart';
 import 'package:salapify/features/budget/presentation/widgets/category_card.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
@@ -16,11 +19,30 @@ import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:lottie/lottie.dart';
 
-class BudgetScreen extends ConsumerWidget {
+class BudgetScreen extends ConsumerStatefulWidget {
   const BudgetScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BudgetScreen> createState() => _BudgetScreenState();
+}
+
+class _BudgetScreenState extends ConsumerState<BudgetScreen> {
+  // client state only
+  BudgetFilter _filter = BudgetFilter.empty;
+
+  Future<void> _openFilterSheet(BudgetingPeriod globalPeriod) async {
+    final result = await showBudgetFilterSheet(
+      context,
+      current: _filter,
+      globalPeriod: globalPeriod,
+    );
+    if (result != null) {
+      setState(() => _filter = result);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     ref.listen<AsyncValue<void>>(budgetActionsProvider, (previous, next) {
       if (next.hasError) {
         CommonSnackbar.showError(context, next.error!);
@@ -48,6 +70,8 @@ class BudgetScreen extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, _) => Center(child: Text('Failed to load categories: $err')),
       data: (categories) {
+        // Totals are ALWAYS computed from the unfiltered category/transaction
+        // lists — the filter only affects which cards are shown below.
         final totalAllocated = BudgetTotalsCalculator.totalAllocated(
           categories: categories,
           globalPeriod: globalPeriod,
@@ -59,36 +83,37 @@ class BudgetScreen extends ConsumerWidget {
           firstHalfEndDay: firstHalfEndDay,
         );
 
+        final now = DateTime.now();
+        final activeCategories = categories
+            .where(
+              (c) =>
+                  !c.isDeleted &&
+                  c.isActiveFor(
+                    globalPeriod: globalPeriod,
+                    firstHalfEndDay: firstHalfEndDay,
+                    now: now,
+                  ),
+            )
+            .toList();
+
+        final filteredCategories = activeCategories
+            .where((c) => c.matchesFilter(_filter))
+            .toList();
+
         final grouped = _groupCategories(
-          categories: categories,
+          categories: filteredCategories,
           globalPeriod: globalPeriod,
           firstHalfEndDay: firstHalfEndDay,
-          now: DateTime.now(),
+          now: now,
         );
+
+        final hasAnyCategories = activeCategories.isNotEmpty;
+        final hasFilteredResults =
+            grouped.current.isNotEmpty || grouped.other.isNotEmpty;
 
         return SafeArea(
           child: CustomScrollView(
             slivers: [
-              // if (hasUnsynced)
-              //   SliverToBoxAdapter(
-              //     child: Container(
-              //       width: double.infinity,
-              //       color: isOnline
-              //           ? Theme.of(context).colorScheme.secondaryContainer
-              //           : Theme.of(context).colorScheme.errorContainer,
-              //       padding: const EdgeInsets.symmetric(
-              //         vertical: 6,
-              //         horizontal: 16,
-              //       ),
-              //       child: Text(
-              //         isOnline
-              //             ? 'Syncing changes…'
-              //             : 'Offline — changes saved locally',
-              //         style: Theme.of(context).textTheme.labelSmall,
-              //         textAlign: TextAlign.center,
-              //       ),
-              //     ),
-              //   ),
               SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverToBoxAdapter(
@@ -100,7 +125,34 @@ class BudgetScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              if (grouped.current.isEmpty && grouped.other.isEmpty)
+              if (hasAnyCategories)
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _FilterBar(
+                          activeCount: _filter.activeCount,
+                          onTap: () => _openFilterSheet(globalPeriod),
+                        ),
+                        if (!_filter.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(
+                              'Clear filters to reorder categories',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Theme.of(context).colorScheme.onSurface
+                                    .withValues(alpha: 0.45),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (!hasAnyCategories)
                 SliverFillRemaining(
                   hasScrollBody: false,
                   child: Transform.translate(
@@ -128,6 +180,14 @@ class BudgetScreen extends ConsumerWidget {
                     ),
                   ),
                 )
+              else if (!hasFilteredResults)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _FilteredEmptyState(
+                    onClearFilters: () =>
+                        setState(() => _filter = BudgetFilter.empty),
+                  ),
+                )
               else ...[
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -136,6 +196,7 @@ class BudgetScreen extends ConsumerWidget {
                       key: const ValueKey('current-grid'),
                       categories: grouped.current,
                       dimmed: false,
+                      reorderEnabled: _filter.isEmpty,
                     ),
                   ),
                 ),
@@ -153,6 +214,7 @@ class BudgetScreen extends ConsumerWidget {
                             ),
                             categories: grouped.other,
                             dimmed: true,
+                            reorderEnabled: _filter.isEmpty,
                           ),
                         ],
                       ),
@@ -167,22 +229,15 @@ class BudgetScreen extends ConsumerWidget {
     );
   }
 
+  /// Splits an already-filtered list of active categories into the current
+  /// half/period and "other" (opposite bi-monthly half), same grouping
+  /// logic as before — the filter is applied upstream in [build].
   _GroupedCategories _groupCategories({
     required List<BudgetCategory> categories,
     required BudgetingPeriod globalPeriod,
     required int firstHalfEndDay,
     required DateTime now,
   }) {
-    final active = categories.where(
-      (c) =>
-          !c.isDeleted &&
-          c.isActiveFor(
-            globalPeriod: globalPeriod,
-            firstHalfEndDay: firstHalfEndDay,
-            now: now,
-          ),
-    );
-
     int cardComparator(BudgetCategory a, BudgetCategory b) {
       if (a.isCompleted != b.isCompleted) {
         return a.isCompleted ? 1 : -1;
@@ -191,14 +246,14 @@ class BudgetScreen extends ConsumerWidget {
     }
 
     if (globalPeriod == BudgetingPeriod.monthly) {
-      final sorted = active.toList()..sort(cardComparator);
+      final sorted = categories.toList()..sort(cardComparator);
       return _GroupedCategories(current: sorted, other: const []);
     }
 
     final current = <BudgetCategory>[];
     final other = <BudgetCategory>[];
 
-    for (final c in active) {
+    for (final c in categories) {
       if (c.matchesCurrentHalf(firstHalfEndDay: firstHalfEndDay, now: now)) {
         current.add(c);
       } else {
@@ -219,15 +274,139 @@ class _GroupedCategories {
   final List<BudgetCategory> other;
 }
 
+/// Compact pill trigger that opens the filter sheet, with a badge showing
+/// how many filters are currently active.
+class _FilterBar extends StatelessWidget {
+  const _FilterBar({required this.activeCount, required this.onTap});
+
+  final int activeCount;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final active = activeCount > 0;
+
+    return Row(
+      children: [
+        Icon(Icons.category_rounded, size: 15, color: AppColors.primary),
+        const SizedBox(width: 6),
+        Text(
+          'CATEGORIES',
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 12,
+            letterSpacing: 0.6,
+            color: colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+        ),
+        const Spacer(),
+        InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            decoration: BoxDecoration(
+              color: active
+                  ? AppColors.primary.withValues(alpha: 0.12)
+                  : colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.6,
+                    ),
+              borderRadius: BorderRadius.circular(20),
+              border: active
+                  ? Border.all(color: AppColors.primary.withValues(alpha: 0.3))
+                  : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.tune_rounded,
+                  size: 15,
+                  color: active
+                      ? AppColors.primary
+                      : colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  active ? 'Filters ($activeCount)' : 'Filter',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12.5,
+                    color: active
+                        ? AppColors.primary
+                        : colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Shown when categories exist but none match the active filter 
+class _FilteredEmptyState extends StatelessWidget {
+  const _FilteredEmptyState({required this.onClearFilters});
+
+  final VoidCallback onClearFilters;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Transform.translate(
+      offset: const Offset(0, -40),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.filter_alt_off_rounded,
+              size: 40,
+              color: colorScheme.onSurface.withValues(alpha: 0.3),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'No categories match your filters',
+              style: TextStyle(
+                fontSize: 13,
+                color: colorScheme.onSurface.withValues(alpha: 0.55),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: onClearFilters,
+              child: const Text('Clear filters'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ReorderableCategoryGrid extends ConsumerWidget {
   const _ReorderableCategoryGrid({
     super.key,
     required this.categories,
     required this.dimmed,
+    this.reorderEnabled = true,
   });
 
   final List<BudgetCategory> categories;
   final bool dimmed;
+
+
+  final bool reorderEnabled;
+
+  static const _gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 2,
+    mainAxisSpacing: 12,
+    crossAxisSpacing: 12,
+    childAspectRatio: 1.15,
+  );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -250,6 +429,15 @@ class _ReorderableCategoryGrid extends ConsumerWidget {
         )
         .toList();
 
+    if (!reorderEnabled) {
+      return GridView(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: _gridDelegate,
+        children: children,
+      );
+    }
+
     return ReorderableBuilder(
       onReorder: (ReorderedListFunction reorderedListFunction) {
         final reordered =
@@ -263,12 +451,7 @@ class _ReorderableCategoryGrid extends ConsumerWidget {
         return GridView(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 1.15,
-          ),
+          gridDelegate: _gridDelegate,
           children: reorderedChildren,
         );
       },

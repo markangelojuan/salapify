@@ -6,7 +6,7 @@ import 'package:salapify/features/budget/presentation/screens/category_form_scre
 import 'package:salapify/features/settings/presentation/screens/account_screen.dart';
 import 'package:salapify/features/settings/presentation/screens/settings_screen.dart';
 import 'package:salapify/features/settings/presentation/screens/help_screen.dart';
-import 'package:salapify/features/dashboard/presentation/screens/home_screen.dart';
+import 'package:salapify/features/shell/presentation/screens/home_screen.dart';
 import 'package:salapify/features/transaction/domain/entities/income_source.dart';
 import 'package:salapify/features/transaction/presentation/screens/expense_form_screen.dart';
 import 'package:salapify/features/transaction/presentation/screens/income_form_screen.dart';

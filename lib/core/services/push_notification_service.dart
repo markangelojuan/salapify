@@ -1,7 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:salapify/features/dashboard/presentation/screens/home_screen.dart';
+import 'package:salapify/features/shell/presentation/screens/home_screen.dart';
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
 import 'package:salapify/router/routes.dart';
 

@@ -38,7 +38,7 @@ class UserRepository {
     return query.docs.first.id;
   }
 
-  Future<List<Map<String, String>>> searchUsernames(String prefix) async {
+  Future<List<Map<String, String?>>> searchUsernames(String prefix) async {
     if (prefix.isEmpty) return [];
     final query = await _users
         .where('username', isGreaterThanOrEqualTo: prefix)
@@ -46,7 +46,13 @@ class UserRepository {
         .limit(10)
         .get();
     return query.docs
-        .map((d) => {'uid': d.id, 'username': d.data()['username'] as String})
+        .map(
+          (d) => {
+            'uid': d.id,
+            'username': d.data()['username'] as String,
+            'avatarId': d.data()['avatarId'] as String?,
+          },
+        )
         .toList();
   }
 

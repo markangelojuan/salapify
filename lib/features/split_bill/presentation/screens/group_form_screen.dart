@@ -10,6 +10,7 @@ import 'package:salapify/features/authentication/data/repositories/auth_reposito
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 import 'package:salapify/features/split_bill/presentation/controllers/split_bill_controller.dart';
+import 'package:salapify/features/split_bill/presentation/widgets/member_avatar.dart';
 
 class GroupFormScreen extends ConsumerStatefulWidget {
   const GroupFormScreen({super.key, this.existingGroup});
@@ -27,7 +28,7 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
 
   final Map<String, String> _selectedMembers = {};
 
-  List<Map<String, String>> _suggestions = [];
+  List<Map<String, String?>> _suggestions = [];
   Timer? _debounce;
   bool _isSearching = false;
   bool _hasSearched = false;
@@ -124,7 +125,7 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
     });
   }
 
-  void _addMember(Map<String, String> user) {
+  void _addMember(Map<String, String?> user) {
     setState(() {
       _selectedMembers[user['uid']!] = user['username']!;
       _suggestions = [];
@@ -215,15 +216,26 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
                   ),
                   child: _suggestions.isEmpty
                       ? Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          child: Center(
-                            child: Text(
-                              'No user found',
-                              style: TextStyle(
-                                fontSize: 13,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.search_off_rounded,
+                                size: 16,
                                 color: colors.textSecondary,
                               ),
-                            ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'No user found',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: colors.textSecondary,
+                                ),
+                              ),
+                            ],
                           ),
                         )
                       : ListView.builder(
@@ -237,16 +249,9 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
-                              leading: CircleAvatar(
+                              leading: MemberAvatar(
+                                avatarId: user['avatarId'],
                                 radius: 16,
-                                backgroundColor: colors.primary.withValues(
-                                  alpha: 0.15,
-                                ),
-                                child: Icon(
-                                  Icons.person_outline_rounded,
-                                  size: 16,
-                                  color: colors.primary,
-                                ),
                               ),
                               title: Text(
                                 user['username']!,
