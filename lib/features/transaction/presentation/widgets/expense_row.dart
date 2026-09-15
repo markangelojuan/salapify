@@ -24,6 +24,8 @@ class ExpenseRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Dismissible(
       key: ValueKey(transaction.id),
       direction: DismissDirection.endToStart,
@@ -36,10 +38,10 @@ class ExpenseRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         alignment: Alignment.centerRight,
         decoration: BoxDecoration(
-          color: Colors.red.withValues(alpha: 0.9),
+          color: colors.error.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
+        child: Icon(Icons.delete_outline_rounded, color: colors.onPrimary),
       ),
       child: InkWell(
         onTap: onTap,
@@ -48,7 +50,7 @@ class ExpenseRow extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: colors.border),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -57,7 +59,7 @@ class ExpenseRow extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: colors.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -65,7 +67,7 @@ class ExpenseRow extends StatelessWidget {
                       ? CategoryIcons.iconFor(category!.iconName)
                       : Icons.help_outline_rounded,
                   size: 18,
-                  color: AppColors.primary,
+                  color: colors.primary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -75,9 +77,10 @@ class ExpenseRow extends StatelessWidget {
                   children: [
                     Text(
                       category?.name ?? 'Deleted category',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
+                        color: colors.textPrimary,
                       ),
                     ),
                     if (transaction.note != null &&
@@ -87,7 +90,7 @@ class ExpenseRow extends StatelessWidget {
                         transaction.note!,
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textPrimary.withValues(alpha: 0.6),
+                          color: colors.textSecondary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -98,10 +101,10 @@ class ExpenseRow extends StatelessWidget {
               ),
               Text(
                 '-${transaction.amount.toStringAsFixed(2)}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
-                  color: Colors.red,
+                  color: colors.error,
                 ),
               ),
             ],

@@ -85,11 +85,13 @@ class ExpensesTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     ref.listen<AsyncValue<void>>(transactionActionsProvider, (previous, next) {
-    if (next.hasError) {
-      CommonSnackbar.showError(context, next.error!);
-    }
-  });
+      if (next.hasError) {
+        CommonSnackbar.showError(context, next.error!);
+      }
+    });
     final transactionsAsync = ref.watch(transactionsProvider);
     final categoriesAsync = ref.watch(budgetCategoriesProvider);
 
@@ -112,7 +114,7 @@ class ExpensesTab extends ConsumerWidget {
                   Text(
                     'No expenses yet',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
@@ -151,7 +153,7 @@ class ExpensesTab extends ConsumerWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 13,
-                      color: AppColors.textPrimary.withValues(alpha: 0.6),
+                      color: colors.textSecondary,
                     ),
                   ),
                 ),

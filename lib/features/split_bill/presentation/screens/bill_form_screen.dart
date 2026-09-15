@@ -249,6 +249,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
   }
 
   Future<void> _delete() async {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -261,7 +262,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text('Delete', style: TextStyle(color: colors.error)),
           ),
         ],
       ),
@@ -286,6 +287,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final currency =
         ref.watch(currencySettingProvider).value ?? AppCurrency.php;
     final membersAsync = ref.watch(groupMembersProvider(widget.group.id));
@@ -333,7 +335,6 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
     final lockTotalAndSplit = _isEditingExisting && hasPaymentActivity;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(title: Text(title)),
       body: SafeArea(
         child: Form(
@@ -414,18 +415,14 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                                   Icon(
                                     Icons.lock_outline_rounded,
                                     size: 12,
-                                    color: AppColors.textPrimary.withValues(
-                                      alpha: 0.4,
-                                    ),
+                                    color: colors.textSecondary,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     'Locked — payment activity exists',
                                     style: TextStyle(
                                       fontSize: 11,
-                                      color: AppColors.textPrimary.withValues(
-                                        alpha: 0.5,
-                                      ),
+                                      color: colors.textSecondary,
                                     ),
                                   ),
                                 ],
@@ -448,9 +445,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary.withValues(
-                                  alpha: 0.6,
-                                ),
+                                color: colors.textSecondary,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -544,8 +539,8 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                 const SizedBox(height: 8),
                 CommonButton(
                   label: _isEditingExisting ? 'Save Changes' : 'Add Bill',
-                  btnColor: AppColors.black,
-                  labelColor: AppColors.white,
+                  btnColor: colors.textPrimary,
+                  labelColor: colors.background,
                   isLoading: _isSaving,
                   onPressed: () => _save(names),
                 ),
@@ -553,8 +548,8 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                   const SizedBox(height: 12),
                   CommonButton(
                     label: 'Delete Bill',
-                    btnColor: AppColors.white,
-                    labelColor: Colors.red,
+                    btnColor: colors.surface,
+                    labelColor: colors.error,
                     isLoading: _isSaving,
                     onPressed: _delete,
                   ),
@@ -568,9 +563,10 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
   }
 }
 
-/// Rounded white "grouped card" shell used to give each form section
-/// (bill details, split, payment status) a consistent, modern container
-/// instead of loose fields floating directly on the screen background.
+/// Grouped section shell for each form section (bill details, split,
+/// payment status). Uses the same gradient-tint + border recipe as
+/// BudgetSummaryCard / CashFlowSummaryStrip instead of a flat white card,
+/// so forms match the rest of the app's visual language.
 class _SectionCard extends StatelessWidget {
   const _SectionCard({
     required this.child,
@@ -586,20 +582,22 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colors.primary.withValues(alpha: 0.07),
+            colors.primary.withValues(alpha: 0.015),
+          ],
+        ),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.10)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -608,7 +606,7 @@ class _SectionCard extends StatelessWidget {
             Row(
               children: [
                 if (icon != null) ...[
-                  Icon(icon, size: 16, color: AppColors.primary),
+                  Icon(icon, size: 16, color: colors.primary),
                   const SizedBox(width: 6),
                 ],
                 Text(
@@ -616,7 +614,7 @@ class _SectionCard extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const Spacer(),
@@ -641,10 +639,12 @@ class _CountPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.10),
+        color: colors.primary.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -652,7 +652,7 @@ class _CountPill extends StatelessWidget {
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: AppColors.primary,
+          color: colors.primary,
         ),
       ),
     );
@@ -676,11 +676,13 @@ class _ScrollablePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.04),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
+        color: colors.primary.withValues(alpha: 0.04),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.12)),
         borderRadius: BorderRadius.circular(14),
       ),
       clipBehavior: Clip.antiAlias,
@@ -693,7 +695,7 @@ class _ScrollablePanel extends StatelessWidget {
             height: 1,
             indent: 14,
             endIndent: 14,
-            color: AppColors.primary.withValues(alpha: 0.10),
+            color: colors.primary.withValues(alpha: 0.10),
           ),
           itemBuilder: itemBuilder,
         ),
@@ -702,8 +704,7 @@ class _ScrollablePanel extends StatelessWidget {
   }
 }
 
-/// Restyled "view only" notice as a soft banner chip instead of bare
-/// centered icon+text, matching the app's pill/banner language.
+/// Soft banner chip for "view only" / "locked" notices.
 class _ReadOnlyBanner extends StatelessWidget {
   const _ReadOnlyBanner({required this.text});
 
@@ -711,19 +712,21 @@ class _ReadOnlyBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.textPrimary.withValues(alpha: 0.05),
+        color: colors.textSecondary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: colors.border),
       ),
       child: Row(
         children: [
           Icon(
             Icons.info_outline_rounded,
             size: 16,
-            color: AppColors.textPrimary.withValues(alpha: 0.5),
+            color: colors.textSecondary,
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -731,7 +734,7 @@ class _ReadOnlyBanner extends StatelessWidget {
               text,
               style: TextStyle(
                 fontSize: 12,
-                color: AppColors.textPrimary.withValues(alpha: 0.6),
+                color: colors.textSecondary,
               ),
             ),
           ),
@@ -759,11 +762,13 @@ class _PaidByField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.05),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+        color: colors.primary.withValues(alpha: 0.05),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.15)),
         borderRadius: BorderRadius.circular(14),
       ),
       child: DropdownButtonHideUnderline(
@@ -772,7 +777,7 @@ class _PaidByField extends StatelessWidget {
           decoration: const InputDecoration(border: InputBorder.none),
           icon: Icon(
             Icons.expand_more_rounded,
-            color: AppColors.primary.withValues(alpha: 0.7),
+            color: colors.primary.withValues(alpha: 0.7),
           ),
           onChanged: onChanged,
           items: memberIds
@@ -785,14 +790,15 @@ class _PaidByField extends StatelessWidget {
                       Icon(
                         Icons.person_outline_rounded,
                         size: 16,
-                        color: AppColors.primary,
+                        color: colors.primary,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         names[id] ?? '...',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
+                          color: colors.textPrimary,
                         ),
                       ),
                     ],
@@ -813,11 +819,13 @@ class _FormerMemberBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Container(
       margin: const EdgeInsets.only(left: 6),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: AppColors.textPrimary.withValues(alpha: 0.08),
+        color: colors.textSecondary.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -825,7 +833,7 @@ class _FormerMemberBadge extends StatelessWidget {
         style: TextStyle(
           fontSize: 9,
           fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary.withValues(alpha: 0.5),
+          color: colors.textSecondary,
         ),
       ),
     );
@@ -850,6 +858,8 @@ class _SharePreviewRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       child: Row(
@@ -860,9 +870,10 @@ class _SharePreviewRow extends StatelessWidget {
                 Flexible(
                   child: Text(
                     name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
+                      color: colors.textPrimary,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -873,7 +884,11 @@ class _SharePreviewRow extends StatelessWidget {
           ),
           Text(
             '${currency.symbol}${amount.toStringAsFixed(2)}',
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+              color: colors.textPrimary,
+            ),
           ),
         ],
       ),
@@ -899,6 +914,8 @@ class _CustomShareField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       child: Row(
@@ -909,9 +926,10 @@ class _CustomShareField extends StatelessWidget {
                 Flexible(
                   child: Text(
                     name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
+                      color: colors.textPrimary,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -923,7 +941,7 @@ class _CustomShareField extends StatelessWidget {
           Text(
             currency.symbol,
             style: TextStyle(
-              color: AppColors.textPrimary.withValues(alpha: 0.6),
+              color: colors.textSecondary,
               fontWeight: FontWeight.w500,
               fontSize: 13,
             ),
@@ -941,9 +959,10 @@ class _CustomShareField extends StatelessWidget {
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
                 ],
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
+                  color: colors.textPrimary,
                 ),
                 decoration: const InputDecoration(
                   isDense: true,
@@ -960,14 +979,7 @@ class _CustomShareField extends StatelessWidget {
   }
 }
 
-/// Per-member payment status list for an existing bill. Read-only for
-/// everyone except the payer, who gets Confirm/Decline actions on any
-/// share currently marked paid.
-///
-/// Uses the same _SectionCard shell as the fields above so the whole form
-/// reads as one set of consistent grouped panels, and the same
-/// _ScrollablePanel as the Split section so it scrolls internally instead
-/// of pushing the Save/Delete buttons further down as group size grows.
+
 class _PaymentStatusSection extends ConsumerWidget {
   const _PaymentStatusSection({
     required this.bill,
@@ -1009,6 +1021,7 @@ class _PaymentStatusSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final owerShares = bill.shares
         .where((s) => s.userId != bill.paidBy)
         .toList();
@@ -1030,7 +1043,7 @@ class _PaymentStatusSection extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.12),
+                color: colors.warning.withValues(alpha: 0.14),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -1038,7 +1051,7 @@ class _PaymentStatusSection extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: Colors.orange[700],
+                  color: colors.warning,
                 ),
               ),
             ),
@@ -1096,22 +1109,23 @@ class _ShareStatusRow extends StatelessWidget {
   final AppCurrency currency;
   final bool isFormerMember;
 
-  (String, Color) get _statusMeta {
+  (String, Color) _statusMeta(AppColorsExt colors) {
     switch (share.status) {
       case PaymentStatus.unpaid:
-        return ('Unpaid', AppColors.textPrimary.withValues(alpha: 0.5));
+        return ('Unpaid', colors.textSecondary);
       case PaymentStatus.markedPaid:
-        return ('Says paid — review', Colors.orange[700]!);
+        return ('Says paid — review', colors.warning);
       case PaymentStatus.confirmed:
-        return ('Confirmed', Colors.green[700]!);
+        return ('Confirmed', colors.primary);
       case PaymentStatus.disputed:
-        return ('Disputed', Colors.red[600]!);
+        return ('Disputed', colors.error);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final (label, color) = _statusMeta;
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final (label, color) = _statusMeta(colors);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: Row(
@@ -1125,9 +1139,10 @@ class _ShareStatusRow extends StatelessWidget {
                     Flexible(
                       child: Text(
                         name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
+                          color: colors.textPrimary,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1149,16 +1164,16 @@ class _ShareStatusRow extends StatelessWidget {
           ),
           if (canAct) ...[
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.check_circle_outline_rounded,
-                color: Colors.green,
+                color: colors.primary,
               ),
               tooltip: 'Confirm',
               visualDensity: VisualDensity.compact,
               onPressed: onConfirm,
             ),
             IconButton(
-              icon: const Icon(Icons.cancel_outlined, color: Colors.red),
+              icon: Icon(Icons.cancel_outlined, color: colors.error),
               tooltip: 'Decline',
               visualDensity: VisualDensity.compact,
               onPressed: onDispute,

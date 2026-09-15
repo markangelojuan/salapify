@@ -13,6 +13,7 @@ class NotificationScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final notificationsAsync = ref.watch(notificationsProvider);
 
     return SafeArea(
@@ -47,7 +48,7 @@ class NotificationScreen extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary.withValues(alpha: 0.45),
+                          color: colors.textSecondary,
                           letterSpacing: 0.6,
                         ),
                       ),
@@ -116,6 +117,8 @@ class _HeaderCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       decoration: BoxDecoration(
@@ -124,11 +127,11 @@ class _HeaderCard extends ConsumerWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primary.withValues(alpha: 0.10),
-            AppColors.primary.withValues(alpha: 0.02),
+            colors.primary.withValues(alpha: 0.10),
+            colors.primary.withValues(alpha: 0.02),
           ],
         ),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.08)),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.08)),
       ),
       child: Row(
         children: [
@@ -137,12 +140,12 @@ class _HeaderCard extends ConsumerWidget {
             height: 40,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primary.withValues(alpha: 0.12),
+              color: colors.primary.withValues(alpha: 0.12),
             ),
             child: Icon(
               Icons.notifications_rounded,
               size: 20,
-              color: AppColors.primary,
+              color: colors.primary,
             ),
           ),
           const SizedBox(width: 12),
@@ -150,17 +153,20 @@ class _HeaderCard extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Notifications',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: colors.textPrimary,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  unreadCount > 0 ? '$unreadCount unread' : 'You\'re all caught up',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textPrimary.withValues(alpha: 0.6),
-                  ),
+                  unreadCount > 0
+                      ? '$unreadCount unread'
+                      : 'You\'re all caught up',
+                  style: TextStyle(fontSize: 12, color: colors.textSecondary),
                 ),
               ],
             ),
@@ -170,7 +176,10 @@ class _HeaderCard extends ConsumerWidget {
               onPressed: () => ref
                   .read(notificationControllerProvider.notifier)
                   .markAllRead(),
-              style: TextButton.styleFrom(padding: EdgeInsets.zero),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                foregroundColor: colors.primary,
+              ),
               child: const Text(
                 'Mark all read',
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
@@ -187,6 +196,8 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Padding(
       padding: const EdgeInsets.only(top: 40),
       child: Center(
@@ -200,9 +211,9 @@ class _EmptyState extends StatelessWidget {
             ),
             Text(
               'No notifications yet',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: colors.textSecondary),
             ),
           ],
         ),
@@ -216,18 +227,18 @@ class _NotificationTile extends ConsumerWidget {
 
   final NotificationEntry entry;
 
-  (IconData, Color) get _iconAndColor {
+  (IconData, Color Function(AppColorsExt)) get _iconAndColorResolver {
     switch (entry.type) {
       case NotificationType.addedToGroup:
-        return (Icons.group_add_rounded, AppColors.primary);
+        return (Icons.group_add_rounded, (c) => c.primary);
       case NotificationType.billAdded:
-        return (Icons.receipt_long_rounded, AppColors.primary);
+        return (Icons.receipt_long_rounded, (c) => c.primary);
       case NotificationType.paymentMarked:
-        return (Icons.hourglass_top_rounded, Colors.orange[700]!);
+        return (Icons.hourglass_top_rounded, (c) => c.warning);
       case NotificationType.paymentConfirmed:
-        return (Icons.check_circle_rounded, Colors.green[700]!);
+        return (Icons.check_circle_rounded, (c) => c.primary);
       case NotificationType.paymentDisputed:
-        return (Icons.error_rounded, Colors.red[600]!);
+        return (Icons.error_rounded, (c) => c.error);
     }
   }
 
@@ -257,7 +268,9 @@ class _NotificationTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final (icon, color) = _iconAndColor;
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final (icon, resolveColor) = _iconAndColorResolver;
+    final color = resolveColor(colors);
 
     return InkWell(
       onTap: () {
@@ -272,14 +285,12 @@ class _NotificationTile extends ConsumerWidget {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: entry.read
-              ? null
-              : AppColors.primary.withValues(alpha: 0.05),
+          color: entry.read ? null : colors.primary.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: entry.read
-                ? AppColors.border
-                : AppColors.primary.withValues(alpha: 0.25),
+                ? colors.border
+                : colors.primary.withValues(alpha: 0.25),
           ),
         ),
         child: Row(
@@ -291,7 +302,7 @@ class _NotificationTile extends ConsumerWidget {
                 height: 34,
                 margin: const EdgeInsets.only(right: 10),
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: colors.primary,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -316,16 +327,13 @@ class _NotificationTile extends ConsumerWidget {
                       fontWeight: entry.read
                           ? FontWeight.w500
                           : FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     _timeAgo(entry.createdAt),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textPrimary.withValues(alpha: 0.5),
-                    ),
+                    style: TextStyle(fontSize: 11, color: colors.textSecondary),
                   ),
                 ],
               ),

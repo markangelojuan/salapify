@@ -62,11 +62,13 @@ class _AddBillCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Container(
       width: 140,
       margin: const EdgeInsets.only(right: 12),
       child: Material(
-        color: AppColors.primary.withValues(alpha: 0.06),
+        color: colors.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
@@ -77,9 +79,7 @@ class _AddBillCard extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.2),
-              ),
+              border: Border.all(color: colors.primary.withValues(alpha: 0.2)),
             ),
             child: Center(
               child: Column(
@@ -88,7 +88,7 @@ class _AddBillCard extends StatelessWidget {
                   Icon(
                     Icons.add_circle_outline_rounded,
                     size: 28,
-                    color: AppColors.primary,
+                    color: colors.primary,
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -96,7 +96,7 @@ class _AddBillCard extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
-                      color: AppColors.primary,
+                      color: colors.primary,
                     ),
                   ),
                 ],
@@ -126,17 +126,31 @@ class _BillCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final isPayer = bill.paidBy == currentUid;
     final myShare = bill.shares.firstWhereOrNull((s) => s.userId == currentUid);
 
     return Container(
       width: 220,
       margin: const EdgeInsets.only(right: 12),
-      child: Card(
-        margin: EdgeInsets.zero,
-        clipBehavior: Clip.antiAlias,
-        elevation: 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: colors.surface,
+        border: Border.all(color: colors.primary.withValues(alpha: 0.10)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.4
+                  : 0.08,
+            ),
+            blurRadius: 4,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: () => context.pushNamed(
             AppRoutes.billForm.name,
@@ -151,22 +165,21 @@ class _BillCard extends ConsumerWidget {
                   children: [
                     CircleAvatar(
                       radius: 16,
-                      backgroundColor: AppColors.primary.withValues(
-                        alpha: 0.15,
-                      ),
+                      backgroundColor: colors.primary.withValues(alpha: 0.15),
                       child: Icon(
                         Icons.receipt_long_rounded,
                         size: 16,
-                        color: AppColors.primary,
+                        color: colors.primary,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         bill.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
+                          color: colors.textPrimary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -177,24 +190,22 @@ class _BillCard extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Text(
                   'Total ${currency.format(bill.totalAmount)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'Paid by ${isPayer ? "you" : (names[bill.paidBy] ?? '...')}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textPrimary.withValues(alpha: 0.6),
-                  ),
+                  style: TextStyle(fontSize: 11, color: colors.textSecondary),
                 ),
                 const Spacer(),
                 if (isPayer)
-                  _buildPayerStatusRow(context)
+                  _buildPayerStatusRow(context, colors)
                 else if (myShare != null)
-                  _buildOwerRow(context, ref, myShare),
+                  _buildOwerRow(context, ref, myShare, colors),
               ],
             ),
           ),
@@ -203,7 +214,7 @@ class _BillCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildPayerStatusRow(BuildContext context) {
+  Widget _buildPayerStatusRow(BuildContext context, AppColorsExt colors) {
     final total = bill.shares.length;
     final confirmed = bill.shares
         .where((s) => s.status == PaymentStatus.confirmed)
@@ -223,29 +234,31 @@ class _BillCard extends ConsumerWidget {
     );
 
     if (confirmed == total) {
-      return label('All confirmed', Colors.green[700]!);
+      return label('All confirmed', colors.primary);
     }
     if (disputed > 0) {
-      return label('$disputed disputed — tap to review', Colors.red[600]!);
+      return label('$disputed disputed — tap to review', colors.error);
     }
     if (pendingConfirmation > 0) {
-      return label('$pendingConfirmation waiting on you', Colors.orange[700]!);
+      return label('$pendingConfirmation waiting on you', colors.warning);
     }
     return Text(
       'Waiting on payments',
-      style: TextStyle(
-        fontSize: 11,
-        color: AppColors.textPrimary.withValues(alpha: 0.6),
-      ),
+      style: TextStyle(fontSize: 11, color: colors.textSecondary),
     );
   }
 
-  Widget _buildOwerRow(BuildContext context, WidgetRef ref, BillShare share) {
+  Widget _buildOwerRow(
+    BuildContext context,
+    WidgetRef ref,
+    BillShare share,
+    AppColorsExt colors,
+  ) {
     final status = share.status;
     final amount = share.amountOwed;
 
     if (status == PaymentStatus.confirmed) {
-      return const _StatusPill(label: 'Settled', color: Colors.green);
+      return _StatusPill(label: 'Settled', color: colors.primary);
     }
     if (status == PaymentStatus.disputed) {
       return Row(
@@ -256,7 +269,7 @@ class _BillCard extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: Colors.red[600],
+                color: colors.error,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -266,7 +279,7 @@ class _BillCard extends ConsumerWidget {
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
               minimumSize: const Size(0, 0),
-              foregroundColor: AppColors.primary,
+              foregroundColor: colors.primary,
             ),
             onPressed: () => ref
                 .read(splitBillControllerProvider.notifier)
@@ -288,10 +301,7 @@ class _BillCard extends ConsumerWidget {
     if (status == PaymentStatus.markedPaid) {
       return Text(
         'Waiting on confirmation',
-        style: TextStyle(
-          fontSize: 11,
-          color: AppColors.textPrimary.withValues(alpha: 0.6),
-        ),
+        style: TextStyle(fontSize: 11, color: colors.textSecondary),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       );
@@ -303,7 +313,11 @@ class _BillCard extends ConsumerWidget {
         Expanded(
           child: Text(
             'You owe ${currency.format(amount)}',
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+              color: colors.textPrimary,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -312,7 +326,7 @@ class _BillCard extends ConsumerWidget {
           style: TextButton.styleFrom(
             padding: EdgeInsets.zero,
             minimumSize: const Size(0, 0),
-            foregroundColor: AppColors.primary,
+            foregroundColor: colors.primary,
           ),
           onPressed: () => ref
               .read(splitBillControllerProvider.notifier)
@@ -339,11 +353,10 @@ class _StatusPill extends StatelessWidget {
   const _StatusPill({required this.label, required this.color});
 
   final String label;
-  final MaterialColor color;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    final shade = color[700]!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
@@ -355,7 +368,7 @@ class _StatusPill extends StatelessWidget {
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w600,
-          color: shade,
+          color: color,
         ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,

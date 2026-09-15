@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 
-/// Three-way cash flow summary (Income / Spent / Savings) for the current
-/// period. Sits above the Expenses/Income tabs since it's cross-cutting,
-/// not specific to either tab.
+
 class CashFlowSummaryStrip extends StatelessWidget {
   const CashFlowSummaryStrip({
     super.key,
@@ -18,7 +16,7 @@ class CashFlowSummaryStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,14 +29,14 @@ class CashFlowSummaryStrip extends StatelessWidget {
               Icon(
                 Icons.info_outline_rounded,
                 size: 12,
-                color: AppColors.textPrimary.withValues(alpha: 0.4),
+                color: colors.textSecondary,
               ),
               const SizedBox(width: 4),
               Text(
                 'Resets at the start of each period',
                 style: TextStyle(
                   fontSize: 11,
-                  color: AppColors.textPrimary.withValues(alpha: 0.5),
+                  color: colors.textSecondary,
                 ),
               ),
             ],
@@ -52,12 +50,12 @@ class CashFlowSummaryStrip extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                AppColors.primary.withValues(alpha: 0.10),
-                AppColors.primary.withValues(alpha: 0.02),
+                colors.primary.withValues(alpha: 0.10),
+                colors.primary.withValues(alpha: 0.02),
               ],
             ),
             border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.08),
+              color: colors.primary.withValues(alpha: 0.08),
             ),
           ),
           child: Row(
@@ -66,23 +64,25 @@ class CashFlowSummaryStrip extends StatelessWidget {
                 child: _SummaryItem(
                   label: 'Income',
                   amount: income,
-                  color: Colors.green[700]!,
+                  color: colors.primary,
                 ),
               ),
-              _VerticalDivider(colorScheme: colorScheme),
+              _VerticalDivider(color: colors.border),
               Expanded(
                 child: _SummaryItem(
                   label: 'Spent',
                   amount: spent,
-                  color: Colors.red[600]!,
+                  color: colors.error,
                 ),
               ),
-              _VerticalDivider(colorScheme: colorScheme),
+              _VerticalDivider(color: colors.border),
               Expanded(
                 child: _SummaryItem(
                   label: 'Savings',
                   amount: savings,
-                  color: Colors.blue[400]!,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF7EB6E8)
+                      : const Color(0xFF3D7EBF),
                 ),
               ),
             ],
@@ -106,14 +106,14 @@ class _SummaryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     return Column(
       children: [
         Text(
           label,
           style: TextStyle(
             fontSize: 11,
-            color: colorScheme.onSurface.withValues(alpha: 0.6),
+            color: colors.textSecondary,
           ),
         ),
         const SizedBox(height: 4),
@@ -131,16 +131,16 @@ class _SummaryItem extends StatelessWidget {
 }
 
 class _VerticalDivider extends StatelessWidget {
-  const _VerticalDivider({required this.colorScheme});
+  const _VerticalDivider({required this.color});
 
-  final ColorScheme colorScheme;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 1,
       height: 32,
-      color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+      color: color,
     );
   }
 }

@@ -112,13 +112,15 @@ class ActivityFeedView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     if (activity.isEmpty) {
       return Center(
         child: Text(
           'No activity yet',
           style: TextStyle(
             fontSize: 12,
-            color: AppColors.textPrimary.withValues(alpha: 0.6),
+            color: colors.textSecondary,
           ),
         ),
       );
@@ -202,8 +204,8 @@ class ActivityFeedView extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: isMine
-                          ? AppColors.primary.withValues(alpha: 0.15)
-                          : AppColors.primary.withValues(alpha: 0.05),
+                          ? colors.primary.withValues(alpha: 0.15)
+                          : colors.primary.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: Column(
@@ -224,7 +226,7 @@ class ActivityFeedView extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.primary,
+                                color: colors.primary,
                               ),
                             ),
                           ),
@@ -238,7 +240,10 @@ class ActivityFeedView extends StatelessWidget {
                         else
                           Text(
                             _label(entry),
-                            style: const TextStyle(fontSize: 15),
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: colors.textPrimary,
+                            ),
                           ),
                       ],
                     ),
@@ -262,33 +267,34 @@ class _SystemActivityPill extends StatelessWidget {
   final ActivityType type;
   final String label;
 
-  (IconData, Color) get _iconAndColor {
+  (IconData, Color) _iconAndColor(AppColorsExt colors) {
     switch (type) {
       case ActivityType.billAdded:
-        return (Icons.receipt_long_rounded, AppColors.primary);
+        return (Icons.receipt_long_rounded, colors.primary);
       case ActivityType.paymentMarked:
-        return (Icons.hourglass_top_rounded, Colors.orange[700]!);
+        return (Icons.hourglass_top_rounded, colors.warning);
       case ActivityType.paymentConfirmed:
-        return (Icons.check_circle_rounded, Colors.green[700]!);
+        return (Icons.check_circle_rounded, colors.primary);
       case ActivityType.paymentDisputed:
-        return (Icons.error_rounded, Colors.red[600]!);
+        return (Icons.error_rounded, colors.error);
       case ActivityType.memberAdded:
-        return (Icons.person_add_rounded, AppColors.primary);
+        return (Icons.person_add_rounded, colors.primary);
       case ActivityType.poke:
         return (
           Icons.back_hand_rounded,
           const Color.fromARGB(255, 43, 27, 185),
         );
       case ActivityType.message:
-        return (Icons.chat_bubble_rounded, AppColors.primary);
+        return (Icons.chat_bubble_rounded, colors.primary);
       case ActivityType.photo:
-        return (Icons.image_rounded, AppColors.primary);
+        return (Icons.image_rounded, colors.primary);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final (icon, color) = _iconAndColor;
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final (icon, color) = _iconAndColor(colors);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -307,7 +313,7 @@ class _SystemActivityPill extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary.withValues(alpha: 0.7),
+                color: colors.textSecondary,
               ),
             ),
           ),
@@ -324,13 +330,15 @@ class _DayDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Center(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: AppColors.textPrimary.withValues(alpha: 0.06),
+            color: colors.textSecondary.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
@@ -338,7 +346,7 @@ class _DayDivider extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary.withValues(alpha: 0.5),
+              color: colors.textSecondary,
             ),
           ),
         ),
@@ -358,18 +366,20 @@ class _ActivityPhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     if (url == null || _isExpired) {
       return Container(
         width: 220,
         height: 120,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: Colors.black12,
+          color: colors.border.withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(14),
         ),
-        child: const Text(
+        child: Text(
           'Photo expired',
-          style: TextStyle(color: Colors.black54, fontSize: 13),
+          style: TextStyle(color: colors.textSecondary, fontSize: 13),
         ),
       );
     }

@@ -59,6 +59,8 @@ class SplitBillsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     ref.listen<AsyncValue<void>>(splitBillControllerProvider, (previous, next) {
       if (next.hasError) {
         CommonSnackbar.showError(context, next.error!);
@@ -87,7 +89,7 @@ class SplitBillsScreen extends ConsumerWidget {
                     Text(
                       'No groups yet',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -95,7 +97,6 @@ class SplitBillsScreen extends ConsumerWidget {
               ),
             );
           }
-
 
           return ListView.builder(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
@@ -149,6 +150,7 @@ class _GroupRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final billsAsync = ref.watch(splitBillsProvider(group.id));
     final hasUnread = unreadCount > 0;
 
@@ -164,22 +166,39 @@ class _GroupRow extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         alignment: Alignment.centerRight,
         decoration: BoxDecoration(
-          color: Colors.red.withValues(alpha: 0.9),
-          borderRadius: BorderRadius.circular(16),
+          color: colors.error.withValues(alpha: 0.9),
+          borderRadius: BorderRadius.circular(18),
         ),
         child: Icon(
           isCreator ? Icons.delete_outline_rounded : Icons.logout_rounded,
-          color: Colors.white,
+          color: colors.onPrimary,
         ),
       ),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        child: Card(
-          clipBehavior: Clip.antiAlias,
-          elevation: 1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: hasUnread
+                ? [
+                    colors.primary.withValues(alpha: 0.10),
+                    colors.primary.withValues(alpha: 0.02),
+                  ]
+                : [
+                    colors.primary.withValues(alpha: 0.04),
+                    colors.primary.withValues(alpha: 0.0),
+                  ],
           ),
+          border: Border.all(
+            color: hasUnread
+                ? colors.primary.withValues(alpha: 0.25)
+                : colors.border,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
           child: InkWell(
             onTap: onTap,
             child: Padding(
@@ -191,7 +210,7 @@ class _GroupRow extends ConsumerWidget {
                     children: [
                       CircleAvatar(
                         radius: 24,
-                        backgroundColor: AppColors.primary.withValues(
+                        backgroundColor: colors.primary.withValues(
                           alpha: 0.15,
                         ),
                         child: Text(
@@ -199,7 +218,7 @@ class _GroupRow extends ConsumerWidget {
                               ? group.name[0].toUpperCase()
                               : '?',
                           style: TextStyle(
-                            color: AppColors.primary,
+                            color: colors.primary,
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
                           ),
@@ -225,6 +244,7 @@ class _GroupRow extends ConsumerWidget {
                                 ? FontWeight.w800
                                 : FontWeight.w600,
                             fontSize: 14,
+                            color: colors.textPrimary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -237,7 +257,7 @@ class _GroupRow extends ConsumerWidget {
                             _Pill(
                               label:
                                   '${group.memberIds.length} member${group.memberIds.length == 1 ? '' : 's'}',
-                              color: AppColors.primary,
+                              color: colors.primary,
                             ),
                             if (billsAsync.hasValue && currentUid != null)
                               _BalancePill(
@@ -254,14 +274,14 @@ class _GroupRow extends ConsumerWidget {
                       icon: Icon(
                         Icons.edit_outlined,
                         size: 20,
-                        color: AppColors.textPrimary.withValues(alpha: 0.5),
+                        color: colors.textSecondary,
                       ),
                       onPressed: onEdit,
                     )
                   else
                     Icon(
                       Icons.chevron_right_rounded,
-                      color: AppColors.textPrimary.withValues(alpha: 0.3),
+                      color: colors.textSecondary,
                     ),
                 ],
               ),
@@ -273,7 +293,6 @@ class _GroupRow extends ConsumerWidget {
   }
 }
 
-
 class _UnreadBadge extends StatelessWidget {
   const _UnreadBadge({required this.count});
 
@@ -281,22 +300,23 @@ class _UnreadBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final label = count > 9 ? '9+' : '$count';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
       constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: Colors.red[600],
+        color: colors.error,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white, width: 1.5),
+        border: Border.all(color: colors.background, width: 1.5),
       ),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w700,
-          color: Colors.white,
+          color: colors.onPrimary,
         ),
       ),
     );
@@ -343,6 +363,7 @@ class _BalancePill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final balances = SplitBalanceCalculator.forUser(bills, currentUid);
     final youOwe = balances.youOwe.fold<double>(0, (a, b) => a + b.amount);
     final owedToYou = balances.owedToYou.fold<double>(
@@ -352,7 +373,7 @@ class _BalancePill extends StatelessWidget {
     final net = owedToYou - youOwe;
 
     if (net == 0) {
-      return _Pill(label: 'Settled', color: Colors.green[700]!);
+      return _Pill(label: 'Settled', color: colors.primary);
     }
     final isPositive = net > 0;
     final label = isPositive
@@ -360,7 +381,7 @@ class _BalancePill extends StatelessWidget {
         : 'You owe ₱${net.abs().toStringAsFixed(0)}';
     return _Pill(
       label: label,
-      color: isPositive ? Colors.green[700]! : Colors.red[600]!,
+      color: isPositive ? colors.primary : colors.error,
     );
   }
 }

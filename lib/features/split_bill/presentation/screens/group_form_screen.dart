@@ -172,6 +172,8 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Scaffold(
       appBar: AppBar(title: Text(_isEditing ? 'Edit Group' : 'New Group')),
       body: SafeArea(
@@ -192,7 +194,7 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
               const SizedBox(height: 18),
               Text(
                 'Add members',
-                style: TextStyle(color: AppColors.textPrimary),
+                style: TextStyle(color: colors.textPrimary),
               ),
               const SizedBox(height: 8),
               _MemberSearchField(
@@ -205,9 +207,9 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
                   margin: const EdgeInsets.only(top: 8),
                   constraints: const BoxConstraints(maxHeight: 220),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.05),
+                    color: colors.primary.withValues(alpha: 0.05),
                     border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.15),
+                      color: colors.primary.withValues(alpha: 0.15),
                     ),
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -219,9 +221,7 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
                               'No user found',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: AppColors.textPrimary.withValues(
-                                  alpha: 0.5,
-                                ),
+                                color: colors.textSecondary,
                               ),
                             ),
                           ),
@@ -239,20 +239,21 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
                               ),
                               leading: CircleAvatar(
                                 radius: 16,
-                                backgroundColor: AppColors.primary.withValues(
+                                backgroundColor: colors.primary.withValues(
                                   alpha: 0.15,
                                 ),
                                 child: Icon(
                                   Icons.person_outline_rounded,
                                   size: 16,
-                                  color: AppColors.primary,
+                                  color: colors.primary,
                                 ),
                               ),
                               title: Text(
                                 user['username']!,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13,
+                                  color: colors.textPrimary,
                                 ),
                               ),
                               onTap: () => _addMember(user),
@@ -289,8 +290,8 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
               const SizedBox(height: 28),
               CommonButton(
                 label: _isEditing ? 'Save Changes' : 'Create Group',
-                btnColor: AppColors.black,
-                labelColor: AppColors.white,
+                btnColor: colors.textPrimary,
+                labelColor: colors.background,
                 isLoading: _isSaving,
                 onPressed: _save,
               ),
@@ -318,16 +319,18 @@ class _MemberSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.05),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+        color: colors.primary.withValues(alpha: 0.05),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.15)),
         borderRadius: BorderRadius.circular(14),
       ),
       child: TextField(
         controller: controller,
         onChanged: onChanged,
-        style: const TextStyle(fontSize: 14),
+        style: TextStyle(fontSize: 14, color: colors.textPrimary),
         decoration: InputDecoration(
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
@@ -336,13 +339,13 @@ class _MemberSearchField extends StatelessWidget {
           ),
           hintText: 'Search by username',
           hintStyle: TextStyle(
-            color: AppColors.textPrimary.withValues(alpha: 0.4),
+            color: colors.textSecondary,
             fontSize: 14,
           ),
           prefixIcon: Icon(
             Icons.search_rounded,
             size: 20,
-            color: AppColors.primary,
+            color: colors.primary,
           ),
           suffixIcon: isSearching
               ? Padding(
@@ -352,7 +355,7 @@ class _MemberSearchField extends StatelessWidget {
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.primary,
+                      color: colors.primary,
                     ),
                   ),
                 )
@@ -373,10 +376,12 @@ class _MemberChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Container(
       padding: const EdgeInsets.only(left: 10, right: 6, top: 6, bottom: 6),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.12),
+        color: colors.primary.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -387,7 +392,7 @@ class _MemberChip extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppColors.primary,
+              color: colors.primary,
             ),
           ),
           const SizedBox(width: 4),
@@ -396,7 +401,7 @@ class _MemberChip extends StatelessWidget {
             child: Icon(
               Icons.close_rounded,
               size: 15,
-              color: AppColors.primary.withValues(alpha: 0.7),
+              color: colors.primary.withValues(alpha: 0.7),
             ),
           ),
         ],

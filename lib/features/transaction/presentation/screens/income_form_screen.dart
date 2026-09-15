@@ -140,6 +140,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final globalPeriod =
         ref.watch(budgetingPeriodSettingProvider).value ??
         BudgetingPeriod.monthly;
@@ -202,7 +203,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                   },
                 ),
                 const SizedBox(height: 18),
-                Text('Type', style: TextStyle(color: AppColors.textPrimary)),
+                Text('Type', style: TextStyle(color: colors.textPrimary)),
                 const SizedBox(height: 8),
                 SegmentedButton<bool>(
                   segments: const [
@@ -217,7 +218,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                 if (_isRecurring) ...[
                   Text(
                     'Deposit day',
-                    style: TextStyle(color: AppColors.textPrimary),
+                    style: TextStyle(color: colors.textPrimary),
                   ),
                   const SizedBox(height: 8),
                   _DateField(
@@ -226,7 +227,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                     onTap: _pickRecurringDay,
                   ),
                 ] else ...[
-                  Text('Date', style: TextStyle(color: AppColors.textPrimary)),
+                  Text('Date', style: TextStyle(color: colors.textPrimary)),
                   const SizedBox(height: 8),
                   _DateField(
                     icon: Icons.calendar_today_rounded,
@@ -239,9 +240,9 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.05),
+                      color: colors.primary.withValues(alpha: 0.05),
                       border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.15),
+                        color: colors.primary.withValues(alpha: 0.15),
                       ),
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -250,14 +251,14 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                         Icon(
                           Icons.info_outline_rounded,
                           size: 18,
-                          color: AppColors.primary,
+                          color: colors.primary,
                         ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             'Will be added to: '
                             '${_currentPeriodLabel(globalPeriod, firstHalfEndDay)}',
-                            style: TextStyle(color: AppColors.textPrimary),
+                            style: TextStyle(color: colors.textPrimary),
                           ),
                         ),
                       ],
@@ -267,8 +268,8 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                 const SizedBox(height: 28),
                 CommonButton(
                   label: widget.isEditing ? 'Save Changes' : 'Add Income',
-                  btnColor: AppColors.black,
-                  labelColor: AppColors.white,
+                  btnColor: colors.textPrimary,
+                  labelColor: colors.background,
                   isLoading: actionsState.isLoading,
                   onPressed: _submit,
                 ),
@@ -296,6 +297,8 @@ class _DateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
@@ -303,15 +306,15 @@ class _DateField extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.05),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+          color: colors.primary.withValues(alpha: 0.05),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.15)),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 18, color: AppColors.primary),
+            Icon(icon, size: 18, color: colors.primary),
             const SizedBox(width: 10),
-            Text(label),
+            Text(label, style: TextStyle(color: colors.textPrimary)),
           ],
         ),
       ),

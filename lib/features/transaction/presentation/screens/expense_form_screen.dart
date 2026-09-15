@@ -133,6 +133,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
     final categoriesAsync = ref.watch(budgetCategoriesProvider);
     final actionsState = ref.watch(transactionActionsProvider);
     final currency =
@@ -178,7 +179,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 const SizedBox(height: 18),
                 Text(
                   'Category',
-                  style: TextStyle(color: AppColors.textPrimary),
+                  style: TextStyle(color: colors.textPrimary),
                 ),
                 const SizedBox(height: 8),
                 categoriesAsync.when(
@@ -193,7 +194,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                   ),
                 ),
                 const SizedBox(height: 18),
-                Text('Date', style: TextStyle(color: AppColors.textPrimary)),
+                Text('Date', style: TextStyle(color: colors.textPrimary)),
                 const SizedBox(height: 8),
                 InkWell(
                   onTap: _pickDate,
@@ -204,9 +205,9 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                       vertical: 14,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.05),
+                      color: colors.primary.withValues(alpha: 0.05),
                       border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.15),
+                        color: colors.primary.withValues(alpha: 0.15),
                       ),
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -215,11 +216,12 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                         Icon(
                           Icons.calendar_today_rounded,
                           size: 18,
-                          color: AppColors.primary,
+                          color: colors.primary,
                         ),
                         const SizedBox(width: 10),
                         Text(
                           '${_date.year}-${_date.month.toString().padLeft(2, '0')}-${_date.day.toString().padLeft(2, '0')}',
+                          style: TextStyle(color: colors.textPrimary),
                         ),
                       ],
                     ),
@@ -235,8 +237,8 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 const SizedBox(height: 28),
                 CommonButton(
                   label: widget.isEditing ? 'Save Changes' : 'Add Expense',
-                  btnColor: AppColors.black,
-                  labelColor: AppColors.white,
+                  btnColor: colors.textPrimary,
+                  labelColor: colors.background,
                   isLoading: actionsState.isLoading,
                   onPressed: _submit,
                 ),
@@ -265,8 +267,13 @@ class _CategoryPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     if (categories.isEmpty) {
-      return const Text('No categories yet — add one from the Budget tab.');
+      return Text(
+        'No categories yet — add one from the Budget tab.',
+        style: TextStyle(color: colors.textSecondary),
+      );
     }
 
     return Wrap(
@@ -282,8 +289,8 @@ class _CategoryPicker extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: selected
-                  ? AppColors.primary
-                  : AppColors.primary.withValues(alpha: 0.08),
+                  ? colors.primary
+                  : colors.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -292,7 +299,7 @@ class _CategoryPicker extends StatelessWidget {
                 Icon(
                   CategoryIcons.iconFor(category.iconName),
                   size: 16,
-                  color: selected ? Colors.white : AppColors.primary,
+                  color: selected ? colors.onPrimary : colors.primary,
                 ),
                 const SizedBox(width: 6),
                 Text(
@@ -300,7 +307,7 @@ class _CategoryPicker extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: selected ? Colors.white : AppColors.textPrimary,
+                    color: selected ? colors.onPrimary : colors.textPrimary,
                   ),
                 ),
               ],

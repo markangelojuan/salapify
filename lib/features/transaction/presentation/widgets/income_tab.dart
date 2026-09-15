@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
+import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/transaction/presentation/controllers/income_source_controller.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:salapify/features/transaction/presentation/widgets/recurring_income_row.dart';
@@ -41,11 +42,13 @@ class IncomeTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     ref.listen<AsyncValue<void>>(incomeSourceActionsProvider, (previous, next) {
-    if (next.hasError) {
-      CommonSnackbar.showError(context, next.error!);
-    }
-  });
+      if (next.hasError) {
+        CommonSnackbar.showError(context, next.error!);
+      }
+    });
     final sourcesAsync = ref.watch(incomeSourcesProvider);
 
     return sourcesAsync.when(
@@ -67,7 +70,7 @@ class IncomeTab extends ConsumerWidget {
                   Text(
                     'No income entries yet',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
@@ -83,6 +86,7 @@ class IncomeTab extends ConsumerWidget {
               'Income',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w700,
+                color: colors.textPrimary,
               ),
             ),
             const SizedBox(height: 10),

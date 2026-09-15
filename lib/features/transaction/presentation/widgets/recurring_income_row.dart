@@ -15,28 +15,34 @@ class RecurringIncomeRow extends StatelessWidget {
   final VoidCallback onDelete;
 
   String get _frequencyLabel {
-  if (!source.isRecurring) return 'One-time';
-  final now = DateTime.now();
-  final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-  final effectiveDay = (source.recurringDay ?? 1).clamp(1, daysInMonth);
-  final isClamped = effectiveDay != source.recurringDay;
-  return isClamped
-      ? 'Every month on day ${source.recurringDay} (${_ordinal(effectiveDay)} this month)'
-      : 'Every month on day ${source.recurringDay}';
-}
-
-String _ordinal(int day) {
-  if (day >= 11 && day <= 13) return '${day}th';
-  switch (day % 10) {
-    case 1: return '${day}st';
-    case 2: return '${day}nd';
-    case 3: return '${day}rd';
-    default: return '${day}th';
+    if (!source.isRecurring) return 'One-time';
+    final now = DateTime.now();
+    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+    final effectiveDay = (source.recurringDay ?? 1).clamp(1, daysInMonth);
+    final isClamped = effectiveDay != source.recurringDay;
+    return isClamped
+        ? 'Every month on day ${source.recurringDay} (${_ordinal(effectiveDay)} this month)'
+        : 'Every month on day ${source.recurringDay}';
   }
-}
+
+  String _ordinal(int day) {
+    if (day >= 11 && day <= 13) return '${day}th';
+    switch (day % 10) {
+      case 1:
+        return '${day}st';
+      case 2:
+        return '${day}nd';
+      case 3:
+        return '${day}rd';
+      default:
+        return '${day}th';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
     return Dismissible(
       key: ValueKey(source.id),
       direction: DismissDirection.endToStart,
@@ -49,10 +55,10 @@ String _ordinal(int day) {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         alignment: Alignment.centerRight,
         decoration: BoxDecoration(
-          color: Colors.red.withValues(alpha: 0.9),
+          color: colors.error.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
+        child: Icon(Icons.delete_outline_rounded, color: colors.onPrimary),
       ),
       child: InkWell(
         onTap: onTap,
@@ -61,7 +67,7 @@ String _ordinal(int day) {
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: colors.border),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -72,9 +78,10 @@ String _ordinal(int day) {
                   children: [
                     Text(
                       source.source,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
+                        color: colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -82,7 +89,7 @@ String _ordinal(int day) {
                       _frequencyLabel,
                       style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textPrimary.withValues(alpha: 0.6),
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -90,10 +97,10 @@ String _ordinal(int day) {
               ),
               Text(
                 '+${source.amount.toStringAsFixed(2)}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
-                  color: Colors.green,
+                  color: colors.primary,
                 ),
               ),
             ],
