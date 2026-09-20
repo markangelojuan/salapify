@@ -7,6 +7,8 @@ import 'package:salapify/features/authentication/data/repositories/auth_reposito
 import 'package:salapify/features/budget/data/repositories/budget_repository.dart';
 import 'package:salapify/features/budget/data/services/budget_sync_service.dart';
 import 'package:salapify/features/budget/domain/entities/budget_category.dart';
+import 'package:salapify/features/budget/domain/entities/budget_limits.dart';
+import 'package:salapify/features/budget/domain/exceptions/category_limit_exceeded_exception.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/domain/period_key.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
@@ -16,6 +18,7 @@ import 'package:salapify/features/transaction/data/services/transaction_sync_ser
 import 'package:salapify/features/transaction/domain/entities/transaction_entry.dart';
 import 'package:salapify/features/transaction/domain/transaction_totals_calculator.dart';
 import 'package:salapify/features/transaction/presentation/controllers/transaction_controller.dart';
+import 'package:salapify/features/premium/data/repositories/entitlement_repository.dart';
 
 part 'budget_controller.g.dart';
 
@@ -87,6 +90,16 @@ class BudgetActions extends _$BudgetActions {
 
   Future<void> addCategory(BudgetCategory category) async {
     final result = await AsyncValue.guard(() async {
+      final isPremium = ref.read(isPremiumProvider).value ?? false;
+      final limit = BudgetLimits.maxActiveCategoriesFor(isPremium: isPremium);
+      final currentCount = await ref
+          .read(budgetRepositoryProvider)
+          .countActive();
+
+      if (currentCount >= limit) {
+        throw CategoryLimitExceededException(limit);
+      }
+
       await ref.read(budgetRepositoryProvider).addCategory(category);
       await _syncIfSignedIn(category);
     });
@@ -219,23 +232,40 @@ class BudgetActions extends _$BudgetActions {
   /// period. Called from BudgetingPeriodSetting.set() before the period
   /// setting itself is persisted, so category data and period setting never
   /// briefly disagree from the UI's perspective.
+  ///
+  /// Only the local (Drift) conversion is awaited. The converted rows are
+  /// flagged unsynced by the repository and pushed to Firestore in the
+  /// background, so a slow network can't hold up the caller.
+  ///
+  /// Rethrows on failure. AsyncValue.guard swallows errors into `state`, and
+  /// without the rethrow the caller would go on to persist the new period on
+  /// top of categories that failed to convert.
   Future<void> convertCategoriesForPeriodChange(
     BudgetingPeriod newPeriod,
   ) async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
+    final result = await AsyncValue.guard(() async {
       await ref
           .read(budgetRepositoryProvider)
           .convertCategoriesToPeriod(newPeriod);
-
-      final uid = ref.read(currentUserProvider)?.uid;
-      if (uid == null || !_isOnline) return;
-
-      try {
-        await ref.read(budgetSyncServiceProvider).pushUnsyncedCategories(uid);
-      } catch (e) {
-        _logIfRealError(e, context: 'convertCategoriesForPeriodChange');
-      }
     });
+    state = result;
+
+    final error = result.error;
+    if (error != null) {
+      Error.throwWithStackTrace(error, result.stackTrace ?? StackTrace.current);
+    }
+
+    final uid = ref.read(currentUserProvider)?.uid;
+    if (uid == null || !_isOnline) return;
+    unawaited(_pushUnsyncedCategoriesInBackground(uid));
+  }
+
+  Future<void> _pushUnsyncedCategoriesInBackground(String uid) async {
+    try {
+      await ref.read(budgetSyncServiceProvider).pushUnsyncedCategories(uid);
+    } catch (e) {
+      _logIfRealError(e, context: 'convertCategoriesForPeriodChange');
+    }
   }
 }

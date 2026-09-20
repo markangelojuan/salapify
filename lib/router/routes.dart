@@ -5,6 +5,7 @@ import 'package:salapify/features/budget/domain/entities/budget_category.dart';
 import 'package:salapify/features/budget/presentation/screens/category_form_screen.dart';
 import 'package:salapify/features/settings/presentation/screens/account_screen.dart';
 import 'package:salapify/features/settings/presentation/screens/settings_screen.dart';
+import 'package:salapify/features/settings/presentation/screens/preferences_setup_screen.dart';
 import 'package:salapify/features/settings/presentation/screens/help_screen.dart';
 import 'package:salapify/features/shell/presentation/screens/home_screen.dart';
 import 'package:salapify/features/transaction/domain/entities/income_source.dart';
@@ -44,6 +45,7 @@ enum AppRoutes {
   signUp,
   verifyEmail,
   avatarPicker,
+  preferencesSetup,
   account,
   settings,
   help,
@@ -55,9 +57,6 @@ enum AppRoutes {
   billForm,
 }
 
-/// Notifies GoRouter's `redirect` to re-run whenever auth state, guest mode,
-/// or the current user's profile (e.g. avatarId) changes — WITHOUT rebuilding
-/// the GoRouter instance itself (that's what was resetting screen state).
 class _RouterRefreshNotifier extends ChangeNotifier {
   _RouterRefreshNotifier(Ref ref) {
     ref.listen(authStateChangesProvider, (_, __) => notifyListeners());
@@ -111,7 +110,14 @@ GoRouter goRouter(Ref ref) {
         return loc == "/avatar-picker" ? null : "/avatar-picker";
       }
 
-      if (loc == "/sign-in" || loc == "/sign-up") {
+      final needsPrefs = appUserAsync.value?.preferencesCompleted == false;
+      if (needsPrefs) {
+        return loc == "/preferences-setup" ? null : "/preferences-setup";
+      }
+
+      if (loc == "/sign-in" ||
+          loc == "/sign-up" ||
+          loc == "/preferences-setup") {
         return "/home";
       }
       return null;
@@ -144,6 +150,12 @@ GoRouter goRouter(Ref ref) {
         name: AppRoutes.avatarPicker.name,
         builder: (ctx, state) =>
             _withGradientBackground(const AvatarPickerScreen()),
+      ),
+      GoRoute(
+        path: "/preferences-setup",
+        name: AppRoutes.preferencesSetup.name,
+        builder: (ctx, state) =>
+            _withGradientBackground(const PreferencesSetupScreen()),
       ),
       GoRoute(
         path: "/account",

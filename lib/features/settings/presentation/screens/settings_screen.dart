@@ -14,6 +14,7 @@ class SettingsScreen extends ConsumerWidget {
     WidgetRef ref,
     BudgetingPeriod newPeriod,
   ) async {
+    if (ref.read(budgetingPeriodSettingProvider).value == newPeriod) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -221,14 +222,14 @@ class SettingsScreen extends ConsumerWidget {
                 Consumer(
                   builder: (context, ref, _) {
                     final currencyAsync = ref.watch(currencySettingProvider);
-                    ref.listen<AsyncValue<AppCurrency>>(currencySettingProvider, (
-                      previous,
-                      next,
-                    ) {
-                      if (next.hasError) {
-                        CommonSnackbar.showError(context, next.error!);
-                      }
-                    });
+                    ref.listen<AsyncValue<AppCurrency>>(
+                      currencySettingProvider,
+                      (previous, next) {
+                        if (next.hasError) {
+                          CommonSnackbar.showError(context, next.error!);
+                        }
+                      },
+                    );
                     final currency = currencyAsync.asData?.value;
                     if (currency == null) {
                       return const _SettingsCard(
@@ -246,6 +247,60 @@ class SettingsScreen extends ConsumerWidget {
                           currency: currency,
                           onTap: () =>
                               _openCurrencyPicker(context, ref, currency),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const _SectionLabel(
+                  icon: Icons.notifications_active_rounded,
+                  title: 'Reminders',
+                ),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final remindersAsync = ref.watch(
+                      reminderNotificationsSettingProvider,
+                    );
+                    ref.listen<AsyncValue<bool>>(
+                      reminderNotificationsSettingProvider,
+                      (previous, next) {
+                        if (next.hasError) {
+                          CommonSnackbar.showError(context, next.error!);
+                        }
+                      },
+                    );
+                    final enabled = remindersAsync.asData?.value;
+                    if (enabled == null) {
+                      return const _SettingsCard(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20),
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                        ],
+                      );
+                    }
+                    return _SettingsCard(
+                      children: [
+                        SwitchListTile(
+                          title: const Text(
+                            'App reminders',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                            ),
+                          ),
+                          subtitle: const Text(
+                            'Nudge occasionally to update your budget',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          value: enabled,
+                          activeThumbColor: AppColors.primary,
+                          onChanged: (v) => ref
+                              .read(
+                                reminderNotificationsSettingProvider.notifier,
+                              )
+                              .set(v),
                         ),
                       ],
                     );
@@ -562,10 +617,7 @@ class _CurrencyTile extends StatelessWidget {
 /// Bottom sheet listing every currency as a proper scrollable list with a
 /// symbol avatar and a check indicator — replaces the flat Wrap of chips.
 class _CurrencyPickerSheet extends StatelessWidget {
-  const _CurrencyPickerSheet({
-    required this.selected,
-    required this.onSelect,
-  });
+  const _CurrencyPickerSheet({required this.selected, required this.onSelect});
 
   final AppCurrency selected;
   final ValueChanged<AppCurrency> onSelect;

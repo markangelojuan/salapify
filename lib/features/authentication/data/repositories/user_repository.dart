@@ -20,7 +20,9 @@ class UserRepository {
       'username': username,
       'email': email,
       'avatarId': null,
+      'isPremium': false,
       'createdAt': FieldValue.serverTimestamp(),
+      'preferencesCompleted': false,
     });
   }
 
@@ -73,6 +75,11 @@ class UserRepository {
     return doc.data();
   }
 
+  Future<bool> isPremiumUser(String uid) async {
+    final doc = await _users.doc(uid).get();
+    return doc.data()?['isPremium'] as bool? ?? false;
+  }
+
   Future<void> setAvatarId(String uid, String avatarId) async {
     await _users.doc(uid).update({'avatarId': avatarId});
   }
@@ -88,6 +95,12 @@ class UserRepository {
       candidate = '$fallback$suffix';
     }
     return candidate;
+  }
+
+  Future<void> markPreferencesCompleted(String uid) async {
+    await _users.doc(uid).set({
+      'preferencesCompleted': true,
+    }, SetOptions(merge: true));
   }
 }
 

@@ -3,6 +3,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:salapify/features/shell/presentation/screens/home_screen.dart';
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
+import 'package:timezone/timezone.dart' as tz;
 import 'package:salapify/router/routes.dart';
 
 part 'push_notification_service.g.dart';
@@ -15,6 +16,8 @@ class PushNotificationService {
 
   final _localNotifications = FlutterLocalNotificationsPlugin();
 
+  bool _localInitialized = false;
+
   static const _channel = AndroidNotificationChannel(
     'default_channel',
     'General Notifications',
@@ -24,10 +27,12 @@ class PushNotificationService {
     playSound: true,
   );
 
+  static const _reminderIds = [1001, 1002];
+
   Future<void> initForUser(String uid) async {
     await _messaging.requestPermission(alert: true, badge: true, sound: true);
 
-    await _setupLocalNotifications();
+    await ensureLocalNotificationsInitialized();
     _listenForForegroundMessages();
     _listenForNotificationTaps();
 
@@ -115,6 +120,64 @@ class PushNotificationService {
     if (token != null) {
       await _userRepository.removeFcmToken(uid, token);
     }
+  }
+
+  Future<void> ensureLocalNotificationsInitialized() async {
+    if (_localInitialized) return;
+    await _setupLocalNotifications();
+    _localInitialized = true;
+  }
+
+  Future<void> scheduleMonthlyReminders() async {
+    await _scheduleMonthly(
+      id: 1001,
+      day: 1,
+      title: 'New month, fresh budget 📊',
+      body: 'Update your budget and log any pending transactions.',
+    );
+    await _scheduleMonthly(
+      id: 1002,
+      day: 16,
+      title: 'Midmonth check-in 💸',
+      body: "Don't forget to log your recent expenses.",
+    );
+  }
+
+  Future<void> cancelMonthlyReminders() async {
+    for (final id in _reminderIds) {
+      await _localNotifications.cancel(id: id);
+    }
+  }
+
+  Future<void> _scheduleMonthly({
+    required int id,
+    required int day,
+    required String title,
+    required String body,
+  }) async {
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduled = tz.TZDateTime(tz.local, now.year, now.month, day, 9, 0);
+    if (scheduled.isBefore(now)) {
+      scheduled = tz.TZDateTime(tz.local, now.year, now.month + 1, day, 9, 0);
+    }
+
+    await _localNotifications.zonedSchedule(
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: scheduled, // was positional, now named
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          _channel.id,
+          _channel.name,
+          channelDescription: _channel.description,
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.dayOfMonthAndTime,
+    );
   }
 }
 

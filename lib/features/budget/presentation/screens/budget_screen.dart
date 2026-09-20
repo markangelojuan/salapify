@@ -18,6 +18,7 @@ import 'package:salapify/features/transaction/presentation/controllers/transacti
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:lottie/lottie.dart';
+import 'package:salapify/core/layout/breakpoints.dart';
 
 class BudgetScreen extends ConsumerStatefulWidget {
   const BudgetScreen({super.key});
@@ -117,11 +118,19 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
               SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverToBoxAdapter(
-                  child: BudgetSummaryCard(
-                    totalSpent: totalSpent,
-                    totalAllocated: totalAllocated,
-                    period: globalPeriod,
-                    firstHalfEndDay: firstHalfEndDay,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 600),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: BudgetSummaryCard(
+                          totalSpent: totalSpent,
+                          totalAllocated: totalAllocated,
+                          period: globalPeriod,
+                          firstHalfEndDay: firstHalfEndDay,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -143,8 +152,9 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                               'Clear filters to reorder categories',
                               style: TextStyle(
                                 fontSize: 11,
-                                color: Theme.of(context).colorScheme.onSurface
-                                    .withValues(alpha: 0.45),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.45),
                               ),
                             ),
                           ),
@@ -309,9 +319,7 @@ class _FilterBar extends StatelessWidget {
             decoration: BoxDecoration(
               color: active
                   ? AppColors.primary.withValues(alpha: 0.12)
-                  : colorScheme.surfaceContainerHighest.withValues(
-                      alpha: 0.6,
-                    ),
+                  : colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(20),
               border: active
                   ? Border.all(color: AppColors.primary.withValues(alpha: 0.3))
@@ -347,7 +355,7 @@ class _FilterBar extends StatelessWidget {
   }
 }
 
-/// Shown when categories exist but none match the active filter 
+/// Shown when categories exist but none match the active filter
 class _FilteredEmptyState extends StatelessWidget {
   const _FilteredEmptyState({required this.onClearFilters});
 
@@ -398,18 +406,28 @@ class _ReorderableCategoryGrid extends ConsumerWidget {
   final List<BudgetCategory> categories;
   final bool dimmed;
 
-
   final bool reorderEnabled;
 
-  static const _gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
-    crossAxisCount: 2,
-    mainAxisSpacing: 12,
-    crossAxisSpacing: 12,
-    childAspectRatio: 1.15,
-  );
+  double _mainAxisExtentFor(BuildContext context) {
+
+  return 170;
+}
+
+  int _crossAxisCountFor(BuildContext context) {
+    if (context.isExpanded) return 4;
+    if (context.isMedium) return 3;
+    return 2;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: _crossAxisCountFor(context),
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      mainAxisExtent: _mainAxisExtentFor(context),
+    );
+
     final children = categories
         .map(
           (category) => Opacity(
@@ -433,7 +451,7 @@ class _ReorderableCategoryGrid extends ConsumerWidget {
       return GridView(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: _gridDelegate,
+        gridDelegate: gridDelegate,
         children: children,
       );
     }
@@ -451,7 +469,7 @@ class _ReorderableCategoryGrid extends ConsumerWidget {
         return GridView(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: _gridDelegate,
+          gridDelegate: gridDelegate,
           children: reorderedChildren,
         );
       },

@@ -7,18 +7,17 @@ class SplitGroup {
     required this.createdAt,
     required this.lastActivityAt,
     this.unreadCounts = const {},
+    this.billsCreatedCount = 0,
   });
 
   final String id;
   final String name;
-  final List<String> memberIds; // user IDs
+  final List<String> memberIds;
   final String createdBy;
   final DateTime createdAt;
-
   final DateTime lastActivityAt;
-
-
   final Map<String, int> unreadCounts;
+  final int billsCreatedCount;
 
   SplitGroup copyWith({
     String? id,
@@ -28,6 +27,7 @@ class SplitGroup {
     DateTime? createdAt,
     DateTime? lastActivityAt,
     Map<String, int>? unreadCounts,
+    int? billsCreatedCount,
   }) {
     return SplitGroup(
       id: id ?? this.id,
@@ -37,6 +37,7 @@ class SplitGroup {
       createdAt: createdAt ?? this.createdAt,
       lastActivityAt: lastActivityAt ?? this.lastActivityAt,
       unreadCounts: unreadCounts ?? this.unreadCounts,
+      billsCreatedCount: billsCreatedCount ?? this.billsCreatedCount,
     );
   }
 }

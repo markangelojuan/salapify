@@ -1936,6 +1936,391 @@ class TransactionsCompanion extends UpdateCompanion<TransactionRow> {
   }
 }
 
+class $UserEntitlementTable extends UserEntitlement
+    with TableInfo<$UserEntitlementTable, UserEntitlementRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $UserEntitlementTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isPremiumMeta = const VerificationMeta(
+    'isPremium',
+  );
+  @override
+  late final GeneratedColumn<bool> isPremium = GeneratedColumn<bool>(
+    'is_premium',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_premium" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _premiumSinceMeta = const VerificationMeta(
+    'premiumSince',
+  );
+  @override
+  late final GeneratedColumn<DateTime> premiumSince = GeneratedColumn<DateTime>(
+    'premium_since',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _premiumProductIdMeta = const VerificationMeta(
+    'premiumProductId',
+  );
+  @override
+  late final GeneratedColumn<String> premiumProductId = GeneratedColumn<String>(
+    'premium_product_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastSyncedAtMeta = const VerificationMeta(
+    'lastSyncedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastSyncedAt = GeneratedColumn<DateTime>(
+    'last_synced_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    isPremium,
+    premiumSince,
+    premiumProductId,
+    lastSyncedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'user_entitlement';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<UserEntitlementRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('is_premium')) {
+      context.handle(
+        _isPremiumMeta,
+        isPremium.isAcceptableOrUnknown(data['is_premium']!, _isPremiumMeta),
+      );
+    }
+    if (data.containsKey('premium_since')) {
+      context.handle(
+        _premiumSinceMeta,
+        premiumSince.isAcceptableOrUnknown(
+          data['premium_since']!,
+          _premiumSinceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('premium_product_id')) {
+      context.handle(
+        _premiumProductIdMeta,
+        premiumProductId.isAcceptableOrUnknown(
+          data['premium_product_id']!,
+          _premiumProductIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_synced_at')) {
+      context.handle(
+        _lastSyncedAtMeta,
+        lastSyncedAt.isAcceptableOrUnknown(
+          data['last_synced_at']!,
+          _lastSyncedAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  UserEntitlementRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return UserEntitlementRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      isPremium: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_premium'],
+      )!,
+      premiumSince: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}premium_since'],
+      ),
+      premiumProductId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}premium_product_id'],
+      ),
+      lastSyncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_synced_at'],
+      ),
+    );
+  }
+
+  @override
+  $UserEntitlementTable createAlias(String alias) {
+    return $UserEntitlementTable(attachedDatabase, alias);
+  }
+}
+
+class UserEntitlementRow extends DataClass
+    implements Insertable<UserEntitlementRow> {
+  final String id;
+  final bool isPremium;
+  final DateTime? premiumSince;
+  final String? premiumProductId;
+  final DateTime? lastSyncedAt;
+  const UserEntitlementRow({
+    required this.id,
+    required this.isPremium,
+    this.premiumSince,
+    this.premiumProductId,
+    this.lastSyncedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['is_premium'] = Variable<bool>(isPremium);
+    if (!nullToAbsent || premiumSince != null) {
+      map['premium_since'] = Variable<DateTime>(premiumSince);
+    }
+    if (!nullToAbsent || premiumProductId != null) {
+      map['premium_product_id'] = Variable<String>(premiumProductId);
+    }
+    if (!nullToAbsent || lastSyncedAt != null) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt);
+    }
+    return map;
+  }
+
+  UserEntitlementCompanion toCompanion(bool nullToAbsent) {
+    return UserEntitlementCompanion(
+      id: Value(id),
+      isPremium: Value(isPremium),
+      premiumSince: premiumSince == null && nullToAbsent
+          ? const Value.absent()
+          : Value(premiumSince),
+      premiumProductId: premiumProductId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(premiumProductId),
+      lastSyncedAt: lastSyncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncedAt),
+    );
+  }
+
+  factory UserEntitlementRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return UserEntitlementRow(
+      id: serializer.fromJson<String>(json['id']),
+      isPremium: serializer.fromJson<bool>(json['isPremium']),
+      premiumSince: serializer.fromJson<DateTime?>(json['premiumSince']),
+      premiumProductId: serializer.fromJson<String?>(json['premiumProductId']),
+      lastSyncedAt: serializer.fromJson<DateTime?>(json['lastSyncedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'isPremium': serializer.toJson<bool>(isPremium),
+      'premiumSince': serializer.toJson<DateTime?>(premiumSince),
+      'premiumProductId': serializer.toJson<String?>(premiumProductId),
+      'lastSyncedAt': serializer.toJson<DateTime?>(lastSyncedAt),
+    };
+  }
+
+  UserEntitlementRow copyWith({
+    String? id,
+    bool? isPremium,
+    Value<DateTime?> premiumSince = const Value.absent(),
+    Value<String?> premiumProductId = const Value.absent(),
+    Value<DateTime?> lastSyncedAt = const Value.absent(),
+  }) => UserEntitlementRow(
+    id: id ?? this.id,
+    isPremium: isPremium ?? this.isPremium,
+    premiumSince: premiumSince.present ? premiumSince.value : this.premiumSince,
+    premiumProductId: premiumProductId.present
+        ? premiumProductId.value
+        : this.premiumProductId,
+    lastSyncedAt: lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
+  );
+  UserEntitlementRow copyWithCompanion(UserEntitlementCompanion data) {
+    return UserEntitlementRow(
+      id: data.id.present ? data.id.value : this.id,
+      isPremium: data.isPremium.present ? data.isPremium.value : this.isPremium,
+      premiumSince: data.premiumSince.present
+          ? data.premiumSince.value
+          : this.premiumSince,
+      premiumProductId: data.premiumProductId.present
+          ? data.premiumProductId.value
+          : this.premiumProductId,
+      lastSyncedAt: data.lastSyncedAt.present
+          ? data.lastSyncedAt.value
+          : this.lastSyncedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserEntitlementRow(')
+          ..write('id: $id, ')
+          ..write('isPremium: $isPremium, ')
+          ..write('premiumSince: $premiumSince, ')
+          ..write('premiumProductId: $premiumProductId, ')
+          ..write('lastSyncedAt: $lastSyncedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, isPremium, premiumSince, premiumProductId, lastSyncedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is UserEntitlementRow &&
+          other.id == this.id &&
+          other.isPremium == this.isPremium &&
+          other.premiumSince == this.premiumSince &&
+          other.premiumProductId == this.premiumProductId &&
+          other.lastSyncedAt == this.lastSyncedAt);
+}
+
+class UserEntitlementCompanion extends UpdateCompanion<UserEntitlementRow> {
+  final Value<String> id;
+  final Value<bool> isPremium;
+  final Value<DateTime?> premiumSince;
+  final Value<String?> premiumProductId;
+  final Value<DateTime?> lastSyncedAt;
+  final Value<int> rowid;
+  const UserEntitlementCompanion({
+    this.id = const Value.absent(),
+    this.isPremium = const Value.absent(),
+    this.premiumSince = const Value.absent(),
+    this.premiumProductId = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  UserEntitlementCompanion.insert({
+    required String id,
+    this.isPremium = const Value.absent(),
+    this.premiumSince = const Value.absent(),
+    this.premiumProductId = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id);
+  static Insertable<UserEntitlementRow> custom({
+    Expression<String>? id,
+    Expression<bool>? isPremium,
+    Expression<DateTime>? premiumSince,
+    Expression<String>? premiumProductId,
+    Expression<DateTime>? lastSyncedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (isPremium != null) 'is_premium': isPremium,
+      if (premiumSince != null) 'premium_since': premiumSince,
+      if (premiumProductId != null) 'premium_product_id': premiumProductId,
+      if (lastSyncedAt != null) 'last_synced_at': lastSyncedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  UserEntitlementCompanion copyWith({
+    Value<String>? id,
+    Value<bool>? isPremium,
+    Value<DateTime?>? premiumSince,
+    Value<String?>? premiumProductId,
+    Value<DateTime?>? lastSyncedAt,
+    Value<int>? rowid,
+  }) {
+    return UserEntitlementCompanion(
+      id: id ?? this.id,
+      isPremium: isPremium ?? this.isPremium,
+      premiumSince: premiumSince ?? this.premiumSince,
+      premiumProductId: premiumProductId ?? this.premiumProductId,
+      lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (isPremium.present) {
+      map['is_premium'] = Variable<bool>(isPremium.value);
+    }
+    if (premiumSince.present) {
+      map['premium_since'] = Variable<DateTime>(premiumSince.value);
+    }
+    if (premiumProductId.present) {
+      map['premium_product_id'] = Variable<String>(premiumProductId.value);
+    }
+    if (lastSyncedAt.present) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserEntitlementCompanion(')
+          ..write('id: $id, ')
+          ..write('isPremium: $isPremium, ')
+          ..write('premiumSince: $premiumSince, ')
+          ..write('premiumProductId: $premiumProductId, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1944,6 +2329,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $IncomeSourcesTable incomeSources = $IncomeSourcesTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
+  late final $UserEntitlementTable userEntitlement = $UserEntitlementTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1952,6 +2340,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     budgetCategories,
     incomeSources,
     transactions,
+    userEntitlement,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -3131,6 +3520,222 @@ typedef $$TransactionsTableProcessedTableManager =
       TransactionRow,
       PrefetchHooks Function({bool categoryId})
     >;
+typedef $$UserEntitlementTableCreateCompanionBuilder =
+    UserEntitlementCompanion Function({
+      required String id,
+      Value<bool> isPremium,
+      Value<DateTime?> premiumSince,
+      Value<String?> premiumProductId,
+      Value<DateTime?> lastSyncedAt,
+      Value<int> rowid,
+    });
+typedef $$UserEntitlementTableUpdateCompanionBuilder =
+    UserEntitlementCompanion Function({
+      Value<String> id,
+      Value<bool> isPremium,
+      Value<DateTime?> premiumSince,
+      Value<String?> premiumProductId,
+      Value<DateTime?> lastSyncedAt,
+      Value<int> rowid,
+    });
+
+class $$UserEntitlementTableFilterComposer
+    extends Composer<_$AppDatabase, $UserEntitlementTable> {
+  $$UserEntitlementTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPremium => $composableBuilder(
+    column: $table.isPremium,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get premiumSince => $composableBuilder(
+    column: $table.premiumSince,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get premiumProductId => $composableBuilder(
+    column: $table.premiumProductId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$UserEntitlementTableOrderingComposer
+    extends Composer<_$AppDatabase, $UserEntitlementTable> {
+  $$UserEntitlementTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPremium => $composableBuilder(
+    column: $table.isPremium,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get premiumSince => $composableBuilder(
+    column: $table.premiumSince,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get premiumProductId => $composableBuilder(
+    column: $table.premiumProductId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$UserEntitlementTableAnnotationComposer
+    extends Composer<_$AppDatabase, $UserEntitlementTable> {
+  $$UserEntitlementTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPremium =>
+      $composableBuilder(column: $table.isPremium, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get premiumSince => $composableBuilder(
+    column: $table.premiumSince,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get premiumProductId => $composableBuilder(
+    column: $table.premiumProductId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$UserEntitlementTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $UserEntitlementTable,
+          UserEntitlementRow,
+          $$UserEntitlementTableFilterComposer,
+          $$UserEntitlementTableOrderingComposer,
+          $$UserEntitlementTableAnnotationComposer,
+          $$UserEntitlementTableCreateCompanionBuilder,
+          $$UserEntitlementTableUpdateCompanionBuilder,
+          (
+            UserEntitlementRow,
+            BaseReferences<
+              _$AppDatabase,
+              $UserEntitlementTable,
+              UserEntitlementRow
+            >,
+          ),
+          UserEntitlementRow,
+          PrefetchHooks Function()
+        > {
+  $$UserEntitlementTableTableManager(
+    _$AppDatabase db,
+    $UserEntitlementTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$UserEntitlementTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$UserEntitlementTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$UserEntitlementTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<bool> isPremium = const Value.absent(),
+                Value<DateTime?> premiumSince = const Value.absent(),
+                Value<String?> premiumProductId = const Value.absent(),
+                Value<DateTime?> lastSyncedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => UserEntitlementCompanion(
+                id: id,
+                isPremium: isPremium,
+                premiumSince: premiumSince,
+                premiumProductId: premiumProductId,
+                lastSyncedAt: lastSyncedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<bool> isPremium = const Value.absent(),
+                Value<DateTime?> premiumSince = const Value.absent(),
+                Value<String?> premiumProductId = const Value.absent(),
+                Value<DateTime?> lastSyncedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => UserEntitlementCompanion.insert(
+                id: id,
+                isPremium: isPremium,
+                premiumSince: premiumSince,
+                premiumProductId: premiumProductId,
+                lastSyncedAt: lastSyncedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$UserEntitlementTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $UserEntitlementTable,
+      UserEntitlementRow,
+      $$UserEntitlementTableFilterComposer,
+      $$UserEntitlementTableOrderingComposer,
+      $$UserEntitlementTableAnnotationComposer,
+      $$UserEntitlementTableCreateCompanionBuilder,
+      $$UserEntitlementTableUpdateCompanionBuilder,
+      (
+        UserEntitlementRow,
+        BaseReferences<
+          _$AppDatabase,
+          $UserEntitlementTable,
+          UserEntitlementRow
+        >,
+      ),
+      UserEntitlementRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3141,6 +3746,8 @@ class $AppDatabaseManager {
       $$IncomeSourcesTableTableManager(_db, _db.incomeSources);
   $$TransactionsTableTableManager get transactions =>
       $$TransactionsTableTableManager(_db, _db.transactions);
+  $$UserEntitlementTableTableManager get userEntitlement =>
+      $$UserEntitlementTableTableManager(_db, _db.userEntitlement);
 }
 
 // **************************************************************************

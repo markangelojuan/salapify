@@ -87,7 +87,7 @@ final class BudgetingPeriodSettingProvider
 }
 
 String _$budgetingPeriodSettingHash() =>
-    r'5930734ee86632ba103cb20c8fc080608257fa37';
+    r'd1bddd4b796bf3c6025debb90d4eb33fd5251208';
 
 abstract class _$BudgetingPeriodSetting
     extends $AsyncNotifier<BudgetingPeriod> {
@@ -190,6 +190,52 @@ abstract class _$CurrencySetting extends $AsyncNotifier<AppCurrency> {
             as $ClassProviderElement<
               AnyNotifier<AsyncValue<AppCurrency>, AppCurrency>,
               AsyncValue<AppCurrency>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(ReminderNotificationsSetting)
+final reminderNotificationsSettingProvider =
+    ReminderNotificationsSettingProvider._();
+
+final class ReminderNotificationsSettingProvider
+    extends $AsyncNotifierProvider<ReminderNotificationsSetting, bool> {
+  ReminderNotificationsSettingProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'reminderNotificationsSettingProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$reminderNotificationsSettingHash();
+
+  @$internal
+  @override
+  ReminderNotificationsSetting create() => ReminderNotificationsSetting();
+}
+
+String _$reminderNotificationsSettingHash() =>
+    r'a8a8e25109a99efbf875fa29114af82e8d87d63a';
+
+abstract class _$ReminderNotificationsSetting extends $AsyncNotifier<bool> {
+  FutureOr<bool> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<bool>, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<bool>, bool>,
+              AsyncValue<bool>,
               Object?,
               Object?
             >;

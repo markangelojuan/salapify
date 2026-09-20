@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:salapify/core/services/connectivity_service.dart';
+import 'package:salapify/core/widgets/global_loading.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/budget/presentation/controllers/budget_controller.dart';
 import 'package:salapify/features/settings/data/repositories/settings_repository.dart';
@@ -9,6 +10,7 @@ import 'package:salapify/features/settings/data/services/settings_sync_service.d
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/domain/period_key.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/core/services/push_notification_service.dart';
 
 part 'settings_controller.g.dart';
 
@@ -38,27 +40,33 @@ class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
     );
 
     try {
+      // Only the local migration sits behind the blocking overlay. The
+      // Firestore push further down stays outside it, so a slow network can
+      // never keep the whole app frozen.
       await ref
-          .read(budgetActionsProvider.notifier)
-          .convertCategoriesForPeriodChange(period);
+          .read(globalLoadingProvider.notifier)
+          .run('Converting your categories…', () async {
+            await ref
+                .read(budgetActionsProvider.notifier)
+                .convertCategoriesForPeriodChange(period);
 
-      final repository = ref.read(settingsRepositoryProvider);
-      await repository.setLocalBudgetingPeriod(period);
+            final repository = ref.read(settingsRepositoryProvider);
+            await repository.setLocalBudgetingPeriod(period);
 
-      final firstHalfEndDay =
-          ref.read(firstHalfEndDaySettingProvider).value ?? 15;
-      final newKey = computeCurrentPeriodKey(
-        globalPeriod: period,
-        firstHalfEndDay: firstHalfEndDay,
-        now: DateTime.now(),
-      );
-      await repository.setLastResetPeriodKey(newKey);
+            final firstHalfEndDay =
+                ref.read(firstHalfEndDaySettingProvider).value ?? 15;
+            final newKey = computeCurrentPeriodKey(
+              globalPeriod: period,
+              firstHalfEndDay: firstHalfEndDay,
+              now: DateTime.now(),
+            );
+            await repository.setLastResetPeriodKey(newKey);
+          });
 
       state = AsyncData(period);
 
       final uid = ref.read(currentUserProvider)?.uid;
-      if (uid == null || !_isOnline)
-        return; // guest, or offline — synced on reconnect
+      if (uid == null || !_isOnline) return; // guest, or offline — synced on reconnect
 
       try {
         await ref
@@ -165,5 +173,34 @@ class CurrencySetting extends _$CurrencySetting {
   void _warnIfRealError(Object e, {required String fallback}) {
     if (!_isOnline || e is TimeoutException) return;
     ref.read(settingsSyncWarningProvider.notifier).set(fallback);
+  }
+}
+
+@Riverpod(keepAlive: true)
+class ReminderNotificationsSetting extends _$ReminderNotificationsSetting {
+  @override
+  Future<bool> build() {
+    return ref.watch(settingsRepositoryProvider).getLocalRemindersEnabled();
+  }
+
+  Future<void> set(bool enabled) async {
+    final previous = state;
+    state = AsyncData(enabled);
+
+    try {
+      await ref
+          .read(settingsRepositoryProvider)
+          .setLocalRemindersEnabled(enabled);
+
+      final pushService = ref.read(pushNotificationServiceProvider);
+      if (enabled) {
+        await pushService.scheduleMonthlyReminders();
+      } else {
+        await pushService.cancelMonthlyReminders();
+      }
+    } catch (e, st) {
+      // ignore: invalid_use_of_internal_member
+      state = AsyncError<bool>(e, st).copyWithPrevious(previous);
+    }
   }
 }

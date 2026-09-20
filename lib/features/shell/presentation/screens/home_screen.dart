@@ -4,13 +4,20 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:salapify/core/layout/app_drawer.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
+import 'package:salapify/features/budget/data/repositories/budget_repository.dart';
+import 'package:salapify/features/budget/domain/entities/budget_limits.dart';
 import 'package:salapify/features/notification/presentation/screens/notification_screen.dart';
 import 'package:salapify/features/budget/presentation/screens/budget_screen.dart';
+import 'package:salapify/features/premium/data/repositories/entitlement_repository.dart';
+import 'package:salapify/features/premium/presentation/widgets/premium_upsell_sheet.dart';
+import 'package:salapify/features/split_bill/domain/entities/split_bill_limits.dart';
 import 'package:salapify/features/split_bill/presentation/screens/split_bills_screen.dart';
 import 'package:salapify/features/transaction/presentation/controllers/transaction_tab_state.dart';
 import 'package:salapify/features/transaction/presentation/screens/transaction_screen.dart';
 import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
 import 'package:salapify/features/notification/data/providers/notification_providers.dart';
+import 'package:salapify/core/layout/breakpoints.dart';
 import 'package:salapify/core/widgets/nav_badge.dart';
 
 import 'package:salapify/router/routes.dart';
@@ -44,16 +51,51 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   VoidCallback? _fabActionForIndex(int index) {
     switch (index) {
       case 0:
-        return () => context.pushNamed(AppRoutes.categoryForm.name);
+        return () => _handleAddCategory(context, ref);
       case 1:
         final activeTab = ref.watch(transactionTabStateProvider);
         return activeTab == TransactionTab.expenses
             ? () => context.pushNamed(AppRoutes.expenseForm.name)
             : () => context.pushNamed(AppRoutes.incomeForm.name);
       case 2:
-        return () => context.pushNamed(AppRoutes.groupForm.name);
+        return () => _handleCreateGroup(context, ref);
       default:
         return null;
+    }
+  }
+
+  Future<void> _handleAddCategory(BuildContext context, WidgetRef ref) async {
+    final isPremium = ref.read(isPremiumProvider).value ?? false;
+    final limit = BudgetLimits.maxActiveCategoriesFor(isPremium: isPremium);
+    final currentCount = await ref.read(budgetRepositoryProvider).countActive();
+
+    if (currentCount >= limit) {
+      if (!context.mounted) return;
+      await showPremiumUpsellSheet(context, limit: PremiumLimit.categories);
+      return;
+    }
+    if (context.mounted) {
+      context.pushNamed(AppRoutes.categoryForm.name);
+    }
+  }
+
+  Future<void> _handleCreateGroup(BuildContext context, WidgetRef ref) async {
+    final currentUid = ref.read(currentUserProvider)?.uid;
+    if (currentUid == null) return; // guests can't create groups anyway
+
+    final isPremium = ref.read(isPremiumProvider).value ?? false;
+    final limit = SplitBillLimits.maxActiveGroupsFor(isPremium: isPremium);
+    final ownedCount = await ref
+        .read(splitBillRepositoryProvider)
+        .countOwnedGroupsForUser(currentUid);
+
+    if (ownedCount >= limit) {
+      if (!context.mounted) return;
+      await showPremiumUpsellSheet(context, limit: PremiumLimit.groups);
+      return;
+    }
+    if (context.mounted) {
+      context.pushNamed(AppRoutes.groupForm.name);
     }
   }
 
@@ -86,7 +128,8 @@ class _FloatingNavBar extends StatelessWidget {
 
   static const double _pillHeight = 64;
   static const double _fabSize = 50;
-  static const double _fabPopOut = 22; 
+  static const double _fabPopOut = 22;
+  static const double _maxWidthOnWide = 480;
 
   @override
   Widget build(BuildContext context) {
@@ -96,41 +139,50 @@ class _FloatingNavBar extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
         child: SizedBox(
-          height: _pillHeight + _fabPopOut,
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.bottomCenter,
-            children: [
-              // The pill itself, pinned to the bottom of the stack
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                height: _pillHeight,
-                child: _Pill(
-                  currentIndex: currentIndex,
-                  onTap: onTap,
-                  reserveCenterGap: fabOnPressed != null,
-                ),
+          height: _pillHeight + _fabPopOut, // fixes height first
+          child: Center(
+            // now safe — parent height is already fixed
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: context.isTabletOrWider
+                    ? _maxWidthOnWide
+                    : double.infinity,
               ),
-              Positioned(
-                bottom: _pillHeight - _fabSize / 2.2,
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 220),
-                  transitionBuilder: (child, anim) => ScaleTransition(
-                    scale: anim,
-                    child: FadeTransition(opacity: anim, child: child),
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.bottomCenter,
+                children: [
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: _pillHeight,
+                    child: _Pill(
+                      currentIndex: currentIndex,
+                      onTap: onTap,
+                      reserveCenterGap: fabOnPressed != null,
+                    ),
                   ),
-                  child: fabOnPressed == null
-                      ? const SizedBox.shrink(key: ValueKey('no_fab'))
-                      : _PopOutFab(
-                          key: const ValueKey('active_fab'),
-                          size: _fabSize,
-                          onPressed: fabOnPressed!,
-                        ),
-                ),
+                  Positioned(
+                    bottom: _pillHeight - _fabSize / 2.2,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 220),
+                      transitionBuilder: (child, anim) => ScaleTransition(
+                        scale: anim,
+                        child: FadeTransition(opacity: anim, child: child),
+                      ),
+                      child: fabOnPressed == null
+                          ? const SizedBox.shrink(key: ValueKey('no_fab'))
+                          : _PopOutFab(
+                              key: const ValueKey('active_fab'),
+                              size: _fabSize,
+                              onPressed: fabOnPressed!,
+                            ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -157,7 +209,6 @@ class _Pill extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-     
         color: _pillBackground.withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
@@ -254,11 +305,7 @@ class _PopOutFab extends StatelessWidget {
             offset: const Offset(0, 6),
           ),
         ],
-
-        border: Border.all(
-          color: colors.background,
-          width: 4,
-        ),
+        border: Border.all(color: colors.background, width: 4),
       ),
       child: Material(
         color: Colors.transparent,

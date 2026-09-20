@@ -741,3 +741,73 @@ abstract class _$ActivityLoadingMore extends $Notifier<bool> {
     element.handleCreate(ref, () => build(_$args));
   }
 }
+
+@ProviderFor(isGroupCreatorPremium)
+final isGroupCreatorPremiumProvider = IsGroupCreatorPremiumFamily._();
+
+final class IsGroupCreatorPremiumProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
+    with $FutureModifier<bool>, $FutureProvider<bool> {
+  IsGroupCreatorPremiumProvider._({
+    required IsGroupCreatorPremiumFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'isGroupCreatorPremiumProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$isGroupCreatorPremiumHash();
+
+  @override
+  String toString() {
+    return r'isGroupCreatorPremiumProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<bool> create(Ref ref) {
+    final argument = this.argument as String;
+    return isGroupCreatorPremium(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is IsGroupCreatorPremiumProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$isGroupCreatorPremiumHash() =>
+    r'9a48c32e0e164dc04e67b7a3db9890d202ec8d0d';
+
+final class IsGroupCreatorPremiumFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<bool>, String> {
+  IsGroupCreatorPremiumFamily._()
+    : super(
+        retry: null,
+        name: r'isGroupCreatorPremiumProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  IsGroupCreatorPremiumProvider call(String creatorUid) =>
+      IsGroupCreatorPremiumProvider._(argument: creatorUid, from: this);
+
+  @override
+  String toString() => r'isGroupCreatorPremiumProvider';
+}

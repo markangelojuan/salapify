@@ -14,23 +14,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest.dart' as tz_data;
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/core/widgets/global_loading.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tz_data.initializeTimeZones();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await GoogleSignIn.instance.initialize(
-    serverClientId: '1017841458128-psiglpuppigqrakhe4qfkmjnvjnd58a0.apps.googleusercontent.com',
+    serverClientId:
+        '1017841458128-psiglpuppigqrakhe4qfkmjnvjnd58a0.apps.googleusercontent.com',
   );
 
   final prefs = await SharedPreferences.getInstance();
   final savedTheme = prefs.getString('theme_mode');
-  final initialThemeMode = savedTheme == 'dark' ? ThemeMode.dark : ThemeMode.light;
+  final initialThemeMode = savedTheme == 'dark'
+      ? ThemeMode.dark
+      : ThemeMode.light;
 
   runApp(
     ProviderScope(
       overrides: [
-        themeControllerProvider.overrideWith(() => ThemeController(initialThemeMode)), 
+        themeControllerProvider.overrideWith(
+          () => ThemeController(initialThemeMode),
+        ),
       ],
       child: const MyApp(),
     ),
@@ -53,6 +62,22 @@ class _MyAppState extends ConsumerState<MyApp> {
   }
 
   Future<void> _runStartupSync() async {
+    // Reminder scheduling is local-only — runs for guests too, ahead of the
+    // login-gated sync below.
+    final pushService = ref.read(pushNotificationServiceProvider);
+    await pushService.ensureLocalNotificationsInitialized();
+    if (!mounted) return;
+
+    final remindersEnabled = await ref.read(
+      reminderNotificationsSettingProvider.future,
+    );
+    if (!mounted) return;
+
+    if (remindersEnabled) {
+      await pushService.scheduleMonthlyReminders();
+      if (!mounted) return;
+    }
+
     final user = await ref.read(authStateChangesProvider.future);
     if (!mounted) return;
 
@@ -100,9 +125,11 @@ class _MyAppState extends ConsumerState<MyApp> {
       themeMode: ref.watch(themeControllerProvider),
       builder: (context, child) {
         final colors = Theme.of(context).extension<AppColorsExt>()!;
-        return Container(
-          decoration: BoxDecoration(gradient: colors.backgroundGradient),
-          child: child,
+        return GlobalLoadingOverlay(
+          child: Container(
+            decoration: BoxDecoration(gradient: colors.backgroundGradient),
+            child: child,
+          ),
         );
       },
     );

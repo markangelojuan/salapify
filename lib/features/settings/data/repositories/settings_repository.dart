@@ -10,6 +10,7 @@ class SettingsRepository {
   static const _firstHalfEndDayKey = 'first_half_end_day';
   static const _lastResetPeriodKeyKey = 'last_reset_period_key';
   static const _currencyKey = 'currency';
+  static const _remindersEnabledKey = 'reminders_enabled';
 
   Future<BudgetingPeriod> getLocalBudgetingPeriod() async {
     final prefs = await SharedPreferences.getInstance();
@@ -46,7 +47,7 @@ class SettingsRepository {
     await prefs.setString(_lastResetPeriodKeyKey, key);
   }
 
-    Future<AppCurrency> getLocalCurrency() async {
+  Future<AppCurrency> getLocalCurrency() async {
     final prefs = await SharedPreferences.getInstance();
     final value = prefs.getString(_currencyKey);
     if (value == null) return AppCurrency.php;
@@ -59,6 +60,16 @@ class SettingsRepository {
   Future<void> setLocalCurrency(AppCurrency currency) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_currencyKey, currency.name);
+  }
+
+  Future<bool> getLocalRemindersEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_remindersEnabledKey) ?? true;
+  }
+
+  Future<void> setLocalRemindersEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_remindersEnabledKey, enabled);
   }
 }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/core/widgets/bouncing_dots.dart';
 
 class CommonButton extends StatelessWidget {
   final Color? btnColor;
@@ -36,24 +37,35 @@ class CommonButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
         ),
-        child: isLoading
-            ? SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
+        // Cross-fades (with a slight scale) between the label and the dots
+        // instead of snapping, so the loading state feels smooth.
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          switchInCurve: Curves.easeOut,
+          switchOutCurve: Curves.easeIn,
+          transitionBuilder: (child, animation) => FadeTransition(
+            opacity: animation,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.85, end: 1.0).animate(animation),
+              child: child,
+            ),
+          ),
+          child: isLoading
+              ? BouncingDots(
+                  key: const ValueKey('loading'),
                   color: resolvedLabelColor,
-                  strokeWidth: 2.5,
+                )
+              : Text(
+                  label,
+                  key: const ValueKey('label'),
+                  style: TextStyle(
+                    color: resolvedLabelColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
                 ),
-              )
-            : Text(
-                label,
-                style: TextStyle(
-                  color: resolvedLabelColor,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
-                ),
-              ),
+        ),
       ),
     );
   }

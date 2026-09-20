@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:salapify/features/split_bill/domain/exceptions/bill_limit_exceeded_exception.dart';
 
 class SplitBillFirestoreService {
   SplitBillFirestoreService(this._firestore);
@@ -184,34 +185,50 @@ class SplitBillFirestoreService {
   }
 
   Future<void> createBillWithActivity(
-    String groupId,
-    Map<String, dynamic> billData,
-    Map<String, dynamic> activityData,
-  ) async {
-    final groupRef = _groups.doc(groupId);
-    final billRef = _bills(groupId).doc();
-    final activityRef = _activity(groupId).doc();
+  String groupId,
+  Map<String, dynamic> billData,
+  Map<String, dynamic> activityData, {
+  required int billLimit,
+}) async {
+  final groupRef = _groups.doc(groupId);
+  final billRef = _bills(groupId).doc();
+  final activityRef = _activity(groupId).doc();
 
-    await _firestore.runTransaction((txn) async {
-      final groupSnap = await txn.get(groupRef);
+  await _firestore.runTransaction((txn) async {
+    final groupSnap = await txn.get(groupRef);
+    if (!groupSnap.exists) {
+      throw StateError('Group not found');
+    }
 
-      txn.set(billRef, billData);
-      txn.set(activityRef, activityData);
+    final currentCount = groupSnap.data()?['billsCreatedCount'] as int? ?? 0;
+    if (currentCount >= billLimit) {
+      throw BillLimitExceededException(billLimit);
+    }
 
-      if (!groupSnap.exists) return;
+    txn.set(billRef, billData);
+    txn.set(activityRef, activityData);
 
-      final memberIds = List<String>.from(
-        groupSnap.data()?['memberIds'] as List? ?? const [],
-      );
-      final senderId = activityData['senderId'] as String?;
-      final updates = <String, dynamic>{
-        'lastActivityAt': activityData['createdAt'] ?? Timestamp.now(),
-      };
-      for (final id in memberIds) {
-        if (id == senderId) continue;
-        updates['unreadCounts.$id'] = FieldValue.increment(1);
-      }
-      txn.update(groupRef, updates);
-    });
+    final memberIds = List<String>.from(
+      groupSnap.data()?['memberIds'] as List? ?? const [],
+    );
+    final senderId = activityData['senderId'] as String?;
+    final updates = <String, dynamic>{
+      'lastActivityAt': activityData['createdAt'] ?? Timestamp.now(),
+      'billsCreatedCount': currentCount + 1,
+    };
+    for (final id in memberIds) {
+      if (id == senderId) continue;
+      updates['unreadCounts.$id'] = FieldValue.increment(1);
+    }
+    txn.update(groupRef, updates);
+  });
+}
+
+  Future<int> countOwnedGroups(String userId) async {
+    final snapshot = await _groups
+        .where('createdBy', isEqualTo: userId)
+        .count()
+        .get();
+    return snapshot.count ?? 0;
   }
 }

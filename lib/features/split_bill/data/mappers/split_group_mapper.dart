@@ -1,4 +1,3 @@
-// lib/features/split_bill/data/mappers/split_group_mapper.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 
@@ -11,12 +10,13 @@ extension SplitGroupMapper on SplitGroup {
       'createdAt': Timestamp.fromDate(createdAt),
       'lastActivityAt': Timestamp.fromDate(lastActivityAt),
       'unreadCounts': unreadCounts,
+      'billsCreatedCount': billsCreatedCount,
     };
   }
 
   static SplitGroup fromFirestore(String id, Map<String, dynamic> data) {
     final createdAt = (data['createdAt'] as Timestamp).toDate();
-   
+
     final lastActivityAt =
         (data['lastActivityAt'] as Timestamp?)?.toDate() ?? createdAt;
     final rawUnread = data['unreadCounts'] as Map<String, dynamic>?;
@@ -31,6 +31,7 @@ extension SplitGroupMapper on SplitGroup {
       unreadCounts: rawUnread == null
           ? const {}
           : rawUnread.map((k, v) => MapEntry(k, (v as num).toInt())),
+      billsCreatedCount: data['billsCreatedCount'] as int? ?? 0,
     );
   }
 }

@@ -7,6 +7,7 @@ import 'package:salapify/core/widgets/common_button.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/features/authentication/domain/entities/avatar_option.dart';
 import 'package:salapify/features/authentication/presentation/controllers/avatar_controller.dart';
+import 'package:salapify/features/authentication/presentation/controllers/app_user_controller.dart';
 
 class AvatarPickerScreen extends ConsumerStatefulWidget {
   const AvatarPickerScreen({super.key});
@@ -22,7 +23,13 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.42);
+    final currentId = ref.read(currentAppUserProvider).value?.avatarId;
+    final index = kAvatarOptions.indexWhere((a) => a.id == currentId);
+    _selectedIndex = index >= 0 ? index : 0;
+    _pageController = PageController(
+      viewportFraction: 0.42,
+      initialPage: _selectedIndex,
+    );
   }
 
   @override
@@ -76,9 +83,7 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
                       const SizedBox(height: 8),
                       SizedBox(
                         height: 130,
-                        child: Lottie.asset(
-                          'assets/lottie/sleeping_squirrel.json',
-                        ),
+                        child: Lottie.asset('assets/lottie/curious.json'),
                       ),
                       Text(
                         'Which little money beast are you?',

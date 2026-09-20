@@ -17,5 +17,6 @@ Future<AppUser?> currentAppUser(Ref ref) async {
     email: sessionUser.email,
     username: profile?['username'] as String?,
     avatarId: profile?['avatarId'] as String?,
+    preferencesCompleted: profile?['preferencesCompleted'] as bool? ?? true,
   );
 }

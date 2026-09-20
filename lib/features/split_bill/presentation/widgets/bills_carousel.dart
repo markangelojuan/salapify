@@ -8,10 +8,13 @@ import 'package:salapify/features/split_bill/data/providers/split_bill_providers
 import 'package:salapify/features/split_bill/domain/entities/bill_share.dart';
 import 'package:salapify/features/split_bill/domain/entities/payment_status.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_bill.dart';
+import 'package:salapify/features/split_bill/domain/entities/split_bill_limits.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 import 'package:salapify/features/split_bill/presentation/controllers/split_bill_controller.dart';
 import 'package:salapify/features/split_bill/presentation/screens/bill_form_screen.dart';
+import 'package:salapify/features/premium/presentation/widgets/premium_upsell_sheet.dart';
 import 'package:salapify/router/routes.dart';
+import 'package:flutter/foundation.dart';
 
 class BillsCarousel extends ConsumerWidget {
   const BillsCarousel({
@@ -55,40 +58,58 @@ class BillsCarousel extends ConsumerWidget {
   }
 }
 
-class _AddBillCard extends StatelessWidget {
+class _AddBillCard extends ConsumerWidget {
   const _AddBillCard({required this.group});
 
   final SplitGroup group;
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final creatorIsPremiumAsync = ref.watch(
+      isGroupCreatorPremiumProvider(group.createdBy),
+    );
+    final isPremium = creatorIsPremiumAsync.value ?? false;
+    final limit = SplitBillLimits.maxBillsPerGroupFor(isPremium: isPremium);
+    final atLimit = group.billsCreatedCount >= limit;
+    debugPrint(
+      'creatorPremium=$isPremium limit=$limit count=${group.billsCreatedCount}',
+    );
 
     return Container(
       width: 140,
       margin: const EdgeInsets.only(right: 12),
       child: Material(
-        color: colors.primary.withValues(alpha: 0.06),
+        color: atLimit
+            ? colors.textSecondary.withValues(alpha: 0.06)
+            : colors.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => context.pushNamed(
-            AppRoutes.billForm.name,
-            extra: BillFormArgs(group: group),
-          ),
+          onTap: atLimit
+              ? () => showPremiumUpsellSheet(context, limit: PremiumLimit.bills)
+              : () => context.pushNamed(
+                  AppRoutes.billForm.name,
+                  extra: BillFormArgs(group: group),
+                ),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: colors.primary.withValues(alpha: 0.2)),
+              border: Border.all(
+                color: atLimit
+                    ? colors.textSecondary.withValues(alpha: 0.2)
+                    : colors.primary.withValues(alpha: 0.2),
+              ),
             ),
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.add_circle_outline_rounded,
+                    atLimit
+                        ? Icons.lock_outline_rounded
+                        : Icons.add_circle_outline_rounded,
                     size: 28,
-                    color: colors.primary,
+                    color: atLimit ? colors.textSecondary : colors.primary,
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -96,7 +117,7 @@ class _AddBillCard extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
-                      color: colors.primary,
+                      color: atLimit ? colors.textSecondary : colors.primary,
                     ),
                   ),
                 ],

@@ -156,6 +156,14 @@ class BudgetRepository {
         .watch()
         .map((rows) => rows.isNotEmpty);
   }
+
+  Future<int> countActive() async {
+    final query = _db.selectOnly(_db.budgetCategories)
+      ..addColumns([_db.budgetCategories.id.count()])
+      ..where(_db.budgetCategories.isDeleted.equals(false));
+    final row = await query.getSingle();
+    return row.read(_db.budgetCategories.id.count()) ?? 0;
+  }
 }
 
 @Riverpod(keepAlive: true)

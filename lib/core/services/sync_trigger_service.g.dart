@@ -40,7 +40,7 @@ final class SyncTriggerProvider extends $NotifierProvider<SyncTrigger, void> {
   }
 }
 
-String _$syncTriggerHash() => r'ca7730df02b196f076588cc9115b94db64694fa8';
+String _$syncTriggerHash() => r'2b9d0f897657afea1b568e988b207c2d6805a9c2';
 
 abstract class _$SyncTrigger extends $Notifier<void> {
   void build();

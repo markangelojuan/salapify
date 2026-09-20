@@ -161,3 +161,9 @@ class ActivityLoadingMore extends _$ActivityLoadingMore {
   @override
   bool build(String groupId) => false;
 }
+
+
+@riverpod
+Future<bool> isGroupCreatorPremium(Ref ref, String creatorUid) {
+  return ref.watch(userRepositoryProvider).isPremiumUser(creatorUid);
+}

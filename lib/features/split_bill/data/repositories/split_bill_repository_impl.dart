@@ -12,7 +12,6 @@ import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 import 'dart:io';
 import 'package:salapify/features/split_bill/data/services/split_bill_storage_service.dart';
 
-
 class SplitBillRepositoryImpl implements SplitBillRepository {
   SplitBillRepositoryImpl(this._service, this._storageService);
   final SplitBillFirestoreService _service;
@@ -157,11 +156,16 @@ class SplitBillRepositoryImpl implements SplitBillRepository {
   }
 
   @override
-  Future<void> createBillWithActivity(SplitBill bill, ActivityEntry activity) {
+  Future<void> createBillWithActivity(
+    SplitBill bill,
+    ActivityEntry activity, {
+    required int billLimit,
+  }) {
     return _service.createBillWithActivity(
       bill.groupId,
       bill.toFirestore(),
       activity.toFirestore(),
+      billLimit: billLimit,
     );
   }
 
@@ -171,5 +175,10 @@ class SplitBillRepositoryImpl implements SplitBillRepository {
     required File file,
   }) {
     return _storageService.uploadActivityPhoto(groupId: groupId, file: file);
+  }
+
+  @override
+  Future<int> countOwnedGroupsForUser(String userId) {
+    return _service.countOwnedGroups(userId);
   }
 }

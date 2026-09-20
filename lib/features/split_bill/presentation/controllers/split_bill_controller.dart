@@ -2,11 +2,16 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
+import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
 import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
 import 'package:salapify/features/split_bill/domain/entities/activity_entry.dart';
 import 'package:salapify/features/split_bill/domain/entities/payment_status.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_bill.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
+import 'package:salapify/features/split_bill/domain/entities/split_bill_limits.dart';
+import 'package:salapify/features/split_bill/domain/exceptions/group_limit_exceeded_exception.dart';
+import 'package:salapify/features/premium/data/repositories/entitlement_repository.dart';
+
 import 'dart:io';
 
 part 'split_bill_controller.g.dart';
@@ -20,12 +25,22 @@ class SplitBillController extends _$SplitBillController {
 
   Future<void> createGroup({
     required String name,
-    required List<String> memberIds, // does NOT include the creator
+    required List<String> memberIds,
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final currentUser = ref.read(authRepositoryProvider).currentUser;
       if (currentUser == null) throw StateError('Not signed in');
+
+      final isPremium = ref.read(isPremiumProvider).value ?? false;
+      final limit = SplitBillLimits.maxActiveGroupsFor(isPremium: isPremium);
+      final ownedCount = await ref
+          .read(splitBillRepositoryProvider)
+          .countOwnedGroupsForUser(currentUser.uid);
+
+      if (ownedCount >= limit) {
+        throw GroupLimitExceededException(limit);
+      }
 
       final now = DateTime.now();
       final group = SplitGroup(
@@ -97,12 +112,22 @@ class SplitBillController extends _$SplitBillController {
     }
   }
 
-  /// Saves the bill and logs the "bill added" activity entry as one unit,
-  /// so screens can never save one without the other.
+
   Future<void> createBill(SplitBill bill) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(splitBillRepositoryProvider);
+
+      final group = await repo.getGroup(bill.groupId);
+      if (group == null) throw StateError('Group not found');
+
+      final creatorIsPremium = await ref
+          .read(userRepositoryProvider)
+          .isPremiumUser(group.createdBy);
+      final limit = SplitBillLimits.maxBillsPerGroupFor(
+        isPremium: creatorIsPremium,
+      );
+
       await repo.createBillWithActivity(
         bill,
         ActivityEntry(
@@ -113,6 +138,7 @@ class SplitBillController extends _$SplitBillController {
           createdAt: DateTime.now(),
           metadata: {'billTitle': bill.title, 'amount': bill.totalAmount},
         ),
+        billLimit: limit,
       );
     });
   }
@@ -238,7 +264,12 @@ class SplitBillController extends _$SplitBillController {
           senderId: currentUser.uid,
           type: ActivityType.photo,
           createdAt: DateTime.now(),
-          metadata: {'photoUrl': url, 'expiresAt': DateTime.now().add(const Duration(days: 3)).toIso8601String(),},
+          metadata: {
+            'photoUrl': url,
+            'expiresAt': DateTime.now()
+                .add(const Duration(days: 3))
+                .toIso8601String(),
+          },
         ),
       );
     });

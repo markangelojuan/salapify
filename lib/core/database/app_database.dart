@@ -8,15 +8,33 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:salapify/core/database/tables/budget_categories_table.dart';
 import 'package:salapify/core/database/tables/income_sources_table.dart';
 import 'package:salapify/core/database/tables/transactions_table.dart';
+import 'package:salapify/core/database/tables/user_entitlement_table.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [BudgetCategories, IncomeSources, Transactions])
+@DriftDatabase(
+  tables: [
+    BudgetCategories,
+    IncomeSources,
+    Transactions,
+    UserEntitlement,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.createTable(userEntitlement);
+      }
+    },
+  );
 
   static QueryExecutor _openConnection() {
     return LazyDatabase(() async {

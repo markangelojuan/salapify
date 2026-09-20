@@ -3,6 +3,7 @@ import 'package:salapify/core/services/connectivity_service.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/authentication/domain/entities/app_user.dart';
 import 'package:salapify/features/budget/data/services/budget_sync_service.dart';
+import 'package:salapify/features/premium/data/services/entitlement_sync_service.dart';
 import 'package:salapify/features/settings/data/services/settings_sync_service.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/transaction/data/services/income_source_sync_service.dart';
@@ -82,6 +83,12 @@ class SyncTrigger extends _$SyncTrigger {
     } catch (e) {
       _logIfRealError(e, context: 'onSignedIn: settings push/pull');
     }
+
+    try {
+      await ref.read(entitlementSyncServiceProvider).pullRemoteEntitlement(uid);
+    } catch (e) {
+      _logIfRealError(e, context: 'onSignedIn: entitlement pull');
+    }
   }
 
   Future<void> _triggerSync() async {
@@ -116,6 +123,12 @@ class SyncTrigger extends _$SyncTrigger {
       await ref.read(settingsSyncServiceProvider).retryPendingSettingsSync(uid);
     } catch (e) {
       _logIfRealError(e, context: 'triggerSync: retryPendingSettingsSync');
+    }
+
+    try {
+      await ref.read(entitlementSyncServiceProvider).pullRemoteEntitlement(uid);
+    } catch (e) {
+      _logIfRealError(e, context: 'triggerSync: entitlement pull');
     }
   }
 
