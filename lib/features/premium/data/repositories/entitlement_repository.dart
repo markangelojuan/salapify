@@ -14,7 +14,8 @@ class EntitlementRepository {
     final query = _db.select(_db.userEntitlement)
       ..where((t) => t.id.equals(_localRowId));
     return query.watchSingleOrNull().map(
-      (row) => row ?? const UserEntitlementRow(id: _localRowId, isPremium: false),
+      (row) =>
+          row ?? const UserEntitlementRow(id: _localRowId, isPremium: false),
     );
   }
 
@@ -23,15 +24,23 @@ class EntitlementRepository {
     DateTime? premiumSince,
     String? productId,
   }) async {
-    await _db.into(_db.userEntitlement).insertOnConflictUpdate(
-      UserEntitlementCompanion(
-        id: const Value(_localRowId),
-        isPremium: Value(isPremium),
-        premiumSince: Value(premiumSince),
-        premiumProductId: Value(productId),
-        lastSyncedAt: Value(DateTime.now()),
-      ),
-    );
+    await _db
+        .into(_db.userEntitlement)
+        .insertOnConflictUpdate(
+          UserEntitlementCompanion(
+            id: const Value(_localRowId),
+            isPremium: Value(isPremium),
+            premiumSince: Value(premiumSince),
+            premiumProductId: Value(productId),
+            lastSyncedAt: Value(DateTime.now()),
+          ),
+        );
+  }
+
+  Future<void> clearLocal() async {
+    await (_db.delete(
+      _db.userEntitlement,
+    )..where((t) => t.id.equals(_localRowId))).go();
   }
 }
 

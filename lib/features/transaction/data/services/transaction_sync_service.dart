@@ -111,6 +111,10 @@ class TransactionSyncService {
       }
     }
   }
+
+  Future<void> deleteTransactionRemote(String uid, String id) async {
+    await _remoteCollection(uid).doc(id).delete().timeout(_firestoreTimeout);
+  }
 }
 
 @Riverpod(keepAlive: true)

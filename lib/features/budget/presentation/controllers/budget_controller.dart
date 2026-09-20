@@ -53,7 +53,26 @@ class PeriodResetGuard extends _$PeriodResetGuard {
     final lastKey = await settingsRepo.getLastResetPeriodKey();
 
     if (lastKey != currentKey) {
-      await ref.read(budgetRepositoryProvider).resetAllCompleted();
+      final removedIds = await ref
+          .read(transactionRepositoryProvider)
+          .deleteStaleAutofillTransactions(
+            globalPeriod: globalPeriod,
+            firstHalfEndDay: firstHalfEndDay,
+            now: DateTime.now(),
+          );
+
+      final uid = ref.read(currentUserProvider)?.uid;
+      final isOnline = ref.read(isOnlineProvider).value ?? true;
+      if (uid != null && isOnline && removedIds.isNotEmpty) {
+        final syncService = ref.read(transactionSyncServiceProvider);
+        for (final id in removedIds) {
+          try {
+            await syncService.deleteTransactionRemote(uid, id);
+          } catch (_) {
+            //  offline/guest just leaves an orphaned doc
+          }
+        }
+      }
       await settingsRepo.setLastResetPeriodKey(currentKey);
     }
   }

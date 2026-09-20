@@ -17,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/core/widgets/global_loading.dart';
+import 'core/lifecycle/period_reset_lifecycle_observer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,8 +63,6 @@ class _MyAppState extends ConsumerState<MyApp> {
   }
 
   Future<void> _runStartupSync() async {
-    // Reminder scheduling is local-only — runs for guests too, ahead of the
-    // login-gated sync below.
     final pushService = ref.read(pushNotificationServiceProvider);
     await pushService.ensureLocalNotificationsInitialized();
     if (!mounted) return;
@@ -85,23 +84,35 @@ class _MyAppState extends ConsumerState<MyApp> {
     if (uid == null) return; // guest mode, nothing to sync
 
     try {
-      final syncService = ref.read(budgetSyncServiceProvider);
-      await syncService.pullRemoteCategories(uid);
-      if (!mounted) return;
-      await syncService.pushUnsyncedCategories(uid);
-    } catch (e) {
-      if (!mounted) return;
-      _logIfRealError(e, context: 'startupSync: budget pull/push');
+      await Future.wait([
+        () async {
+          final syncService = ref.read(budgetSyncServiceProvider);
+          await syncService.pullRemoteCategories(uid);
+          await syncService.pushUnsyncedCategories(uid);
+        }().catchError((e) {
+          if (mounted) {
+            _logIfRealError(e, context: 'startupSync: budget pull/push');
+          }
+        }),
+        () async {
+          final settingsService = ref.read(settingsSyncServiceProvider);
+          await settingsService.pullRemoteSettings(uid);
+          await settingsService.retryPendingSettingsSync(uid);
+        }().catchError((e) {
+          if (mounted) {
+            _logIfRealError(e, context: 'startupSync: settings pull/retry');
+          }
+        }),
+      ]);
+    } finally {
+      if (mounted) {
+        ref.invalidate(budgetingPeriodSettingProvider);
+        ref.invalidate(firstHalfEndDaySettingProvider);
+        ref.invalidate(currencySettingProvider);
+      }
     }
 
     if (!mounted) return;
-
-    try {
-      await ref.read(settingsSyncServiceProvider).retryPendingSettingsSync(uid);
-    } catch (e) {
-      if (!mounted) return;
-      _logIfRealError(e, context: 'startupSync: retryPendingSettingsSync');
-    }
 
     await ref.read(pushNotificationServiceProvider).initForUser(uid);
   }
@@ -116,22 +127,24 @@ class _MyAppState extends ConsumerState<MyApp> {
   Widget build(BuildContext context) {
     ref.watch(syncTriggerProvider);
 
-    return MaterialApp.router(
-      routerConfig: ref.watch(goRouterProvider),
-      title: 'Salapify',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: ref.watch(themeControllerProvider),
-      builder: (context, child) {
-        final colors = Theme.of(context).extension<AppColorsExt>()!;
-        return GlobalLoadingOverlay(
-          child: Container(
-            decoration: BoxDecoration(gradient: colors.backgroundGradient),
-            child: child,
-          ),
-        );
-      },
+    return PeriodResetLifecycleObserver(
+      child: MaterialApp.router(
+        routerConfig: ref.watch(goRouterProvider),
+        title: 'Salapify',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        themeMode: ref.watch(themeControllerProvider),
+        builder: (context, child) {
+          final colors = Theme.of(context).extension<AppColorsExt>()!;
+          return GlobalLoadingOverlay(
+            child: Container(
+              decoration: BoxDecoration(gradient: colors.backgroundGradient),
+              child: child,
+            ),
+          );
+        },
+      ),
     );
   }
 }

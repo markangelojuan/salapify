@@ -71,6 +71,17 @@ class SettingsRepository {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_remindersEnabledKey, enabled);
   }
+
+  Future<void> clearAll() async {
+    final prefs = await SharedPreferences.getInstance();
+    await Future.wait([
+      prefs.remove(_periodKey),
+      prefs.remove(_firstHalfEndDayKey),
+      prefs.remove(_lastResetPeriodKeyKey),
+      prefs.remove(_currencyKey),
+      prefs.remove(_remindersEnabledKey),
+    ]);
+  }
 }
 
 @Riverpod(keepAlive: true)

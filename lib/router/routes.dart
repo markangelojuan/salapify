@@ -74,8 +74,10 @@ GoRouter goRouter(Ref ref) {
     initialLocation: "/home",
     debugLogDiagnostics: true,
     redirect: (ctx, state) {
+      final authAsync = ref.read(authStateChangesProvider);
+      if (authAsync.isLoading) return null;
       final authRepository = ref.read(authRepositoryProvider);
-      final isLoggedIn = authRepository.currentUser != null;
+      final isLoggedIn = authAsync.value != null;
       final isGuest = ref.read(guestModeProvider);
       final loc = state.matchedLocation;
 

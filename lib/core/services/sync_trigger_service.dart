@@ -76,8 +76,8 @@ class SyncTrigger extends _$SyncTrigger {
       // clobbered by a stale local default, and a fresh account gets the
       // guest's actual choices instead of silently losing them.
       final settingsService = ref.read(settingsSyncServiceProvider);
-      await settingsService.pushLocalSettingsOnSignIn(uid);
       await settingsService.pullRemoteSettings(uid);
+      await settingsService.retryPendingSettingsSync(uid);
       ref.invalidate(budgetingPeriodSettingProvider);
       ref.invalidate(firstHalfEndDaySettingProvider);
     } catch (e) {

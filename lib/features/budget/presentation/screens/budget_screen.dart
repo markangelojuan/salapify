@@ -55,7 +55,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
         CommonSnackbar.showError(context, next.error!);
       }
     });
-    if (resetGuard.isLoading) {
+    if (resetGuard.isLoading && !resetGuard.hasValue) {
       return const Center(child: CircularProgressIndicator());
     }
 

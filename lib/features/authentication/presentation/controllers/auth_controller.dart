@@ -8,6 +8,9 @@ import 'package:salapify/features/authentication/data/repositories/auth_reposito
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
 import 'package:salapify/features/authentication/domain/exceptions/auth_exceptions.dart';
 import 'package:salapify/features/budget/data/repositories/budget_repository.dart';
+import 'package:salapify/features/premium/data/repositories/entitlement_repository.dart';
+import 'package:salapify/features/settings/data/repositories/settings_repository.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/transaction/data/repositories/transaction_repository.dart';
 import 'package:salapify/features/transaction/data/repositories/income_source_repository.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -39,7 +42,7 @@ class AuthController extends _$AuthController {
       }
 
       final authRepository = ref.read(authRepositoryProvider);
-      // Email uniqueness is enforced by Firebase Auth itself 
+      // Email uniqueness is enforced by Firebase Auth itself
       await authRepository.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -93,7 +96,16 @@ class AuthController extends _$AuthController {
         await ref.read(transactionRepositoryProvider).clearAllTransactions();
         await ref.read(incomeSourceRepositoryProvider).clearAllSources();
         await ref.read(budgetRepositoryProvider).clearAllCategories();
+        await ref.read(entitlementRepositoryProvider).clearLocal();
       });
+
+      await ref.read(settingsRepositoryProvider).clearAll();
+
+      ref.invalidate(budgetingPeriodSettingProvider);
+      ref.invalidate(firstHalfEndDaySettingProvider);
+      ref.invalidate(currencySettingProvider);
+      ref.invalidate(reminderNotificationsSettingProvider);
+      ref.invalidate(isPremiumProvider);
     });
   }
 
