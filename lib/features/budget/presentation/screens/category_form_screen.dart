@@ -38,6 +38,9 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   BudgetPeriod? _period;
   late String _iconKey;
 
+  static const String _fixedHint = 'Same amount each time.';
+  static const String _variableHint = 'Amount may change each time.';
+
   @override
   void initState() {
     super.initState();
@@ -206,7 +209,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                   },
                 ),
                 const SizedBox(height: 18),
-                Text('Type', style: TextStyle(color: colors.textPrimary)),
+                _buildTypeLabel(colors),
                 const SizedBox(height: 8),
                 SegmentedButton<BudgetCategoryType>(
                   segments: const [
@@ -253,6 +256,28 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTypeLabel(AppColorsExt colors) {
+    return Row(
+      children: [
+        Text('Type', style: TextStyle(color: colors.textPrimary)),
+        Tooltip(
+          message: 'Fixed: $_fixedHint\nVariable: $_variableHint',
+          triggerMode: TooltipTriggerMode.tap,
+          showDuration: const Duration(seconds: 6),
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(2, 4, 4, 4),
+            child: Icon(
+              Icons.info_outline_rounded,
+              size: 18,
+              color: colors.textPrimary.withValues(alpha: 0.6),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

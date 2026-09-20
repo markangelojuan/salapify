@@ -127,7 +127,7 @@ class _FloatingNavBar extends StatelessWidget {
   });
 
   static const double _pillHeight = 64;
-  static const double _fabSize = 50;
+  static const double _fabSize = 52;
   static const double _fabPopOut = 22;
   static const double _maxWidthOnWide = 480;
 
@@ -305,7 +305,6 @@ class _PopOutFab extends StatelessWidget {
             offset: const Offset(0, 6),
           ),
         ],
-        border: Border.all(color: colors.background, width: 4),
       ),
       child: Material(
         color: Colors.transparent,

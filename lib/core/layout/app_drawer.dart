@@ -79,13 +79,6 @@ class AppDrawer extends ConsumerWidget {
                       context.push('/help');
                     },
                   ),
-                  ElevatedButton(
-  onPressed: () => ref.read(globalLoadingProvider.notifier).run(
-    'Testing overlay…',
-    () => Future.delayed(const Duration(seconds: 3)),
-  ),
-  child: const Text('Test overlay'),
-),
                   const Spacer(),
                   const Divider(height: 1, indent: 20, endIndent: 20),
                   const SizedBox(height: 8),

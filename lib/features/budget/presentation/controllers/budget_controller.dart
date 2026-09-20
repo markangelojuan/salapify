@@ -53,6 +53,7 @@ class PeriodResetGuard extends _$PeriodResetGuard {
     final lastKey = await settingsRepo.getLastResetPeriodKey();
 
     if (lastKey != currentKey) {
+      await ref.read(budgetRepositoryProvider).resetAllCompleted(); 
       final removedIds = await ref
           .read(transactionRepositoryProvider)
           .deleteStaleAutofillTransactions(

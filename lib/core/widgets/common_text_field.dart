@@ -39,16 +39,8 @@ class CommonTextField extends StatelessWidget {
       children: [
         if (label != null)
           Padding(
-            padding: const EdgeInsets.only(bottom: 10, left: 4),
-            child: Text(
-              label!,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: colors.textPrimary.withValues(alpha: 0.8),
-                letterSpacing: 1.2,
-              ),
-            ),
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(label!, style: TextStyle(color: colors.textPrimary)),
           ),
         TextFormField(
           controller: controller,
