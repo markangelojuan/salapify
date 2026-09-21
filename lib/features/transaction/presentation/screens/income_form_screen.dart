@@ -164,6 +164,8 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                 CommonTextField(
                   controller: _sourceController,
                   icon: Icons.badge_outlined,
+                  textInputAction: TextInputAction.done,
+                  maxCharacters: 50,
                   hint: 'e.g. Salary, Freelance, Gift',
                   label: 'Source',
                   validator: (value) {

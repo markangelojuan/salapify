@@ -173,6 +173,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                 CommonTextField(
                   controller: _nameController,
                   icon: Icons.label_outline_rounded,
+                  textInputAction: TextInputAction.done,
+                  maxCharacters: 50,
                   hint: 'e.g. Groceries',
                   label: 'Category Name',
                   validator: (value) {
@@ -267,7 +269,25 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
           message: 'Fixed: $_fixedHint\nVariable: $_variableHint',
           triggerMode: TooltipTriggerMode.tap,
           showDuration: const Duration(seconds: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: colors.textPrimary,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: colors.textPrimary.withValues(alpha: 0.25),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          textStyle: TextStyle(
+            color: colors.background,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            height: 1.4,
+          ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(2, 4, 4, 4),
             child: Icon(

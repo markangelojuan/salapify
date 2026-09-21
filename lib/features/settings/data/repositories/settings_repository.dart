@@ -65,7 +65,7 @@ class SettingsRepository {
 
   Future<bool> getLocalRemindersEnabled() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_remindersEnabledKey) ?? true;
+    return prefs.getBool(_remindersEnabledKey) ?? false;
   }
 
   Future<void> setLocalRemindersEnabled(bool enabled) async {

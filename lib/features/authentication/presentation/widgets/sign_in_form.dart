@@ -52,7 +52,6 @@ class _SignInFormState extends ConsumerState<SignInForm> {
   }
 
   void _showForgotPasswordSheet() {
-
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final capturedTheme = Theme.of(context);
 
@@ -160,6 +159,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                                 icon: Icons.mail_outline_rounded,
                                 hint: "Enter your email",
                                 label: "Email Address",
+                                textInputAction: TextInputAction.next,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return "Email is required";
@@ -241,6 +241,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                 icon: Icons.mail_outline_rounded,
                 hint: "Enter your email",
                 label: "Email Address",
+                textInputAction: TextInputAction.next,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "Email is required";
@@ -266,6 +267,9 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                 controller: _passwordController,
                 icon: Icons.lock_open_rounded,
                 hint: "Enter your password",
+                maxCharacters: 128,
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (_) {FocusScope.of(context).unfocus();},
                 label: "Password",
                 isPassword: true,
                 isPasswordVisible: _isPasswordVisible,
@@ -432,10 +436,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
               },
               child: Text(
                 "Continue as guest",
-                style: TextStyle(
-                  color: colors.textSecondary,
-                  fontSize: 13,
-                ),
+                style: TextStyle(color: colors.textSecondary, fontSize: 13),
               ),
             ),
           ),

@@ -194,6 +194,7 @@ class _SplitGroupDetailScreenState
                   onSend: _sendMessage,
                   onPoke: _sendPoke,
                   onAddPhoto: _pickAndSendPhoto,
+                  maxCharacters: 1000,
                 ),
               ],
             );

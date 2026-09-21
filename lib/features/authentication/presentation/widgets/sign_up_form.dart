@@ -117,10 +117,22 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             controller: _usernameController,
             icon: Icons.alternate_email_rounded,
             hint: "Enter your preferred username",
+            maxCharacters: 20,
+            textInputAction: TextInputAction.next,
             label: "Username",
             validator: (value) {
               if (value == null || value.isEmpty) return "Username is required";
-              if (value.length < 3) return "Minimum 3 characters";
+              if (value != value.trim()) return "No leading or trailing spaces";
+              if (!RegExp(r'^[a-zA-Z]').hasMatch(value)) {
+                return "Must start with a letter";
+              }
+              if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) {
+                return "Only letters, numbers, and underscores allowed";
+              }
+              final letterCount = RegExp(r'[a-zA-Z]').allMatches(value).length;
+              if (letterCount < 3) return "Minimum 3 letters";
+              final digitCount = RegExp(r'[0-9]').allMatches(value).length;
+              if (digitCount > 3) return "Maximum 3 numbers";
               if (_usernameError != null) return _usernameError;
               return null;
             },
@@ -128,7 +140,9 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
           const SizedBox(height: 18),
           CommonTextField(
             controller: _emailController,
+            textInputAction: TextInputAction.next,
             icon: Icons.mail_outline_rounded,
+            maxCharacters: 255,
             hint: "Enter your email",
             label: "Email Address",
             validator: (value) {
@@ -141,7 +155,9 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
           const SizedBox(height: 18),
           CommonTextField(
             controller: _passwordController,
+            textInputAction: TextInputAction.next,
             icon: Icons.lock_open_rounded,
+            maxCharacters: 120,
             hint: "Enter your password",
             label: "Password",
             isPassword: true,
@@ -166,11 +182,14 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
           const SizedBox(height: 18),
           CommonTextField(
             controller: _confirmPasswordController,
+            textInputAction: TextInputAction.done,
             icon: Icons.lock_outline_rounded,
+            maxCharacters: 120,
             hint: "Re-enter your password",
             label: "Confirm Password",
             isPassword: true,
             isPasswordVisible: _isConfirmPasswordVisible,
+            onFieldSubmitted: (_) {FocusScope.of(context).unfocus();},
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return "Please confirm your password";

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 
 class MessageInput extends StatelessWidget {
@@ -8,12 +9,14 @@ class MessageInput extends StatelessWidget {
     required this.onSend,
     required this.onPoke,
     required this.onAddPhoto,
+    this.maxCharacters,
   });
 
   final TextEditingController controller;
   final VoidCallback onSend;
   final VoidCallback onPoke;
   final VoidCallback onAddPhoto;
+  final int? maxCharacters;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +34,9 @@ class MessageInput extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: controller,
+              inputFormatters: maxCharacters != null
+                  ? [LengthLimitingTextInputFormatter(maxCharacters)]
+                  : null,
               style: TextStyle(fontSize: 14, color: colors.textPrimary),
               decoration: InputDecoration(
                 hintText: 'Message the group...',
@@ -42,7 +48,7 @@ class MessageInput extends StatelessWidget {
                 fillColor: colors.primary.withValues(alpha: 0.05),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide(
+                 borderSide: BorderSide(
                     color: colors.primary.withValues(alpha: 0.15),
                   ),
                 ),

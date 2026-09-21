@@ -83,6 +83,8 @@ class RecurringIncomeRow extends StatelessWidget {
                         fontSize: 14,
                         color: colors.textPrimary,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -91,10 +93,13 @@ class RecurringIncomeRow extends StatelessWidget {
                         fontSize: 12,
                         color: colors.textSecondary,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
               Text(
                 '+${source.amount.toStringAsFixed(2)}',
                 style: TextStyle(

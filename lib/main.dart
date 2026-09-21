@@ -80,10 +80,12 @@ class _MyAppState extends ConsumerState<MyApp> {
     if (!mounted) return;
 
     if (remindersEnabled) {
-      await pushService.requestLocalNotificationPermission();
+      final alreadyGranted = await pushService.hasNotificationPermission();
       if (!mounted) return;
-      await pushService.scheduleMonthlyReminders();
-      if (!mounted) return;
+      if (alreadyGranted) {
+        await pushService.scheduleMonthlyReminders();
+        if (!mounted) return;
+      }
     }
 
     final user = await ref.read(authStateChangesProvider.future);

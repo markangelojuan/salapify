@@ -371,7 +371,9 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                           children: [
                             CommonTextField(
                               controller: _titleController,
+                              textInputAction: TextInputAction.done,
                               icon: Icons.receipt_long_rounded,
+                              maxCharacters: 55,
                               hint: 'e.g. Dinner @ KFC',
                               label: 'Title',
                               validator: (v) => (v == null || v.trim().isEmpty)

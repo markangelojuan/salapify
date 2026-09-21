@@ -180,13 +180,29 @@ class PushNotificationService {
     );
   }
 
-  // in PushNotificationService
-  Future<void> requestLocalNotificationPermission() async {
-    await _localNotifications
+  Future<bool> requestLocalNotificationPermission() async {
+    final androidImpl = _localNotifications
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.requestNotificationsPermission();
+        >();
+
+
+    if (androidImpl == null) return true;
+
+    final granted = await androidImpl.requestNotificationsPermission();
+    return granted ?? false;
+  }
+
+  Future<bool> hasNotificationPermission() async {
+    final androidImpl = _localNotifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+
+    if (androidImpl == null) return true;
+
+    final enabled = await androidImpl.areNotificationsEnabled();
+    return enabled ?? false;
   }
 }
 

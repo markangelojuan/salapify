@@ -186,6 +186,8 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
               CommonTextField(
                 controller: _nameController,
                 icon: Icons.groups_rounded,
+                textInputAction: TextInputAction.done,
+                maxCharacters: 55,
                 hint: 'e.g. Roommates, Baguio Trip',
                 label: 'Group name',
                 validator: (value) => (value == null || value.trim().isEmpty)

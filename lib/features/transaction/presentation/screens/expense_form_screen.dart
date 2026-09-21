@@ -231,6 +231,8 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                 CommonTextField(
                   controller: _noteController,
                   icon: Icons.notes_rounded,
+                  textInputAction: TextInputAction.done,
+                  maxCharacters: 150,
                   hint: 'e.g. Coffee with a friend',
                   label: 'Note (optional)',
                 ),

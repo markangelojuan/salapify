@@ -86,14 +86,12 @@ class ExpenseRow extends StatelessWidget {
                     if (transaction.note != null &&
                         transaction.note!.isNotEmpty) ...[
                       const SizedBox(height: 2),
-                      Text(
-                        transaction.note!,
+                      _TruncatedNote(
+                        text: transaction.note!,
                         style: TextStyle(
                           fontSize: 12,
                           color: colors.textSecondary,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ],
@@ -111,6 +109,67 @@ class ExpenseRow extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Single-line note that ellipsizes when it doesn't fit its row, and only
+/// then becomes long-pressable to reveal the full text via a tooltip.
+class _TruncatedNote extends StatelessWidget {
+  const _TruncatedNote({required this.text, required this.style});
+
+  final String text;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final painter = TextPainter(
+          text: TextSpan(text: text, style: style),
+          maxLines: 1,
+          textDirection: Directionality.of(context),
+        )..layout(maxWidth: constraints.maxWidth);
+
+        final isTruncated = painter.didExceedMaxLines;
+
+        final textWidget = Text(
+          text,
+          style: style,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        );
+
+        if (!isTruncated) return textWidget;
+
+        return Tooltip(
+          message: text,
+          triggerMode: TooltipTriggerMode.longPress,
+          preferBelow: false,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: colors.textPrimary,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: colors.textPrimary.withValues(alpha: 0.25),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          textStyle: TextStyle(
+            color: colors.background,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            height: 1.4,
+          ),
+          child: textWidget,
+        );
+      },
     );
   }
 }

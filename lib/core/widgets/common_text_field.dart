@@ -14,6 +14,10 @@ class CommonTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
+  final int? maxCharacters;
+  final bool showCharacterCount;
+  final TextInputAction? textInputAction;
+  final void Function(String)? onFieldSubmitted;
 
   const CommonTextField({
     super.key,
@@ -28,6 +32,10 @@ class CommonTextField extends StatelessWidget {
     this.validator,
     this.keyboardType,
     this.inputFormatters,
+    this.maxCharacters,
+    this.showCharacterCount = true,
+    this.textInputAction,
+    this.onFieldSubmitted,
   });
 
   @override
@@ -48,6 +56,9 @@ class CommonTextField extends StatelessWidget {
           validator: validator,
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
+          maxLength: maxCharacters,
+          textInputAction: textInputAction,
+          onFieldSubmitted: onFieldSubmitted,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           style: TextStyle(
             color: colors.textPrimary,
@@ -73,6 +84,8 @@ class CommonTextField extends StatelessWidget {
                   )
                 : Icon(icon, color: colors.primary, size: 22),
             suffixIcon: suffix,
+            counterText:
+                (maxCharacters != null && !showCharacterCount) ? '' : null,
             contentPadding: const EdgeInsets.symmetric(
               vertical: 18,
               horizontal: 16,

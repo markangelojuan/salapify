@@ -43,30 +43,32 @@ class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
       // Only the local migration sits behind the blocking overlay. The
       // Firestore push further down stays outside it, so a slow network can
       // never keep the whole app frozen.
-      await ref
-          .read(globalLoadingProvider.notifier)
-          .run('Converting your categories…', () async {
-            await ref
-                .read(budgetActionsProvider.notifier)
-                .convertCategoriesForPeriodChange(period);
+      await ref.read(globalLoadingProvider.notifier).run(
+        'Converting your categories…',
+        () async {
+          await ref
+              .read(budgetActionsProvider.notifier)
+              .convertCategoriesForPeriodChange(period);
 
-            final repository = ref.read(settingsRepositoryProvider);
-            await repository.setLocalBudgetingPeriod(period);
+          final repository = ref.read(settingsRepositoryProvider);
+          await repository.setLocalBudgetingPeriod(period);
 
-            final firstHalfEndDay =
-                ref.read(firstHalfEndDaySettingProvider).value ?? 15;
-            final newKey = computeCurrentPeriodKey(
-              globalPeriod: period,
-              firstHalfEndDay: firstHalfEndDay,
-              now: DateTime.now(),
-            );
-            await repository.setLastResetPeriodKey(newKey);
-          });
+          final firstHalfEndDay =
+              ref.read(firstHalfEndDaySettingProvider).value ?? 15;
+          final newKey = computeCurrentPeriodKey(
+            globalPeriod: period,
+            firstHalfEndDay: firstHalfEndDay,
+            now: DateTime.now(),
+          );
+          await repository.setLastResetPeriodKey(newKey);
+        },
+      );
 
       state = AsyncData(period);
 
       final uid = ref.read(currentUserProvider)?.uid;
-      if (uid == null || !_isOnline) return; // guest, or offline — synced on reconnect
+      if (uid == null || !_isOnline)
+        return; // guest, or offline — synced on reconnect
 
       try {
         await ref
@@ -185,6 +187,18 @@ class ReminderNotificationsSetting extends _$ReminderNotificationsSetting {
 
   Future<void> set(bool enabled) async {
     final previous = state;
+    final pushService = ref.read(pushNotificationServiceProvider);
+
+    if (enabled) {
+      final granted = await pushService.requestLocalNotificationPermission();
+      if (!granted) {
+        // Leave the switch as it was; don't persist "enabled" if the
+        // user denied the OS prompt.
+        state = previous;
+        return;
+      }
+    }
+
     state = AsyncData(enabled);
 
     try {
@@ -192,7 +206,6 @@ class ReminderNotificationsSetting extends _$ReminderNotificationsSetting {
           .read(settingsRepositoryProvider)
           .setLocalRemindersEnabled(enabled);
 
-      final pushService = ref.read(pushNotificationServiceProvider);
       if (enabled) {
         await pushService.scheduleMonthlyReminders();
       } else {
