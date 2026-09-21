@@ -16,9 +16,7 @@ import 'package:salapify/features/split_bill/data/services/split_bill_storage_se
 
 part 'split_bill_providers.g.dart';
 
-/// Username + avatarId for a group member, fetched together from the same
-/// `users/{uid}` doc so adding avatar support doesn't cost an extra
-/// Firestore read per member.
+
 class GroupMemberInfo {
   const GroupMemberInfo({required this.username, this.avatarId});
 
@@ -47,7 +45,7 @@ SplitBillRepository splitBillRepository(Ref ref) {
 @riverpod
 Stream<List<SplitGroup>> splitGroups(Ref ref) {
   final uid = ref.watch(currentUserProvider)?.uid;
-  if (uid == null) return const Stream.empty();
+  if (uid == null) return Stream.value(const <SplitGroup>[]);
   return ref.watch(splitBillRepositoryProvider).watchGroupsForUser(uid);
 }
 

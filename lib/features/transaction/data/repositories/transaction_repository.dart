@@ -98,6 +98,14 @@ class TransactionRepository {
 
     return staleIds;
   }
+
+  /// Permanently deletes every transaction (regardless of sync/deleted
+  /// flags) with a `date` older than [cutoff].
+  Future<void> hardDeleteOlderThan(DateTime cutoff) async {
+    await (_db.delete(
+      _db.transactions,
+    )..where((t) => t.date.isSmallerThanValue(cutoff))).go();
+  }
 }
 
 @Riverpod(keepAlive: true)

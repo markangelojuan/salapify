@@ -190,7 +190,7 @@ final class SplitGroupsProvider
   }
 }
 
-String _$splitGroupsHash() => r'ee6980aae430edb58e2db17ff796af81d44300ed';
+String _$splitGroupsHash() => r'37e5fddda5afbff8287f4653d0e2f22b0f6ff5c2';
 
 @ProviderFor(splitBills)
 final splitBillsProvider = SplitBillsFamily._();

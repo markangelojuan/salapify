@@ -179,6 +179,15 @@ class PushNotificationService {
       matchDateTimeComponents: DateTimeComponents.dayOfMonthAndTime,
     );
   }
+
+  // in PushNotificationService
+  Future<void> requestLocalNotificationPermission() async {
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.requestNotificationsPermission();
+  }
 }
 
 @Riverpod(keepAlive: true)

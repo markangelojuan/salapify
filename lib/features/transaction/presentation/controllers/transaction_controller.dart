@@ -5,6 +5,7 @@ import 'package:salapify/features/transaction/data/repositories/transaction_repo
 import 'package:salapify/features/transaction/domain/entities/transaction_entry.dart';
 import 'package:salapify/core/services/connectivity_service.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
+import 'package:salapify/features/settings/data/repositories/settings_repository.dart';
 import 'package:salapify/features/transaction/data/services/transaction_sync_service.dart';
 
 part 'transaction_controller.g.dart';
@@ -72,5 +73,54 @@ class TransactionActions extends _$TransactionActions {
       }
     });
     state = result;
+  }
+}
+
+/// Periodically purges transactions older than [_retentionMonths] months
+/// (measured from each transaction's `date`), so local (and, for signed-in
+/// users, Firestore) storage doesn't grow forever.
+@Riverpod(keepAlive: true)
+class TransactionRetentionGuard extends _$TransactionRetentionGuard {
+  static const _retentionMonths = 3;
+  static const _minCheckInterval = Duration(days: 1);
+
+  @override
+  Future<void> build() async {
+    final settingsRepo = ref.read(settingsRepositoryProvider);
+    final lastChecked = await settingsRepo.getLastRetentionCheck();
+    final now = DateTime.now();
+
+    if (lastChecked != null &&
+        now.difference(lastChecked) < _minCheckInterval) {
+      return;
+    }
+
+    final cutoff = DateTime(now.year, now.month - _retentionMonths, now.day);
+    final uid = ref.read(currentUserProvider)?.uid;
+
+    if (uid == null) {
+      // Guest 
+      await ref.read(transactionRepositoryProvider).hardDeleteOlderThan(cutoff);
+      await settingsRepo.setLastRetentionCheck(now);
+      return;
+    }
+
+    final isOnline = ref.read(isOnlineProvider).value ?? false;
+    if (!isOnline) {
+      // Leave lastRetentionCheck untouched so this retries next app open
+      // rather than waiting out a full extra day offline.
+      return;
+    }
+
+    try {
+      await ref
+          .read(transactionSyncServiceProvider)
+          .purgeStaleTransactions(uid, cutoff);
+      await settingsRepo.setLastRetentionCheck(now);
+    } catch (_) {
+      // Leave lastRetentionCheck untouched — retry on next app open.
+      // Not rethrown: a failed cleanup sweep shouldn't surface as a user
+      // facing error, it just tries again later.
+    }
   }
 }

@@ -106,11 +106,13 @@ flutter:
     - assets/images/frugal_zebra.png
     - assets/images/greedy_cat.png
     - assets/images/lavish_dog.png
-    - assets/images/master_eagle.png
+    - assets/images/impecunious_eagle.png
     - assets/images/savvy_monkey.png
+    - assets/images/lucrative_panda.png
     - assets/images/stingy_turtle.png
     - assets/images/thrifty_pig.png
     - assets/images/google_logo.png
+    - assets/images/chat_graphic.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

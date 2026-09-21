@@ -4,16 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salapify/features/budget/presentation/controllers/budget_controller.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/features/transaction/presentation/controllers/transaction_controller.dart';
 
-/// Wraps the app and makes sure PeriodResetGuard re-evaluates exactly when
-/// a period boundary (month rollover, or first-half/second-half cutover)
-/// is crossed — not just when the user changes a setting.
-///
-/// Two triggers, both cheap:
-/// - App resume: covers time that passed while backgrounded (where OS
-///   timers may have been suspended).
-/// - A single scheduled Timer for the next known boundary while the app
-///   stays foregrounded, rescheduled after it fires. No polling loop.
+
 class PeriodResetLifecycleObserver extends ConsumerStatefulWidget {
   const PeriodResetLifecycleObserver({super.key, required this.child});
 
@@ -34,6 +27,8 @@ class _PeriodResetLifecycleObserverState
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _scheduleNextBoundary();
+    // Fire once on cold start too, not just on subsequent resumes.
+    ref.read(transactionRetentionGuardProvider);
   }
 
   @override
@@ -47,7 +42,8 @@ class _PeriodResetLifecycleObserverState
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       ref.invalidate(periodResetGuardProvider);
-      _scheduleNextBoundary(); // the old timer may be stale/suspended
+      ref.invalidate(transactionRetentionGuardProvider);
+      _scheduleNextBoundary(); 
     }
   }
 
@@ -74,9 +70,7 @@ class _PeriodResetLifecycleObserverState
     });
   }
 
-  /// Mirrors the same day-based logic used in computeCurrentPeriodKey /
-  /// _isInCurrentPeriod, just projected forward to find the next cutover
-  /// instant instead of testing membership.
+
   static DateTime _nextPeriodBoundary({
     required BudgetingPeriod globalPeriod,
     required int firstHalfEndDay,

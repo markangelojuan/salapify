@@ -9,6 +9,7 @@ import 'package:salapify/features/split_bill/domain/entities/split_bill.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 import 'package:salapify/features/split_bill/domain/split_balance_calculator.dart';
 import 'package:salapify/features/split_bill/presentation/controllers/split_bill_controller.dart';
+import 'package:salapify/features/split_bill/presentation/widgets/guest_split_bills_promo.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/router/routes.dart';
 
@@ -60,6 +61,9 @@ class SplitBillsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final currentUid = ref.watch(currentUserProvider)?.uid;
+
+    if (currentUid == null) return const GuestSplitBillPromo();
 
     ref.listen<AsyncValue<void>>(splitBillControllerProvider, (previous, next) {
       if (next.hasError) {
@@ -67,7 +71,6 @@ class SplitBillsScreen extends ConsumerWidget {
       }
     });
     final groupsAsync = ref.watch(splitGroupsProvider);
-    final currentUid = ref.watch(currentUserProvider)?.uid;
 
     return SafeArea(
       child: groupsAsync.when(

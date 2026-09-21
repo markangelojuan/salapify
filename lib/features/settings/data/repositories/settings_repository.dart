@@ -11,6 +11,7 @@ class SettingsRepository {
   static const _lastResetPeriodKeyKey = 'last_reset_period_key';
   static const _currencyKey = 'currency';
   static const _remindersEnabledKey = 'reminders_enabled';
+  static const _lastRetentionCheckKey = 'last_retention_check';
 
   Future<BudgetingPeriod> getLocalBudgetingPeriod() async {
     final prefs = await SharedPreferences.getInstance();
@@ -72,6 +73,19 @@ class SettingsRepository {
     await prefs.setBool(_remindersEnabledKey, enabled);
   }
 
+  /// Last time the transaction-retention sweep ran 
+  Future<DateTime?> getLastRetentionCheck() async {
+    final prefs = await SharedPreferences.getInstance();
+    final millis = prefs.getInt(_lastRetentionCheckKey);
+    if (millis == null) return null;
+    return DateTime.fromMillisecondsSinceEpoch(millis);
+  }
+
+  Future<void> setLastRetentionCheck(DateTime time) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_lastRetentionCheckKey, time.millisecondsSinceEpoch);
+  }
+
   Future<void> clearAll() async {
     final prefs = await SharedPreferences.getInstance();
     await Future.wait([
@@ -80,6 +94,7 @@ class SettingsRepository {
       prefs.remove(_lastResetPeriodKeyKey),
       prefs.remove(_currencyKey),
       prefs.remove(_remindersEnabledKey),
+      prefs.remove(_lastRetentionCheckKey),
     ]);
   }
 }

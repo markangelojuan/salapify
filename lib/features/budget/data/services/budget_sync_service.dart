@@ -21,6 +21,9 @@ class BudgetSyncService {
   // pending until reconnect, blocking any await'ing caller indefinitely.
   static const _firestoreTimeout = Duration(seconds: 8);
 
+  /// Firestore write batches are capped at 500 operations.
+  static const _batchSize = 500;
+
   CollectionReference<Map<String, dynamic>> _remoteCollection(String uid) {
     return _firestore
         .collection('users')
@@ -70,6 +73,9 @@ class BudgetSyncService {
   }
 
   /// Pushes a single category to Firestore, then marks it synced locally.
+  ///
+  /// Used for one-off pushes right after a local add/update, where a batch
+  /// would be overkill (it's already a single round-trip).
   Future<void> pushCategory(String uid, BudgetCategory category) async {
     await _remoteCollection(uid)
         .doc(category.id)
@@ -81,24 +87,52 @@ class BudgetSyncService {
         .write(const BudgetCategoriesCompanion(isSynced: Value(true)));
   }
 
+  /// Pushes [categories] to Firestore in batches of up to 500 writes each.
+  /// Each batch is committed as a single network round-trip, then every row
+  /// in that batch is marked `isSynced: true` locally in one bulk update.
+  Future<void> _pushInBatches(
+    String uid,
+    List<BudgetCategory> categories,
+  ) async {
+    for (var i = 0; i < categories.length; i += _batchSize) {
+      final end = (i + _batchSize > categories.length)
+          ? categories.length
+          : i + _batchSize;
+      final chunk = categories.sublist(i, end);
+
+      final batch = _firestore.batch();
+      for (final category in chunk) {
+        batch.set(
+          _remoteCollection(uid).doc(category.id),
+          _toFirestoreMap(category),
+        );
+      }
+      await batch.commit().timeout(_firestoreTimeout);
+
+      final ids = chunk.map((c) => c.id).toList();
+      await (_db.update(_db.budgetCategories)..where((t) => t.id.isIn(ids)))
+          .write(const BudgetCategoriesCompanion(isSynced: Value(true)));
+    }
+  }
+
   /// Pushes all locally unsynced categories.
   Future<void> pushUnsyncedCategories(String uid) async {
     final unsynced = await (_db.select(
       _db.budgetCategories,
     )..where((t) => t.isSynced.equals(false))).get();
 
-    for (final row in unsynced) {
-      await pushCategory(uid, row.toDomain());
-    }
+    if (unsynced.isEmpty) return;
+
+    await _pushInBatches(uid, unsynced.map((row) => row.toDomain()).toList());
   }
 
   /// One-time migration: pushes ALL local categories (guest data) to Firestore.
   Future<void> migrateGuestDataToAccount(String uid) async {
     final allLocal = await _db.select(_db.budgetCategories).get();
 
-    for (final row in allLocal) {
-      await pushCategory(uid, row.toDomain());
-    }
+    if (allLocal.isEmpty) return;
+
+    await _pushInBatches(uid, allLocal.map((row) => row.toDomain()).toList());
   }
 
   /// Pulls remote categories and merges into local using last-write-wins.

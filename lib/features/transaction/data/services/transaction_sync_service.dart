@@ -17,6 +17,9 @@ class TransactionSyncService {
 
   static const _firestoreTimeout = Duration(seconds: 8);
 
+  /// Firestore write/delete batches are capped at 500 operations.
+  static const _batchSize = 500;
+
   CollectionReference<Map<String, dynamic>> _remoteCollection(String uid) {
     return _firestore.collection('users').doc(uid).collection('transactions');
   }
@@ -64,24 +67,53 @@ class TransactionSyncService {
         .write(const TransactionsCompanion(isSynced: Value(true)));
   }
 
+  /// Pushes [transactions] to Firestore in batches of up to 500 writes each.
+  ///
+  /// Each batch is committed as a single network round-trip, then every row
+  /// in that batch is marked `isSynced: true` locally in one bulk update.
+  Future<void> _pushInBatches(
+    String uid,
+    List<TransactionEntry> transactions,
+  ) async {
+    for (var i = 0; i < transactions.length; i += _batchSize) {
+      final end = (i + _batchSize > transactions.length)
+          ? transactions.length
+          : i + _batchSize;
+      final chunk = transactions.sublist(i, end);
+
+      final batch = _firestore.batch();
+      for (final transaction in chunk) {
+        batch.set(
+          _remoteCollection(uid).doc(transaction.id),
+          _toFirestoreMap(transaction),
+        );
+      }
+      await batch.commit().timeout(_firestoreTimeout);
+
+      final ids = chunk.map((t) => t.id).toList();
+      await (_db.update(_db.transactions)..where((t) => t.id.isIn(ids)))
+          .write(const TransactionsCompanion(isSynced: Value(true)));
+    }
+  }
+
   /// Pushes all locally unsynced transactions.
   Future<void> pushUnsyncedTransactions(String uid) async {
     final unsynced = await (_db.select(
       _db.transactions,
     )..where((t) => t.isSynced.equals(false))).get();
 
-    for (final row in unsynced) {
-      await pushTransaction(uid, row.toDomain());
-    }
+    if (unsynced.isEmpty) return;
+
+    await _pushInBatches(uid, unsynced.map((row) => row.toDomain()).toList());
   }
 
   /// One-time migration: pushes ALL local transactions (guest data) to Firestore.
   Future<void> migrateGuestDataToAccount(String uid) async {
     final allLocal = await _db.select(_db.transactions).get();
 
-    for (final row in allLocal) {
-      await pushTransaction(uid, row.toDomain());
-    }
+    if (allLocal.isEmpty) return;
+
+    await _pushInBatches(uid, allLocal.map((row) => row.toDomain()).toList());
   }
 
   /// Pulls remote transactions and merges into local using last-write-wins.
@@ -114,6 +146,35 @@ class TransactionSyncService {
 
   Future<void> deleteTransactionRemote(String uid, String id) async {
     await _remoteCollection(uid).doc(id).delete().timeout(_firestoreTimeout);
+  }
+
+
+  Future<void> purgeStaleTransactions(String uid, DateTime cutoff) async {
+    final staleRows = await (_db.select(_db.transactions)..where(
+          (t) =>
+              t.date.isSmallerThanValue(cutoff) &
+              t.isDeleted.equals(false) &
+              t.isSynced.equals(true),
+        ))
+        .get();
+
+    if (staleRows.isEmpty) return;
+
+    for (var i = 0; i < staleRows.length; i += _batchSize) {
+      final end = (i + _batchSize > staleRows.length)
+          ? staleRows.length
+          : i + _batchSize;
+      final chunk = staleRows.sublist(i, end);
+      final ids = chunk.map((row) => row.id).toList();
+
+      final batch = _firestore.batch();
+      for (final id in ids) {
+        batch.delete(_remoteCollection(uid).doc(id));
+      }
+      await batch.commit().timeout(_firestoreTimeout);
+
+      await (_db.delete(_db.transactions)..where((t) => t.id.isIn(ids))).go();
+    }
   }
 }
 

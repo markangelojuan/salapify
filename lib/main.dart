@@ -18,9 +18,16 @@ import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/core/widgets/global_loading.dart';
 import 'core/lifecycle/period_reset_lifecycle_observer.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   tz_data.initializeTimeZones();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
@@ -73,6 +80,8 @@ class _MyAppState extends ConsumerState<MyApp> {
     if (!mounted) return;
 
     if (remindersEnabled) {
+      await pushService.requestLocalNotificationPermission();
+      if (!mounted) return;
       await pushService.scheduleMonthlyReminders();
       if (!mounted) return;
     }

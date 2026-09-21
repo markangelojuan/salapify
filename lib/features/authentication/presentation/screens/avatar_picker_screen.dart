@@ -24,7 +24,9 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
   void initState() {
     super.initState();
     final currentId = ref.read(currentAppUserProvider).value?.avatarId;
-    final index = kAvatarOptions.indexWhere((a) => a.id == currentId);
+    // Hidden avatars (e.g. the developer one) aren't in this list, so
+    // indexWhere returns -1 and we fall back to the first avatar.
+    final index = kSelectableAvatars.indexWhere((a) => a.id == currentId);
     _selectedIndex = index >= 0 ? index : 0;
     _pageController = PageController(
       viewportFraction: 0.42,
@@ -42,7 +44,7 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
     // Guard against double-tap while a save is already in flight.
     if (ref.read(avatarControllerProvider).isLoading) return;
 
-    final avatar = kAvatarOptions[_selectedIndex];
+    final avatar = kSelectableAvatars[_selectedIndex];
     await ref.read(avatarControllerProvider.notifier).selectAvatar(avatar.id);
 
     if (!mounted) return;
@@ -67,7 +69,7 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
       next.whenOrNull(error: (e, _) => CommonSnackbar.showError(context, e));
     });
 
-    final selected = kAvatarOptions[_selectedIndex];
+    final selected = kSelectableAvatars[_selectedIndex];
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -102,7 +104,7 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
                         height: 220,
                         child: PageView.builder(
                           controller: _pageController,
-                          itemCount: kAvatarOptions.length,
+                          itemCount: kSelectableAvatars.length,
                           onPageChanged: (i) =>
                               setState(() => _selectedIndex = i),
                           itemBuilder: (context, index) {
@@ -124,7 +126,7 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
                                 );
                               },
                               child: _AvatarCircle(
-                                avatar: kAvatarOptions[index],
+                                avatar: kSelectableAvatars[index],
                                 isSelected: index == _selectedIndex,
                                 colors: colors,
                               ),

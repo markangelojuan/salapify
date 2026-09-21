@@ -58,6 +58,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ? () => context.pushNamed(AppRoutes.expenseForm.name)
             : () => context.pushNamed(AppRoutes.incomeForm.name);
       case 2:
+        if (ref.watch(currentUserProvider) == null) return null;
         return () => _handleCreateGroup(context, ref);
       default:
         return null;

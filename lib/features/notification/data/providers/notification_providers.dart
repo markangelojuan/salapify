@@ -21,7 +21,7 @@ NotificationRepository notificationRepository(Ref ref) {
 @riverpod
 Stream<List<NotificationEntry>> notifications(Ref ref) {
   final uid = ref.watch(currentUserProvider)?.uid;
-  if (uid == null) return const Stream.empty();
+  if (uid == null) return Stream.value(const <NotificationEntry>[]);
   return ref.watch(notificationRepositoryProvider).watchNotifications(uid);
 }
 

@@ -94,3 +94,62 @@ abstract class _$TransactionActions extends $AsyncNotifier<void> {
     element.handleCreate(ref, build);
   }
 }
+
+/// Periodically purges transactions older than [_retentionMonths] months
+/// (measured from each transaction's `date`), so local (and, for signed-in
+/// users, Firestore) storage doesn't grow forever.
+
+@ProviderFor(TransactionRetentionGuard)
+final transactionRetentionGuardProvider = TransactionRetentionGuardProvider._();
+
+/// Periodically purges transactions older than [_retentionMonths] months
+/// (measured from each transaction's `date`), so local (and, for signed-in
+/// users, Firestore) storage doesn't grow forever.
+final class TransactionRetentionGuardProvider
+    extends $AsyncNotifierProvider<TransactionRetentionGuard, void> {
+  /// Periodically purges transactions older than [_retentionMonths] months
+  /// (measured from each transaction's `date`), so local (and, for signed-in
+  /// users, Firestore) storage doesn't grow forever.
+  TransactionRetentionGuardProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'transactionRetentionGuardProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$transactionRetentionGuardHash();
+
+  @$internal
+  @override
+  TransactionRetentionGuard create() => TransactionRetentionGuard();
+}
+
+String _$transactionRetentionGuardHash() =>
+    r'441f3acd6467a8d17d994ce7e73ece8290d89dae';
+
+/// Periodically purges transactions older than [_retentionMonths] months
+/// (measured from each transaction's `date`), so local (and, for signed-in
+/// users, Firestore) storage doesn't grow forever.
+
+abstract class _$TransactionRetentionGuard extends $AsyncNotifier<void> {
+  FutureOr<void> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<void>, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>, void>,
+              AsyncValue<void>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
