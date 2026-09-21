@@ -33,7 +33,7 @@ class CommonTextField extends StatelessWidget {
     this.keyboardType,
     this.inputFormatters,
     this.maxCharacters,
-    this.showCharacterCount = true,
+    this.showCharacterCount = false,
     this.textInputAction,
     this.onFieldSubmitted,
   });

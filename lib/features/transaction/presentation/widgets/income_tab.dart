@@ -81,14 +81,7 @@ class IncomeTab extends ConsumerWidget {
 
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-          children: [
-            Text(
-              'Income',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: colors.textPrimary,
-              ),
-            ),
+          children: [       
             const SizedBox(height: 10),
             ...sources.map(
               (source) => RecurringIncomeRow(

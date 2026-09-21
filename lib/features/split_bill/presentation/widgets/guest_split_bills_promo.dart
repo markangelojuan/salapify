@@ -21,7 +21,6 @@ class GuestSplitBillPromo extends ConsumerWidget {
     return SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          
           final sideBySide = constraints.maxWidth > constraints.maxHeight;
 
           return sideBySide
@@ -32,7 +31,6 @@ class GuestSplitBillPromo extends ConsumerWidget {
     );
   }
 
-  
   Widget _buildStacked(
     BuildContext context,
     WidgetRef ref,
@@ -47,13 +45,16 @@ class GuestSplitBillPromo extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Flexible(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxHeight: _portraitHeroMaxHeight,
-                  ),
-                  child: _Hero(colors: colors),
-                ),
-              ).animate().fadeIn(duration: 500.ms).scale(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxHeight: _portraitHeroMaxHeight,
+                      ),
+                      child: _Hero(colors: colors),
+                    ),
+                  )
+                  .animate()
+                  .fadeIn(duration: 500.ms)
+                  .scale(
                     begin: const Offset(0.96, 0.96),
                     end: const Offset(1, 1),
                     curve: Curves.easeOut,
@@ -67,47 +68,43 @@ class GuestSplitBillPromo extends ConsumerWidget {
     );
   }
 
-
   Widget _buildSideBySide(
     BuildContext context,
     WidgetRef ref,
     AppColorsExt colors,
     BoxConstraints constraints,
   ) {
-    final availableHeight =
-        constraints.maxHeight - _landscapeTopPadding - _navClearance;
-  
-    final heroHeight = (availableHeight * 0.85).clamp(120.0, 240.0);
+    final isTablet = constraints.maxWidth > 700;
+    final heroHeight = (constraints.maxHeight * 0.7).clamp(
+      180.0,
+      isTablet ? 480.0 : 300.0,
+    );
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(
-        28,
-        _landscapeTopPadding,
-        28,
-        _navClearance,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
       child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minHeight: availableHeight > 0 ? availableHeight : 0,
-        ),
+        constraints: BoxConstraints(minHeight: constraints.maxHeight),
         child: Center(
           child: Row(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-     
               SizedBox(
-                width: heroHeight * 0.9,
-                height: heroHeight,
-                child: _Hero(colors: colors),
-              ).animate().fadeIn(duration: 500.ms).scale(
+                    width: heroHeight * 0.9,
+                    height: heroHeight,
+                    child: _Hero(colors: colors),
+                  )
+                  .animate()
+                  .fadeIn(duration: 500.ms)
+                  .scale(
                     begin: const Offset(0.96, 0.96),
                     end: const Offset(1, 1),
                     curve: Curves.easeOut,
                   ),
-              const SizedBox(width: 32),
+              SizedBox(width: isTablet ? 48 : 32),
               Flexible(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 360),
+                  constraints: BoxConstraints(maxWidth: isTablet ? 460 : 360),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,24 +126,23 @@ class GuestSplitBillPromo extends ConsumerWidget {
   }) {
     return [
       FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: landscape ? Alignment.centerLeft : Alignment.center,
-        child: Text(
-          'Chip in. Settle up. Stay friends.',
-          maxLines: 1,
-          textAlign: landscape ? TextAlign.start : TextAlign.center,
-          style: TextStyle(
-            fontSize: landscape ? 22 : 24,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.3,
-            color: colors.textPrimary,
-          ),
-        ),
-      ).animate().fadeIn(delay: 150.ms, duration: 400.ms).slideY(
-            begin: 0.15,
-            end: 0,
-            curve: Curves.easeOut,
-          ),
+            fit: BoxFit.scaleDown,
+            alignment: landscape ? Alignment.centerLeft : Alignment.center,
+            child: Text(
+              'Chip in. Settle up. Stay friends.',
+              maxLines: 1,
+              textAlign: landscape ? TextAlign.start : TextAlign.center,
+              style: TextStyle(
+                fontSize: landscape ? 22 : 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
+                color: colors.textPrimary,
+              ),
+            ),
+          )
+          .animate()
+          .fadeIn(delay: 150.ms, duration: 400.ms)
+          .slideY(begin: 0.15, end: 0, curve: Curves.easeOut),
       SizedBox(height: landscape ? 8 : 10),
       Text(
         'Create groups, split bills, and see who owes who. '
@@ -204,7 +200,7 @@ class _Hero extends StatelessWidget {
             ),
           ),
         ),
-        
+
         ClipRect(
               child: Align(
                 alignment: Alignment.topCenter,

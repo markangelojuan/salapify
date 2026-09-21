@@ -156,22 +156,31 @@ class _SplitGroupDetailScreenState
 
             return Column(
               children: [
-                BalanceSummaryCard(
-                  bills: bills,
-                  currentUid: currentUid,
-                  currency: currencyFormat,
-                ),
-                const SizedBox(height: 12),
-                BillsCarousel(
-                  bills: bills,
-                  group: group,
-                  currentUid: currentUid,
-                  names: names,
-                  currency: currencyFormat,
-                ),
-                Divider(
-                  height: 24,
-                  color: AppColors.border.withValues(alpha: 0.5),
+                Flexible(
+                  flex: 0,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        BalanceSummaryCard(
+                          bills: bills,
+                          currentUid: currentUid,
+                          currency: currencyFormat,
+                        ),
+                        const SizedBox(height: 12),
+                        BillsCarousel(
+                          bills: bills,
+                          group: group,
+                          currentUid: currentUid,
+                          names: names,
+                          currency: currencyFormat,
+                        ),
+                        Divider(
+                          height: 24,
+                          color: AppColors.border.withValues(alpha: 0.5),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 Expanded(
                   child: activityAsync.when(

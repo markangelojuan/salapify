@@ -73,19 +73,28 @@ class _TransactionScreenState extends ConsumerState<TransactionScreen>
     return SafeArea(
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-            child: CashFlowSummaryStrip(
-              income: income,
-              spent: spent,
-              savings: savings,
+          Flexible(
+            flex: 0,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                    child: CashFlowSummaryStrip(
+                      income: income,
+                      spent: spent,
+                      savings: savings,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: TransactionTabBar(controller: _tabController),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: TransactionTabBar(controller: _tabController),
-          ),
-          const SizedBox(height: 8),
           Expanded(
             child: TabBarView(
               controller: _tabController,

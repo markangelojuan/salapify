@@ -33,7 +33,7 @@ class CashFlowSummaryStrip extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                'Resets at the start of each period',
+                'Resets each period. No history is stored.',
                 style: TextStyle(
                   fontSize: 11,
                   color: colors.textSecondary,
@@ -115,6 +115,8 @@ class _SummaryItem extends StatelessWidget {
             fontSize: 11,
             color: colors.textSecondary,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
         Text(
@@ -124,6 +126,8 @@ class _SummaryItem extends StatelessWidget {
             fontWeight: FontWeight.bold,
             color: color,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
