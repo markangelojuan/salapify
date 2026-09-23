@@ -56,10 +56,9 @@ class IncomeSourceSyncService {
 
   /// Pushes a single income source to Firestore, then marks it synced locally.
   Future<void> pushSource(String uid, IncomeSource source) async {
-    await _remoteCollection(uid)
-        .doc(source.id)
-        .set(_toFirestoreMap(source))
-        .timeout(_firestoreTimeout);
+    await _remoteCollection(
+      uid,
+    ).doc(source.id).set(_toFirestoreMap(source)).timeout(_firestoreTimeout);
 
     await (_db.update(_db.incomeSources)..where((t) => t.id.equals(source.id)))
         .write(const IncomeSourcesCompanion(isSynced: Value(true)));
@@ -110,6 +109,28 @@ class IncomeSourceSyncService {
       if (remoteTimestamp.isAfter(localTimestamp)) {
         await _db.update(_db.incomeSources).replace(remote.toCompanion());
       }
+    }
+  }
+
+  static const _batchSize = 500;
+
+  Future<void> deleteAllRemoteSources(String uid) async {
+    final collection = _remoteCollection(uid);
+
+    while (true) {
+      final snap = await collection
+          .limit(_batchSize)
+          .get()
+          .timeout(_firestoreTimeout);
+      if (snap.docs.isEmpty) break;
+
+      final batch = _firestore.batch();
+      for (final doc in snap.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit().timeout(_firestoreTimeout);
+
+      if (snap.docs.length < _batchSize) break;
     }
   }
 }

@@ -5,3 +5,8 @@ class GroupLimitExceededException implements Exception {
   @override
   String toString() => 'GroupLimitExceededException(limit: $limit)';
 }
+
+class MaxGroupMembersExceededException implements Exception {
+  const MaxGroupMembersExceededException(this.limit);
+  final int limit;
+}

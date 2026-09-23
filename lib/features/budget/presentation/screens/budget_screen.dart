@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_reorderable_grid_view/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:salapify/core/services/connectivity_service.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/budget/domain/budget_totals_calculator.dart';
 import 'package:salapify/features/budget/domain/entities/budget_category.dart';
@@ -302,7 +301,7 @@ class _FilterBar extends StatelessWidget {
         Icon(Icons.category_rounded, size: 15, color: AppColors.primary),
         const SizedBox(width: 6),
         Text(
-          'CATEGORIES',
+          'ALLOCATIONS',
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 12,

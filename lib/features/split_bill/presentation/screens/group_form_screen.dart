@@ -11,6 +11,7 @@ import 'package:salapify/features/authentication/data/repositories/user_reposito
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 import 'package:salapify/features/split_bill/presentation/controllers/split_bill_controller.dart';
 import 'package:salapify/features/split_bill/presentation/widgets/member_avatar.dart';
+import 'package:salapify/features/split_bill/domain/entities/split_bill_limits.dart';
 
 class GroupFormScreen extends ConsumerStatefulWidget {
   const GroupFormScreen({super.key, this.existingGroup});
@@ -38,6 +39,8 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
   static const int _minSearchLength = 3;
 
   bool get _isEditing => widget.existingGroup != null;
+  bool get _atMemberLimit =>
+      _selectedMembers.length + 1 >= SplitBillLimits.maxGroupMembers;
 
   @override
   void initState() {
@@ -126,6 +129,7 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
   }
 
   void _addMember(Map<String, String?> user) {
+    if (_atMemberLimit) return;
     setState(() {
       _selectedMembers[user['uid']!] = user['username']!;
       _suggestions = [];
@@ -195,16 +199,22 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
                     : null,
               ),
               const SizedBox(height: 18),
-              Text(
-                'Add members',
-                style: TextStyle(color: colors.textPrimary),
-              ),
+              Text('Add members', style: TextStyle(color: colors.textPrimary)),
               const SizedBox(height: 8),
-              _MemberSearchField(
-                controller: _searchController,
-                isSearching: _isSearching,
-                onChanged: _onSearchChanged,
-              ),
+              if (_atMemberLimit)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Text(
+                    'Group is full (${SplitBillLimits.maxGroupMembers}/${SplitBillLimits.maxGroupMembers} members)',
+                    style: TextStyle(fontSize: 13, color: colors.textSecondary),
+                  ),
+                )
+              else
+                _MemberSearchField(
+                  controller: _searchController,
+                  isSearching: _isSearching,
+                  onChanged: _onSearchChanged,
+                ),
               if (_hasSearched && !_isSearching)
                 Container(
                   margin: const EdgeInsets.only(top: 8),
@@ -345,10 +355,7 @@ class _MemberSearchField extends StatelessWidget {
             vertical: 14,
           ),
           hintText: 'Search by username',
-          hintStyle: TextStyle(
-            color: colors.textSecondary,
-            fontSize: 14,
-          ),
+          hintStyle: TextStyle(color: colors.textSecondary, fontSize: 14),
           prefixIcon: Icon(
             Icons.search_rounded,
             size: 20,

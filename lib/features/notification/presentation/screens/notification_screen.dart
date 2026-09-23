@@ -6,6 +6,9 @@ import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/notification/data/providers/notification_providers.dart';
 import 'package:salapify/features/notification/domain/entities/notification_entry.dart';
 import 'package:salapify/features/notification/presentation/controllers/notification_controller.dart';
+import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
+import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
+import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 import 'package:salapify/router/routes.dart';
 
 class NotificationScreen extends ConsumerWidget {
@@ -227,6 +230,11 @@ class _NotificationTile extends ConsumerWidget {
 
   final NotificationEntry entry;
 
+  static const _fallbackSenderLabel = 'Deleted user';
+
+  String get _senderDisplayName =>
+      entry.senderName.trim().isEmpty ? _fallbackSenderLabel : entry.senderName;
+
   (IconData, Color Function(AppColorsExt)) get _iconAndColorResolver {
     switch (entry.type) {
       case NotificationType.addedToGroup:
@@ -243,18 +251,19 @@ class _NotificationTile extends ConsumerWidget {
   }
 
   String get _label {
+    final name = _senderDisplayName;
     switch (entry.type) {
       case NotificationType.addedToGroup:
-        return '${entry.senderName} added you to "${entry.groupName}"';
+        return '$name added you to "${entry.groupName}"';
       case NotificationType.billAdded:
         final title = entry.metadata?['billTitle'] ?? 'a bill';
-        return '${entry.senderName} added "$title" in ${entry.groupName}';
+        return '$name added "$title" in ${entry.groupName}';
       case NotificationType.paymentMarked:
-        return '${entry.senderName} marked their share as paid in ${entry.groupName}';
+        return '$name marked their share as paid in ${entry.groupName}';
       case NotificationType.paymentConfirmed:
-        return '${entry.senderName} confirmed your payment in ${entry.groupName}';
+        return '$name confirmed your payment in ${entry.groupName}';
       case NotificationType.paymentDisputed:
-        return '${entry.senderName} disputed your payment in ${entry.groupName}';
+        return '$name disputed your payment in ${entry.groupName}';
     }
   }
 
@@ -266,6 +275,39 @@ class _NotificationTile extends ConsumerWidget {
     return '${diff.inDays}d ago';
   }
 
+  Future<void> _handleTap(BuildContext context, WidgetRef ref) async {
+    ref.read(notificationControllerProvider.notifier).markRead(entry.id);
+
+    final currentUser = ref.read(authRepositoryProvider).currentUser;
+    if (currentUser == null) return;
+
+    SplitGroup? group;
+    try {
+      group = await ref
+          .read(splitBillRepositoryProvider)
+          .getGroup(entry.groupId);
+    } catch (_) {
+      group = null;
+    }
+
+    if (!context.mounted) return;
+
+    final stillMember =
+        group != null && group.memberIds.contains(currentUser.uid);
+
+    if (!stillMember) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('This group is no longer available.')),
+      );
+      return;
+    }
+
+    context.pushNamed(
+      AppRoutes.splitGroupDetail.name,
+      pathParameters: {'groupId': entry.groupId},
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
@@ -273,13 +315,7 @@ class _NotificationTile extends ConsumerWidget {
     final color = resolveColor(colors);
 
     return InkWell(
-      onTap: () {
-        ref.read(notificationControllerProvider.notifier).markRead(entry.id);
-        context.pushNamed(
-          AppRoutes.splitGroupDetail.name,
-          pathParameters: {'groupId': entry.groupId},
-        );
-      },
+      onTap: () => _handleTap(context, ref),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),

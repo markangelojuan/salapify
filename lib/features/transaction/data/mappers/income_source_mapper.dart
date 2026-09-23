@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:salapify/core/database/app_database.dart';
+import 'package:salapify/features/transaction/domain/entities/income_period.dart';
 import 'package:salapify/features/transaction/domain/entities/income_source.dart';
 
 extension IncomeSourceMapper on IncomeSourceRow {
@@ -10,6 +11,7 @@ extension IncomeSourceMapper on IncomeSourceRow {
       amount: amount,
       isRecurring: isRecurring,
       recurringDay: recurringDay,
+      period: IncomePeriod.fromString(period), 
       date: date,
       createdAt: createdAt,
       updatedAt: updatedAt,
@@ -27,6 +29,7 @@ extension IncomeSourceCompanionMapper on IncomeSource {
       amount: amount,
       isRecurring: Value(isRecurring),
       recurringDay: Value(recurringDay),
+      period: Value(period.name), 
       date: date,
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),

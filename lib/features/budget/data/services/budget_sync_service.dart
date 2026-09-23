@@ -162,6 +162,27 @@ class BudgetSyncService {
       }
     }
   }
+
+
+  Future<void> deleteAllRemoteCategories(String uid) async {
+    final collection = _remoteCollection(uid);
+
+    while (true) {
+      final snap = await collection
+          .limit(_batchSize)
+          .get()
+          .timeout(_firestoreTimeout);
+      if (snap.docs.isEmpty) break;
+
+      final batch = _firestore.batch();
+      for (final doc in snap.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit().timeout(_firestoreTimeout);
+
+      if (snap.docs.length < _batchSize) break;
+    }
+  }
 }
 
 @Riverpod(keepAlive: true)

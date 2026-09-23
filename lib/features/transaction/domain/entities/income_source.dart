@@ -1,4 +1,5 @@
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
+import 'package:salapify/features/transaction/domain/entities/income_period.dart';
 
 class IncomeSource {
   const IncomeSource({
@@ -7,6 +8,7 @@ class IncomeSource {
     required this.amount,
     required this.isRecurring,
     this.recurringDay,
+    this.period = IncomePeriod.both,
     required this.date,
     required this.createdAt,
     this.updatedAt,
@@ -18,8 +20,10 @@ class IncomeSource {
   final String source;
   final double amount;
   final bool isRecurring;
-  final int? recurringDay; // 1–31, set only when isRecurring
-  final DateTime date; // one-time: date it was added. recurring: informational only.
+  final int? recurringDay; // cosmetic label only, never used for counting
+  final IncomePeriod
+  period; // currently always 'both' — reserved for a future advanced option
+  final DateTime date;
   final DateTime createdAt;
   final DateTime? updatedAt;
   final bool isSynced;
@@ -31,6 +35,7 @@ class IncomeSource {
     bool? isRecurring,
     int? recurringDay,
     bool clearRecurringDay = false,
+    IncomePeriod? period,
     DateTime? date,
     DateTime? updatedAt,
     bool? isSynced,
@@ -41,8 +46,10 @@ class IncomeSource {
       source: source ?? this.source,
       amount: amount ?? this.amount,
       isRecurring: isRecurring ?? this.isRecurring,
-      recurringDay:
-          clearRecurringDay ? null : (recurringDay ?? this.recurringDay),
+      recurringDay: clearRecurringDay
+          ? null
+          : (recurringDay ?? this.recurringDay),
+      period: period ?? this.period,
       date: date ?? this.date,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -51,26 +58,28 @@ class IncomeSource {
     );
   }
 
-bool isActiveFor({
-  required BudgetingPeriod globalPeriod,
-  required int firstHalfEndDay,
-  required DateTime now,
-}) {
-  final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-  final isMonthly = globalPeriod == BudgetingPeriod.monthly;
-  final inFirstHalf = now.day <= firstHalfEndDay;
+  bool isActiveFor({
+    required BudgetingPeriod globalPeriod,
+    required int firstHalfEndDay,
+    required DateTime now,
+  }) {
+    if (!isRecurring) {
+      // One-time: counted for the whole month it happened in, both halves
+      // if biMonthly. Naturally stops counting once the month changes —
+      // no explicit "reset" needed since it's checked against the current
+      // year/month every time.
+      return date.year == now.year && date.month == now.month;
+    }
 
-  final periodStartDay = isMonthly ? 1 : (inFirstHalf ? 1 : firstHalfEndDay + 1);
-  final periodEndDay = isMonthly ? daysInMonth : (inFirstHalf ? firstHalfEndDay : daysInMonth);
+    // Recurring: counted every period regardless of recurringDay.
+    // `period` stays as a hook for a possible future "1st/2nd half only"
+    // option, but every entry defaults to `both`, so today this is
+    // effectively unconditional — matching monthly behavior exactly.
+    if (globalPeriod == BudgetingPeriod.monthly) return true;
 
-  if (isRecurring) {
-    final day = (recurringDay ?? 1).clamp(1, daysInMonth);
-    return day >= periodStartDay && day <= periodEndDay;
+    final inFirstHalf = now.day <= firstHalfEndDay;
+    if (period == IncomePeriod.both) return true;
+    if (period == IncomePeriod.firstHalf) return inFirstHalf;
+    return !inFirstHalf; // secondHalf
   }
-
-  return date.year == now.year &&
-      date.month == now.month &&
-      date.day >= periodStartDay &&
-      date.day <= periodEndDay;
-}
 }

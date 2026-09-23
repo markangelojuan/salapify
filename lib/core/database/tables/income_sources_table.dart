@@ -6,7 +6,8 @@ class IncomeSources extends Table {
   TextColumn get source => text().withLength(min: 1, max: 50)();
   RealColumn get amount => real()();
   BoolColumn get isRecurring => boolean().withDefault(const Constant(false))();
-  IntColumn get recurringDay => integer().nullable()(); // 1–31, set only when isRecurring
+  IntColumn get recurringDay => integer().nullable()();
+  TextColumn get period => text().withDefault(const Constant('both'))();
   DateTimeColumn get date => dateTime()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().nullable()();

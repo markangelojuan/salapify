@@ -71,6 +71,40 @@ class AuthRepository {
     final credential = GoogleAuthProvider.credential(idToken: idToken);
     return _auth.signInWithCredential(credential);
   }
+
+  String? get currentUserProviderId {
+    final providerData = _auth.currentUser?.providerData;
+    if (providerData == null || providerData.isEmpty) return null;
+    return providerData.first.providerId; // 'password' or 'google.com'
+  }
+
+  Future<void> reauthenticateWithPassword(String password) async {
+    final user = _auth.currentUser;
+    final email = user?.email;
+    if (user == null || email == null) {
+      throw StateError('No current user to reauthenticate');
+    }
+    final credential = EmailAuthProvider.credential(
+      email: email,
+      password: password,
+    );
+    await user.reauthenticateWithCredential(credential);
+  }
+
+  Future<void> reauthenticateWithGoogle() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw StateError('No current user to reauthenticate');
+    }
+    final googleUser = await GoogleSignIn.instance.authenticate();
+    final idToken = googleUser.authentication.idToken;
+    final credential = GoogleAuthProvider.credential(idToken: idToken);
+    await user.reauthenticateWithCredential(credential);
+  }
+
+  Future<void> deleteCurrentUser() async {
+    await _auth.currentUser?.delete();
+  }
 }
 
 @Riverpod(keepAlive: true)

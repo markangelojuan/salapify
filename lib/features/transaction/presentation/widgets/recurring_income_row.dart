@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/features/transaction/domain/entities/income_period.dart';
 import 'package:salapify/features/transaction/domain/entities/income_source.dart';
 
 class RecurringIncomeRow extends StatelessWidget {

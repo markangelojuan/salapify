@@ -9,7 +9,9 @@ class NotificationRepositoryImpl implements NotificationRepository {
 
   @override
   Stream<List<NotificationEntry>> watchNotifications(String uid) {
-    return _service.watchNotifications(uid).map(
+    return _service
+        .watchNotifications(uid)
+        .map(
           (snap) => snap.docs
               .map((d) => NotificationEntryMapper.fromFirestore(d.id, d.data()))
               .toList(),
@@ -29,5 +31,10 @@ class NotificationRepositoryImpl implements NotificationRepository {
   @override
   Future<int> unreadCount(String uid) {
     return _service.unreadCount(uid);
+  }
+
+  @override
+  Future<void> deleteAllForUser(String uid) {
+    return _service.deleteAllForUser(uid);
   }
 }

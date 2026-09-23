@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:salapify/features/authentication/domain/exceptions/auth_exceptions.dart';
 
 part 'user_repository.g.dart';
 
@@ -15,15 +16,21 @@ class UserRepository {
     required String uid,
     required String username,
     required String email,
+    required bool emailVerified,
   }) async {
     await _users.doc(uid).set({
       'username': username,
       'email': email,
       'avatarId': null,
       'isPremium': false,
+      'emailVerified': emailVerified,
       'createdAt': FieldValue.serverTimestamp(),
       'preferencesCompleted': false,
     });
+  }
+
+  Future<void> markEmailVerified(String uid) async {
+    await _users.doc(uid).update({'emailVerified': true});
   }
 
   Future<String?> getUsername(String uid) async {
@@ -43,6 +50,7 @@ class UserRepository {
   Future<List<Map<String, String?>>> searchUsernames(String prefix) async {
     if (prefix.isEmpty) return [];
     final query = await _users
+        .where('emailVerified', isEqualTo: true)
         .where('username', isGreaterThanOrEqualTo: prefix)
         .where('username', isLessThan: '$prefix\uf8ff')
         .limit(10)
@@ -101,6 +109,21 @@ class UserRepository {
     await _users.doc(uid).set({
       'preferencesCompleted': true,
     }, SetOptions(merge: true));
+  }
+
+  Future<void> deleteUserProfile(String uid) async {
+    await _users.doc(uid).delete();
+  }
+
+  Future<void> updateUsername({
+    required String uid,
+    required String newUsername,
+  }) async {
+    final existingUid = await findUidByUsername(newUsername);
+    if (existingUid != null && existingUid != uid) {
+      throw const UsernameTakenException();
+    }
+    await _users.doc(uid).update({'username': newUsername});
   }
 }
 

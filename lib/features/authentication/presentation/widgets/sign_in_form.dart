@@ -261,7 +261,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                 duration: 300.ms,
                 curve: Curves.easeOut,
               ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 12),
 
           CommonTextField(
                 controller: _passwordController,
@@ -277,7 +277,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                   if (value == null || value.isEmpty) {
                     return "Password is required";
                   }
-                  if (value.length < 6) return "Minimum 6 characters";
+                  if (value.length < 3) return "Invalid password";
                   return null;
                 },
                 suffix: IconButton(

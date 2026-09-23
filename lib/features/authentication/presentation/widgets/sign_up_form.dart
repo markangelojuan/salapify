@@ -117,7 +117,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             controller: _usernameController,
             icon: Icons.alternate_email_rounded,
             hint: "Enter your preferred username",
-            maxCharacters: 20,
+            maxCharacters: 18,
             textInputAction: TextInputAction.next,
             label: "Username",
             validator: (value) {
@@ -137,7 +137,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
               return null;
             },
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 12),
           CommonTextField(
             controller: _emailController,
             textInputAction: TextInputAction.next,
@@ -152,7 +152,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
               return null;
             },
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 12),
           CommonTextField(
             controller: _passwordController,
             textInputAction: TextInputAction.next,
@@ -179,7 +179,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
               ),
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 12),
           CommonTextField(
             controller: _confirmPasswordController,
             textInputAction: TextInputAction.done,
@@ -189,7 +189,9 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             label: "Confirm Password",
             isPassword: true,
             isPasswordVisible: _isConfirmPasswordVisible,
-            onFieldSubmitted: (_) {FocusScope.of(context).unfocus();},
+            onFieldSubmitted: (_) {
+              FocusScope.of(context).unfocus();
+            },
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return "Please confirm your password";
@@ -235,7 +237,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
           CommonButton(
             label: "Sign Up",
             btnColor: AppColors.black,
@@ -250,7 +252,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             labelColor: AppColors.black,
             onPressed: () => context.pop(),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -263,11 +265,11 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
         builder: (ctx, setDialogState) => AlertDialog(
           insetPadding: const EdgeInsets.symmetric(
             horizontal: 24,
-            vertical: 80,
+            vertical: 60,
           ),
-          title: const Text("Terms & Privacy Policy"),
+          title: const Text("Terms & Privacy"),
           content: SizedBox(
-            height: 300,
+            height: 360,
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,51 +280,75 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    "1. Acceptance — By using Salapify, you agree to these terms. If you disagree, please do not use the app.",
+                    "By using Salapify, you agree to use the app responsibly "
+                    "and provide accurate information. You are responsible "
+                    "for your account and the information you enter.",
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    "2. User Responsibilities — You are responsible for keeping your credentials confidential and all activities under your account.",
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    "3. Changes — We may update these terms at any time. Continued use means acceptance of the new terms.",
-                  ),
+
                   const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 16),
+
                   const Text(
                     "Privacy Policy",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    "1. Data Collection — We collect your name, email, and financial data solely to provide budgeting services.",
+                    "Salapify collects information needed to provide your "
+                    "account, budgeting, expense tracking, groups, and "
+                    "bill-splitting features. We do not connect to your "
+                    "bank accounts or financial accounts, and we do not "
+                    "sell your personal information.",
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  const Text(
+                    "Shared Information",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    "2. Data Sharing — We do not sell your data to third parties.",
+                    "When you join groups or split bills, relevant information "
+                    "such as your username, bills, and shares may be visible "
+                    "to other members of those groups.",
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  const Text(
+                    "Important",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    "3. Security — We use industry-standard measures to protect your data, though no transmission is 100% secure.",
+                    "Salapify is a budgeting and organization tool, not a bank, "
+                    "payment service, or financial adviser.",
                   ),
-                  const SizedBox(height: 24),
+
+                  const SizedBox(height: 20),
+
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Checkbox(
                         value: _isChecked,
                         visualDensity: VisualDensity.compact,
                         onChanged: (value) {
-                          setState(() => _isChecked = value!);
+                          // Update the actual form state.
+                          setState(() {
+                            _isChecked = value ?? false;
+                          });
+
+                          // Update the checkbox inside the dialog immediately.
                           setDialogState(() {});
                         },
                       ),
-                      Expanded(
-                        child: Text(
-                          "I agree to the Terms of Service and Privacy Policy",
-                          softWrap: true,
+                      const Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 6),
+                          child: Text(
+                            "I agree to the Terms of Service and Privacy Policy.",
+                          ),
                         ),
                       ),
                     ],

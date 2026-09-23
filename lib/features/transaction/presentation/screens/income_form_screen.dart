@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:salapify/features/transaction/domain/entities/income_period.dart';
 import 'package:uuid/uuid.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/widgets/common_button.dart';
@@ -46,6 +47,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
 
   late bool _isRecurring;
   int? _recurringDay;
+  late IncomePeriod _period;
   late DateTime _date;
 
   @override
@@ -58,6 +60,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
     );
     _isRecurring = existing?.isRecurring ?? false;
     _recurringDay = existing?.recurringDay ?? DateTime.now().day;
+    _period = existing?.period ?? IncomePeriod.both;
     _date = existing?.date ?? DateTime.now();
   }
 
@@ -93,10 +96,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
 
   String _currentPeriodLabel(BudgetingPeriod period, int firstHalfEndDay) {
     final now = DateTime.now();
-    final monthLabel = '${_monthNames[now.month - 1]} ${now.year}';
-    if (period == BudgetingPeriod.monthly) return monthLabel;
-    final half = now.day <= firstHalfEndDay ? '1st half' : '2nd half';
-    return '$half of $monthLabel';
+    return '${_monthNames[now.month - 1]} ${now.year}';
   }
 
   Future<void> _submit() async {
@@ -112,6 +112,8 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
         isRecurring: _isRecurring,
         recurringDay: _isRecurring ? _recurringDay : null,
         clearRecurringDay: !_isRecurring,
+        period:
+            IncomePeriod.both, // always — no half-specific option in this form
         date: _date,
       );
       await actions.updateSource(updated);
@@ -122,6 +124,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
         amount: amount,
         isRecurring: _isRecurring,
         recurringDay: _isRecurring ? _recurringDay : null,
+        period: IncomePeriod.both,
         date: _isRecurring ? DateTime.now() : _date,
         createdAt: DateTime.now(),
       );
@@ -147,7 +150,8 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
     final firstHalfEndDay =
         ref.watch(firstHalfEndDaySettingProvider).value ?? 15;
     final actionsState = ref.watch(incomeSourceActionsProvider);
-    final currency = ref.watch(currencySettingProvider).value ?? AppCurrency.php;
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
 
     return Scaffold(
       appBar: AppBar(
@@ -227,6 +231,11 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                     icon: Icons.event_repeat_rounded,
                     label: 'Every month on day ${_recurringDay ?? '-'}',
                     onTap: _pickRecurringDay,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Counted as income for every period, regardless of the exact day.',
+                    style: TextStyle(fontSize: 12, color: colors.textSecondary),
                   ),
                 ] else ...[
                   Text('Date', style: TextStyle(color: colors.textPrimary)),

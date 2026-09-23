@@ -34,4 +34,26 @@ class NotificationFirestoreService {
     ).where('read', isEqualTo: false).count().get();
     return snap.count ?? 0;
   }
+
+
+  Future<void> deleteAllForUser(String uid) async {
+    const chunkSize = 300;
+    final collection = _items(uid);
+
+    while (true) {
+      final snap = await collection.limit(chunkSize).get();
+      if (snap.docs.isEmpty) break;
+
+      final batch = _firestore.batch();
+      for (final doc in snap.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+
+      if (snap.docs.length < chunkSize) break;
+    }
+
+
+    await _firestore.collection('notifications').doc(uid).delete();
+  }
 }

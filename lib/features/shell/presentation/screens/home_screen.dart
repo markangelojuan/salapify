@@ -128,7 +128,7 @@ class _FloatingNavBar extends StatelessWidget {
   });
 
   static const double _pillHeight = 64;
-  static const double _fabSize = 52;
+  static const double _fabSize = 50;
   static const double _fabPopOut = 22;
   static const double _maxWidthOnWide = 480;
 

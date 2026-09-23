@@ -59,4 +59,6 @@ abstract class SplitBillRepository {
   });
 
   Future<int> countOwnedGroupsForUser(String userId);
+
+  Future<void> leaveAllGroups(String userId);
 }

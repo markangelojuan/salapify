@@ -181,4 +181,9 @@ class SplitBillRepositoryImpl implements SplitBillRepository {
   Future<int> countOwnedGroupsForUser(String userId) {
     return _service.countOwnedGroups(userId);
   }
+
+  @override
+  Future<void> leaveAllGroups(String userId) {
+    return _service.removeMemberFromAllGroups(userId);
+  }
 }

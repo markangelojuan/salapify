@@ -5,4 +5,5 @@ abstract class NotificationRepository {
   Future<void> markRead(String uid, String notificationId);
   Future<void> markAllRead(String uid);
   Future<int> unreadCount(String uid);
+  Future<void> deleteAllForUser(String uid);
 }

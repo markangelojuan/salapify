@@ -1,4 +1,3 @@
-// lib/features/split_bill/data/mappers/split_bill_mapper.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:salapify/features/split_bill/data/mappers/bill_share_mapper.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_bill.dart';

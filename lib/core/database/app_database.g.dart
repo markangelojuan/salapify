@@ -821,6 +821,16 @@ class $IncomeSourcesTable extends IncomeSources
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _periodMeta = const VerificationMeta('period');
+  @override
+  late final GeneratedColumn<String> period = GeneratedColumn<String>(
+    'period',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('both'),
+  );
   static const VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
   late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
@@ -890,6 +900,7 @@ class $IncomeSourcesTable extends IncomeSources
     amount,
     isRecurring,
     recurringDay,
+    period,
     date,
     createdAt,
     updatedAt,
@@ -945,6 +956,12 @@ class $IncomeSourcesTable extends IncomeSources
           data['recurring_day']!,
           _recurringDayMeta,
         ),
+      );
+    }
+    if (data.containsKey('period')) {
+      context.handle(
+        _periodMeta,
+        period.isAcceptableOrUnknown(data['period']!, _periodMeta),
       );
     }
     if (data.containsKey('date')) {
@@ -1008,6 +1025,10 @@ class $IncomeSourcesTable extends IncomeSources
         DriftSqlType.int,
         data['${effectivePrefix}recurring_day'],
       ),
+      period: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}period'],
+      )!,
       date: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}date'],
@@ -1043,6 +1064,7 @@ class IncomeSourceRow extends DataClass implements Insertable<IncomeSourceRow> {
   final double amount;
   final bool isRecurring;
   final int? recurringDay;
+  final String period;
   final DateTime date;
   final DateTime createdAt;
   final DateTime? updatedAt;
@@ -1054,6 +1076,7 @@ class IncomeSourceRow extends DataClass implements Insertable<IncomeSourceRow> {
     required this.amount,
     required this.isRecurring,
     this.recurringDay,
+    required this.period,
     required this.date,
     required this.createdAt,
     this.updatedAt,
@@ -1070,6 +1093,7 @@ class IncomeSourceRow extends DataClass implements Insertable<IncomeSourceRow> {
     if (!nullToAbsent || recurringDay != null) {
       map['recurring_day'] = Variable<int>(recurringDay);
     }
+    map['period'] = Variable<String>(period);
     map['date'] = Variable<DateTime>(date);
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || updatedAt != null) {
@@ -1089,6 +1113,7 @@ class IncomeSourceRow extends DataClass implements Insertable<IncomeSourceRow> {
       recurringDay: recurringDay == null && nullToAbsent
           ? const Value.absent()
           : Value(recurringDay),
+      period: Value(period),
       date: Value(date),
       createdAt: Value(createdAt),
       updatedAt: updatedAt == null && nullToAbsent
@@ -1110,6 +1135,7 @@ class IncomeSourceRow extends DataClass implements Insertable<IncomeSourceRow> {
       amount: serializer.fromJson<double>(json['amount']),
       isRecurring: serializer.fromJson<bool>(json['isRecurring']),
       recurringDay: serializer.fromJson<int?>(json['recurringDay']),
+      period: serializer.fromJson<String>(json['period']),
       date: serializer.fromJson<DateTime>(json['date']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
@@ -1126,6 +1152,7 @@ class IncomeSourceRow extends DataClass implements Insertable<IncomeSourceRow> {
       'amount': serializer.toJson<double>(amount),
       'isRecurring': serializer.toJson<bool>(isRecurring),
       'recurringDay': serializer.toJson<int?>(recurringDay),
+      'period': serializer.toJson<String>(period),
       'date': serializer.toJson<DateTime>(date),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
@@ -1140,6 +1167,7 @@ class IncomeSourceRow extends DataClass implements Insertable<IncomeSourceRow> {
     double? amount,
     bool? isRecurring,
     Value<int?> recurringDay = const Value.absent(),
+    String? period,
     DateTime? date,
     DateTime? createdAt,
     Value<DateTime?> updatedAt = const Value.absent(),
@@ -1151,6 +1179,7 @@ class IncomeSourceRow extends DataClass implements Insertable<IncomeSourceRow> {
     amount: amount ?? this.amount,
     isRecurring: isRecurring ?? this.isRecurring,
     recurringDay: recurringDay.present ? recurringDay.value : this.recurringDay,
+    period: period ?? this.period,
     date: date ?? this.date,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
@@ -1168,6 +1197,7 @@ class IncomeSourceRow extends DataClass implements Insertable<IncomeSourceRow> {
       recurringDay: data.recurringDay.present
           ? data.recurringDay.value
           : this.recurringDay,
+      period: data.period.present ? data.period.value : this.period,
       date: data.date.present ? data.date.value : this.date,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -1184,6 +1214,7 @@ class IncomeSourceRow extends DataClass implements Insertable<IncomeSourceRow> {
           ..write('amount: $amount, ')
           ..write('isRecurring: $isRecurring, ')
           ..write('recurringDay: $recurringDay, ')
+          ..write('period: $period, ')
           ..write('date: $date, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -1200,6 +1231,7 @@ class IncomeSourceRow extends DataClass implements Insertable<IncomeSourceRow> {
     amount,
     isRecurring,
     recurringDay,
+    period,
     date,
     createdAt,
     updatedAt,
@@ -1215,6 +1247,7 @@ class IncomeSourceRow extends DataClass implements Insertable<IncomeSourceRow> {
           other.amount == this.amount &&
           other.isRecurring == this.isRecurring &&
           other.recurringDay == this.recurringDay &&
+          other.period == this.period &&
           other.date == this.date &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -1228,6 +1261,7 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSourceRow> {
   final Value<double> amount;
   final Value<bool> isRecurring;
   final Value<int?> recurringDay;
+  final Value<String> period;
   final Value<DateTime> date;
   final Value<DateTime> createdAt;
   final Value<DateTime?> updatedAt;
@@ -1240,6 +1274,7 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSourceRow> {
     this.amount = const Value.absent(),
     this.isRecurring = const Value.absent(),
     this.recurringDay = const Value.absent(),
+    this.period = const Value.absent(),
     this.date = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1253,6 +1288,7 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSourceRow> {
     required double amount,
     this.isRecurring = const Value.absent(),
     this.recurringDay = const Value.absent(),
+    this.period = const Value.absent(),
     required DateTime date,
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1269,6 +1305,7 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSourceRow> {
     Expression<double>? amount,
     Expression<bool>? isRecurring,
     Expression<int>? recurringDay,
+    Expression<String>? period,
     Expression<DateTime>? date,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -1282,6 +1319,7 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSourceRow> {
       if (amount != null) 'amount': amount,
       if (isRecurring != null) 'is_recurring': isRecurring,
       if (recurringDay != null) 'recurring_day': recurringDay,
+      if (period != null) 'period': period,
       if (date != null) 'date': date,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -1297,6 +1335,7 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSourceRow> {
     Value<double>? amount,
     Value<bool>? isRecurring,
     Value<int?>? recurringDay,
+    Value<String>? period,
     Value<DateTime>? date,
     Value<DateTime>? createdAt,
     Value<DateTime?>? updatedAt,
@@ -1310,6 +1349,7 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSourceRow> {
       amount: amount ?? this.amount,
       isRecurring: isRecurring ?? this.isRecurring,
       recurringDay: recurringDay ?? this.recurringDay,
+      period: period ?? this.period,
       date: date ?? this.date,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -1336,6 +1376,9 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSourceRow> {
     }
     if (recurringDay.present) {
       map['recurring_day'] = Variable<int>(recurringDay.value);
+    }
+    if (period.present) {
+      map['period'] = Variable<String>(period.value);
     }
     if (date.present) {
       map['date'] = Variable<DateTime>(date.value);
@@ -1366,6 +1409,7 @@ class IncomeSourcesCompanion extends UpdateCompanion<IncomeSourceRow> {
           ..write('amount: $amount, ')
           ..write('isRecurring: $isRecurring, ')
           ..write('recurringDay: $recurringDay, ')
+          ..write('period: $period, ')
           ..write('date: $date, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -2830,6 +2874,7 @@ typedef $$IncomeSourcesTableCreateCompanionBuilder =
       required double amount,
       Value<bool> isRecurring,
       Value<int?> recurringDay,
+      Value<String> period,
       required DateTime date,
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
@@ -2844,6 +2889,7 @@ typedef $$IncomeSourcesTableUpdateCompanionBuilder =
       Value<double> amount,
       Value<bool> isRecurring,
       Value<int?> recurringDay,
+      Value<String> period,
       Value<DateTime> date,
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
@@ -2883,6 +2929,11 @@ class $$IncomeSourcesTableFilterComposer
 
   ColumnFilters<int> get recurringDay => $composableBuilder(
     column: $table.recurringDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get period => $composableBuilder(
+    column: $table.period,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2946,6 +2997,11 @@ class $$IncomeSourcesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get period => $composableBuilder(
+    column: $table.period,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get date => $composableBuilder(
     column: $table.date,
     builder: (column) => ColumnOrderings(column),
@@ -3000,6 +3056,9 @@ class $$IncomeSourcesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get period =>
+      $composableBuilder(column: $table.period, builder: (column) => column);
+
   GeneratedColumn<DateTime> get date =>
       $composableBuilder(column: $table.date, builder: (column) => column);
 
@@ -3052,6 +3111,7 @@ class $$IncomeSourcesTableTableManager
                 Value<double> amount = const Value.absent(),
                 Value<bool> isRecurring = const Value.absent(),
                 Value<int?> recurringDay = const Value.absent(),
+                Value<String> period = const Value.absent(),
                 Value<DateTime> date = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
@@ -3064,6 +3124,7 @@ class $$IncomeSourcesTableTableManager
                 amount: amount,
                 isRecurring: isRecurring,
                 recurringDay: recurringDay,
+                period: period,
                 date: date,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -3078,6 +3139,7 @@ class $$IncomeSourcesTableTableManager
                 required double amount,
                 Value<bool> isRecurring = const Value.absent(),
                 Value<int?> recurringDay = const Value.absent(),
+                Value<String> period = const Value.absent(),
                 required DateTime date,
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
@@ -3090,6 +3152,7 @@ class $$IncomeSourcesTableTableManager
                 amount: amount,
                 isRecurring: isRecurring,
                 recurringDay: recurringDay,
+                period: period,
                 date: date,
                 createdAt: createdAt,
                 updatedAt: updatedAt,

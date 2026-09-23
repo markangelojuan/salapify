@@ -33,7 +33,7 @@ class CashFlowSummaryStrip extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                'Resets each period. No history is stored.',
+                "Your expected income this month. No history kept.",
                 style: TextStyle(
                   fontSize: 11,
                   color: colors.textSecondary,

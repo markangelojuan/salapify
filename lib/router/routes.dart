@@ -3,7 +3,7 @@ import 'package:salapify/features/authentication/presentation/screens/sign_up_sc
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/budget/domain/entities/budget_category.dart';
 import 'package:salapify/features/budget/presentation/screens/category_form_screen.dart';
-import 'package:salapify/features/settings/presentation/screens/account_screen.dart';
+import 'package:salapify/features/authentication/presentation/screens/account_screen.dart';
 import 'package:salapify/features/settings/presentation/screens/settings_screen.dart';
 import 'package:salapify/features/settings/presentation/screens/preferences_setup_screen.dart';
 import 'package:salapify/features/settings/presentation/screens/help_screen.dart';
@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:salapify/features/authentication/presentation/screens/verify_email_screen.dart';
+import 'package:salapify/features/authentication/presentation/controllers/auth_controller.dart';
 
 part 'routes.g.dart';
 
@@ -62,6 +63,7 @@ class _RouterRefreshNotifier extends ChangeNotifier {
     ref.listen(authStateChangesProvider, (_, __) => notifyListeners());
     ref.listen(currentAppUserProvider, (_, __) => notifyListeners());
     ref.listen(guestModeProvider, (_, __) => notifyListeners());
+    ref.listen(authControllerProvider, (_, __) => notifyListeners());
   }
 }
 
@@ -74,6 +76,8 @@ GoRouter goRouter(Ref ref) {
     initialLocation: "/home",
     debugLogDiagnostics: true,
     redirect: (ctx, state) {
+      final authControllerState = ref.read(authControllerProvider);
+      if (authControllerState.isLoading) return null;
       final authAsync = ref.read(authStateChangesProvider);
       if (authAsync.isLoading) return null;
       final authRepository = ref.read(authRepositoryProvider);

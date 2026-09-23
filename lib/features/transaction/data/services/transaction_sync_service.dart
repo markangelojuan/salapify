@@ -91,8 +91,9 @@ class TransactionSyncService {
       await batch.commit().timeout(_firestoreTimeout);
 
       final ids = chunk.map((t) => t.id).toList();
-      await (_db.update(_db.transactions)..where((t) => t.id.isIn(ids)))
-          .write(const TransactionsCompanion(isSynced: Value(true)));
+      await (_db.update(_db.transactions)..where((t) => t.id.isIn(ids))).write(
+        const TransactionsCompanion(isSynced: Value(true)),
+      );
     }
   }
 
@@ -148,15 +149,15 @@ class TransactionSyncService {
     await _remoteCollection(uid).doc(id).delete().timeout(_firestoreTimeout);
   }
 
-
   Future<void> purgeStaleTransactions(String uid, DateTime cutoff) async {
-    final staleRows = await (_db.select(_db.transactions)..where(
-          (t) =>
-              t.date.isSmallerThanValue(cutoff) &
-              t.isDeleted.equals(false) &
-              t.isSynced.equals(true),
-        ))
-        .get();
+    final staleRows =
+        await (_db.select(_db.transactions)..where(
+              (t) =>
+                  t.date.isSmallerThanValue(cutoff) &
+                  t.isDeleted.equals(false) &
+                  t.isSynced.equals(true),
+            ))
+            .get();
 
     if (staleRows.isEmpty) return;
 
@@ -174,6 +175,26 @@ class TransactionSyncService {
       await batch.commit().timeout(_firestoreTimeout);
 
       await (_db.delete(_db.transactions)..where((t) => t.id.isIn(ids))).go();
+    }
+  }
+
+  Future<void> deleteAllRemoteTransactions(String uid) async {
+    final collection = _remoteCollection(uid);
+
+    while (true) {
+      final snap = await collection
+          .limit(_batchSize)
+          .get()
+          .timeout(_firestoreTimeout);
+      if (snap.docs.isEmpty) break;
+
+      final batch = _firestore.batch();
+      for (final doc in snap.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit().timeout(_firestoreTimeout);
+
+      if (snap.docs.length < _batchSize) break;
     }
   }
 }

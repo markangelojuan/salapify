@@ -7,6 +7,8 @@ class SplitBillLimits {
   static const int freeMaxBillsPerGroup = 2;
   static const int premiumMaxBillsPerGroup = 50;
 
+  static const int maxGroupMembers = 21;
+
   static int maxActiveGroupsFor({required bool isPremium}) {
     return isPremium ? premiumMaxActiveGroups : freeMaxActiveGroups;
   }

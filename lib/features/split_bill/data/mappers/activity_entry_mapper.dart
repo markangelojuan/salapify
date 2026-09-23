@@ -1,4 +1,3 @@
-// lib/features/split_bill/data/mappers/activity_entry_mapper.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:salapify/features/split_bill/domain/entities/activity_entry.dart';
 

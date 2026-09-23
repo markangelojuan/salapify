@@ -1,4 +1,3 @@
-// lib/features/split_bill/domain/entities/split_bill.dart
 import 'package:salapify/features/split_bill/domain/entities/bill_share.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_type.dart';
 

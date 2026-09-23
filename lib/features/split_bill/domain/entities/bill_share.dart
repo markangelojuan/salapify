@@ -1,4 +1,3 @@
-// lib/features/split_bill/domain/entities/bill_share.dart
 import 'package:salapify/features/split_bill/domain/entities/payment_status.dart';
 
 class BillShare {

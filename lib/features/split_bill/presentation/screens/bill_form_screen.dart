@@ -46,28 +46,19 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
   final Map<String, TextEditingController> _customControllers = {};
   bool _isSaving = false;
 
-  // groupMemberNamesProvider only knows CURRENT group members. A bill can
-  // reference someone who has since left the group, so we resolve those
-  // names separately here instead of showing '...' for them forever.
   final Map<String, String> _resolvedNames = {};
   final Set<String> _namesBeingResolved = {};
 
+  Set<String>? _knownMemberIds;
+
   bool get _isEditingExisting => widget.existingBill != null;
 
-  /// Only the person who paid for the bill can edit or delete it.
-  /// New bills are always editable (there's nothing to protect yet).
   bool get _canEdit {
     if (widget.existingBill == null) return true;
     final uid = ref.read(authRepositoryProvider).currentUser?.uid;
     return widget.existingBill!.paidBy == uid;
   }
 
-  /// Everyone this bill actually involves — the payer plus everyone with a
-  /// share. For an existing bill this is locked to its saved `shares`, so
-  /// editing a bill (even just fixing a typo) never silently pulls in
-  /// members added to the group afterward, and never drops a share for
-  /// someone since removed from the group. Only a brand-new bill uses
-  /// current group membership.
   List<String> get _participantIds {
     final existing = widget.existingBill;
     if (existing != null) {
@@ -76,7 +67,10 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
         ...existing.shares.map((s) => s.userId),
       }.toList();
     }
-    return widget.group.memberIds;
+    final known = _knownMemberIds;
+    
+    if (known == null) return widget.group.memberIds;
+    return widget.group.memberIds.where(known.contains).toList();
   }
 
   @override
@@ -120,6 +114,13 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
   }
 
   double get _total => double.tryParse(_totalController.text) ?? 0;
+
+ 
+  void _syncCustomControllers(Iterable<String> participantIds) {
+    for (final id in participantIds) {
+      _customControllers.putIfAbsent(id, () => TextEditingController());
+    }
+  }
 
   /// Fetches usernames for participants missing from [knownNames] (i.e.
   /// people who've left the group since this bill was created) and merges
@@ -186,17 +187,6 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
     if (_paidBy == null) return;
 
     final shares = _computeShares();
-
-    if (_splitType == SplitType.custom) {
-      final sum = shares.values.fold<double>(0, (a, b) => a + b);
-      if ((sum - _total).abs() > 0.01) {
-        // Custom split is intentionally free-form — warn but don't block save.
-        CommonSnackbar.showWarning(
-          context,
-          'Shares add up to ${sum.toStringAsFixed(2)}, but total is ${_total.toStringAsFixed(2)}',
-        );
-      }
-    }
 
     setState(() => _isSaving = true);
     final controller = ref.read(splitBillControllerProvider.notifier);
@@ -295,6 +285,12 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
       for (final e in (membersAsync.value ?? {}).entries)
         e.key: e.value.username,
     };
+
+    _knownMemberIds = membersAsync.value?.keys.toSet();
+    if (!_isEditingExisting) {
+      _syncCustomControllers(_participantIds);
+    }
+
     if (_isEditingExisting) {
       _resolveMissingNames(_participantIds, groupNames);
     }
@@ -442,27 +438,24 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Paid by',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: colors.textSecondary,
+                            // "Paid by" is only shown once editing an
+                            // existing bill — the bill creator is always
+                            // the payer, so on a brand-new bill this would
+                            // just echo the current user's own name back
+                            // at them.
+                            if (_isEditingExisting) ...[
+                              Text(
+                                'Paid by',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: colors.textSecondary,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            _PaidByField(
-                              value: _paidBy,
-                              names: names,
-                              memberIds: _participantIds,
-                              // Payer is fixed once a bill exists —
-                              // reassigning it would invalidate how shares
-                              // were computed.
-                              onChanged: _isEditingExisting
-                                  ? null
-                                  : (val) => setState(() => _paidBy = val),
-                            ),
-                            const SizedBox(height: 18),
+                              const SizedBox(height: 8),
+                              _PaidByDisplay(name: names[_paidBy] ?? '...'),
+                              const SizedBox(height: 18),
+                            ],
                             AbsorbPointer(
                               absorbing: lockTotalAndSplit,
                               child: Opacity(
@@ -734,10 +727,7 @@ class _ReadOnlyBanner extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
-                fontSize: 12,
-                color: colors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 12, color: colors.textSecondary),
             ),
           ),
         ],
@@ -746,69 +736,39 @@ class _ReadOnlyBanner extends StatelessWidget {
   }
 }
 
-/// Dropdown restyled to match the app's primary-tinted field containers
-/// (see date fields in Expense/Income forms) instead of the default
-/// Material DropdownButtonFormField underline style.
-class _PaidByField extends StatelessWidget {
-  const _PaidByField({
-    required this.value,
-    required this.names,
-    required this.memberIds,
-    required this.onChanged,
-  });
+/// Read-only "paid by" row shown when editing an existing bill. Styled to
+/// match the app's primary-tinted field containers (see date fields in
+/// Expense/Income forms). Replaces the old editable dropdown now that the
+/// bill creator is always the payer.
+class _PaidByDisplay extends StatelessWidget {
+  const _PaidByDisplay({required this.name});
 
-  final String? value;
-  final Map<String, String> names;
-  final List<String> memberIds;
-  final ValueChanged<String?>? onChanged;
+  final String name;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
         color: colors.primary.withValues(alpha: 0.05),
         border: Border.all(color: colors.primary.withValues(alpha: 0.15)),
         borderRadius: BorderRadius.circular(14),
       ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButtonFormField<String>(
-          initialValue: value,
-          decoration: const InputDecoration(border: InputBorder.none),
-          icon: Icon(
-            Icons.expand_more_rounded,
-            color: colors.primary.withValues(alpha: 0.7),
+      child: Row(
+        children: [
+          Icon(Icons.person_outline_rounded, size: 16, color: colors.primary),
+          const SizedBox(width: 8),
+          Text(
+            name,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+              color: colors.textPrimary,
+            ),
           ),
-          onChanged: onChanged,
-          items: memberIds
-              .map(
-                (id) => DropdownMenuItem(
-                  value: id,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.person_outline_rounded,
-                        size: 16,
-                        color: colors.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        names[id] ?? '...',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                          color: colors.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-              .toList(),
-        ),
+        ],
       ),
     );
   }
@@ -980,7 +940,6 @@ class _CustomShareField extends StatelessWidget {
     );
   }
 }
-
 
 class _PaymentStatusSection extends ConsumerWidget {
   const _PaymentStatusSection({

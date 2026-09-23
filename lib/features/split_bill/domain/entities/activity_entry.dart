@@ -1,4 +1,3 @@
-// lib/features/split_bill/domain/entities/activity_entry.dart
 enum ActivityType {
   message,
   billAdded,
@@ -19,6 +18,8 @@ class ActivityEntry {
     required this.createdAt,
     this.text,
     this.metadata,
+    this.isUploading = false,
+    this.uploadFailed = false,
   });
 
   final String id;
@@ -30,6 +31,11 @@ class ActivityEntry {
   final String? text; // for ActivityType.message
   final Map<String, dynamic>? metadata; // for system events: {billTitle, amount, targetUserId}
 
+  // Optimistic-send-only flags (photo). Never persisted to Firestore —
+  // only ever set locally by ActivityFeed while an upload is in flight.
+  final bool isUploading;
+  final bool uploadFailed;
+
   ActivityEntry copyWith({
     String? id,
     String? groupId,
@@ -38,6 +44,8 @@ class ActivityEntry {
     DateTime? createdAt,
     String? text,
     Map<String, dynamic>? metadata,
+    bool? isUploading,
+    bool? uploadFailed,
   }) {
     return ActivityEntry(
       id: id ?? this.id,
@@ -47,6 +55,8 @@ class ActivityEntry {
       createdAt: createdAt ?? this.createdAt,
       text: text ?? this.text,
       metadata: metadata ?? this.metadata,
+      isUploading: isUploading ?? this.isUploading,
+      uploadFailed: uploadFailed ?? this.uploadFailed,
     );
   }
 }

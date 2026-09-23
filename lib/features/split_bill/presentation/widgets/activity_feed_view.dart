@@ -27,8 +27,14 @@ class ActivityFeedView extends StatelessWidget {
   final bool loadingMore;
   final NumberFormat currency;
 
+  String _senderName(ActivityEntry entry) =>
+      names[entry.senderId] ?? 'A former member';
+
+  String? _targetName(String? targetId) =>
+      targetId != null ? (names[targetId] ?? 'a former member') : null;
+
   String _label(ActivityEntry entry) {
-    final senderName = names[entry.senderId] ?? '...';
+    final senderName = _senderName(entry);
     switch (entry.type) {
       case ActivityType.message:
         return entry.text ?? '';
@@ -45,9 +51,7 @@ class ActivityFeedView extends StatelessWidget {
       case ActivityType.paymentConfirmed:
         {
           final targetId = entry.metadata?['targetUserId'] as String?;
-          final targetName = targetId != null
-              ? (names[targetId] ?? '...')
-              : null;
+          final targetName = _targetName(targetId);
           return targetName != null
               ? '$senderName confirmed $targetName\'s payment'
               : '$senderName confirmed a payment';
@@ -55,18 +59,14 @@ class ActivityFeedView extends StatelessWidget {
       case ActivityType.paymentDisputed:
         {
           final targetId = entry.metadata?['targetUserId'] as String?;
-          final targetName = targetId != null
-              ? (names[targetId] ?? '...')
-              : null;
+          final targetName = _targetName(targetId);
           return targetName != null
               ? '$senderName disputed $targetName\'s payment'
               : '$senderName disputed a payment';
         }
       case ActivityType.memberAdded:
         final targetId = entry.metadata?['targetUserId'] as String?;
-        final targetName = targetId != null
-            ? (names[targetId] ?? '...')
-            : 'someone';
+        final targetName = _targetName(targetId) ?? 'someone';
         return '$senderName added $targetName to the group';
       case ActivityType.poke:
         final character =
@@ -118,10 +118,7 @@ class ActivityFeedView extends StatelessWidget {
       return Center(
         child: Text(
           'No activity yet',
-          style: TextStyle(
-            fontSize: 12,
-            color: colors.textSecondary,
-          ),
+          style: TextStyle(fontSize: 12, color: colors.textSecondary),
         ),
       );
     }
@@ -171,7 +168,7 @@ class ActivityFeedView extends StatelessWidget {
           );
         }
 
-        final senderName = names[entry.senderId] ?? '...';
+        final senderName = _senderName(entry);
 
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
@@ -236,6 +233,8 @@ class ActivityFeedView extends StatelessWidget {
                             expiresAt: DateTime.tryParse(
                               entry.metadata?['expiresAt'] as String? ?? '',
                             ),
+                            isUploading: entry.isUploading,
+                            uploadFailed: entry.uploadFailed,
                           )
                         else
                           Text(
@@ -356,10 +355,17 @@ class _DayDivider extends StatelessWidget {
 }
 
 class _ActivityPhoto extends StatelessWidget {
-  const _ActivityPhoto({required this.url, required this.expiresAt});
+  const _ActivityPhoto({
+    required this.url,
+    required this.expiresAt,
+    this.isUploading = false,
+    this.uploadFailed = false,
+  });
 
   final String? url;
   final DateTime? expiresAt;
+  final bool isUploading;
+  final bool uploadFailed;
 
   bool get _isExpired =>
       expiresAt != null && DateTime.now().isAfter(expiresAt!);
@@ -367,6 +373,34 @@ class _ActivityPhoto extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
+
+    // Optimistic placeholder — shown immediately on send, before the
+    // upload + Firestore write complete.
+    if (isUploading || uploadFailed) {
+      return Container(
+        width: 220,
+        height: 220,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: colors.border.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: colors.border.withValues(alpha: 0.6),
+            width: 1.5,
+          ),
+        ),
+        child: uploadFailed
+            ? Icon(Icons.error_outline_rounded, color: colors.error, size: 32)
+            : SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: colors.primary,
+                ),
+              ),
+      );
+    }
 
     if (url == null || _isExpired) {
       return Container(

@@ -9,3 +9,11 @@ class EmailAlreadyInUseException implements Exception {
   @override
   String toString() => 'Email is already registered';
 }
+
+class WrongPasswordException implements Exception {
+  const WrongPasswordException();
+}
+
+class ReauthCancelledException implements Exception {
+  const ReauthCancelledException();
+}

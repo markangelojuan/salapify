@@ -32,6 +32,11 @@ class SplitBillController extends _$SplitBillController {
       final currentUser = ref.read(authRepositoryProvider).currentUser;
       if (currentUser == null) throw StateError('Not signed in');
 
+      final allMembers = {currentUser.uid, ...memberIds};
+      if (allMembers.length > SplitBillLimits.maxGroupMembers) {
+        throw MaxGroupMembersExceededException(SplitBillLimits.maxGroupMembers);
+      }
+
       final isPremium = ref.read(isPremiumProvider).value ?? false;
       final limit = SplitBillLimits.maxActiveGroupsFor(isPremium: isPremium);
       final ownedCount = await ref
@@ -46,7 +51,7 @@ class SplitBillController extends _$SplitBillController {
       final group = SplitGroup(
         id: '',
         name: name,
-        memberIds: {currentUser.uid, ...memberIds}.toList(),
+        memberIds: allMembers.toList(),
         createdBy: currentUser.uid,
         createdAt: now,
         lastActivityAt: now,
@@ -63,6 +68,15 @@ class SplitBillController extends _$SplitBillController {
     required String name,
     required List<String> memberIds,
   }) async {
+    final uniqueMembers = memberIds.toSet();
+    if (uniqueMembers.length > SplitBillLimits.maxGroupMembers) {
+      state = AsyncError(
+        MaxGroupMembersExceededException(SplitBillLimits.maxGroupMembers),
+        StackTrace.current,
+      );
+      return;
+    }
+
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref
@@ -70,7 +84,7 @@ class SplitBillController extends _$SplitBillController {
           .updateGroupDetails(
             groupId: groupId,
             name: name,
-            memberIds: memberIds,
+            memberIds: uniqueMembers.toList(),
           );
     });
   }
@@ -111,7 +125,6 @@ class SplitBillController extends _$SplitBillController {
       // an error to the user.
     }
   }
-
 
   Future<void> createBill(SplitBill bill) async {
     state = const AsyncLoading();
@@ -254,24 +267,36 @@ class SplitBillController extends _$SplitBillController {
     final currentUser = ref.read(authRepositoryProvider).currentUser;
     if (currentUser == null) return;
 
+    final feed = ref.read(activityFeedProvider(groupId).notifier);
+    final tempId = feed.addOptimisticPhoto(senderId: currentUser.uid);
+
     state = await AsyncValue.guard(() async {
-      final repo = ref.read(splitBillRepositoryProvider);
-      final url = await repo.uploadActivityPhoto(groupId: groupId, file: file);
-      await repo.addActivity(
-        ActivityEntry(
-          id: '',
+      try {
+        final repo = ref.read(splitBillRepositoryProvider);
+        final url = await repo.uploadActivityPhoto(
           groupId: groupId,
-          senderId: currentUser.uid,
-          type: ActivityType.photo,
-          createdAt: DateTime.now(),
-          metadata: {
-            'photoUrl': url,
-            'expiresAt': DateTime.now()
-                .add(const Duration(days: 3))
-                .toIso8601String(),
-          },
-        ),
-      );
+          file: file,
+        );
+        await repo.addActivity(
+          ActivityEntry(
+            id: '',
+            groupId: groupId,
+            senderId: currentUser.uid,
+            type: ActivityType.photo,
+            createdAt: DateTime.now(),
+            metadata: {
+              'photoUrl': url,
+              'expiresAt': DateTime.now()
+                  .add(const Duration(days: 3))
+                  .toIso8601String(),
+            },
+          ),
+        );
+        feed.resolvePending(tempId);
+      } catch (e) {
+        feed.markPendingFailed(tempId);
+        rethrow;
+      }
     });
   }
 }

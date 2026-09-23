@@ -13,9 +13,7 @@ import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:salapify/features/split_bill/data/services/split_bill_storage_service.dart';
 
-
 part 'split_bill_providers.g.dart';
-
 
 class GroupMemberInfo {
   const GroupMemberInfo({required this.username, this.avatarId});
@@ -107,47 +105,89 @@ class ActivityFeed extends _$ActivityFeed {
   StreamSubscription<List<ActivityEntry>>? _liveSub;
   bool _hasMore = true;
 
+  List<ActivityEntry> _confirmed = [];
+  final Map<String, ActivityEntry> _pending = {};
+
   @override
   FutureOr<List<ActivityEntry>> build(String groupId) {
     ref.onDispose(() => _liveSub?.cancel());
+    _pending.clear();
 
     final repo = ref.watch(splitBillRepositoryProvider);
     final completer = Completer<List<ActivityEntry>>();
 
     _liveSub = repo.watchActivity(groupId, limit: _pageSize).listen((live) {
       if (!completer.isCompleted) {
-        completer.complete(live);
+        _confirmed = live;
+        completer.complete(_combined());
         return;
       }
       // Merge: live window is authoritative for recent entries; keep
       // whatever older, non-overlapping tail we've already paginated in.
-      final current = state.value ?? [];
       final liveIds = live.map((e) => e.id).toSet();
       final cutoff = live.isNotEmpty ? live.last.createdAt : null;
-      final tail = current
+      final tail = _confirmed
           .where((e) => !liveIds.contains(e.id))
           .where((e) => cutoff == null || e.createdAt.isBefore(cutoff))
           .toList();
-      state = AsyncData([...live, ...tail]);
+      _confirmed = [...live, ...tail];
+      state = AsyncData(_combined());
     });
 
     return completer.future;
   }
 
+  List<ActivityEntry> _combined() {
+    if (_pending.isEmpty) return _confirmed;
+    final pendingList = _pending.values.toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return [...pendingList, ..._confirmed];
+  }
+
+
+  String addOptimisticPhoto({required String senderId}) {
+    final tempId = 'pending-${DateTime.now().microsecondsSinceEpoch}';
+    _pending[tempId] = ActivityEntry(
+      id: tempId,
+      groupId: groupId,
+      senderId: senderId,
+      type: ActivityType.photo,
+      createdAt: DateTime.now(),
+      isUploading: true,
+    );
+    state = AsyncData(_combined());
+    return tempId;
+  }
+
+
+  void resolvePending(String tempId) {
+    _pending.remove(tempId);
+    state = AsyncData(_combined());
+  }
+
+  void markPendingFailed(String tempId) {
+    final entry = _pending[tempId];
+    if (entry == null) return;
+    _pending[tempId] = entry.copyWith(isUploading: false, uploadFailed: true);
+    state = AsyncData(_combined());
+  }
+
   Future<void> loadMore() async {
-    final current = state.value;
-    if (current == null || current.isEmpty || !_hasMore) return;
+    if (_confirmed.isEmpty || !_hasMore) return;
     if (ref.read(activityLoadingMoreProvider(groupId))) return;
 
     ref.read(activityLoadingMoreProvider(groupId).notifier).state = true;
     try {
-      final older = await ref.read(splitBillRepositoryProvider).fetchOlderActivity(
+      final older = await ref
+          .read(splitBillRepositoryProvider)
+          .fetchOlderActivity(
             groupId: groupId,
-            before: current.last.createdAt,
+            before: _confirmed.last.createdAt,
             limit: _pageSize,
           );
       if (older.length < _pageSize) _hasMore = false;
-      state = AsyncData([...current, ...older]);
+      _confirmed = [..._confirmed, ...older];
+      state = AsyncData(_combined());
     } finally {
       ref.read(activityLoadingMoreProvider(groupId).notifier).state = false;
     }
@@ -159,7 +199,6 @@ class ActivityLoadingMore extends _$ActivityLoadingMore {
   @override
   bool build(String groupId) => false;
 }
-
 
 @riverpod
 Future<bool> isGroupCreatorPremium(Ref ref, String creatorUid) {
