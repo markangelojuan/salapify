@@ -5,6 +5,8 @@ import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/router/routes.dart';
+import 'package:go_router/go_router.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -305,6 +307,44 @@ class SettingsScreen extends ConsumerWidget {
                       ],
                     );
                   },
+                ),
+                const _SectionLabel(
+                  icon: Icons.block_rounded,
+                  title: 'Privacy',
+                ),
+                _SettingsCard(
+                  children: [
+                    InkWell(
+                      onTap: () =>
+                          context.pushNamed(AppRoutes.blockedUsers.name),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 14,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Blocked users',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                  color: colorScheme.onSurface,
+                                ),
+                              ),
+                            ),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.35,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

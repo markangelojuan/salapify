@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:salapify/features/authentication/domain/exceptions/auth_exceptions.dart';
+import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 
 part 'user_repository.g.dart';
 
@@ -125,9 +126,109 @@ class UserRepository {
     }
     await _users.doc(uid).update({'username': newUsername});
   }
+
+  Future<void> blockUser({
+    required String blockerId,
+    required String blockedId,
+  }) async {
+    final batch = _firestore.batch();
+    batch.update(_users.doc(blockerId), {
+      'blockedUserIds': FieldValue.arrayUnion([blockedId]),
+    });
+    batch.update(_users.doc(blockedId), {
+      'blockedByUserIds': FieldValue.arrayUnion([blockerId]),
+    });
+    await batch.commit();
+  }
+
+  Future<void> unblockUser({
+    required String blockerId,
+    required String blockedId,
+  }) async {
+    final batch = _firestore.batch();
+    batch.update(_users.doc(blockerId), {
+      'blockedUserIds': FieldValue.arrayRemove([blockedId]),
+    });
+    batch.update(_users.doc(blockedId), {
+      'blockedByUserIds': FieldValue.arrayRemove([blockerId]),
+    });
+    await batch.commit();
+  }
+
+  Stream<List<String>> watchBlockedIds(String uid) {
+    return _users
+        .doc(uid)
+        .snapshots()
+        .map(
+          (doc) =>
+              List<String>.from(doc.data()?['blockedUserIds'] as List? ?? []),
+        );
+  }
+
+  Stream<Set<String>> watchBlockedAndBlockingIds(String uid) {
+    return _users.doc(uid).snapshots().map((doc) {
+      final blocked = List<String>.from(
+        doc.data()?['blockedUserIds'] as List? ?? [],
+      );
+      final blockedBy = List<String>.from(
+        doc.data()?['blockedByUserIds'] as List? ?? [],
+      );
+      return {...blocked, ...blockedBy};
+    });
+  }
+
+  Stream<Map<String, dynamic>?> watchUserProfile(String uid) {
+    return _users.doc(uid).snapshots().map((doc) => doc.data());
+  }
 }
 
 @Riverpod(keepAlive: true)
 UserRepository userRepository(Ref ref) {
   return UserRepository(FirebaseFirestore.instance);
+}
+
+class BlockedUserInfo {
+  const BlockedUserInfo({
+    required this.uid,
+    required this.username,
+    this.avatarId,
+  });
+
+  final String uid;
+  final String username;
+  final String? avatarId;
+}
+
+/// People *I* have blocked — feeds the Blocked Users settings screen.
+@Riverpod(keepAlive: true)
+Stream<List<String>> blockedUserIds(Ref ref) {
+  final uid = ref.watch(currentUserProvider)?.uid;
+  if (uid == null) return Stream.value(const <String>[]);
+  return ref.watch(userRepositoryProvider).watchBlockedIds(uid);
+}
+
+/// Union of blocked + blocked-by — feeds chat filtering and member search.
+@Riverpod(keepAlive: true)
+Stream<Set<String>> blockedAndBlockingIds(Ref ref) {
+  final uid = ref.watch(currentUserProvider)?.uid;
+  if (uid == null) return Stream.value(const <String>{});
+  return ref.watch(userRepositoryProvider).watchBlockedAndBlockingIds(uid);
+}
+
+@riverpod
+Future<List<BlockedUserInfo>> blockedUsersInfo(Ref ref) async {
+  final ids = await ref.watch(blockedUserIdsProvider.future);
+  final userRepo = ref.watch(userRepositoryProvider);
+
+  final entries = await Future.wait(
+    ids.map((id) async {
+      final profile = await userRepo.getUserProfile(id);
+      return BlockedUserInfo(
+        uid: id,
+        username: (profile?['username'] as String?) ?? 'Unknown',
+        avatarId: profile?['avatarId'] as String?,
+      );
+    }),
+  );
+  return entries;
 }

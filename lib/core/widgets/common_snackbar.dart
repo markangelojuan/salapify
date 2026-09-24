@@ -98,6 +98,13 @@ class CommonSnackbar {
 
     if (error is String) return error;
 
+    // Catch-all for your app's own exceptions (UsernameTakenException,
+    // EmailAlreadyInUseException, WrongPasswordException,
+    // ReauthCancelledException, AccountDisabledException, etc.) — all of
+    // them communicate via a custom toString(), so use it directly instead
+    // of falling through to the generic message.
+    if (error is Exception) return error.toString();
+
     return 'A tiny hiccup! Try again?';
   }
 }

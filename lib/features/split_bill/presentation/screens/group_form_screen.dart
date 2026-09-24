@@ -108,12 +108,15 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
         if (!mounted) return;
 
         final currentUid = ref.read(currentUserProvider)?.uid;
+        final hiddenIds =
+            ref.read(blockedAndBlockingIdsProvider).value ?? const <String>{};
         setState(() {
           _suggestions = results
               .where(
                 (r) =>
                     !_selectedMembers.containsKey(r['uid']) &&
-                    r['uid'] != currentUid,
+                    r['uid'] != currentUid &&
+                    !hiddenIds.contains(r['uid']),
               )
               .toList();
           _hasSearched = true;

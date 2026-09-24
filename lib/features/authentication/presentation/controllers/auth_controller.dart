@@ -80,6 +80,14 @@ class AuthController extends _$AuthController {
 
       final uid = authRepository.currentUser!.uid;
 
+      final profile = await ref
+          .read(userRepositoryProvider)
+          .getUserProfile(uid);
+      if (profile?['isDisabled'] == true) {
+        await authRepository.signOut();
+        throw const AccountDisabledException();
+      }
+
       await ref.read(pushNotificationServiceProvider).initForUser(uid);
     });
   }
@@ -146,6 +154,14 @@ class AuthController extends _$AuthController {
           email: email,
           emailVerified: userCredential.user?.emailVerified ?? true,
         );
+      } else {
+        final profile = await ref
+            .read(userRepositoryProvider)
+            .getUserProfile(uid);
+        if (profile?['isDisabled'] == true) {
+          await authRepository.signOut();
+          throw const AccountDisabledException();
+        }
       }
 
       await ref.read(pushNotificationServiceProvider).initForUser(uid);

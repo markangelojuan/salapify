@@ -85,11 +85,15 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
   }
 
   Future<void> _pickDate() async {
+    final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
-      initialDate: _date,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
+      initialDate:
+          _date.isBefore(DateTime(now.year, now.month, 1)) || _date.isAfter(now)
+          ? now
+          : _date,
+      firstDate: DateTime(now.year, now.month, 1),
+      lastDate: now,
     );
     if (picked != null) setState(() => _date = picked);
   }

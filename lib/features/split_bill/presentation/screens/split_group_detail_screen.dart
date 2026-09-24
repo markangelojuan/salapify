@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
+import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
 import 'package:salapify/features/split_bill/presentation/controllers/split_bill_controller.dart';
@@ -12,9 +14,11 @@ import 'package:salapify/features/split_bill/presentation/widgets/balance_summar
 import 'package:salapify/features/split_bill/presentation/widgets/bills_carousel.dart';
 import 'package:salapify/features/split_bill/presentation/widgets/message_input.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
+import 'package:salapify/features/split_bill/presentation/screens/report_user_screen.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:salapify/router/routes.dart';
 
 class SplitGroupDetailScreen extends ConsumerStatefulWidget {
   const SplitGroupDetailScreen({super.key, required this.groupId});
@@ -95,6 +99,99 @@ class _SplitGroupDetailScreenState
         .sendPhoto(groupId: widget.groupId, file: File(xfile.path));
   }
 
+  Future<void> _showMemberOptions(
+    BuildContext context,
+    WidgetRef ref,
+    Offset position,
+    String userId,
+    String username,
+  ) async {
+    final currentUid = ref.read(currentUserProvider)?.uid;
+    if (currentUid == null) return;
+
+    final selected = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        position.dx,
+        position.dy,
+        position.dx,
+        position.dy,
+      ),
+      items: [
+        PopupMenuItem(
+          value: 'block',
+          child: Row(
+            children: [
+              const Icon(Icons.block_rounded, size: 18),
+              const SizedBox(width: 8),
+              Text('Block $username'),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+      value: 'report',
+      child: Row(
+        children: [
+          const Icon(Icons.flag_outlined, size: 18),
+          const SizedBox(width: 8),
+          Text('Report $username'),
+        ],
+      ),
+    ),
+      ],
+    );
+
+    if (selected == 'report') {
+  if (!context.mounted) return;
+  context.pushNamed(
+    AppRoutes.report.name,
+    extra: ReportArgs(
+      groupId: widget.groupId,
+      reportedUserId: userId,
+      reportedUsername: username,
+    ),
+  );
+  return;
+}
+
+    if (selected != 'block' || !context.mounted) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Block $username?'),
+        content: Text(
+          'You won\'t see $username\'s messages or activity in shared '
+          'groups, including bill updates. You can unblock them anytime '
+          'from Settings.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Block'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await ref
+          .read(userRepositoryProvider)
+          .blockUser(blockerId: currentUid, blockedId: userId);
+      if (context.mounted) {
+        CommonSnackbar.showWarning(context, 'Blocked $username');
+      }
+    } catch (e) {
+      if (context.mounted) CommonSnackbar.showError(context, e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<AsyncValue<void>>(splitBillControllerProvider, (previous, next) {
@@ -139,6 +236,8 @@ class _SplitGroupDetailScreenState
     final loadingMore = ref.watch(activityLoadingMoreProvider(group.id));
     final membersAsync = ref.watch(groupMembersProvider(group.id));
     final currentUid = ref.watch(currentUserProvider)?.uid;
+    final blockedIds =
+        ref.watch(blockedUserIdsProvider).value ?? const <String>[];
 
     return Scaffold(
       appBar: AppBar(title: Text(group.name)),
@@ -195,6 +294,15 @@ class _SplitGroupDetailScreenState
                       scrollController: _activityScrollController,
                       loadingMore: loadingMore,
                       currency: currencyFormat,
+                      blockedUserIds: blockedIds.toSet(),
+                      onAvatarLongPress: (position, userId, username) =>
+                          _showMemberOptions(
+                            context,
+                            ref,
+                            position,
+                            userId,
+                            username,
+                          ),
                     ),
                   ),
                 ),

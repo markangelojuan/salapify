@@ -17,6 +17,8 @@ class ActivityFeedView extends StatelessWidget {
     required this.scrollController,
     required this.loadingMore,
     required this.currency,
+    required this.blockedUserIds,
+    required this.onAvatarLongPress,
   });
 
   final List<ActivityEntry> activity;
@@ -26,6 +28,8 @@ class ActivityFeedView extends StatelessWidget {
   final ScrollController scrollController;
   final bool loadingMore;
   final NumberFormat currency;
+  final Set<String> blockedUserIds;
+  final void Function(Offset position, String userId, String username) onAvatarLongPress;
 
   String _senderName(ActivityEntry entry) =>
       names[entry.senderId] ?? 'A former member';
@@ -113,8 +117,11 @@ class ActivityFeedView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final visibleActivity = activity
+        .where((e) => !blockedUserIds.contains(e.senderId))
+        .toList();
 
-    if (activity.isEmpty) {
+    if (visibleActivity.isEmpty) {
       return Center(
         child: Text(
           'No activity yet',
@@ -184,6 +191,7 @@ class ActivityFeedView extends StatelessWidget {
                     child: MemberAvatar(
                       avatarId: members[entry.senderId]?.avatarId,
                       radius: 14,
+                      onLongPress: (pos) => onAvatarLongPress(pos, entry.senderId, senderName),
                     ),
                   ),
                   const SizedBox(width: 6),

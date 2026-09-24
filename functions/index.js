@@ -33,16 +33,24 @@ exports.onActivityCreated = onDocumentCreated(
     const senderName = senderDoc.data()?.username || "Someone";
 
     const notif = buildNotification(activity, senderName, group.name);
-    if (!notif.notificationType) return; // unrecognized/unsupported type, skip silently
+    if (!notif.notificationType) return;
 
     const createdAt = activity.createdAt || admin.firestore.Timestamp.now();
 
-    // Write a persisted notification doc per recipient + collect their tokens
     const tokens = [];
     await Promise.all(
       recipientIds.map(async (uid) => {
         const userDoc = await db.collection("users").doc(uid).get();
         const userData = userDoc.data();
+
+        // Either direction blocks notifications both ways.
+        const blockedUserIds = userData?.blockedUserIds || [];
+        const blockedByUserIds = userData?.blockedByUserIds || [];
+        const isBlockedPair =
+          blockedUserIds.includes(activity.senderId) ||
+          blockedByUserIds.includes(activity.senderId);
+        if (isBlockedPair) return; // skip: no notification doc, no push
+
         const userTokens = userData?.fcmTokens || [];
         tokens.push(...userTokens);
 

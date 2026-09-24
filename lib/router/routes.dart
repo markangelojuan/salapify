@@ -16,10 +16,12 @@ import 'package:salapify/features/transaction/domain/entities/transaction_entry.
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 import 'package:salapify/features/split_bill/presentation/screens/group_form_screen.dart';
 import 'package:salapify/features/split_bill/presentation/screens/split_group_detail_screen.dart';
+import 'package:salapify/features/split_bill/presentation/screens/report_user_screen.dart';
 import 'package:salapify/features/split_bill/presentation/screens/bill_form_screen.dart';
 import 'package:salapify/features/authentication/presentation/controllers/app_user_controller.dart';
 import 'package:salapify/features/authentication/presentation/screens/avatar_picker_screen.dart';
 import 'package:salapify/features/premium/presentation/screens/premium_screen.dart';
+import 'package:salapify/features/settings/presentation/screens/blocked_users_screen.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -58,6 +60,8 @@ enum AppRoutes {
   groupForm,
   splitGroupDetail,
   billForm,
+  blockedUsers,
+  report,
 }
 
 class _RouterRefreshNotifier extends ChangeNotifier {
@@ -110,6 +114,11 @@ GoRouter goRouter(Ref ref) {
       final appUserAsync = ref.read(currentAppUserProvider);
       if (appUserAsync.isLoading || appUserAsync.hasError) {
         return null;
+      }
+
+      if (appUserAsync.value?.isDisabled == true) {
+        authRepository.signOut();
+        return "/sign-in";
       }
 
       final needsAvatar = appUserAsync.value?.avatarId == null;
@@ -244,6 +253,20 @@ GoRouter goRouter(Ref ref) {
           return _withGradientBackground(
             BillFormScreen(group: args.group, existingBill: args.existingBill),
           );
+        },
+      ),
+      GoRoute(
+        path: "/blocked-users",
+        name: AppRoutes.blockedUsers.name,
+        builder: (ctx, state) =>
+            _withGradientBackground(const BlockedUsersScreen()),
+      ),
+      GoRoute(
+        path: "/report",
+        name: AppRoutes.report.name,
+        builder: (ctx, state) {
+          final args = state.extra as ReportArgs;
+          return _withGradientBackground(ReportUserScreen(args: args));
         },
       ),
     ],
