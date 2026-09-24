@@ -7,6 +7,7 @@ import 'package:salapify/core/theme/theme_controller.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/budget/data/services/budget_sync_service.dart';
 import 'package:salapify/features/settings/data/services/settings_sync_service.dart';
+import 'package:salapify/features/premium/data/services/entitlement_sync_service.dart';
 import 'package:salapify/firebase_options.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -16,6 +17,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/features/premium/data/services/purchase_service.dart';
 import 'package:salapify/core/widgets/global_loading.dart';
 import 'core/lifecycle/period_reset_lifecycle_observer.dart';
 import 'package:flutter/services.dart';
@@ -65,8 +67,11 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   void initState() {
     super.initState();
-    // Run once at startup, after first frame, so ref is safe to use.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _runStartupSync());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _runStartupSync();
+      // Fire-and-forget: warms PurchaseService's cached price so the upsell sheet doesn't show a stale hardcoded value on first tap.
+      ref.read(purchaseServiceProvider).premiumPriceLabel();
+    });
   }
 
   Future<void> _runStartupSync() async {
@@ -95,27 +100,35 @@ class _MyAppState extends ConsumerState<MyApp> {
     if (uid == null) return; // guest mode, nothing to sync
 
     try {
-      await Future.wait([
-        () async {
-          final syncService = ref.read(budgetSyncServiceProvider);
-          await syncService.pullRemoteCategories(uid);
-          await syncService.pushUnsyncedCategories(uid);
-        }().catchError((e) {
-          if (mounted) {
-            _logIfRealError(e, context: 'startupSync: budget pull/push');
-          }
-        }),
-        () async {
-          final settingsService = ref.read(settingsSyncServiceProvider);
-          await settingsService.pullRemoteSettings(uid);
-          await settingsService.retryPendingSettingsSync(uid);
-        }().catchError((e) {
-          if (mounted) {
-            _logIfRealError(e, context: 'startupSync: settings pull/retry');
-          }
-        }),
-      ]);
-    } finally {
+  await Future.wait([
+    () async {
+      final syncService = ref.read(budgetSyncServiceProvider);
+      await syncService.pullRemoteCategories(uid);
+      await syncService.pushUnsyncedCategories(uid);
+    }().catchError((e) {
+      if (mounted) {
+        _logIfRealError(e, context: 'startupSync: budget pull/push');
+      }
+    }),
+    () async {
+      final settingsService = ref.read(settingsSyncServiceProvider);
+      await settingsService.pullRemoteSettings(uid);
+      await settingsService.retryPendingSettingsSync(uid);
+    }().catchError((e) {
+      if (mounted) {
+        _logIfRealError(e, context: 'startupSync: settings pull/retry');
+      }
+    }),
+    () async {
+      final entitlementService = ref.read(entitlementSyncServiceProvider);
+      await entitlementService.pullRemoteEntitlement(uid);
+    }().catchError((e) {
+      if (mounted) {
+        _logIfRealError(e, context: 'startupSync: entitlement pull');
+      }
+    }),
+  ]);
+} finally {
       if (mounted) {
         ref.invalidate(budgetingPeriodSettingProvider);
         ref.invalidate(firstHalfEndDaySettingProvider);
@@ -131,7 +144,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   void _logIfRealError(Object e, {required String context}) {
     final isOnline = ref.read(isOnlineProvider).value ?? true;
     if (!isOnline) return; // expected — offline, will retry later
-    // FirebaseCrashlytics.instance.recordError(e, StackTrace.current, reason: context);
+    // debugPrint('[StartupSync] REAL ERROR in $context: $e');
   }
 
   @override

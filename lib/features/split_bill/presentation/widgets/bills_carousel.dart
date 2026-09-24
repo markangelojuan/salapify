@@ -14,6 +14,7 @@ import 'package:salapify/features/split_bill/presentation/controllers/split_bill
 import 'package:salapify/features/split_bill/presentation/screens/bill_form_screen.dart';
 import 'package:salapify/features/premium/presentation/widgets/premium_upsell_sheet.dart';
 import 'package:salapify/router/routes.dart';
+import 'package:salapify/features/premium/data/services/purchase_service.dart';
 import 'package:flutter/foundation.dart';
 
 class BillsCarousel extends ConsumerWidget {
@@ -62,6 +63,21 @@ class _AddBillCard extends ConsumerWidget {
   const _AddBillCard({required this.group});
 
   final SplitGroup group;
+
+  Future<void> _showPremiumUpsell(BuildContext context, WidgetRef ref) async {
+    final purchaseService = ref.read(purchaseServiceProvider);
+    final price = await purchaseService.premiumPriceLabel() ?? '₱59';
+    if (!context.mounted) return;
+
+    await showPremiumUpsellSheet(
+      context,
+      limit: PremiumLimit.bills,
+      priceLabel: price,
+      onUnlock: () => purchaseService.buyPremium(),
+      onRestore: () => purchaseService.restorePurchases(),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
@@ -71,9 +87,6 @@ class _AddBillCard extends ConsumerWidget {
     final isPremium = creatorIsPremiumAsync.value ?? false;
     final limit = SplitBillLimits.maxBillsPerGroupFor(isPremium: isPremium);
     final atLimit = group.billsCreatedCount >= limit;
-    debugPrint(
-      'creatorPremium=$isPremium limit=$limit count=${group.billsCreatedCount}',
-    );
 
     return Container(
       width: 140,
@@ -86,7 +99,7 @@ class _AddBillCard extends ConsumerWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: atLimit
-              ? () => showPremiumUpsellSheet(context, limit: PremiumLimit.bills)
+              ? () => _showPremiumUpsell(context, ref)
               : () => context.pushNamed(
                   AppRoutes.billForm.name,
                   extra: BillFormArgs(group: group),

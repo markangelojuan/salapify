@@ -34,7 +34,7 @@ final class SplitBillControllerProvider
 }
 
 String _$splitBillControllerHash() =>
-    r'ec018d0df3642054c825346119436ff8ef46d678';
+    r'b80b751410ed0df10143be90f4744ee70a893ed0';
 
 abstract class _$SplitBillController extends $AsyncNotifier<void> {
   FutureOr<void> build();

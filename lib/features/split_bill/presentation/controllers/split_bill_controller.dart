@@ -37,7 +37,9 @@ class SplitBillController extends _$SplitBillController {
         throw MaxGroupMembersExceededException(SplitBillLimits.maxGroupMembers);
       }
 
-      final isPremium = ref.read(isPremiumProvider).value ?? false;
+      final isPremium =
+          (await ref.read(entitlementRepositoryProvider).watch().first)
+              .isPremium; 
       final limit = SplitBillLimits.maxActiveGroupsFor(isPremium: isPremium);
       final ownedCount = await ref
           .read(splitBillRepositoryProvider)

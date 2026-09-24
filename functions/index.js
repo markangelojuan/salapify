@@ -1,9 +1,17 @@
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { defineSecret } = require("firebase-functions/params");
+const { google } = require("googleapis");
 const admin = require("firebase-admin");
 admin.initializeApp();
 
 const db = admin.firestore();
 const messaging = admin.messaging();
+
+const PLAY_SERVICE_ACCOUNT_KEY = defineSecret("PLAY_SERVICE_ACCOUNT_KEY");
+
+const ANDROID_PACKAGE_NAME = "com.mrkj.salapify";
+
 
 exports.onActivityCreated = onDocumentCreated(
   "splitGroups/{groupId}/activity/{activityId}",
@@ -129,3 +137,112 @@ function buildNotification(activity, senderName, groupName) {
       return { notificationType: null, title: null, body: null };
   }
 }
+
+// verifies a Play Billing purchase and grants entitlement
+
+exports.verifyPurchase = onCall(
+  { secrets: [PLAY_SERVICE_ACCOUNT_KEY] },
+  async (request) => {
+    const uid = request.auth?.uid;
+    if (!uid) {
+      throw new HttpsError("unauthenticated", "Must be signed in.");
+    }
+
+    const { productId, purchaseToken } = request.data || {};
+    if (!productId || !purchaseToken) {
+      throw new HttpsError(
+        "invalid-argument",
+        "productId and purchaseToken are required."
+      );
+    }
+    console.log("DEBUG purchaseToken:", purchaseToken);
+    // Only the product(s) you actually sell — prevents a forged call from
+    // claiming premium via an arbitrary productId string.
+    const ALLOWED_PRODUCT_IDS = new Set(["premium_upgrade"]);
+    if (!ALLOWED_PRODUCT_IDS.has(productId)) {
+      throw new HttpsError("invalid-argument", "Unknown productId.");
+    }
+
+    // ── 1. Authenticate to the Android Publisher API ──────────────────────
+    const credentials = JSON.parse(PLAY_SERVICE_ACCOUNT_KEY.value());
+    const auth = new google.auth.GoogleAuth({
+      credentials,
+      scopes: ["https://www.googleapis.com/auth/androidpublisher"],
+    });
+    const androidpublisher = google.androidpublisher({ version: "v3", auth });
+
+    // ── 2. Verify the purchase token with Google Play ──────────────────────
+    let purchase;
+    try {
+      const res = await androidpublisher.purchases.products.get({
+        packageName: ANDROID_PACKAGE_NAME,
+        productId,
+        token: purchaseToken,
+      });
+      purchase = res.data;
+    } catch (err) {
+      console.error("Play verification failed", err?.message || err);
+      throw new HttpsError("permission-denied", "Could not verify purchase.");
+    }
+
+    // purchaseState: 0 = purchased, 1 = canceled, 2 = pending
+    if (purchase.purchaseState !== 0) {
+      throw new HttpsError(
+        "failed-precondition",
+        `Purchase not in a valid state (state=${purchase.purchaseState}).`
+      );
+    }
+
+    // ── 3. Claim the token atomically — blocks replay & double-redemption ──
+    const tokenRef = db.collection("processedPurchaseTokens").doc(purchaseToken);
+    const userRef = db.collection("users").doc(uid);
+
+    await db.runTransaction(async (tx) => {
+      const tokenDoc = await tx.get(tokenRef);
+      if (tokenDoc.exists) {
+        const existingUid = tokenDoc.data().uid;
+        if (existingUid !== uid) {
+          throw new HttpsError(
+            "already-exists",
+            "This purchase has already been redeemed by another account."
+          );
+        }
+        // Same uid re-submitting (e.g. retry after a dropped response) — fine, fall through.
+      }
+
+      tx.set(tokenRef, {
+        uid,
+        productId,
+        claimedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      tx.set(
+        userRef,
+        {
+          isPremium: true,
+          premiumSince: admin.firestore.FieldValue.serverTimestamp(),
+          premiumProductId: productId,
+        },
+        { merge: true }
+      );
+    });
+
+    // ── 4. Acknowledge with Google Play (must happen within 3 days or it auto-refunds) ──
+    if (purchase.acknowledgementState === 0) {
+      try {
+        await androidpublisher.purchases.products.acknowledge({
+          packageName: ANDROID_PACKAGE_NAME,
+          productId,
+          token: purchaseToken,
+          requestBody: {},
+        });
+      } catch (err) {
+        // Entitlement is already granted in Firestore at this point — an ack
+        // failure shouldn't undo that. Log loudly so you can investigate/retry.
+        console.error("Acknowledge failed after granting entitlement", err?.message || err);
+      }
+    }
+
+    return { success: true, productId };
+  }
+);

@@ -4,17 +4,16 @@ import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/authentication/presentation/widgets/sign_in_form.dart';
 import '../widgets/background_decoration.dart';
 import '../widgets/auth_header.dart';
+import '../widgets/animated_greeting.dart';
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    
-    final lightTheme = Theme.of(context).copyWith(
-      brightness: Brightness.light,
-      extensions: [AppColorsExt.light], 
-    );
+    final lightTheme = Theme.of(
+      context,
+    ).copyWith(brightness: Brightness.light, extensions: [AppColorsExt.light]);
 
     return Theme(
       data: lightTheme,
@@ -39,16 +38,18 @@ class SignInScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           Align(
-                            alignment: Alignment.centerLeft,
-                            child: AuthHeader(
-                              title: "Kumusta",
-                              subtitle:
-                                  "Enter your credentials to access your account",
-                            ),
-                          ).animate().fadeIn(
-                                duration: 500.ms,
-                                curve: Curves.easeOut,
-                              ).slideY(
+                                alignment: Alignment.centerLeft,
+                                child: AuthHeader(
+                                  title: const AnimatedGreeting(
+                                    mode: GreetingMode.hello,
+                                  ),
+                                  subtitle:
+                                      "Enter your credentials to access your account",
+                                ),
+                              )
+                              .animate()
+                              .fadeIn(duration: 500.ms, curve: Curves.easeOut)
+                              .slideY(
                                 begin: 0.15,
                                 end: 0,
                                 duration: 500.ms,

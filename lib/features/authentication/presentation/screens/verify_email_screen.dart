@@ -95,7 +95,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                   Align(
                         alignment: Alignment.centerLeft,
                         child: AuthHeader(
-                          title: "Verify your email",
+                          title: const Text("Verify your email"),
                           subtitle: email.isEmpty
                               ? "We've sent you a verification link."
                               : "We've sent a verification link to $email.",

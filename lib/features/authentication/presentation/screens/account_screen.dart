@@ -5,6 +5,8 @@ import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/authentication/domain/entities/avatar_option.dart';
 import 'package:salapify/features/authentication/presentation/controllers/app_user_controller.dart';
 import 'package:salapify/features/authentication/presentation/widgets/account_bottom_sheet.dart';
+import 'package:salapify/features/premium/data/repositories/entitlement_repository.dart';
+import 'package:salapify/router/routes.dart';
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -13,6 +15,7 @@ class AccountScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final userAsync = ref.watch(currentAppUserProvider);
+    final isPremium = ref.watch(isPremiumProvider).value ?? false;
     final user = userAsync.value;
     final avatar = avatarById(user?.avatarId);
 
@@ -174,6 +177,21 @@ class AccountScreen extends ConsumerWidget {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 32),
+                  _SectionHeader(
+                    icon: Icons.workspace_premium_rounded,
+                    title: 'Membership',
+                    colors: colors,
+                    iconColor: isPremium
+                        ? colors.primary
+                        : colors.textSecondary,
+                  ),
+                  const SizedBox(height: 12),
+                  _MembershipCard(
+                    colors: colors,
+                    isPremium: isPremium,
+                    onTap: () => context.pushNamed(AppRoutes.premium.name),
                   ),
                   const SizedBox(height: 32),
                   _SectionHeader(
@@ -369,6 +387,94 @@ class _DangerZoneCard extends StatelessWidget {
               Icon(
                 Icons.chevron_right_rounded,
                 color: Colors.red.withValues(alpha: 0.5),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MembershipCard extends StatelessWidget {
+  const _MembershipCard({
+    required this.colors,
+    required this.isPremium,
+    required this.onTap,
+  });
+
+  final AppColorsExt colors;
+  final bool isPremium;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isPremium
+            ? colors.primary.withValues(alpha: 0.08)
+            : colors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isPremium
+              ? colors.primary.withValues(alpha: 0.25)
+              : colors.border,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: (isPremium ? colors.primary : colors.textSecondary)
+                      .withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  isPremium
+                      ? Icons.verified_rounded
+                      : Icons.workspace_premium_outlined,
+                  color: isPremium ? colors.primary : colors.textSecondary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isPremium ? 'Premium' : 'Upgrade to Premium',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        color: isPremium ? colors.primary : colors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      isPremium
+                          ? 'Every limit removed on this account'
+                          : 'Remove category, group and bill limits',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: (isPremium ? colors.primary : colors.textSecondary)
+                    .withValues(alpha: 0.5),
               ),
             ],
           ),

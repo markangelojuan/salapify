@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 
 class AuthHeader extends StatelessWidget {
-  final String title;
+  final Widget title;
   final String subtitle;
 
   const AuthHeader({
@@ -17,15 +17,14 @@ class AuthHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 70),
-        Text(
-          title,
-          textAlign: TextAlign.left,
-          style: TextStyle(
+        DefaultTextStyle(
+          style: const TextStyle(
             fontSize: 34,
             fontWeight: FontWeight.w800,
             color: AppColors.textPrimary,
             letterSpacing: -0.5,
           ),
+          child: title,
         ),
         const SizedBox(height: 10),
         Text(

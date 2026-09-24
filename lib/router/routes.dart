@@ -19,6 +19,7 @@ import 'package:salapify/features/split_bill/presentation/screens/split_group_de
 import 'package:salapify/features/split_bill/presentation/screens/bill_form_screen.dart';
 import 'package:salapify/features/authentication/presentation/controllers/app_user_controller.dart';
 import 'package:salapify/features/authentication/presentation/screens/avatar_picker_screen.dart';
+import 'package:salapify/features/premium/presentation/screens/premium_screen.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -50,6 +51,7 @@ enum AppRoutes {
   account,
   settings,
   help,
+  premium,
   categoryForm,
   expenseForm,
   incomeForm,
@@ -162,6 +164,11 @@ GoRouter goRouter(Ref ref) {
         name: AppRoutes.preferencesSetup.name,
         builder: (ctx, state) =>
             _withGradientBackground(const PreferencesSetupScreen()),
+      ),
+      GoRoute(
+        path: "/premium",
+        name: AppRoutes.premium.name,
+        builder: (ctx, state) => _withGradientBackground(const PremiumScreen()),
       ),
       GoRoute(
         path: "/account",

@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/widgets/common_button.dart';
 import 'package:salapify/features/premium/domain/entities/premium_limit.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/features/premium/data/services/purchase_service.dart'
+    show PurchaseOutcome;
 
 export 'package:salapify/features/premium/domain/entities/premium_limit.dart';
 
@@ -12,8 +15,8 @@ TextStyle _font(TextStyle style) =>
 Future<void> showPremiumUpsellSheet(
   BuildContext context, {
   required PremiumLimit limit,
-  Future<bool> Function()? onUnlock,
-  Future<bool> Function()? onRestore,
+  Future<PurchaseOutcome> Function()? onUnlock,
+  Future<PurchaseOutcome> Function()? onRestore,
   String priceLabel = '₱59',
   String benefit = 'Remove every free-plan limit',
 }) {
@@ -21,7 +24,6 @@ Future<void> showPremiumUpsellSheet(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-
     backgroundColor: Colors.transparent,
     builder: (_) => _PremiumUpsellSheet(
       limit: limit,
@@ -43,8 +45,8 @@ class _PremiumUpsellSheet extends StatefulWidget {
   });
 
   final PremiumLimit limit;
-  final Future<bool> Function()? onUnlock;
-  final Future<bool> Function()? onRestore;
+  final Future<PurchaseOutcome> Function()? onUnlock;
+  final Future<PurchaseOutcome> Function()? onRestore;
   final String priceLabel;
   final String benefit;
 
@@ -57,18 +59,53 @@ class _PremiumUpsellSheetState extends State<_PremiumUpsellSheet> {
 
   /// UI-only stand-in until purchases exist: shows the loading state briefly,
   /// then leaves the sheet open. Delete once onUnlock is always provided.
-  Future<bool> _previewUnlock() async {
+  Future<PurchaseOutcome> _previewUnlock() async {
     await Future<void>.delayed(const Duration(milliseconds: 800));
-    return false;
+    return PurchaseOutcome.transientFailure;
   }
 
-  Future<void> _run(Future<bool> Function() action) async {
+  Future<void> _run(Future<PurchaseOutcome> Function() action) async {
     if (_busy) return;
     setState(() => _busy = true);
     try {
-      final ok = await action();
+      final outcome = await action();
       if (!mounted) return;
-      if (ok) Navigator.of(context).pop();
+      switch (outcome) {
+        case PurchaseOutcome.granted:
+          Navigator.of(context).pop();
+        case PurchaseOutcome.alreadyClaimedElsewhere:
+          CommonSnackbar.showError(
+            context,
+            'This purchase is linked to a different account. '
+            'Sign in with that account to restore it.',
+          );
+        case PurchaseOutcome.nothingToRestore:
+          CommonSnackbar.showWarning(
+            context,
+            'No previous purchase found to restore.',
+          );
+        case PurchaseOutcome.cancelled:
+          // User backed out of the Play sheet — no message needed.
+          break;
+        case PurchaseOutcome.notSignedIn:
+          CommonSnackbar.showWarning(
+            context,
+            'Please sign in first to unlock premium.',
+          );
+        case PurchaseOutcome.notAvailable:
+          CommonSnackbar.showError(
+            context,
+            'Billing is unavailable right now. Please try again later.',
+          );
+        case PurchaseOutcome.transientFailure:
+          CommonSnackbar.showWarning(
+            context,
+            "Purchase didn't go through. Please try again.",
+          );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      CommonSnackbar.showError(context, e);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -197,16 +234,14 @@ class _PremiumUpsellSheetState extends State<_PremiumUpsellSheet> {
                           : () => Navigator.of(context).pop(),
                       child: Text(
                         'Close',
-                        style: _font(
-                          TextStyle(
-                            color: colors.textSecondary,
-                          ),
-                        ),
+                        style: _font(TextStyle(color: colors.textSecondary)),
                       ),
                     ),
                     if (widget.onRestore != null)
                       TextButton(
-                        onPressed: _busy ? null : () => _run(widget.onRestore!),
+                        onPressed: _busy
+                            ? null
+                            : () => _run(widget.onRestore!),
                         child: Text(
                           'Restore purchase',
                           style: _font(

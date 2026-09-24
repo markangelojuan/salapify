@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/features/authentication/presentation/widgets/animated_greeting.dart';
 import 'package:salapify/features/authentication/presentation/widgets/sign_up_form.dart';
 import '../widgets/background_decoration.dart';
 import '../widgets/auth_header.dart';
@@ -10,10 +11,9 @@ class SignUpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lightTheme = Theme.of(context).copyWith(
-      brightness: Brightness.light,
-      extensions: [AppColorsExt.light],
-    );
+    final lightTheme = Theme.of(
+      context,
+    ).copyWith(brightness: Brightness.light, extensions: [AppColorsExt.light]);
 
     return Theme(
       data: lightTheme,
@@ -41,15 +41,17 @@ class SignUpScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           Align(
-                            alignment: Alignment.centerLeft,
-                            child: AuthHeader(
-                              title: "Maligayang pagdating",
-                              subtitle: "Create an account to get started",
-                            ),
-                          ).animate().fadeIn(
-                                duration: 500.ms,
-                                curve: Curves.easeOut,
-                              ).slideY(
+                                alignment: Alignment.centerLeft,
+                                child: AuthHeader(
+                                  title: const AnimatedGreeting(
+                                    mode: GreetingMode.welcome,
+                                  ),
+                                  subtitle: "Create an account to get started",
+                                ),
+                              )
+                              .animate()
+                              .fadeIn(duration: 500.ms, curve: Curves.easeOut)
+                              .slideY(
                                 begin: 0.15,
                                 end: 0,
                                 duration: 500.ms,

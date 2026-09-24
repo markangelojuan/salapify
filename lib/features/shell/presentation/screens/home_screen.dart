@@ -17,6 +17,7 @@ import 'package:salapify/features/transaction/presentation/controllers/transacti
 import 'package:salapify/features/transaction/presentation/screens/transaction_screen.dart';
 import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
 import 'package:salapify/features/notification/data/providers/notification_providers.dart';
+import 'package:salapify/features/premium/data/services/purchase_service.dart';
 import 'package:salapify/core/layout/breakpoints.dart';
 import 'package:salapify/core/widgets/nav_badge.dart';
 
@@ -66,13 +67,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _handleAddCategory(BuildContext context, WidgetRef ref) async {
-    final isPremium = ref.read(isPremiumProvider).value ?? false;
+    final isPremium =
+        (await ref.read(entitlementRepositoryProvider).watch().first).isPremium;
     final limit = BudgetLimits.maxActiveCategoriesFor(isPremium: isPremium);
     final currentCount = await ref.read(budgetRepositoryProvider).countActive();
 
     if (currentCount >= limit) {
       if (!context.mounted) return;
-      await showPremiumUpsellSheet(context, limit: PremiumLimit.categories);
+      await _showPremiumUpsell(PremiumLimit.categories);
       return;
     }
     if (context.mounted) {
@@ -82,9 +84,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _handleCreateGroup(BuildContext context, WidgetRef ref) async {
     final currentUid = ref.read(currentUserProvider)?.uid;
-    if (currentUid == null) return; // guests can't create groups anyway
+    if (currentUid == null) return;
 
-    final isPremium = ref.read(isPremiumProvider).value ?? false;
+    final isPremium =
+        (await ref.read(entitlementRepositoryProvider).watch().first).isPremium;
+
     final limit = SplitBillLimits.maxActiveGroupsFor(isPremium: isPremium);
     final ownedCount = await ref
         .read(splitBillRepositoryProvider)
@@ -92,12 +96,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     if (ownedCount >= limit) {
       if (!context.mounted) return;
-      await showPremiumUpsellSheet(context, limit: PremiumLimit.groups);
+      await _showPremiumUpsell(PremiumLimit.groups);
       return;
     }
     if (context.mounted) {
       context.pushNamed(AppRoutes.groupForm.name);
     }
+  }
+
+  Future<void> _showPremiumUpsell(PremiumLimit limit) async {
+    final purchaseService = ref.read(purchaseServiceProvider);
+    final price = await purchaseService.premiumPriceLabel() ?? '₱59';
+    if (!context.mounted) return;
+
+    await showPremiumUpsellSheet(
+      context,
+      limit: limit,
+      priceLabel: price,
+      onUnlock: () => purchaseService.buyPremium(),
+      onRestore: () => purchaseService.restorePurchases(),
+    );
   }
 
   @override

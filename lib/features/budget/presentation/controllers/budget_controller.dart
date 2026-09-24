@@ -53,7 +53,7 @@ class PeriodResetGuard extends _$PeriodResetGuard {
     final lastKey = await settingsRepo.getLastResetPeriodKey();
 
     if (lastKey != currentKey) {
-      await ref.read(budgetRepositoryProvider).resetAllCompleted(); 
+      await ref.read(budgetRepositoryProvider).resetAllCompleted();
       final removedIds = await ref
           .read(transactionRepositoryProvider)
           .deleteStaleAutofillTransactions(
@@ -110,7 +110,9 @@ class BudgetActions extends _$BudgetActions {
 
   Future<void> addCategory(BudgetCategory category) async {
     final result = await AsyncValue.guard(() async {
-      final isPremium = ref.read(isPremiumProvider).value ?? false;
+      final isPremium =
+          (await ref.read(entitlementRepositoryProvider).watch().first)
+              .isPremium; 
       final limit = BudgetLimits.maxActiveCategoriesFor(isPremium: isPremium);
       final currentCount = await ref
           .read(budgetRepositoryProvider)
