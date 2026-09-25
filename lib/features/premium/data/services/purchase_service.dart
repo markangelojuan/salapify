@@ -96,11 +96,7 @@ class PurchaseService {
   }
 
   Future<PurchaseOutcome> buyPremium() async {
-    if (_auth.currentUser == null) {
-      // Entitlement is written to users/{uid} — without a signed-in user
-      // there's nowhere for the grant to attach to.
-      return PurchaseOutcome.notSignedIn;
-    }
+    if (_auth.currentUser == null) return PurchaseOutcome.notSignedIn;
     if (!await _iap.isAvailable()) return PurchaseOutcome.notAvailable;
 
     final product = await _loadProduct();
@@ -115,7 +111,21 @@ class PurchaseService {
       return PurchaseOutcome.transientFailure;
     }
 
-    return _pendingCompleter!.future.timeout(
+    // If Play already considers this owned, buyNonConsumable() is often
+    // silently rejected and purchaseStream never fires — restorePurchases()
+    // reliably does. Race a shorter fallback alongside the normal wait so
+    // genuine new buyers aren't penalized with an extra delay.
+    final buyFuture = _pendingCompleter!.future;
+    Future.delayed(const Duration(seconds: 4), () async {
+      if (_pendingCompleter == null || _pendingCompleter!.isCompleted) return;
+      try {
+        await _iap.restorePurchases();
+      } catch (_) {
+        // Swallow — if this fails, the normal 3-min timeout still catches it.
+      }
+    });
+
+    return buyFuture.timeout(
       const Duration(minutes: 3),
       onTimeout: () => PurchaseOutcome.transientFailure,
     );

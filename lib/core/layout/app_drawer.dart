@@ -7,7 +7,7 @@ import 'package:salapify/features/authentication/presentation/controllers/app_us
 import 'package:salapify/features/authentication/presentation/controllers/auth_controller.dart';
 import 'package:salapify/features/authentication/presentation/controllers/guest_controller.dart';
 import 'package:salapify/features/authentication/domain/entities/avatar_option.dart';
-import 'package:salapify/core/widgets/global_loading.dart';
+import 'package:salapify/features/premium/data/repositories/entitlement_repository.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -18,6 +18,7 @@ class AppDrawer extends ConsumerWidget {
     final user = userAsync.value;
     final isGuest = ref.watch(guestModeProvider);
     final themeMode = ref.watch(themeControllerProvider);
+    final isPremium = !isGuest && (ref.watch(isPremiumProvider).value ?? false);
 
     void goToSignIn() {
       Navigator.pop(context);
@@ -34,6 +35,7 @@ class AppDrawer extends ConsumerWidget {
                 ? 'Sign in to save your data'
                 : (user?.email ?? ''),
             avatarId: isGuest ? null : user?.avatarId,
+            isPremium: isPremium,
             onTap: isGuest ? goToSignIn : null,
           ),
           const SizedBox(height: 12),
@@ -111,12 +113,15 @@ class _DrawerHeader extends StatelessWidget {
     required this.username,
     required this.subtitle,
     this.avatarId,
+    this.isPremium = false,
     this.onTap,
   });
 
   final String username;
   final String subtitle;
   final String? avatarId;
+
+  final bool isPremium;
 
   /// When non-null the whole header is tappable and shows a chevron.
   final VoidCallback? onTap;
@@ -140,19 +145,28 @@ class _DrawerHeader extends StatelessWidget {
               bottom: false,
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 28,
-                    backgroundColor: Colors.white,
-                    backgroundImage: avatar != null
-                        ? AssetImage(avatar.assetPath)
-                        : null,
-                    child: avatar == null
-                        ? Icon(
-                            Icons.person_rounded,
-                            color: AppColors.textPrimary,
-                            size: 28,
+                  Container(
+                    padding: EdgeInsets.all(isPremium ? 2.5 : 0),
+                    decoration: isPremium
+                        ? const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xFFD4AF37),
                           )
                         : null,
+                    child: CircleAvatar(
+                      radius: 28,
+                      backgroundColor: Colors.white,
+                      backgroundImage: avatar != null
+                          ? AssetImage(avatar.assetPath)
+                          : null,
+                      child: avatar == null
+                          ? Icon(
+                              Icons.person_rounded,
+                              color: AppColors.textPrimary,
+                              size: 28,
+                            )
+                          : null,
+                    ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(

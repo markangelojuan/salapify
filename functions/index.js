@@ -1,6 +1,7 @@
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
+const functionsV1 = require("firebase-functions/v1");
 const { google } = require("googleapis");
 const admin = require("firebase-admin");
 admin.initializeApp();
@@ -210,12 +211,21 @@ exports.verifyPurchase = onCall(
       if (tokenDoc.exists) {
         const existingUid = tokenDoc.data().uid;
         if (existingUid !== uid) {
-          throw new HttpsError(
-            "already-exists",
-            "This purchase has already been redeemed by another account."
-          );
+          // The token is claimed by a different uid. That's only a real
+          // conflict if that account still exists — if it was deleted
+          // (e.g. user deleted their account and signed up again), the
+          // token is orphaned and safe to reclaim for the new uid.
+          const oldUserDoc = await tx.get(db.collection("users").doc(existingUid));
+          if (oldUserDoc.exists) {
+            throw new HttpsError(
+              "already-exists",
+              "This purchase has already been redeemed by another account."
+            );
+          }
+          // else: fall through and reclaim below.
         }
-        // Same uid re-submitting (e.g. retry after a dropped response) — fine, fall through.
+        // Same uid re-submitting (e.g. retry after a dropped response), or
+        // reclaimed from a deleted account — fine, fall through.
       }
 
       tx.set(tokenRef, {
@@ -254,3 +264,23 @@ exports.verifyPurchase = onCall(
     return { success: true, productId };
   }
 );
+
+// Frees up any purchase tokens this uid claimed, so a resignup with the
+// same Play account can reclaim entitlement instead of permanently hitting
+// "already redeemed by another account" in verifyPurchase. Runs on Auth
+// user deletion rather than client-side so it can't be skipped by a
+// crashed/killed app mid-deletion.
+exports.cleanupPurchaseTokensOnUserDelete = functionsV1.auth
+  .user()
+  .onDelete(async (user) => {
+    const tokensSnap = await db
+      .collection("processedPurchaseTokens")
+      .where("uid", "==", user.uid)
+      .get();
+
+    if (tokensSnap.empty) return;
+
+    const batch = db.batch();
+    tokensSnap.docs.forEach((doc) => batch.delete(doc.ref));
+    await batch.commit();
+  });
