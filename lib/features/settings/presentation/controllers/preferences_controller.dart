@@ -40,7 +40,7 @@ class PreferencesController extends _$PreferencesController {
       //    unchanged we still need it in Firestore, so push it directly.
       final localPeriod = await ref
           .read(settingsRepositoryProvider)
-          .getLocalBudgetingPeriod();
+          .getLocalBudgetingPeriod(uid);
       if (localPeriod != period) {
         await ref.read(budgetingPeriodSettingProvider.notifier).set(period);
         _throwIfError(budgetingPeriodSettingProvider);
@@ -70,10 +70,11 @@ class PreferencesController extends _$PreferencesController {
   /// "Use defaults": commits whatever is currently stored locally
   /// (monthly / day 15 / PHP for a brand-new install).
   Future<void> skip() async {
+    final uid = ref.read(authRepositoryProvider).currentUser!.uid;
     final repo = ref.read(settingsRepositoryProvider);
     await complete(
-      period: await repo.getLocalBudgetingPeriod(),
-      firstHalfEndDay: await repo.getLocalFirstHalfEndDay(),
+      period: await repo.getLocalBudgetingPeriod(uid),
+      firstHalfEndDay: await repo.getLocalFirstHalfEndDay(uid),
       currency: await repo.getLocalCurrency(),
     );
   }

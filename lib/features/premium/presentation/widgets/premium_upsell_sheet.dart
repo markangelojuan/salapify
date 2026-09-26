@@ -25,6 +25,8 @@ Future<void> showPremiumUpsellSheet(
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
+    isDismissible: false,
+    enableDrag: false,
     builder: (_) => _PremiumUpsellSheet(
       limit: limit,
       onUnlock: onUnlock,
@@ -116,147 +118,152 @@ class _PremiumUpsellSheetState extends State<_PremiumUpsellSheet> {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520),
-        child: Container(
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            border: Border(top: BorderSide(color: colors.border)),
-          ),
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(24, 12, 24, 20 + bottomInset),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Drag handle
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: colors.textSecondary.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                _PremiumPill(colors: colors),
-                const SizedBox(height: 14),
-
-                // Headline: the reason the sheet appeared
-                Text(
-                  widget.limit.message,
-                  textAlign: TextAlign.center,
-                  style: _font(
-                    TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      height: 1.25,
-                      letterSpacing: -0.4,
-                      color: colors.textPrimary,
+    return PopScope(
+      canPop: !_busy,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Container(
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(32),
+              ),
+              border: Border(top: BorderSide(color: colors.border)),
+            ),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(24, 12, 24, 20 + bottomInset),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Drag handle
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: colors.textSecondary.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                ),
-                const SizedBox(height: 22),
+                  const SizedBox(height: 20),
 
-                // Price: plain type, no container
-                Text(
-                  widget.priceLabel,
-                  textAlign: TextAlign.center,
-                  style: _font(
-                    TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w800,
-                      height: 1.0,
-                      letterSpacing: -1,
-                      color: colors.textPrimary,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 6),
+                  _PremiumPill(colors: colors),
+                  const SizedBox(height: 14),
 
-                if (widget.benefit.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.check_circle_rounded,
-                        size: 20,
+                  // Headline: the reason the sheet appeared
+                  Text(
+                    widget.limit.message,
+                    textAlign: TextAlign.center,
+                    style: _font(
+                      TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        height: 1.25,
+                        letterSpacing: -0.4,
                         color: colors.textPrimary,
                       ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          widget.benefit,
-                          style: _font(
-                            TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              height: 1.3,
-                              color: colors.textPrimary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ],
-                const SizedBox(height: 24),
+                  const SizedBox(height: 22),
 
-                CommonButton(
-                  label: 'Go Premium — ${widget.priceLabel}',
-                  btnColor: colors.textPrimary,
-                  labelColor: colors.background,
-                  isLoading: _busy,
-                  onPressed: () => _run(widget.onUnlock ?? _previewUnlock),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'No subscription. Just one-time fee.',
-                  textAlign: TextAlign.center,
-                  style: _font(
-                    TextStyle(fontSize: 12, color: colors.textSecondary),
-                  ),
-                ),
-                const SizedBox(height: 6),
-
-                // Quiet footer actions
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    TextButton(
-                      onPressed: _busy
-                          ? null
-                          : () => Navigator.of(context).pop(),
-                      child: Text(
-                        'Close',
-                        style: _font(TextStyle(color: colors.textSecondary)),
+                  // Price: plain type, no container
+                  Text(
+                    widget.priceLabel,
+                    textAlign: TextAlign.center,
+                    style: _font(
+                      TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.w800,
+                        height: 1.0,
+                        letterSpacing: -1,
+                        color: colors.textPrimary,
                       ),
                     ),
-                    if (widget.onRestore != null)
-                      TextButton(
-                        onPressed: _busy
-                            ? null
-                            : () => _run(widget.onRestore!),
-                        child: Text(
-                          'Restore purchase',
-                          style: _font(
-                            TextStyle(
-                              fontSize: 13,
-                              color: colors.textSecondary.withValues(
-                                alpha: 0.8,
+                  ),
+                  const SizedBox(height: 6),
+
+                  if (widget.benefit.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check_circle_rounded,
+                          size: 20,
+                          color: colors.textPrimary,
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            widget.benefit,
+                            style: _font(
+                              TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                height: 1.3,
+                                color: colors.textPrimary,
                               ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
+                    ),
                   ],
-                ),
-              ],
+                  const SizedBox(height: 24),
+
+                  CommonButton(
+                    label: 'Go Premium — ${widget.priceLabel}',
+                    btnColor: colors.textPrimary,
+                    labelColor: colors.background,
+                    isLoading: _busy,
+                    onPressed: () => _run(widget.onUnlock ?? _previewUnlock),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'No subscription. Just one-time fee.',
+                    textAlign: TextAlign.center,
+                    style: _font(
+                      TextStyle(fontSize: 12, color: colors.textSecondary),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Quiet footer actions
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: _busy
+                            ? null
+                            : () => Navigator.of(context).pop(),
+                        child: Text(
+                          'Close',
+                          style: _font(TextStyle(color: colors.textSecondary)),
+                        ),
+                      ),
+                      if (widget.onRestore != null)
+                        TextButton(
+                          onPressed: _busy
+                              ? null
+                              : () => _run(widget.onRestore!),
+                          child: Text(
+                            'Restore purchase',
+                            style: _font(
+                              TextStyle(
+                                fontSize: 13,
+                                color: colors.textSecondary.withValues(
+                                  alpha: 0.8,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

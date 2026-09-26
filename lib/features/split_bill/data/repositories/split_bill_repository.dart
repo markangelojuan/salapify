@@ -34,7 +34,11 @@ abstract class SplitBillRepository {
     String billId,
     List<BillShare> shares,
   );
-  Future<void> deleteBill(String groupId, String billId);
+  Future<void> deleteBill(
+    String groupId,
+    String billId, {
+    required bool decrementCount,
+  });
 
   Stream<List<ActivityEntry>> watchActivity(String groupId, {int limit = 50});
   Future<void> addActivity(ActivityEntry entry);

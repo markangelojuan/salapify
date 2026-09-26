@@ -77,8 +77,12 @@ class SplitBillRepositoryImpl implements SplitBillRepository {
   }
 
   @override
-  Future<void> deleteBill(String groupId, String billId) {
-    return _service.deleteBill(groupId, billId);
+  Future<void> deleteBill(
+    String groupId,
+    String billId, {
+    required bool decrementCount,
+  }) {
+    return _service.deleteBill(groupId, billId, decrementCount: decrementCount);
   }
 
   @override

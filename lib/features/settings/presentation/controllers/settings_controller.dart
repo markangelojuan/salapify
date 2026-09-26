@@ -26,7 +26,9 @@ class SettingsSyncWarning extends _$SettingsSyncWarning {
 class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
   @override
   Future<BudgetingPeriod> build() {
-    return ref.watch(settingsRepositoryProvider).getLocalBudgetingPeriod();
+
+    final uid = ref.watch(currentUserProvider)?.uid;
+    return ref.watch(settingsRepositoryProvider).getLocalBudgetingPeriod(uid);
   }
 
   bool get _isOnline => ref.read(isOnlineProvider).value ?? true;
@@ -38,6 +40,8 @@ class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
       previous,
       isRefresh: true,
     );
+
+    final uid = ref.read(currentUserProvider)?.uid;
 
     try {
       // Only the local migration sits behind the blocking overlay. The
@@ -51,7 +55,7 @@ class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
               .convertCategoriesForPeriodChange(period);
 
           final repository = ref.read(settingsRepositoryProvider);
-          await repository.setLocalBudgetingPeriod(period);
+          await repository.setLocalBudgetingPeriod(period, uid);
 
           final firstHalfEndDay =
               ref.read(firstHalfEndDaySettingProvider).value ?? 15;
@@ -60,13 +64,12 @@ class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
             firstHalfEndDay: firstHalfEndDay,
             now: DateTime.now(),
           );
-          await repository.setLastResetPeriodKey(newKey);
+          await repository.setLastResetPeriodKey(newKey, uid);
         },
       );
 
       state = AsyncData(period);
 
-      final uid = ref.read(currentUserProvider)?.uid;
       if (uid == null || !_isOnline)
         return; // guest, or offline — synced on reconnect
 
@@ -98,7 +101,8 @@ class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
 class FirstHalfEndDaySetting extends _$FirstHalfEndDaySetting {
   @override
   Future<int> build() {
-    return ref.watch(settingsRepositoryProvider).getLocalFirstHalfEndDay();
+    final uid = ref.watch(currentUserProvider)?.uid;
+    return ref.watch(settingsRepositoryProvider).getLocalFirstHalfEndDay(uid);
   }
 
   bool get _isOnline => ref.read(isOnlineProvider).value ?? true;
@@ -107,16 +111,16 @@ class FirstHalfEndDaySetting extends _$FirstHalfEndDaySetting {
     final previous = state;
     state = AsyncData(day);
     final repository = ref.read(settingsRepositoryProvider);
+    final uid = ref.read(currentUserProvider)?.uid;
 
     try {
-      await repository.setLocalFirstHalfEndDay(day);
+      await repository.setLocalFirstHalfEndDay(day, uid);
     } catch (e, st) {
       // ignore: invalid_use_of_internal_member
       state = AsyncError<int>(e, st).copyWithPrevious(previous);
       return;
     }
 
-    final uid = ref.read(currentUserProvider)?.uid;
     if (uid == null || !_isOnline) return;
 
     try {

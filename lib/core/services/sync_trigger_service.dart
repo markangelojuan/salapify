@@ -70,18 +70,20 @@ class SyncTrigger extends _$SyncTrigger {
     }
 
     try {
-      // Push local (possibly guest-set) settings first, THEN pull — same
-      // ordering reasoning as budget: push what's genuinely local before
-      // pulling remote, so an existing account's remote settings aren't
-      // clobbered by a stale local default, and a fresh account gets the
-      // guest's actual choices instead of silently losing them.
+      // Merges this device's guest-scoped settings with whatever the
+      // account already has on Firestore: remote wins if the account has a
+      // value, otherwise the guest's local value is pushed up. Replaces the
+      // old pullRemoteSettings + retryPendingSettingsSync pairing, which
+      // never actually pushed guest-set values because retry only re-sends
+      // settings that were previously marked as failed — a guest never
+      // marks anything as failed, since it never attempts a push at all.
       final settingsService = ref.read(settingsSyncServiceProvider);
-      await settingsService.pullRemoteSettings(uid);
-      await settingsService.retryPendingSettingsSync(uid);
+      await settingsService.mergeSettingsOnSignIn(uid);
       ref.invalidate(budgetingPeriodSettingProvider);
       ref.invalidate(firstHalfEndDaySettingProvider);
+      ref.invalidate(currencySettingProvider);
     } catch (e) {
-      _logIfRealError(e, context: 'onSignedIn: settings push/pull');
+      _logIfRealError(e, context: 'onSignedIn: settings merge');
     }
 
     try {
@@ -135,7 +137,6 @@ class SyncTrigger extends _$SyncTrigger {
   void _logIfRealError(Object e, {required String context}) {
     final isOnline = ref.read(isOnlineProvider).value ?? true;
     if (!isOnline) return; // expected — offline, will retry later
-    // Online but still failed
     // FirebaseCrashlytics.instance.recordError(e, StackTrace.current, reason: context);
   }
 }

@@ -40,7 +40,7 @@ final class PreferencesControllerProvider
 }
 
 String _$preferencesControllerHash() =>
-    r'59c24f6898de7a60e7acca1e7385fd8364acdb78';
+    r'6f62f190cd86e1dfdebf7d7eda2586eee5d8ca81';
 
 /// Commits the first-time preferences (budgeting period, first-half end day,
 /// currency) and flags the user's profile as onboarded.

@@ -18,9 +18,6 @@ class SplitBillFirestoreService {
   Stream<QuerySnapshot<Map<String, dynamic>>> watchGroupsForUser(
     String userId,
   ) {
-    // Newest activity first (falls back to createdAt via the mapper for
-    // any older doc missing lastActivityAt — though such a doc is still
-    // excluded from THIS query's results until it has the field
     return _groups
         .where('memberIds', arrayContains: userId)
         .orderBy('lastActivityAt', descending: true)
@@ -93,8 +90,36 @@ class SplitBillFirestoreService {
     return _bills(groupId).doc(billId).update({'shares': shares});
   }
 
-  Future<void> deleteBill(String groupId, String billId) {
-    return _bills(groupId).doc(billId).delete();
+  /// Deletes the bill. Only decrements the group's `billsCreatedCount` when
+  /// [decrementCount] is true (premium groups — active-slot cycling).
+  /// Free groups keep the lifetime-style cap: the count is left as-is so a
+  /// deleted bill does not free up a new slot.
+  Future<void> deleteBill(
+    String groupId,
+    String billId, {
+    required bool decrementCount,
+  }) async {
+    final billRef = _bills(groupId).doc(billId);
+
+    if (!decrementCount) {
+      await billRef.delete();
+      return;
+    }
+
+    final groupRef = _groups.doc(groupId);
+
+    await _firestore.runTransaction((txn) async {
+      final groupSnap = await txn.get(groupRef);
+
+      txn.delete(billRef);
+
+      if (!groupSnap.exists) return; // group was deleted concurrently
+
+      final currentCount = groupSnap.data()?['billsCreatedCount'] as int? ?? 0;
+      txn.update(groupRef, {
+        'billsCreatedCount': currentCount > 0 ? currentCount - 1 : 0,
+      });
+    });
   }
 
   // Activity

@@ -43,6 +43,7 @@ class PeriodResetGuard extends _$PeriodResetGuard {
       firstHalfEndDaySettingProvider.future,
     );
     final settingsRepo = ref.read(settingsRepositoryProvider);
+    final uid = ref.read(currentUserProvider)?.uid;
 
     final currentKey = computeCurrentPeriodKey(
       globalPeriod: globalPeriod,
@@ -50,7 +51,17 @@ class PeriodResetGuard extends _$PeriodResetGuard {
       now: DateTime.now(),
     );
 
-    final lastKey = await settingsRepo.getLastResetPeriodKey();
+    final lastKey = await settingsRepo.getLastResetPeriodKey(uid);
+
+    // No key yet for this identity — either a fresh install, or the first
+    // time this account/guest scope has been seen on this device. We have
+    // no way to know whether a real period rollover happened, and synced
+    // category data already reflects the correct state, so just seed the
+    // marker without running the destructive reset side effects.
+    if (lastKey == null) {
+      await settingsRepo.setLastResetPeriodKey(currentKey, uid);
+      return;
+    }
 
     if (lastKey != currentKey) {
       await ref.read(budgetRepositoryProvider).resetAllCompleted();
@@ -62,7 +73,6 @@ class PeriodResetGuard extends _$PeriodResetGuard {
             now: DateTime.now(),
           );
 
-      final uid = ref.read(currentUserProvider)?.uid;
       final isOnline = ref.read(isOnlineProvider).value ?? true;
       if (uid != null && isOnline && removedIds.isNotEmpty) {
         final syncService = ref.read(transactionSyncServiceProvider);
@@ -74,7 +84,7 @@ class PeriodResetGuard extends _$PeriodResetGuard {
           }
         }
       }
-      await settingsRepo.setLastResetPeriodKey(currentKey);
+      await settingsRepo.setLastResetPeriodKey(currentKey, uid);
     }
   }
 }

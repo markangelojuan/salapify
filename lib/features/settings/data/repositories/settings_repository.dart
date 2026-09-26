@@ -13,9 +13,15 @@ class SettingsRepository {
   static const _remindersEnabledKey = 'reminders_enabled';
   static const _lastRetentionCheckKey = 'last_retention_check';
 
-  Future<BudgetingPeriod> getLocalBudgetingPeriod() async {
+  /// Guest / signed-out scope for the identity-namespaced keys below.
+  static const _guestScope = '__guest__';
+
+  String _scope(String? uid) => uid ?? _guestScope;
+
+
+  Future<BudgetingPeriod> getLocalBudgetingPeriod(String? uid) async {
     final prefs = await SharedPreferences.getInstance();
-    final value = prefs.getString(_periodKey);
+    final value = prefs.getString('$_periodKey:${_scope(uid)}');
     if (value == null) return BudgetingPeriod.monthly;
     return BudgetingPeriod.values.firstWhere(
       (e) => e.name == value,
@@ -23,29 +29,32 @@ class SettingsRepository {
     );
   }
 
-  Future<void> setLocalBudgetingPeriod(BudgetingPeriod period) async {
+  Future<void> setLocalBudgetingPeriod(
+    BudgetingPeriod period,
+    String? uid,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_periodKey, period.name);
+    await prefs.setString('$_periodKey:${_scope(uid)}', period.name);
   }
 
-  Future<int> getLocalFirstHalfEndDay() async {
+  Future<int> getLocalFirstHalfEndDay(String? uid) async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_firstHalfEndDayKey) ?? 15;
+    return prefs.getInt('$_firstHalfEndDayKey:${_scope(uid)}') ?? 15;
   }
 
-  Future<void> setLocalFirstHalfEndDay(int day) async {
+  Future<void> setLocalFirstHalfEndDay(int day, String? uid) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_firstHalfEndDayKey, day);
+    await prefs.setInt('$_firstHalfEndDayKey:${_scope(uid)}', day);
   }
 
-  Future<String?> getLastResetPeriodKey() async {
+  Future<String?> getLastResetPeriodKey(String? uid) async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_lastResetPeriodKeyKey);
+    return prefs.getString('$_lastResetPeriodKeyKey:${_scope(uid)}');
   }
 
-  Future<void> setLastResetPeriodKey(String key) async {
+  Future<void> setLastResetPeriodKey(String key, String? uid) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_lastResetPeriodKeyKey, key);
+    await prefs.setString('$_lastResetPeriodKeyKey:${_scope(uid)}', key);
   }
 
   Future<AppCurrency> getLocalCurrency() async {
@@ -73,7 +82,7 @@ class SettingsRepository {
     await prefs.setBool(_remindersEnabledKey, enabled);
   }
 
-  /// Last time the transaction-retention sweep ran 
+  /// Last time the transaction-retention sweep ran
   Future<DateTime?> getLastRetentionCheck() async {
     final prefs = await SharedPreferences.getInstance();
     final millis = prefs.getInt(_lastRetentionCheckKey);
@@ -86,15 +95,28 @@ class SettingsRepository {
     await prefs.setInt(_lastRetentionCheckKey, time.millisecondsSinceEpoch);
   }
 
+  /// Sign-out: deliberately leaves the identity-scoped keys (period,
+  /// firstHalfEndDay, lastResetPeriodKey) untouched. They're this device's
+  /// memory of a specific account/guest session, not this-session-only
+  /// state — wiping them here is what caused false period-reset triggers
+  /// (and the resulting isCompleted wipe) on relogin.
   Future<void> clearAll() async {
     final prefs = await SharedPreferences.getInstance();
     await Future.wait([
-      prefs.remove(_periodKey),
-      prefs.remove(_firstHalfEndDayKey),
-      prefs.remove(_lastResetPeriodKeyKey),
       prefs.remove(_currencyKey),
       prefs.remove(_remindersEnabledKey),
       prefs.remove(_lastRetentionCheckKey),
+    ]);
+  }
+
+  /// Account deletion only — this uid is gone for good, purge its
+  /// identity-scoped cache too (clearAll alone intentionally keeps it).
+  Future<void> clearForUid(String uid) async {
+    final prefs = await SharedPreferences.getInstance();
+    await Future.wait([
+      prefs.remove('$_periodKey:$uid'),
+      prefs.remove('$_firstHalfEndDayKey:$uid'),
+      prefs.remove('$_lastResetPeriodKeyKey:$uid'),
     ]);
   }
 }

@@ -39,7 +39,7 @@ class SplitBillController extends _$SplitBillController {
 
       final isPremium =
           (await ref.read(entitlementRepositoryProvider).watch().first)
-              .isPremium; 
+              .isPremium;
       final limit = SplitBillLimits.maxActiveGroupsFor(isPremium: isPremium);
       final ownedCount = await ref
           .read(splitBillRepositoryProvider)
@@ -155,6 +155,8 @@ class SplitBillController extends _$SplitBillController {
         ),
         billLimit: limit,
       );
+
+      ref.invalidate(splitGroupProvider(bill.groupId));
     });
   }
 
@@ -167,14 +169,24 @@ class SplitBillController extends _$SplitBillController {
     });
   }
 
-  /// Enforce "only the creator can delete" in the UI.
   Future<void> deleteBill({
     required String groupId,
     required String billId,
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(splitBillRepositoryProvider).deleteBill(groupId, billId);
+      final repo = ref.read(splitBillRepositoryProvider);
+
+      final group = await repo.getGroup(groupId);
+      if (group == null) throw StateError('Group not found');
+
+      final creatorIsPremium = await ref
+          .read(userRepositoryProvider)
+          .isPremiumUser(group.createdBy);
+
+      await repo.deleteBill(groupId, billId, decrementCount: creatorIsPremium);
+
+      ref.invalidate(splitGroupProvider(groupId));
     });
   }
 

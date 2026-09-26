@@ -68,6 +68,14 @@ class AuthRepository {
   Future<UserCredential> signInWithGoogle() async {
     final googleUser = await GoogleSignIn.instance.authenticate();
     final idToken = googleUser.authentication.idToken;
+
+    if (idToken == null) {
+      throw FirebaseAuthException(
+        code: 'missing-id-token',
+        message: 'Google Sign-In did not return an idToken.',
+      );
+    }
+
     final credential = GoogleAuthProvider.credential(idToken: idToken);
     return _auth.signInWithCredential(credential);
   }

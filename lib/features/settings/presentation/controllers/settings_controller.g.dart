@@ -87,7 +87,7 @@ final class BudgetingPeriodSettingProvider
 }
 
 String _$budgetingPeriodSettingHash() =>
-    r'd1bddd4b796bf3c6025debb90d4eb33fd5251208';
+    r'3508fe003dd84b310ead2e5b93f65e596b2de51f';
 
 abstract class _$BudgetingPeriodSetting
     extends $AsyncNotifier<BudgetingPeriod> {
@@ -133,7 +133,7 @@ final class FirstHalfEndDaySettingProvider
 }
 
 String _$firstHalfEndDaySettingHash() =>
-    r'35ca16cb063c32144915b189953035541603bf4a';
+    r'dc2b2a49391a55dba544407e76d35165f18e196f';
 
 abstract class _$FirstHalfEndDaySetting extends $AsyncNotifier<int> {
   FutureOr<int> build();

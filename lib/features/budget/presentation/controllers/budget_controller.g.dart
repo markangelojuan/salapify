@@ -108,7 +108,7 @@ final class PeriodResetGuardProvider
   PeriodResetGuard create() => PeriodResetGuard();
 }
 
-String _$periodResetGuardHash() => r'18e762aeeff6ef1d5e5fe7246ef61e769580dda4';
+String _$periodResetGuardHash() => r'49adebc51632d7d890cd6fd9bde47bc8e0ebc761';
 
 abstract class _$PeriodResetGuard extends $AsyncNotifier<void> {
   FutureOr<void> build();

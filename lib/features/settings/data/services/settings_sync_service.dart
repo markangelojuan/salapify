@@ -66,13 +66,13 @@ class SettingsSyncService {
         (e) => e.name == remotePeriodName,
         orElse: () => BudgetingPeriod.monthly,
       );
-      await _repository.setLocalBudgetingPeriod(period);
+      await _repository.setLocalBudgetingPeriod(period, uid);
       await _setBudgetingPeriodSynced(true);
     }
 
     final remoteDay = data['firstHalfEndDay'] as int?;
     if (remoteDay != null) {
-      await _repository.setLocalFirstHalfEndDay(remoteDay);
+      await _repository.setLocalFirstHalfEndDay(remoteDay, uid);
       await _setFirstHalfEndDaySynced(true);
     }
 
@@ -93,7 +93,7 @@ class SettingsSyncService {
       try {
         await pushBudgetingPeriod(
           uid,
-          await _repository.getLocalBudgetingPeriod(),
+          await _repository.getLocalBudgetingPeriod(uid),
         );
       } catch (_) {}
     }
@@ -101,7 +101,7 @@ class SettingsSyncService {
       try {
         await pushFirstHalfEndDay(
           uid,
-          await _repository.getLocalFirstHalfEndDay(),
+          await _repository.getLocalFirstHalfEndDay(uid),
         );
       } catch (_) {}
     }
@@ -136,13 +136,13 @@ class SettingsSyncService {
     try {
       await pushBudgetingPeriod(
         uid,
-        await _repository.getLocalBudgetingPeriod(),
+        await _repository.getLocalBudgetingPeriod(uid),
       );
     } catch (_) {}
     try {
       await pushFirstHalfEndDay(
         uid,
-        await _repository.getLocalFirstHalfEndDay(),
+        await _repository.getLocalFirstHalfEndDay(uid),
       );
     } catch (_) {}
     try {
@@ -172,6 +172,62 @@ class SettingsSyncService {
   Future<void> _setCurrencySynced(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_currencySyncedKey, value);
+  }
+
+  Future<void> mergeSettingsOnSignIn(String uid) async {
+    final doc = await _firestore
+        .collection('users')
+        .doc(uid)
+        .get()
+        .timeout(_firestoreTimeout);
+    final data = doc.data();
+
+    final remotePeriodName = data?['budgetingPeriod'] as String?;
+    if (remotePeriodName != null) {
+      final period = BudgetingPeriod.values.firstWhere(
+        (e) => e.name == remotePeriodName,
+        orElse: () => BudgetingPeriod.monthly,
+      );
+      await _repository.setLocalBudgetingPeriod(period, uid);
+      await _setBudgetingPeriodSynced(true);
+    } else {
+      final guestPeriod = await _repository.getLocalBudgetingPeriod(null);
+      await _repository.setLocalBudgetingPeriod(guestPeriod, uid);
+      try {
+        await pushBudgetingPeriod(uid, guestPeriod);
+      } catch (_) {
+        // left unsynced; retryPendingSettingsSync picks it up later
+      }
+    }
+
+    final remoteDay = data?['firstHalfEndDay'] as int?;
+    if (remoteDay != null) {
+      await _repository.setLocalFirstHalfEndDay(remoteDay, uid);
+      await _setFirstHalfEndDaySynced(true);
+    } else {
+      final guestDay = await _repository.getLocalFirstHalfEndDay(null);
+      await _repository.setLocalFirstHalfEndDay(guestDay, uid);
+      try {
+        await pushFirstHalfEndDay(uid, guestDay);
+      } catch (_) {}
+    }
+
+    final remoteCurrencyName = data?['currency'] as String?;
+    if (remoteCurrencyName != null) {
+      final currency = AppCurrency.values.firstWhere(
+        (e) => e.name == remoteCurrencyName,
+        orElse: () => AppCurrency.php,
+      );
+      await _repository.setLocalCurrency(currency);
+      await _setCurrencySynced(true);
+    } else {
+      // currency isn't identity-scoped, so the current local value already
+      // *is* whatever the guest had — just push it up.
+      final guestCurrency = await _repository.getLocalCurrency();
+      try {
+        await pushCurrency(uid, guestCurrency);
+      } catch (_) {}
+    }
   }
 }
 

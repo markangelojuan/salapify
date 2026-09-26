@@ -53,9 +53,11 @@ class AccountScreen extends ConsumerWidget {
                           alignment: Alignment.bottomRight,
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(4),
+                              padding: EdgeInsets.all(isPremium ? 2.5 : 4),
                               decoration: BoxDecoration(
-                                color: colors.onPrimary,
+                                color: isPremium
+                                    ? const Color(0xFFD4AF37)
+                                    : colors.onPrimary,
                                 shape: BoxShape.circle,
                               ),
                               child: CircleAvatar(

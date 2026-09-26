@@ -13,6 +13,7 @@ import 'package:salapify/features/split_bill/domain/entities/bill_share.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_bill.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_type.dart';
+import 'package:salapify/features/split_bill/domain/exceptions/bill_limit_exceeded_exception.dart';
 import 'package:salapify/features/split_bill/domain/split_balance_calculator.dart';
 import 'package:salapify/features/split_bill/presentation/controllers/split_bill_controller.dart';
 import 'package:salapify/features/split_bill/domain/entities/payment_status.dart';
@@ -68,7 +69,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
       }.toList();
     }
     final known = _knownMemberIds;
-    
+
     if (known == null) return widget.group.memberIds;
     return widget.group.memberIds.where(known.contains).toList();
   }
@@ -115,7 +116,6 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
 
   double get _total => double.tryParse(_totalController.text) ?? 0;
 
- 
   void _syncCustomControllers(Iterable<String> participantIds) {
     for (final id in participantIds) {
       _customControllers.putIfAbsent(id, () => TextEditingController());
@@ -232,7 +232,14 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
 
     final error = ref.read(splitBillControllerProvider).error;
     if (error != null) {
-      CommonSnackbar.showError(context, 'Failed to save bill: $error');
+      if (error is BillLimitExceededException) {
+        CommonSnackbar.showError(
+          context,
+          'This group has reached its limit of ${error.limit} bills.',
+        );
+      } else {
+        CommonSnackbar.showError(context, 'Failed to save bill: $error');
+      }
       return;
     }
     Navigator.of(context).pop();
@@ -272,6 +279,20 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
       CommonSnackbar.showError(context, 'Failed to delete bill: $error');
       return;
     }
+
+    final creatorIsPremium = await ref
+        .read(userRepositoryProvider)
+        .isPremiumUser(widget.group.createdBy);
+
+    if (!mounted) return;
+
+    if (creatorIsPremium) {
+      CommonSnackbar.showSuccess(
+        context,
+        'Bill deleted. You can add a new one anytime.',
+      );
+    }
+
     Navigator.of(context).pop();
   }
 

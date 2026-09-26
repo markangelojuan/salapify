@@ -73,8 +73,20 @@ class _AddBillCard extends ConsumerWidget {
       context,
       limit: PremiumLimit.bills,
       priceLabel: price,
-      onUnlock: () => purchaseService.buyPremium(),
-      onRestore: () => purchaseService.restorePurchases(),
+      onUnlock: () async {
+        final outcome = await purchaseService.buyPremium();
+        if (outcome == PurchaseOutcome.granted) {
+          ref.invalidate(isGroupCreatorPremiumProvider(group.createdBy));
+        }
+        return outcome;
+      },
+      onRestore: () async {
+        final outcome = await purchaseService.restorePurchases();
+        if (outcome == PurchaseOutcome.granted) {
+          ref.invalidate(isGroupCreatorPremiumProvider(group.createdBy));
+        }
+        return outcome;
+      },
     );
   }
 

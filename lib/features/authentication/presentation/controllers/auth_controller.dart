@@ -252,6 +252,10 @@ class AuthController extends _$AuthController {
       await ref.read(entitlementRepositoryProvider).clearLocal();
     });
     await ref.read(settingsRepositoryProvider).clearAll();
+    // This uid is gone for good — unlike a normal sign-out, its
+    // identity-scoped cache (period/firstHalfEndDay/lastResetPeriodKey)
+    // should be purged too, not preserved for a future relogin.
+    await ref.read(settingsRepositoryProvider).clearForUid(uid);
 
     await authRepository.deleteCurrentUser();
 
