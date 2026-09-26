@@ -8,6 +8,7 @@ import 'package:salapify/features/transaction/domain/entities/transaction_entry.
 import 'package:salapify/features/transaction/presentation/controllers/transaction_controller.dart';
 import 'package:salapify/features/transaction/presentation/widgets/expense_row.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:lottie/lottie.dart';
 
@@ -59,26 +60,13 @@ class ExpensesTab extends ConsumerWidget {
     WidgetRef ref,
     String id,
   ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete this expense?'),
-        content: const Text(
-          'It will no longer count toward your spending totals.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+    final confirmed = await CommonConfirmationDialog.show(
+      context,
+      title: 'Delete this expense?',
+      message: 'It will no longer count toward your spending totals.',
+      isDestructive: true,
     );
-    if (confirmed == true) {
+    if (confirmed) {
       await ref.read(transactionActionsProvider.notifier).deleteTransaction(id);
     }
   }

@@ -10,6 +10,7 @@ import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 import 'package:salapify/features/split_bill/domain/split_balance_calculator.dart';
 import 'package:salapify/features/split_bill/presentation/controllers/split_bill_controller.dart';
 import 'package:salapify/features/split_bill/presentation/widgets/guest_split_bills_promo.dart';
+import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/router/routes.dart';
 
@@ -22,28 +23,16 @@ class SplitBillsScreen extends ConsumerWidget {
     SplitGroup group,
     bool isCreator,
   ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(isCreator ? 'Delete this group?' : 'Leave this group?'),
-        content: Text(
-          isCreator
-              ? 'This deletes "${group.name}" and its bills for everyone.'
-              : 'You\'ll no longer see "${group.name}" or its bills.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(isCreator ? 'Delete' : 'Leave'),
-          ),
-        ],
-      ),
+    final confirmed = await CommonConfirmationDialog.show(
+      context,
+      title: isCreator ? 'Delete this group?' : 'Leave this group?',
+      message: isCreator
+          ? 'This deletes "${group.name}" and its bills for everyone.'
+          : 'You\'ll no longer see "${group.name}" or its bills.',
+      confirmLabel: isCreator ? 'Delete' : 'Leave',
+      isDestructive: true,
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
 
     final notifier = ref.read(splitBillControllerProvider.notifier);
     if (isCreator) {
@@ -213,9 +202,7 @@ class _GroupRow extends ConsumerWidget {
                     children: [
                       CircleAvatar(
                         radius: 24,
-                        backgroundColor: colors.primary.withValues(
-                          alpha: 0.15,
-                        ),
+                        backgroundColor: colors.primary.withValues(alpha: 0.15),
                         child: Text(
                           group.name.isNotEmpty
                               ? group.name[0].toUpperCase()

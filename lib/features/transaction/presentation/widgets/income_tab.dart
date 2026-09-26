@@ -7,6 +7,7 @@ import 'package:salapify/features/transaction/presentation/controllers/income_so
 import 'package:salapify/router/routes.dart';
 import 'package:salapify/features/transaction/presentation/widgets/recurring_income_row.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
 
 class IncomeTab extends ConsumerWidget {
   const IncomeTab({super.key});
@@ -16,26 +17,14 @@ class IncomeTab extends ConsumerWidget {
     WidgetRef ref,
     String id,
   ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Remove this income entry?'),
-        content: const Text(
-          'It will no longer be counted toward total money.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Remove'),
-          ),
-        ],
-      ),
+    final confirmed = await CommonConfirmationDialog.show(
+      context,
+      title: 'Delete this income entry?',
+      message: 'It will no longer be counted toward total money.',
+      confirmLabel: 'Delete',
+      isDestructive: true,
     );
-    if (confirmed == true) {
+    if (confirmed) {
       await ref.read(incomeSourceActionsProvider.notifier).deleteSource(id);
     }
   }
@@ -81,15 +70,13 @@ class IncomeTab extends ConsumerWidget {
 
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-          children: [       
+          children: [
             const SizedBox(height: 10),
             ...sources.map(
               (source) => RecurringIncomeRow(
                 source: source,
-                onTap: () => context.pushNamed(
-                  AppRoutes.incomeForm.name,
-                  extra: source,
-                ),
+                onTap: () =>
+                    context.pushNamed(AppRoutes.incomeForm.name, extra: source),
                 onDelete: () => _confirmDelete(context, ref, source.id),
               ),
             ),

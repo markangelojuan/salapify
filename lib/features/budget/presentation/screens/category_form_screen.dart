@@ -6,6 +6,7 @@ import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/widgets/common_button.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/core/widgets/common_text_field.dart';
+import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
 import 'package:salapify/features/budget/domain/entities/budget_category.dart';
 import 'package:salapify/features/budget/domain/entities/budget_category_type.dart';
 import 'package:salapify/features/budget/domain/entities/budget_frequency.dart';
@@ -109,33 +110,12 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   }
 
   Future<void> _confirmDelete() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        final dialogColors = Theme.of(ctx).extension<AppColorsExt>()!;
-        return AlertDialog(
-          title: const Text('Delete Category'),
-          content: Text(
-            'Are you sure you want to delete "${widget.existingCategory!.name}"? This cannot be undone.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(
-                'Delete',
-                style: TextStyle(color: dialogColors.error),
-              ),
-            ),
-          ],
-        );
-      },
+    final confirmed = await CommonConfirmationDialog.confirmDelete(
+      context,
+      title: 'Delete Category',
+      itemName: widget.existingCategory!.name,
     );
-
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     final actions = ref.read(budgetActionsProvider.notifier);
     await actions.deleteCategory(widget.existingCategory!);

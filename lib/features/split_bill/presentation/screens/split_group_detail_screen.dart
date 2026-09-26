@@ -129,54 +129,80 @@ class _SplitGroupDetailScreenState
           ),
         ),
         PopupMenuItem(
-      value: 'report',
-      child: Row(
-        children: [
-          const Icon(Icons.flag_outlined, size: 18),
-          const SizedBox(width: 8),
-          Text('Report $username'),
-        ],
-      ),
-    ),
+          value: 'report',
+          child: Row(
+            children: [
+              const Icon(Icons.flag_outlined, size: 18),
+              const SizedBox(width: 8),
+              Text('Report $username'),
+            ],
+          ),
+        ),
       ],
     );
 
     if (selected == 'report') {
-  if (!context.mounted) return;
-  context.pushNamed(
-    AppRoutes.report.name,
-    extra: ReportArgs(
-      groupId: widget.groupId,
-      reportedUserId: userId,
-      reportedUsername: username,
-    ),
-  );
-  return;
-}
+      if (!context.mounted) return;
+      context.pushNamed(
+        AppRoutes.report.name,
+        extra: ReportArgs(
+          groupId: widget.groupId,
+          reportedUserId: userId,
+          reportedUsername: username,
+        ),
+      );
+      return;
+    }
 
     if (selected != 'block' || !context.mounted) return;
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Block $username?'),
-        content: Text(
-          'You won\'t see $username\'s messages or activity in shared '
-          'groups, including bill updates. You can unblock them anytime '
-          'from Settings.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+      builder: (ctx) {
+        final dialogColors = Theme.of(ctx).extension<AppColorsExt>()!;
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Block'),
+          title: Text('Block $username?'),
+          content: Text(
+            'You won\'t see $username\'s messages or activity in shared '
+            'groups, including bill updates. You can unblock them anytime '
+            'from Settings.',
           ),
-        ],
-      ),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                foregroundColor: dialogColors.textPrimary,
+                side: BorderSide(color: dialogColors.border),
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 10,
+                ),
+              ),
+              child: const Text('Cancel'),
+            ),
+            OutlinedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                foregroundColor: dialogColors.error,
+                side: BorderSide(color: dialogColors.error),
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 10,
+                ),
+              ),
+              child: const Text('Block'),
+            ),
+          ],
+        );
+      },
     );
     if (confirmed != true || !context.mounted) return;
 

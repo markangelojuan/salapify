@@ -19,6 +19,7 @@ import 'package:salapify/features/split_bill/presentation/controllers/split_bill
 import 'package:salapify/features/split_bill/domain/entities/payment_status.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
 
 class BillFormArgs {
   const BillFormArgs({required this.group, this.existingBill});
@@ -246,25 +247,14 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
   }
 
   Future<void> _delete() async {
-    final colors = Theme.of(context).extension<AppColorsExt>()!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete this bill?'),
-        content: const Text('This cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Delete', style: TextStyle(color: colors.error)),
-          ),
-        ],
-      ),
+    final confirmed = await CommonConfirmationDialog.show(
+      context,
+      title: 'Delete this bill?',
+      message: 'This cannot be undone.',
+      confirmLabel: 'Delete',
+      isDestructive: true,
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
 
     setState(() => _isSaving = true);
     await ref
