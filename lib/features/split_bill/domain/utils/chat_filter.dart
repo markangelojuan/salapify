@@ -4,7 +4,7 @@ class ChatFilter {
   static final _badWords = <String>{
     // English
     'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'dick', 'piss',
-    'nigga', 'nigger',
+    'nigga', 'nigger', 'fuck you', 'fuckyou',
 
     // Filipino/Tagalog
     'gago',
