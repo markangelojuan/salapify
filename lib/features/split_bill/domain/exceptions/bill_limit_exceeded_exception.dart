@@ -3,5 +3,5 @@ class BillLimitExceededException implements Exception {
   final int limit;
 
   @override
-  String toString() => 'BillLimitExceededException(limit: $limit)';
+  String toString() => 'This group has reached its limit of $limit bills';
 }

@@ -178,4 +178,4 @@ final class BlockedUsersInfoProvider
   }
 }
 
-String _$blockedUsersInfoHash() => r'4cd1b7a96b864e9ecbb824e7eaa3d9f0d3645751';
+String _$blockedUsersInfoHash() => r'd792a31f36e6b91001e82b1cc0ea8e988bb5c581';

@@ -171,3 +171,113 @@ abstract class _$BudgetActions extends $AsyncNotifier<void> {
     element.handleCreate(ref, build);
   }
 }
+
+/// Keeps `isCompleted` in sync with actual spend
+
+@ProviderFor(BudgetCompletionGuard)
+final budgetCompletionGuardProvider = BudgetCompletionGuardProvider._();
+
+/// Keeps `isCompleted` in sync with actual spend
+final class BudgetCompletionGuardProvider
+    extends $AsyncNotifierProvider<BudgetCompletionGuard, void> {
+  /// Keeps `isCompleted` in sync with actual spend
+  BudgetCompletionGuardProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'budgetCompletionGuardProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$budgetCompletionGuardHash();
+
+  @$internal
+  @override
+  BudgetCompletionGuard create() => BudgetCompletionGuard();
+}
+
+String _$budgetCompletionGuardHash() =>
+    r'4e8ced0f3e02c211710049fa899f95021c507a7a';
+
+/// Keeps `isCompleted` in sync with actual spend
+
+abstract class _$BudgetCompletionGuard extends $AsyncNotifier<void> {
+  FutureOr<void> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<void>, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>, void>,
+              AsyncValue<void>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(BudgetCompletionEventNotifier)
+final budgetCompletionEventProvider = BudgetCompletionEventNotifierProvider._();
+
+final class BudgetCompletionEventNotifierProvider
+    extends
+        $NotifierProvider<
+          BudgetCompletionEventNotifier,
+          BudgetCompletionEvent?
+        > {
+  BudgetCompletionEventNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'budgetCompletionEventProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$budgetCompletionEventNotifierHash();
+
+  @$internal
+  @override
+  BudgetCompletionEventNotifier create() => BudgetCompletionEventNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(BudgetCompletionEvent? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<BudgetCompletionEvent?>(value),
+    );
+  }
+}
+
+String _$budgetCompletionEventNotifierHash() =>
+    r'9c69be53474d9a84698c264835e0848a1edf01d1';
+
+abstract class _$BudgetCompletionEventNotifier
+    extends $Notifier<BudgetCompletionEvent?> {
+  BudgetCompletionEvent? build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref as $Ref<BudgetCompletionEvent?, BudgetCompletionEvent?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<BudgetCompletionEvent?, BudgetCompletionEvent?>,
+              BudgetCompletionEvent?,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

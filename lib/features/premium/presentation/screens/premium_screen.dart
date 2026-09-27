@@ -145,7 +145,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                         _FeatureItem(
                           icon: Icons.receipt_long_outlined,
                           title:
-                              '${SplitBillLimits.premiumMaxBillsPerGroup} bills per group',
+                              '${SplitBillLimits.premiumMaxBillsPerGroup} active bills per group',
                           subtitle:
                               'Free plan: up to ${SplitBillLimits.freeMaxBillsPerGroup} per group',
                         ),

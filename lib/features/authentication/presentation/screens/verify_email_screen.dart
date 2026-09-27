@@ -54,19 +54,25 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
 
   Future<void> _checkVerified() async {
     setState(() => _isChecking = true);
-    final verified = await ref
-        .read(authControllerProvider.notifier)
-        .checkEmailVerified();
-    if (!mounted) return;
-    setState(() => _isChecking = false);
+    try {
+      final verified = await ref
+          .read(authControllerProvider.notifier)
+          .checkEmailVerified();
+      if (!mounted) return;
 
-    if (verified) {
-      context.go('/home');
-    } else {
-      CommonSnackbar.showWarning(
-        context,
-        "Not verified yet — check your inbox (and spam).",
-      );
+      if (verified) {
+        context.go('/home');
+      } else {
+        CommonSnackbar.showWarning(
+          context,
+          "Not verified yet — check your inbox (and spam).",
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      CommonSnackbar.showError(context, e);
+    } finally {
+      if (mounted) setState(() => _isChecking = false);
     }
   }
 

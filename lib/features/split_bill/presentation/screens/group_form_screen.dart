@@ -108,8 +108,9 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
         if (!mounted) return;
 
         final currentUid = ref.read(currentUserProvider)?.uid;
-        final hiddenIds =
-            ref.read(blockedAndBlockingIdsProvider).value ?? const <String>{};
+        final hiddenIds = await ref.read(blockedAndBlockingIdsProvider.future);
+        if (!mounted) return;
+
         setState(() {
           _suggestions = results
               .where(
@@ -172,7 +173,7 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
 
     final error = ref.read(splitBillControllerProvider).error;
     if (error != null) {
-      CommonSnackbar.showError(context, error.toString());
+      CommonSnackbar.showError(context, error);
       return;
     }
     Navigator.of(context).pop();
@@ -181,6 +182,7 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
+    ref.watch(blockedAndBlockingIdsProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(_isEditing ? 'Edit Group' : 'New Group')),

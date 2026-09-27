@@ -8,6 +8,7 @@ import 'package:salapify/features/authentication/data/repositories/auth_reposito
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
+import 'package:salapify/features/split_bill/domain/entities/activity_entry.dart';
 import 'package:salapify/features/split_bill/presentation/controllers/split_bill_controller.dart';
 import 'package:salapify/features/split_bill/presentation/widgets/activity_feed_view.dart';
 import 'package:salapify/features/split_bill/presentation/widgets/balance_summary_card.dart';
@@ -214,12 +215,24 @@ class _SplitGroupDetailScreenState
         CommonSnackbar.showWarning(context, 'Blocked $username');
       }
     } catch (e) {
-      if (context.mounted) CommonSnackbar.showError(context, e.toString());
+      if (context.mounted) CommonSnackbar.showError(context, e);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AsyncValue<List<ActivityEntry>>>(
+      activityFeedProvider(widget.groupId),
+      (previous, next) {
+        // Only react to genuinely new data, not loading/error transitions
+        // or the initial subscription itself (initState already covers that).
+        if (previous == null || !next.hasValue) return;
+        if (identical(previous.value, next.value)) return;
+        ref
+            .read(splitBillControllerProvider.notifier)
+            .markGroupRead(widget.groupId);
+      },
+    );
     ref.listen<AsyncValue<void>>(splitBillControllerProvider, (previous, next) {
       if (next.hasError) {
         CommonSnackbar.showError(context, next.error!);

@@ -22,7 +22,7 @@ const List<AvatarOption> kAvatarOptions = [
   AvatarOption(id: 'savvy_monkey', assetPath: 'assets/images/savvy_monkey.png', name: 'Savvy Monkey'),
   AvatarOption(id: 'stingy_turtle', assetPath: 'assets/images/stingy_turtle.png', name: 'Stingy Turtle'),
   AvatarOption(id: 'thrifty_pig', assetPath: 'assets/images/thrifty_pig.png', name: 'Thrifty Pig'),
-  AvatarOption(id: 'lucrative_panda', assetPath: 'assets/images/lucrative_panda.png', name: 'Lucrative Panda'),
+  AvatarOption(id: 'prosperous_panda', assetPath: 'assets/images/prosperous_panda.png', name: 'Prosperous Panda'),
   AvatarOption(id: 'impecunious_eagle', assetPath: 'assets/images/impecunious_eagle.png', name: 'Impecunious Eagle', isHidden: true),
 ];
 

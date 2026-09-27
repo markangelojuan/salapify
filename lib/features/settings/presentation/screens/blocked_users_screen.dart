@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
@@ -17,15 +16,14 @@ class BlockedUsersScreen extends ConsumerWidget {
     final currentUid = ref.read(currentUserProvider)?.uid;
     if (currentUid == null) return;
     try {
-      await ref.read(userRepositoryProvider).unblockUser(
-            blockerId: currentUid,
-            blockedId: user.uid,
-          );
+      await ref
+          .read(userRepositoryProvider)
+          .unblockUser(blockerId: currentUid, blockedId: user.uid);
       if (context.mounted) {
         CommonSnackbar.showSuccess(context, 'Unblocked ${user.username}');
       }
     } catch (e) {
-      if (context.mounted) CommonSnackbar.showError(context, e.toString());
+      if (context.mounted) CommonSnackbar.showError(context, e);
     }
   }
 

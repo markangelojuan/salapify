@@ -408,7 +408,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Don't have an account? ",
+                "Not part of the club yet? ",
                 style: TextStyle(color: colors.textPrimary),
               ),
               TextButton(

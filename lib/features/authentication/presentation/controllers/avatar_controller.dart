@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:salapify/core/extensions/network_timeout.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
 import 'package:salapify/features/authentication/domain/entities/avatar_option.dart';
@@ -29,7 +30,10 @@ class AvatarController extends _$AvatarController {
       }
 
       final uid = ref.read(authRepositoryProvider).currentUser!.uid;
-      await ref.read(userRepositoryProvider).setAvatarId(uid, avatarId);
+      await ref
+          .read(userRepositoryProvider)
+          .setAvatarId(uid, avatarId)
+          .withNetworkTimeout();
       ref.invalidate(currentAppUserProvider);
     });
   }

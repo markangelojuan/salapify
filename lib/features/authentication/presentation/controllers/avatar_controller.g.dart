@@ -33,7 +33,7 @@ final class AvatarControllerProvider
   AvatarController create() => AvatarController();
 }
 
-String _$avatarControllerHash() => r'ade6b214284c37c025e09f045cfa01e62744e8a0';
+String _$avatarControllerHash() => r'6311a8b254533b723159a59edd8a7004041e8dc3';
 
 abstract class _$AvatarController extends $AsyncNotifier<void> {
   FutureOr<void> build();

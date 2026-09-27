@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:salapify/core/database/app_database.dart';
+import 'package:salapify/core/extensions/network_timeout.dart';
 import 'package:salapify/core/services/push_notification_service.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
@@ -102,11 +103,13 @@ class AuthController extends _$AuthController {
       final uid = authRepository.currentUser?.uid;
 
       if (uid != null) {
-        await pushNotificationService.clearForUser(uid);
+        await pushNotificationService.clearForUser(uid).withNetworkTimeout();
       }
 
-      await authRepository.signOut();
+      await authRepository.signOut().withNetworkTimeout();
 
+      // Local SQLite only below this point — no network involved, so no
+      // timeout needed; these can't hang waiting on connectivity.
       await ref.read(appDatabaseProvider).transaction(() async {
         await ref.read(transactionRepositoryProvider).clearAllTransactions();
         await ref.read(incomeSourceRepositoryProvider).clearAllSources();
@@ -171,19 +174,25 @@ class AuthController extends _$AuthController {
   Future<void> resendVerificationEmail() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(authRepositoryProvider).sendEmailVerification();
+      await ref
+          .read(authRepositoryProvider)
+          .sendEmailVerification()
+          .withNetworkTimeout();
     });
   }
 
   Future<bool> checkEmailVerified() async {
     final authRepository = ref.read(authRepositoryProvider);
-    await authRepository.reloadCurrentUser();
+    await authRepository.reloadCurrentUser().withNetworkTimeout();
     final verified = authRepository.isEmailVerified;
 
     if (verified) {
       final uid = authRepository.currentUser?.uid;
       if (uid != null) {
-        await ref.read(userRepositoryProvider).markEmailVerified(uid);
+        await ref
+            .read(userRepositoryProvider)
+            .markEmailVerified(uid)
+            .withNetworkTimeout();
         ref.invalidate(currentAppUserProvider);
       }
     }
@@ -192,7 +201,10 @@ class AuthController extends _$AuthController {
   }
 
   Future<void> sendPasswordResetEmail(String email) async {
-    await ref.read(authRepositoryProvider).sendPasswordResetEmail(email);
+    await ref
+        .read(authRepositoryProvider)
+        .sendPasswordResetEmail(email)
+        .withNetworkTimeout();
   }
 
   Future<void> deleteAccountWithPassword(String password) async {
@@ -200,7 +212,9 @@ class AuthController extends _$AuthController {
     state = await AsyncValue.guard(() async {
       final authRepository = ref.read(authRepositoryProvider);
       try {
-        await authRepository.reauthenticateWithPassword(password);
+        await authRepository
+            .reauthenticateWithPassword(password)
+            .withNetworkTimeout();
       } on FirebaseAuthException catch (e) {
         if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
           throw const WrongPasswordException();
@@ -216,7 +230,7 @@ class AuthController extends _$AuthController {
     state = await AsyncValue.guard(() async {
       final authRepository = ref.read(authRepositoryProvider);
       try {
-        await authRepository.reauthenticateWithGoogle();
+        await authRepository.reauthenticateWithGoogle().withNetworkTimeout();
       } on GoogleSignInException catch (e) {
         if (e.code == GoogleSignInExceptionCode.canceled) {
           throw const ReauthCancelledException();
@@ -235,16 +249,32 @@ class AuthController extends _$AuthController {
     final uid = authRepository.currentUser?.uid;
     if (uid == null) return;
 
-    await ref.read(splitBillRepositoryProvider).leaveAllGroups(uid);
-    await pushNotificationService.clearForUser(uid);
-    await ref.read(notificationRepositoryProvider).deleteAllForUser(uid);
-    await ref.read(budgetSyncServiceProvider).deleteAllRemoteCategories(uid);
+    await ref
+        .read(splitBillRepositoryProvider)
+        .leaveAllGroups(uid)
+        .withNetworkTimeout();
+    await pushNotificationService.clearForUser(uid).withNetworkTimeout();
+    await ref
+        .read(notificationRepositoryProvider)
+        .deleteAllForUser(uid)
+        .withNetworkTimeout();
+    await ref
+        .read(budgetSyncServiceProvider)
+        .deleteAllRemoteCategories(uid)
+        .withNetworkTimeout();
     await ref
         .read(transactionSyncServiceProvider)
-        .deleteAllRemoteTransactions(uid);
-    await ref.read(incomeSourceSyncServiceProvider).deleteAllRemoteSources(uid);
-    await userRepository.deleteUserProfile(uid); // parent doc last
+        .deleteAllRemoteTransactions(uid)
+        .withNetworkTimeout();
+    await ref
+        .read(incomeSourceSyncServiceProvider)
+        .deleteAllRemoteSources(uid)
+        .withNetworkTimeout();
+    await userRepository
+        .deleteUserProfile(uid)
+        .withNetworkTimeout(); // parent doc last
 
+    // Local SQLite/prefs only below — no timeout needed.
     await ref.read(appDatabaseProvider).transaction(() async {
       await ref.read(transactionRepositoryProvider).clearAllTransactions();
       await ref.read(incomeSourceRepositoryProvider).clearAllSources();
@@ -252,12 +282,9 @@ class AuthController extends _$AuthController {
       await ref.read(entitlementRepositoryProvider).clearLocal();
     });
     await ref.read(settingsRepositoryProvider).clearAll();
-    // This uid is gone for good — unlike a normal sign-out, its
-    // identity-scoped cache (period/firstHalfEndDay/lastResetPeriodKey)
-    // should be purged too, not preserved for a future relogin.
     await ref.read(settingsRepositoryProvider).clearForUid(uid);
 
-    await authRepository.deleteCurrentUser();
+    await authRepository.deleteCurrentUser().withNetworkTimeout();
 
     ref.invalidate(budgetingPeriodSettingProvider);
     ref.invalidate(firstHalfEndDaySettingProvider);
@@ -275,10 +302,9 @@ class AuthController extends _$AuthController {
       final uid = authRepository.currentUser?.uid;
       if (uid == null) return;
 
-      await userRepository.updateUsername(
-        uid: uid,
-        newUsername: username.trim(),
-      );
+      await userRepository
+          .updateUsername(uid: uid, newUsername: username.trim())
+          .withNetworkTimeout();
       ref.invalidate(currentAppUserProvider);
     });
   }

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:salapify/features/authentication/domain/exceptions/auth_exceptions.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
+import 'package:salapify/core/extensions/network_timeout.dart';
 
 part 'user_repository.g.dart';
 
@@ -138,7 +139,7 @@ class UserRepository {
     batch.update(_users.doc(blockedId), {
       'blockedByUserIds': FieldValue.arrayUnion([blockerId]),
     });
-    await batch.commit();
+    await batch.commit().withNetworkTimeout();
   }
 
   Future<void> unblockUser({
@@ -152,7 +153,7 @@ class UserRepository {
     batch.update(_users.doc(blockedId), {
       'blockedByUserIds': FieldValue.arrayRemove([blockerId]),
     });
-    await batch.commit();
+    await batch.commit().withNetworkTimeout();
   }
 
   Stream<List<String>> watchBlockedIds(String uid) {
@@ -179,6 +180,15 @@ class UserRepository {
 
   Stream<Map<String, dynamic>?> watchUserProfile(String uid) {
     return _users.doc(uid).snapshots().map((doc) => doc.data());
+  }
+
+  Future<void> removeStaleBlockedId({
+    required String blockerId,
+    required String staleBlockedId,
+  }) async {
+    await _users.doc(blockerId).update({
+      'blockedUserIds': FieldValue.arrayRemove([staleBlockedId]),
+    });
   }
 }
 
@@ -217,18 +227,40 @@ Stream<Set<String>> blockedAndBlockingIds(Ref ref) {
 
 @riverpod
 Future<List<BlockedUserInfo>> blockedUsersInfo(Ref ref) async {
+  final currentUid = ref.watch(currentUserProvider)?.uid;
   final ids = await ref.watch(blockedUserIdsProvider.future);
   final userRepo = ref.watch(userRepositoryProvider);
 
   final entries = await Future.wait(
     ids.map((id) async {
       final profile = await userRepo.getUserProfile(id);
-      return BlockedUserInfo(
-        uid: id,
-        username: (profile?['username'] as String?) ?? 'Unknown',
-        avatarId: profile?['avatarId'] as String?,
-      );
+      if (profile != null) {
+        return BlockedUserInfo(
+          uid: id,
+          username: profile['username'] as String? ?? 'Unknown',
+          avatarId: profile['avatarId'] as String?,
+        );
+      }
+
+      // Account was deleted after being blocked — deleteUserProfile only
+      // removes the user's own doc, it doesn't scrub this uid out of
+      // other users' blockedUserIds arrays. Opportunistically clean up
+      // the stale reference now that we've noticed it, so it doesn't
+      // linger forever; if the write fails (offline, etc.) we still
+      // filter it from this screen and it'll simply be retried the next
+      // time this list loads.
+      if (currentUid != null) {
+        try {
+          await userRepo.removeStaleBlockedId(
+            blockerId: currentUid,
+            staleBlockedId: id,
+          );
+        } catch (_) {
+          // Non-critical — worst case we retry on next load.
+        }
+      }
+      return null;
     }),
   );
-  return entries;
+  return entries.whereType<BlockedUserInfo>().toList();
 }

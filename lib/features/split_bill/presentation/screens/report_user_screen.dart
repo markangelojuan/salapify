@@ -63,7 +63,7 @@ class _ReportUserScreenState extends ConsumerState<ReportUserScreen> {
       Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
-      CommonSnackbar.showError(context, e.toString());
+      CommonSnackbar.showError(context, e);
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }

@@ -58,6 +58,20 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    ref.watch(budgetCompletionGuardProvider);
+
+    ref.listen<BudgetCompletionEvent?>(budgetCompletionEventProvider, (
+      previous,
+      next,
+    ) {
+      if (next == null || !next.isCompleted) return;
+
+      CommonSnackbar.showWarning(
+        context,
+        '${next.categoryName} auto-completed — spending reached the budget.',
+      );
+    });
+
     final categoriesAsync = ref.watch(budgetCategoriesProvider);
     final transactionsAsync = ref.watch(transactionsProvider);
     final globalPeriod =
@@ -408,9 +422,8 @@ class _ReorderableCategoryGrid extends ConsumerWidget {
   final bool reorderEnabled;
 
   double _mainAxisExtentFor(BuildContext context) {
-
-  return 170;
-}
+    return 170;
+  }
 
   int _crossAxisCountFor(BuildContext context) {
     if (context.isExpanded) return 4;

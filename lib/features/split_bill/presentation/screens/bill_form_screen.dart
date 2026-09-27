@@ -239,7 +239,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
           'This group has reached its limit of ${error.limit} bills.',
         );
       } else {
-        CommonSnackbar.showError(context, 'Failed to save bill: $error');
+        CommonSnackbar.showError(context, error);
       }
       return;
     }
@@ -266,7 +266,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
 
     final error = ref.read(splitBillControllerProvider).error;
     if (error != null) {
-      CommonSnackbar.showError(context, 'Failed to delete bill: $error');
+      CommonSnackbar.showError(context, error);
       return;
     }
 

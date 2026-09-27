@@ -301,3 +301,67 @@ class BudgetActions extends _$BudgetActions {
     }
   }
 }
+
+/// Keeps `isCompleted` in sync with actual spend
+@Riverpod(keepAlive: true)
+class BudgetCompletionGuard extends _$BudgetCompletionGuard {
+  @override
+  Future<void> build() async {
+    final categories = await ref.watch(budgetCategoriesProvider.future);
+    final transactions = await ref.watch(transactionsProvider.future);
+    final globalPeriod =
+        await ref.watch(budgetingPeriodSettingProvider.future);
+    final firstHalfEndDay =
+        await ref.watch(firstHalfEndDaySettingProvider.future);
+    final now = DateTime.now();
+
+    for (final category in categories) {
+      if (category.isDeleted || category.amount <= 0) continue;
+      if (!category.isActiveFor(
+        globalPeriod: globalPeriod,
+        firstHalfEndDay: firstHalfEndDay,
+        now: now,
+      )) {
+        continue;
+      }
+
+      final totalSpent = TransactionTotalsCalculator.totalSpentForCategory(
+        transactions: transactions,
+        categoryId: category.id,
+        globalPeriod: globalPeriod,
+        firstHalfEndDay: firstHalfEndDay,
+      );
+      final shouldBeCompleted = totalSpent >= category.amount;
+
+      if (shouldBeCompleted != category.isCompleted) {
+        ref
+            .read(budgetCompletionEventProvider.notifier)
+            .emit(BudgetCompletionEvent(
+              categoryName: category.name,
+              isCompleted: shouldBeCompleted,
+            ));
+        await ref
+            .read(budgetActionsProvider.notifier)
+            .setCompleted(category, shouldBeCompleted);
+      }
+    }
+  }
+}
+
+class BudgetCompletionEvent {
+  const BudgetCompletionEvent({
+    required this.categoryName,
+    required this.isCompleted,
+  });
+  final String categoryName;
+  final bool isCompleted;
+}
+
+
+@riverpod
+class BudgetCompletionEventNotifier extends _$BudgetCompletionEventNotifier {
+  @override
+  BudgetCompletionEvent? build() => null;
+
+  void emit(BudgetCompletionEvent event) => state = event;
+}

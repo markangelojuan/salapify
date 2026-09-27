@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/core/widgets/common_button.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/features/authentication/domain/exceptions/auth_exceptions.dart';
 import 'package:salapify/features/authentication/presentation/controllers/auth_controller.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
@@ -29,7 +31,6 @@ Future<void> showDeleteAccountSheet(BuildContext context) {
     builder: (ctx) => const _DeleteAccountSheet(),
   );
 }
-
 
 class _AccountBottomSheetScaffold extends StatelessWidget {
   const _AccountBottomSheetScaffold({
@@ -117,29 +118,8 @@ class _AccountBottomSheetScaffold extends StatelessWidget {
   }
 }
 
-/// Primary filled action button — same look as BudgetFilterSheet's Apply
-/// button (colors.textPrimary fill), with an optional override for
-/// destructive actions (red).
-Widget _primaryButton({
-  required AppColorsExt colors,
-  required VoidCallback? onPressed,
-  required Widget child,
-  Color? backgroundColor,
-  Color? foregroundColor,
-}) {
-  return FilledButton(
-    style: FilledButton.styleFrom(
-      backgroundColor: backgroundColor ?? colors.textPrimary,
-      foregroundColor: foregroundColor ?? colors.background,
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-    ),
-    onPressed: onPressed,
-    child: child,
-  );
-}
-
-/// Secondary outlined action button (Cancel / Back).
+/// Secondary outlined action button (Cancel / Back). CommonButton has no
+/// outlined variant, so this stays as a local helper.
 Widget _secondaryButton({
   required VoidCallback? onPressed,
   required Widget child,
@@ -180,7 +160,8 @@ class _DeleteAccountSheetState extends ConsumerState<_DeleteAccountSheet> {
     super.initState();
     _wordController.addListener(() {
       setState(() {
-        _canProceed = _wordController.text.trim().toLowerCase() ==
+        _canProceed =
+            _wordController.text.trim().toLowerCase() ==
             _confirmWord.toLowerCase();
       });
     });
@@ -228,12 +209,18 @@ class _DeleteAccountSheetState extends ConsumerState<_DeleteAccountSheet> {
           setState(() => _isBusy = false);
           return;
         }
-        setState(() {
-          _isBusy = false;
-          _errorText = error is WrongPasswordException
-              ? 'Incorrect password. Please try again.'
-              : 'Something went wrong. Please try again.';
-        });
+        if (error is WrongPasswordException) {
+          setState(() {
+            _isBusy = false;
+            _errorText = 'Incorrect password. Please try again.';
+          });
+          return;
+        }
+        // Everything else (offline timeout, unexpected errors) — surface it
+        // the same way every other screen does, so it isn't missed and gets
+        // the correct message instead of a generic fallback.
+        setState(() => _isBusy = false);
+        CommonSnackbar.showError(context, error);
       },
       data: (_) {
         if (!mounted) return;
@@ -258,14 +245,13 @@ class _DeleteAccountSheetState extends ConsumerState<_DeleteAccountSheet> {
             : _buildReauthStep(colors, isGoogle),
         actions: _step == _DeleteStep.confirmWord
             ? [
-                _primaryButton(
-                  colors: colors,
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
+                CommonButton(
+                  label: 'Continue',
+                  btnColor: Colors.red,
+                  labelColor: Colors.white,
                   onPressed: _canProceed
                       ? () => setState(() => _step = _DeleteStep.reauth)
                       : null,
-                  child: const Text('Continue'),
                 ),
                 _secondaryButton(
                   onPressed: () => Navigator.of(context).pop(),
@@ -273,25 +259,12 @@ class _DeleteAccountSheetState extends ConsumerState<_DeleteAccountSheet> {
                 ),
               ]
             : [
-                _primaryButton(
-                  colors: colors,
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
+                CommonButton(
+                  label: isGoogle ? 'Verify with Google' : 'Delete permanently',
+                  btnColor: Colors.red,
+                  labelColor: Colors.white,
+                  isLoading: _isBusy,
                   onPressed: _canSubmitReauth ? _handleFinalDelete : null,
-                  child: _isBusy
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Text(
-                          isGoogle
-                              ? 'Verify with Google'
-                              : 'Delete permanently',
-                        ),
                 ),
                 _secondaryButton(
                   onPressed: _isBusy
@@ -432,13 +405,15 @@ class _EditUsernameSheetState extends ConsumerState<_EditUsernameSheet> {
     final state = ref.read(authControllerProvider);
     state.whenOrNull(
       error: (error, _) {
-        setState(() {
-          _isSubmitting = false;
-          if (error is UsernameTakenException) {
+        setState(() => _isSubmitting = false);
+        if (error is UsernameTakenException) {
+          setState(() {
             _usernameError = 'Username is already taken';
-            _formKey.currentState!.validate();
-          }
-        });
+          });
+          _formKey.currentState!.validate();
+        } else {
+          CommonSnackbar.showError(context, error);
+        }
       },
       data: (_) {
         if (!mounted) return;
@@ -471,19 +446,12 @@ class _EditUsernameSheetState extends ConsumerState<_EditUsernameSheet> {
           ),
         ),
         actions: [
-          _primaryButton(
-            colors: colors,
-            onPressed: _isSubmitting ? null : _handleSave,
-            child: _isSubmitting
-                ? SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: colors.background,
-                    ),
-                  )
-                : const Text('Save'),
+          CommonButton(
+            label: 'Save',
+            btnColor: colors.textPrimary,
+            labelColor: colors.background,
+            isLoading: _isSubmitting,
+            onPressed: _handleSave,
           ),
           _secondaryButton(
             onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),

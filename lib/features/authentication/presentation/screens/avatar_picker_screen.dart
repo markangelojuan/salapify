@@ -71,8 +71,22 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
 
     final selected = kSelectableAvatars[_selectedIndex];
 
+   
+    final canGoBack = context.canPop();
+
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: canGoBack
+          ? AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back_rounded, color: colors.textPrimary),
+                onPressed: () => context.pop(),
+              ),
+            )
+          : null,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {

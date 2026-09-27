@@ -98,6 +98,10 @@ class CommonSnackbar {
 
     if (error is String) return error;
 
+    if (_looksLikeNetworkError(error)) {
+      return "You're offline. Check your connection and try again.";
+    }
+
     // Catch-all for your app's own exceptions (UsernameTakenException,
     // EmailAlreadyInUseException, WrongPasswordException,
     // ReauthCancelledException, AccountDisabledException, etc.) — all of
@@ -106,6 +110,24 @@ class CommonSnackbar {
     if (error is Exception) return error.toString();
 
     return 'A tiny hiccup! Try again?';
+  }
+
+  static bool _looksLikeNetworkError(Object error) {
+    final s = error.toString().toLowerCase();
+    const markers = [
+      'socketexception',
+      'failed host lookup',
+      'unable to resolve host',
+      'network is unreachable',
+      'connection failed',
+      'connection refused',
+      'connection reset',
+      'software caused connection abort',
+      'client is offline', // Firestore
+      'unavailable', // Firestore/gRPC UNAVAILABLE
+      'timeoutexception',
+    ];
+    return markers.any(s.contains);
   }
 }
 

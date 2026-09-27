@@ -29,7 +29,8 @@ class ActivityFeedView extends StatelessWidget {
   final bool loadingMore;
   final NumberFormat currency;
   final Set<String> blockedUserIds;
-  final void Function(Offset position, String userId, String username) onAvatarLongPress;
+  final void Function(Offset position, String userId, String username)
+  onAvatarLongPress;
 
   String _senderName(ActivityEntry entry) =>
       names[entry.senderId] ?? 'A former member';
@@ -74,7 +75,7 @@ class ActivityFeedView extends StatelessWidget {
         return '$senderName added $targetName to the group';
       case ActivityType.poke:
         final character =
-            avatarById(members[entry.senderId]?.avatarId)?.name ?? 'Someone';
+            avatarById(members[entry.senderId]?.avatarId)?.name ?? 'Former Beast';
         final article = 'AEIOU'.contains(character[0]) ? 'An' : 'A';
         return '$article $character poked the group!';
       case ActivityType.photo:
@@ -99,13 +100,11 @@ class ActivityFeedView extends StatelessWidget {
     ).format(target);
   }
 
-  List<Object> _buildDisplayItems() {
-    // Walk oldest -> newest so each divider lands before that day's first
-    // message, then reverse once at the end for the reverse:true list.
+  List<Object> _buildDisplayItems(List<ActivityEntry> source) {
     final ascending = <Object>[];
-    for (var i = activity.length - 1; i >= 0; i--) {
-      final entry = activity[i];
-      final prev = i + 1 < activity.length ? activity[i + 1] : null;
+    for (var i = source.length - 1; i >= 0; i--) {
+      final entry = source[i];
+      final prev = i + 1 < source.length ? source[i + 1] : null;
       if (prev == null || !_isSameDay(entry.createdAt, prev.createdAt)) {
         ascending.add(entry.createdAt);
       }
@@ -130,7 +129,7 @@ class ActivityFeedView extends StatelessWidget {
       );
     }
 
-    final displayItems = _buildDisplayItems();
+    final displayItems = _buildDisplayItems(visibleActivity);
 
     return ListView.builder(
       reverse: true,
@@ -176,6 +175,7 @@ class ActivityFeedView extends StatelessWidget {
         }
 
         final senderName = _senderName(entry);
+        final isCurrentMember = members.containsKey(entry.senderId);
 
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
@@ -191,7 +191,13 @@ class ActivityFeedView extends StatelessWidget {
                     child: MemberAvatar(
                       avatarId: members[entry.senderId]?.avatarId,
                       radius: 14,
-                      onLongPress: (pos) => onAvatarLongPress(pos, entry.senderId, senderName),
+                      onLongPress: isCurrentMember
+                          ? (pos) => onAvatarLongPress(
+                              pos,
+                              entry.senderId,
+                              senderName,
+                            )
+                          : null,
                     ),
                   ),
                   const SizedBox(width: 6),

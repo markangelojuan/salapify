@@ -155,7 +155,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                   icon: Icons.label_outline_rounded,
                   textInputAction: TextInputAction.done,
                   maxCharacters: 50,
-                  hint: 'e.g. Groceries',
+                  hint: 'e.g. Groceries, Internet Bill',
                   label: 'Category Name',
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {

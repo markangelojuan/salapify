@@ -9,6 +9,7 @@ import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/transaction/domain/transaction_totals_calculator.dart';
 import 'package:salapify/features/transaction/presentation/controllers/transaction_controller.dart';
+import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
 
 class CategoryCard extends ConsumerWidget {
   const CategoryCard({
@@ -52,6 +53,28 @@ class CategoryCard extends ConsumerWidget {
         return 'Bi-monthly';
       case null:
         return 'Bi-monthly';
+    }
+  }
+
+  Future<void> _handleToggle(BuildContext context) async {
+    if (!category.isCompleted) {
+      // Checking: no destructive side effect, just do it.
+      onToggleComplete(true);
+      return;
+    }
+
+    final confirmed = await CommonConfirmationDialog.show(
+      context,
+      title: 'Mark as incomplete?',
+      message:
+          'Auto-generated expenses will be deleted. '
+          'Manually added expenses will remain and may mark this category complete again.',
+      confirmLabel: 'Mark Incomplete',
+      isDestructive: true,
+    );
+
+    if (confirmed) {
+      onToggleComplete(false);
     }
   }
 
@@ -102,9 +125,7 @@ class CategoryCard extends ConsumerWidget {
                   children: [
                     CircleAvatar(
                       radius: 18,
-                      backgroundColor: colors.primary.withValues(
-                        alpha: 0.15,
-                      ),
+                      backgroundColor: colors.primary.withValues(alpha: 0.15),
                       child: Icon(
                         CategoryIcons.iconFor(category.iconName),
                         color: colors.primary,
@@ -119,7 +140,7 @@ class CategoryCard extends ConsumerWidget {
                     const SizedBox(width: 8),
                     _BigCheckbox(
                       checked: category.isCompleted,
-                      onTap: () => onToggleComplete(!category.isCompleted),
+                      onTap: () => _handleToggle(context),
                     ),
                   ],
                 ),
@@ -233,6 +254,7 @@ class _BigCheckbox extends StatelessWidget {
     );
   }
 }
+
 class _TypeChip extends StatelessWidget {
   const _TypeChip({required this.label, required this.color});
 

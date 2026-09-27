@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:salapify/core/layout/app_drawer.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/budget/data/repositories/budget_repository.dart';
 import 'package:salapify/features/budget/domain/entities/budget_limits.dart';
@@ -35,6 +36,11 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _currentIndex = 0;
 
+  // Guards the FAB's async pre-checks (premium/limit lookups) against
+  // double-taps and gives visual feedback instead of appearing to do
+  // nothing while offline requests are in flight.
+  bool _isFabBusy = false;
+
   static const List<Widget> _screens = [
     BudgetScreen(),
     TransactionScreen(),
@@ -50,6 +56,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   ];
 
   VoidCallback? _fabActionForIndex(int index) {
+    if (_isFabBusy) return null;
+
     switch (index) {
       case 0:
         return () => _handleAddCategory(context, ref);
@@ -67,18 +75,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _handleAddCategory(BuildContext context, WidgetRef ref) async {
-    final isPremium =
-        (await ref.read(entitlementRepositoryProvider).watch().first).isPremium;
-    final limit = BudgetLimits.maxActiveCategoriesFor(isPremium: isPremium);
-    final currentCount = await ref.read(budgetRepositoryProvider).countActive();
+    setState(() => _isFabBusy = true);
+    try {
+      final isPremium =
+          (await ref.read(entitlementRepositoryProvider).watch().first)
+              .isPremium;
+      final limit = BudgetLimits.maxActiveCategoriesFor(isPremium: isPremium);
+      final currentCount = await ref
+          .read(budgetRepositoryProvider)
+          .countActive();
 
-    if (currentCount >= limit) {
-      if (!context.mounted) return;
-      await _showPremiumUpsell(PremiumLimit.categories);
-      return;
-    }
-    if (context.mounted) {
-      context.pushNamed(AppRoutes.categoryForm.name);
+      if (currentCount >= limit) {
+        if (!context.mounted) return;
+        await _showPremiumUpsell(PremiumLimit.categories);
+        return;
+      }
+      if (context.mounted) {
+        context.pushNamed(AppRoutes.categoryForm.name);
+      }
+    } catch (e) {
+      if (context.mounted) CommonSnackbar.showError(context, e);
+    } finally {
+      if (mounted) setState(() => _isFabBusy = false);
     }
   }
 
@@ -86,21 +104,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final currentUid = ref.read(currentUserProvider)?.uid;
     if (currentUid == null) return;
 
-    final isPremium =
-        (await ref.read(entitlementRepositoryProvider).watch().first).isPremium;
+    setState(() => _isFabBusy = true);
+    try {
+      final isPremium =
+          (await ref.read(entitlementRepositoryProvider).watch().first)
+              .isPremium;
 
-    final limit = SplitBillLimits.maxActiveGroupsFor(isPremium: isPremium);
-    final ownedCount = await ref
-        .read(splitBillRepositoryProvider)
-        .countOwnedGroupsForUser(currentUid);
+      final limit = SplitBillLimits.maxActiveGroupsFor(isPremium: isPremium);
+      final ownedCount = await ref
+          .read(splitBillRepositoryProvider)
+          .countOwnedGroupsForUser(currentUid);
 
-    if (ownedCount >= limit) {
-      if (!context.mounted) return;
-      await _showPremiumUpsell(PremiumLimit.groups);
-      return;
-    }
-    if (context.mounted) {
-      context.pushNamed(AppRoutes.groupForm.name);
+      if (ownedCount >= limit) {
+        if (!context.mounted) return;
+        await _showPremiumUpsell(PremiumLimit.groups);
+        return;
+      }
+      if (context.mounted) {
+        context.pushNamed(AppRoutes.groupForm.name);
+      }
+    } catch (e) {
+      if (context.mounted) CommonSnackbar.showError(context, e);
+    } finally {
+      if (mounted) setState(() => _isFabBusy = false);
     }
   }
 
@@ -129,6 +155,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
         fabOnPressed: _fabActionForIndex(_currentIndex),
+        fabLoading: _isFabBusy,
       ),
     );
   }
@@ -138,11 +165,13 @@ class _FloatingNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
   final VoidCallback? fabOnPressed;
+  final bool fabLoading;
 
   const _FloatingNavBar({
     required this.currentIndex,
     required this.onTap,
     required this.fabOnPressed,
+    this.fabLoading = false,
   });
 
   static const double _pillHeight = 64;
@@ -179,7 +208,7 @@ class _FloatingNavBar extends StatelessWidget {
                     child: _Pill(
                       currentIndex: currentIndex,
                       onTap: onTap,
-                      reserveCenterGap: fabOnPressed != null,
+                      reserveCenterGap: fabOnPressed != null || fabLoading,
                     ),
                   ),
                   Positioned(
@@ -190,12 +219,15 @@ class _FloatingNavBar extends StatelessWidget {
                         scale: anim,
                         child: FadeTransition(opacity: anim, child: child),
                       ),
-                      child: fabOnPressed == null
+                      child: (fabOnPressed == null && !fabLoading)
                           ? const SizedBox.shrink(key: ValueKey('no_fab'))
                           : _PopOutFab(
-                              key: const ValueKey('active_fab'),
+                              key: ValueKey(
+                                fabLoading ? 'busy_fab' : 'active_fab',
+                              ),
                               size: _fabSize,
-                              onPressed: fabOnPressed!,
+                              onPressed: fabOnPressed,
+                              loading: fabLoading,
                             ),
                     ),
                   ),
@@ -304,9 +336,15 @@ class _Pill extends ConsumerWidget {
 
 class _PopOutFab extends StatelessWidget {
   final double size;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final bool loading;
 
-  const _PopOutFab({super.key, required this.size, required this.onPressed});
+  const _PopOutFab({
+    super.key,
+    required this.size,
+    required this.onPressed,
+    this.loading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -330,8 +368,19 @@ class _PopOutFab extends StatelessWidget {
         shape: const CircleBorder(),
         child: InkWell(
           customBorder: const CircleBorder(),
-          onTap: onPressed,
-          child: const Icon(Icons.add, color: Colors.white, size: 28),
+          onTap: loading ? null : onPressed,
+          child: Center(
+            child: loading
+                ? SizedBox(
+                    width: size * 0.4,
+                    height: size * 0.4,
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation(Colors.white),
+                    ),
+                  )
+                : const Icon(Icons.add, color: Colors.white, size: 28),
+          ),
         ),
       ),
     );

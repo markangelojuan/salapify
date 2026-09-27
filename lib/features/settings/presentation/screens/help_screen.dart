@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 
-/// ---------------------------------------------------------------------
-/// Content model
-/// ---------------------------------------------------------------------
-
 class FaqEntry {
   const FaqEntry({required this.question, required this.answer});
   final String question;
@@ -17,11 +13,11 @@ class FaqSection {
     required this.title,
     required this.entries,
   });
+
   final IconData icon;
   final String title;
   final List<FaqEntry> entries;
 }
-
 
 const List<FaqSection> kSalapifyFaqs = [
   FaqSection(
@@ -34,7 +30,7 @@ const List<FaqSection> kSalapifyFaqs = [
             'Salapify combines budget tracking with bill splitting. Use the '
             'Budget tab to allocate money into categories, the Transactions '
             'tab to log income and spending, and the Split Bills tab to '
-            'settle shared expenses with friends or strangers — all in one '
+            'settle shared expenses with friends or other users — all in one '
             'place.',
       ),
     ],
@@ -46,9 +42,10 @@ const List<FaqSection> kSalapifyFaqs = [
       FaqEntry(
         question: 'How do I create a budget category?',
         answer:
-            'Tap the FAB on the Budget tab. Give it a name (like '
-            'Internet Bill or Groceries), choose whether it\'s Fixed or '
-            'Variable. Then complete other fields',
+            'Tap the FAB on the Budget tab. Give your category a name, such '
+            'as Internet Bill or Groceries, then choose whether it\'s Fixed '
+            'or Variable. Complete the remaining fields and save your '
+            'category.',
       ),
       FaqEntry(
         question: 'What\'s the difference between Fixed and Variable?',
@@ -62,24 +59,23 @@ const List<FaqSection> kSalapifyFaqs = [
       FaqEntry(
         question: 'What happens when I check off a category as completed?',
         answer:
-            'Marking a category\'s checkbox as done automatically logs it '
-            'as a transaction for the current period, so a Fixed bill like '
+            'Marking a category as complete automatically logs it as a '
+            'transaction for the current period, so a Fixed bill like '
             'Internet doesn\'t need to be entered twice.',
       ),
       FaqEntry(
         question: 'Why are some categories dimmed on my Budget tab?',
         answer:
             'Dimmed categories belong to a different half of the period '
-            '(under bi-monthly budgeting) than the one currently active. '
-            'They\'ll come back into focus automatically once their'
-            'half starts.',
+            'when using bi-monthly budgeting. They\'ll come back into focus '
+            'automatically when their half of the period begins.',
       ),
     ],
   ),
   FaqSection(
     icon: Icons.receipt_long_rounded,
     title: 'Transactions & Income',
-    entries: const [
+    entries: [
       FaqEntry(
         question: 'How do I add income?',
         answer:
@@ -94,6 +90,13 @@ const List<FaqSection> kSalapifyFaqs = [
             'category. The amount is automatically deducted from that '
             'category\'s allocation, so your Budget tab always reflects '
             'what\'s left to spend.',
+      ),
+      FaqEntry(
+        question: 'How do I delete an income or expense?',
+        answer:
+            'Go to the Transactions tab and swipe left on the income or '
+            'expense you want to remove. Then confirm the deletion if '
+            'prompted.',
       ),
       FaqEntry(
         question: 'Why don\'t I see last period\'s transactions?',
@@ -118,6 +121,20 @@ const List<FaqSection> kSalapifyFaqs = [
             'member.',
       ),
       FaqEntry(
+        question: 'How do I delete a Split Bills group?',
+        answer:
+            'If you created the group, swipe left on the group to delete '
+            'it. Deleting a group removes the group and its shared bill '
+            'activity.',
+      ),
+      FaqEntry(
+        question: 'How do I leave a Split Bills group?',
+        answer:
+            'If you\'re a member of a group, swipe left on the group and '
+            'choose to leave. Leaving removes you from the group without '
+            'deleting the group for everyone else.',
+      ),
+      FaqEntry(
         question: 'Can I share receipts or chat with my group?',
         answer:
             'Yes. Every group has an Activity section for messaging '
@@ -125,7 +142,7 @@ const List<FaqSection> kSalapifyFaqs = [
             'the bill history.',
       ),
       FaqEntry(
-        question: 'Do split bills affect my personal budget?',
+        question: 'Do Split Bills affect my personal budget?',
         answer:
             'No — Split Bills is kept separate from your Budget and '
             'Transactions tabs. If you want a settled bill reflected in '
@@ -169,21 +186,20 @@ const List<FaqSection> kSalapifyFaqs = [
       FaqEntry(
         question: 'What shows up in the Notifications tab?',
         answer:
-            'Reminders for budget, updates on split '
-            'bill activity, and alerts when a payer disputes or confirms '
+            'Notifications include budget reminders, updates on Split '
+            'Bills activity, and alerts when a payer disputes or confirms '
             'one of your shares.',
       ),
       FaqEntry(
         question: 'Can I turn off notifications?',
         answer:
-            'Yes, from your device Settings > Apps > Salapify > '
+            'Yes. From your device Settings > Apps > Salapify > '
             'Notifications, you can turn off alerts entirely or fine-tune '
-            'which categories of alerts you want to receive.',
+            'which types of alerts you want to receive.',
       ),
     ],
   ),
 ];
-
 
 class HelpScreen extends StatefulWidget {
   const HelpScreen({super.key, this.sections = kSalapifyFaqs});
@@ -206,7 +222,9 @@ class _HelpScreenState extends State<HelpScreen> {
 
   List<FaqSection> get _filtered {
     if (_query.trim().isEmpty) return widget.sections;
+
     final q = _query.toLowerCase();
+
     return widget.sections
         .map((s) {
           final matches = s.entries
@@ -216,6 +234,7 @@ class _HelpScreenState extends State<HelpScreen> {
                     e.answer.toLowerCase().contains(q),
               )
               .toList();
+
           return FaqSection(icon: s.icon, title: s.title, entries: matches);
         })
         .where((s) => s.entries.isNotEmpty)
@@ -248,7 +267,6 @@ class _HelpScreenState extends State<HelpScreen> {
               _FaqCard(entries: section.entries),
             ],
             const SizedBox(height: 8),
-            
           ],
         ],
       ),
@@ -258,6 +276,7 @@ class _HelpScreenState extends State<HelpScreen> {
 
 /// -------------------------------------------
 /// Pieces
+
 class _SearchField extends StatelessWidget {
   const _SearchField({required this.controller, required this.onChanged});
 
@@ -267,6 +286,7 @@ class _SearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerLow,
@@ -322,6 +342,7 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 20, 20, 10),
       child: Row(
@@ -351,6 +372,7 @@ class _FaqCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 4),
       decoration: BoxDecoration(
@@ -401,6 +423,7 @@ class _FaqTileState extends State<_FaqTile> {
 
     return InkWell(
       onTap: () => setState(() => _expanded = !_expanded),
+      borderRadius: BorderRadius.circular(14),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         child: Column(
@@ -465,6 +488,7 @@ class _NoResults extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.only(top: 64),
       child: Center(

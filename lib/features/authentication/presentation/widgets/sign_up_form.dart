@@ -137,7 +137,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
               return null;
             },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           CommonTextField(
             controller: _emailController,
             textInputAction: TextInputAction.next,
@@ -152,7 +152,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
               return null;
             },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           CommonTextField(
             controller: _passwordController,
             textInputAction: TextInputAction.next,
@@ -179,7 +179,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           CommonTextField(
             controller: _confirmPasswordController,
             textInputAction: TextInputAction.done,

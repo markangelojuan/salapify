@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:salapify/core/extensions/network_timeout.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
 import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
@@ -38,12 +39,17 @@ class SplitBillController extends _$SplitBillController {
       }
 
       final isPremium =
-          (await ref.read(entitlementRepositoryProvider).watch().first)
+          (await ref
+                  .read(entitlementRepositoryProvider)
+                  .watch()
+                  .first
+                  .withNetworkTimeout())
               .isPremium;
       final limit = SplitBillLimits.maxActiveGroupsFor(isPremium: isPremium);
       final ownedCount = await ref
           .read(splitBillRepositoryProvider)
-          .countOwnedGroupsForUser(currentUser.uid);
+          .countOwnedGroupsForUser(currentUser.uid)
+          .withNetworkTimeout();
 
       if (ownedCount >= limit) {
         throw GroupLimitExceededException(limit);
@@ -59,7 +65,10 @@ class SplitBillController extends _$SplitBillController {
         lastActivityAt: now,
       );
 
-      await ref.read(splitBillRepositoryProvider).createGroup(group);
+      await ref
+          .read(splitBillRepositoryProvider)
+          .createGroup(group)
+          .withNetworkTimeout();
     });
   }
 
@@ -87,7 +96,8 @@ class SplitBillController extends _$SplitBillController {
             groupId: groupId,
             name: name,
             memberIds: uniqueMembers.toList(),
-          );
+          )
+          .withNetworkTimeout();
     });
   }
 
@@ -101,7 +111,8 @@ class SplitBillController extends _$SplitBillController {
     state = await AsyncValue.guard(() async {
       await ref
           .read(splitBillRepositoryProvider)
-          .removeMember(groupId, currentUser.uid);
+          .removeMember(groupId, currentUser.uid)
+          .withNetworkTimeout();
     });
   }
 
@@ -110,7 +121,10 @@ class SplitBillController extends _$SplitBillController {
   Future<void> deleteGroup(String groupId) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(splitBillRepositoryProvider).deleteGroup(groupId);
+      await ref
+          .read(splitBillRepositoryProvider)
+          .deleteGroup(groupId)
+          .withNetworkTimeout();
     });
   }
 
@@ -121,10 +135,12 @@ class SplitBillController extends _$SplitBillController {
     try {
       await ref
           .read(splitBillRepositoryProvider)
-          .markGroupRead(groupId, currentUser.uid);
+          .markGroupRead(groupId, currentUser.uid)
+          .withNetworkTimeout();
     } catch (_) {
       // Non-critical — failing to clear a read receipt shouldn't surface
-      // an error to the user.
+      // an error to the user. Timeout is still applied so this doesn't
+      // dangle indefinitely as an unresolved Future while offline.
     }
   }
 
@@ -133,28 +149,31 @@ class SplitBillController extends _$SplitBillController {
     state = await AsyncValue.guard(() async {
       final repo = ref.read(splitBillRepositoryProvider);
 
-      final group = await repo.getGroup(bill.groupId);
+      final group = await repo.getGroup(bill.groupId).withNetworkTimeout();
       if (group == null) throw StateError('Group not found');
 
       final creatorIsPremium = await ref
           .read(userRepositoryProvider)
-          .isPremiumUser(group.createdBy);
+          .isPremiumUser(group.createdBy)
+          .withNetworkTimeout();
       final limit = SplitBillLimits.maxBillsPerGroupFor(
         isPremium: creatorIsPremium,
       );
 
-      await repo.createBillWithActivity(
-        bill,
-        ActivityEntry(
-          id: '',
-          groupId: bill.groupId,
-          senderId: bill.paidBy,
-          type: ActivityType.billAdded,
-          createdAt: DateTime.now(),
-          metadata: {'billTitle': bill.title, 'amount': bill.totalAmount},
-        ),
-        billLimit: limit,
-      );
+      await repo
+          .createBillWithActivity(
+            bill,
+            ActivityEntry(
+              id: '',
+              groupId: bill.groupId,
+              senderId: bill.paidBy,
+              type: ActivityType.billAdded,
+              createdAt: DateTime.now(),
+              metadata: {'billTitle': bill.title, 'amount': bill.totalAmount},
+            ),
+            billLimit: limit,
+          )
+          .withNetworkTimeout();
 
       ref.invalidate(splitGroupProvider(bill.groupId));
     });
@@ -165,7 +184,10 @@ class SplitBillController extends _$SplitBillController {
   Future<void> updateBill(SplitBill bill) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await ref.read(splitBillRepositoryProvider).updateBill(bill);
+      await ref
+          .read(splitBillRepositoryProvider)
+          .updateBill(bill)
+          .withNetworkTimeout();
     });
   }
 
@@ -177,14 +199,17 @@ class SplitBillController extends _$SplitBillController {
     state = await AsyncValue.guard(() async {
       final repo = ref.read(splitBillRepositoryProvider);
 
-      final group = await repo.getGroup(groupId);
+      final group = await repo.getGroup(groupId).withNetworkTimeout();
       if (group == null) throw StateError('Group not found');
 
       final creatorIsPremium = await ref
           .read(userRepositoryProvider)
-          .isPremiumUser(group.createdBy);
+          .isPremiumUser(group.createdBy)
+          .withNetworkTimeout();
 
-      await repo.deleteBill(groupId, billId, decrementCount: creatorIsPremium);
+      await repo
+          .deleteBill(groupId, billId, decrementCount: creatorIsPremium)
+          .withNetworkTimeout();
 
       ref.invalidate(splitGroupProvider(groupId));
     });
@@ -209,7 +234,8 @@ class SplitBillController extends _$SplitBillController {
               createdAt: DateTime.now(),
               text: text,
             ),
-          );
+          )
+          .withNetworkTimeout();
     });
   }
 
@@ -225,12 +251,14 @@ class SplitBillController extends _$SplitBillController {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(splitBillRepositoryProvider);
-      await repo.updateShareStatus(
-        groupId: groupId,
-        billId: billId,
-        userId: userId,
-        status: status,
-      );
+      await repo
+          .updateShareStatus(
+            groupId: groupId,
+            billId: billId,
+            userId: userId,
+            status: status,
+          )
+          .withNetworkTimeout();
 
       final activityType = switch (status) {
         PaymentStatus.markedPaid => ActivityType.paymentMarked,
@@ -240,21 +268,23 @@ class SplitBillController extends _$SplitBillController {
       };
       if (activityType == null) return;
 
-      await repo.addActivity(
-        ActivityEntry(
-          id: '',
-          groupId: groupId,
-          senderId: actorId ?? userId,
-          type: activityType,
-          createdAt: DateTime.now(),
-          metadata: switch (status) {
-            PaymentStatus.markedPaid => {'payerId': payerId},
-            PaymentStatus.confirmed ||
-            PaymentStatus.disputed => {'targetUserId': userId},
-            PaymentStatus.unpaid => null,
-          },
-        ),
-      );
+      await repo
+          .addActivity(
+            ActivityEntry(
+              id: '',
+              groupId: groupId,
+              senderId: actorId ?? userId,
+              type: activityType,
+              createdAt: DateTime.now(),
+              metadata: switch (status) {
+                PaymentStatus.markedPaid => {'payerId': payerId},
+                PaymentStatus.confirmed ||
+                PaymentStatus.disputed => {'targetUserId': userId},
+                PaymentStatus.unpaid => null,
+              },
+            ),
+          )
+          .withNetworkTimeout();
     });
   }
 
@@ -273,7 +303,8 @@ class SplitBillController extends _$SplitBillController {
               type: ActivityType.poke,
               createdAt: DateTime.now(),
             ),
-          );
+          )
+          .withNetworkTimeout();
     });
   }
 
@@ -287,25 +318,27 @@ class SplitBillController extends _$SplitBillController {
     state = await AsyncValue.guard(() async {
       try {
         final repo = ref.read(splitBillRepositoryProvider);
-        final url = await repo.uploadActivityPhoto(
-          groupId: groupId,
-          file: file,
-        );
-        await repo.addActivity(
-          ActivityEntry(
-            id: '',
-            groupId: groupId,
-            senderId: currentUser.uid,
-            type: ActivityType.photo,
-            createdAt: DateTime.now(),
-            metadata: {
-              'photoUrl': url,
-              'expiresAt': DateTime.now()
-                  .add(const Duration(days: 3))
-                  .toIso8601String(),
-            },
-          ),
-        );
+      
+        final url = await repo
+            .uploadActivityPhoto(groupId: groupId, file: file)
+            .withNetworkTimeout(const Duration(seconds: 30));
+        await repo
+            .addActivity(
+              ActivityEntry(
+                id: '',
+                groupId: groupId,
+                senderId: currentUser.uid,
+                type: ActivityType.photo,
+                createdAt: DateTime.now(),
+                metadata: {
+                  'photoUrl': url,
+                  'expiresAt': DateTime.now()
+                      .add(const Duration(days: 3))
+                      .toIso8601String(),
+                },
+              ),
+            )
+            .withNetworkTimeout();
         feed.resolvePending(tempId);
       } catch (e) {
         feed.markPendingFailed(tempId);
