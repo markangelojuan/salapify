@@ -148,6 +148,14 @@ const List<FaqSection> kSalapifyFaqs = [
             'Transactions tabs. If you want a settled bill reflected in '
             'your spending, log it manually as a transaction.',
       ),
+      FaqEntry(
+        question: 'How do I report or block someone in a group?',
+        answer:
+            'In the group\'s Activity tab, press and hold that member\'s '
+            'avatar next to their message. This opens a menu where you can '
+            'Report or Block them. Blocking hides their messages and '
+            'activity. You can undo it anytime from Settings.',
+      ),
     ],
   ),
   FaqSection(

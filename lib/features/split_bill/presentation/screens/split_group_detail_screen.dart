@@ -15,6 +15,7 @@ import 'package:salapify/features/split_bill/presentation/widgets/balance_summar
 import 'package:salapify/features/split_bill/presentation/widgets/bills_carousel.dart';
 import 'package:salapify/features/split_bill/presentation/widgets/message_input.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
+import 'package:salapify/features/split_bill/domain/utils/chat_filter.dart';
 import 'package:salapify/features/split_bill/presentation/screens/report_user_screen.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
 import 'dart:io';
@@ -66,8 +67,10 @@ class _SplitGroupDetailScreenState
   }
 
   Future<void> _sendMessage() async {
-    final text = _messageController.text.trim();
-    if (text.isEmpty) return;
+    final raw = _messageController.text.trim();
+    if (raw.isEmpty) return;
+
+    final text = ChatFilter.mask(raw);
 
     _messageController.clear();
     await ref
@@ -76,7 +79,8 @@ class _SplitGroupDetailScreenState
 
     final error = ref.read(splitBillControllerProvider).error;
     if (error != null && mounted) {
-      _messageController.text = text;
+      _messageController.text =
+          raw; // restore original on failure, not the masked version
     }
   }
 
