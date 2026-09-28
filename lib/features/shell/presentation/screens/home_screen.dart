@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:salapify/core/layout/app_drawer.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/features/shell/presentation/widgets/app_showcase.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
+import 'package:salapify/features/authentication/presentation/controllers/app_user_controller.dart';
+import 'package:salapify/features/authentication/presentation/controllers/guest_controller.dart';
 import 'package:salapify/features/budget/data/repositories/budget_repository.dart';
 import 'package:salapify/features/budget/domain/entities/budget_limits.dart';
 import 'package:salapify/features/notification/presentation/screens/notification_screen.dart';
@@ -41,6 +46,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // nothing while offline requests are in flight.
   bool _isFabBusy = false;
 
+  // Showcase keys
+  final _fabKey = GlobalKey();
+  final _txKey = GlobalKey();
+  final _splitKey = GlobalKey();
+  final _menuKey = GlobalKey();
+
   static const List<Widget> _screens = [
     BudgetScreen(),
     TransactionScreen(),
@@ -54,6 +65,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     'Split Bill',
     'Notifications',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    ShowcaseView.register();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeStartTour());
+  }
+
+  @override
+  void dispose() {
+    ShowcaseView.get().unregister();
+    super.dispose();
+  }
+
+  Future<void> _maybeStartTour() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('seen_home_tour') ?? false) return;
+    await Future.delayed(
+      const Duration(milliseconds: 600),
+    ); // let FAB animate in
+    if (!mounted) return;
+
+    // Router may still redirect (sign-in / avatar / preferences) — only
+    // start once the user is actually settled on Home.
+    final isGuest = ref.read(guestModeProvider);
+    var ready = isGuest;
+
+    if (!isGuest) {
+      if (ref.read(currentUserProvider) == null) return;
+      try {
+        final user = await ref
+            .read(currentAppUserProvider.future)
+            .timeout(const Duration(seconds: 5));
+        if (!mounted) return;
+        ready = user?.avatarId != null && user?.preferencesCompleted != false;
+      } catch (_) {
+        return;
+      }
+    }
+
+    if (!ready || !(ModalRoute.of(context)?.isCurrent ?? false)) return;
+
+    await prefs.setBool('seen_home_tour', true);
+    if (!mounted) return;
+    ShowcaseView.get().startShowCase([_fabKey, _txKey, _splitKey, _menuKey]);
+  }
 
   VoidCallback? _fabActionForIndex(int index) {
     if (_isFabBusy) return null;
@@ -147,7 +204,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_titles[_currentIndex])),
+      appBar: AppBar(
+        title: Text(_titles[_currentIndex]),
+        leading: Builder(
+          builder: (ctx) => AppShowcase(
+            showcaseKey: _menuKey,
+            title: 'More Options',
+            description:
+                'Manage your account, budget period,\nother settings, and get help.',
+            child: IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () => Scaffold.of(ctx).openDrawer(),
+            ),
+          ),
+        ),
+      ),
       drawer: const AppDrawer(),
       extendBody: true,
       body: IndexedStack(index: _currentIndex, children: _screens),
@@ -156,6 +227,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onTap: (index) => setState(() => _currentIndex = index),
         fabOnPressed: _fabActionForIndex(_currentIndex),
         fabLoading: _isFabBusy,
+        fabKey: _fabKey,
+        txKey: _txKey,
+        splitKey: _splitKey,
       ),
     );
   }
@@ -166,11 +240,17 @@ class _FloatingNavBar extends StatelessWidget {
   final ValueChanged<int> onTap;
   final VoidCallback? fabOnPressed;
   final bool fabLoading;
+  final GlobalKey fabKey;
+  final GlobalKey txKey;
+  final GlobalKey splitKey;
 
   const _FloatingNavBar({
     required this.currentIndex,
     required this.onTap,
     required this.fabOnPressed,
+    required this.fabKey,
+    required this.txKey,
+    required this.splitKey,
     this.fabLoading = false,
   });
 
@@ -209,26 +289,37 @@ class _FloatingNavBar extends StatelessWidget {
                       currentIndex: currentIndex,
                       onTap: onTap,
                       reserveCenterGap: fabOnPressed != null || fabLoading,
+                      txKey: txKey,
+                      splitKey: splitKey,
                     ),
                   ),
                   Positioned(
                     bottom: _pillHeight - _fabSize / 2.2,
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 220),
-                      transitionBuilder: (child, anim) => ScaleTransition(
-                        scale: anim,
-                        child: FadeTransition(opacity: anim, child: child),
-                      ),
-                      child: (fabOnPressed == null && !fabLoading)
-                          ? const SizedBox.shrink(key: ValueKey('no_fab'))
-                          : _PopOutFab(
-                              key: ValueKey(
-                                fabLoading ? 'busy_fab' : 'active_fab',
+                    // Showcase wraps the whole switcher (not the FAB inside
+                    // it) so two children mid-transition never share the key.
+                    child: AppShowcase(
+                      showcaseKey: fabKey,
+                      circle: true,
+                      title: 'Quick Add',
+                      description:
+                          'Tap + to quickly add a category,\ntransaction, or split-bill group.',
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 220),
+                        transitionBuilder: (child, anim) => ScaleTransition(
+                          scale: anim,
+                          child: FadeTransition(opacity: anim, child: child),
+                        ),
+                        child: (fabOnPressed == null && !fabLoading)
+                            ? const SizedBox.shrink(key: ValueKey('no_fab'))
+                            : _PopOutFab(
+                                key: ValueKey(
+                                  fabLoading ? 'busy_fab' : 'active_fab',
+                                ),
+                                size: _fabSize,
+                                onPressed: fabOnPressed,
+                                loading: fabLoading,
                               ),
-                              size: _fabSize,
-                              onPressed: fabOnPressed,
-                              loading: fabLoading,
-                            ),
+                      ),
                     ),
                   ),
                 ],
@@ -245,11 +336,15 @@ class _Pill extends ConsumerWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
   final bool reserveCenterGap;
+  final GlobalKey txKey;
+  final GlobalKey splitKey;
 
   const _Pill({
     required this.currentIndex,
     required this.onTap,
     required this.reserveCenterGap,
+    required this.txKey,
+    required this.splitKey,
   });
 
   @override
@@ -257,6 +352,7 @@ class _Pill extends ConsumerWidget {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final unreadSplitCount = ref.watch(totalUnreadSplitCountProvider);
     final unreadNotifCount = ref.watch(unreadNotificationCountProvider);
+    final isGuest = ref.watch(currentUserProvider) == null;
 
     return Container(
       decoration: BoxDecoration(
@@ -303,15 +399,28 @@ class _Pill extends ConsumerWidget {
                 selectedIcon: Icon(Icons.account_balance_wallet_rounded),
                 label: 'Budget',
               ),
-              const NavigationDestination(
-                icon: Icon(Icons.payments_outlined),
-                selectedIcon: Icon(Icons.payments_rounded),
+              NavigationDestination(
+                icon: AppShowcase(
+                  showcaseKey: txKey,
+                  title: 'Track Your Expenses',
+                  description:
+                      'Track your income and expenses.\nUse + to add a transaction.',
+                  child: const Icon(Icons.payments_outlined),
+                ),
+                selectedIcon: const Icon(Icons.payments_rounded),
                 label: 'Transactions',
               ),
               NavigationDestination(
-                icon: NavBadge(
-                  count: unreadSplitCount,
-                  child: const Icon(Icons.receipt_long_outlined),
+                icon: AppShowcase(
+                  showcaseKey: splitKey,
+                  title: 'Split Bills Easily',
+                  description: isGuest
+                      ? 'Split expenses with friends.\nSign in to unlock this feature.'
+                      : "Create a group, add bills,\nand chat with everyone.",
+                  child: NavBadge(
+                    count: unreadSplitCount,
+                    child: const Icon(Icons.receipt_long_outlined),
+                  ),
                 ),
                 selectedIcon: const Icon(Icons.receipt_long_rounded),
                 label: 'Split Bill',
