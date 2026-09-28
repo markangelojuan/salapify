@@ -218,6 +218,7 @@ class SplitBillController extends _$SplitBillController {
   Future<void> sendMessage({
     required String groupId,
     required String text,
+    List<Map<String, dynamic>> mentions = const [],
   }) async {
     final currentUser = ref.read(authRepositoryProvider).currentUser;
     if (currentUser == null) return;
@@ -233,6 +234,7 @@ class SplitBillController extends _$SplitBillController {
               type: ActivityType.message,
               createdAt: DateTime.now(),
               text: text,
+              metadata: mentions.isEmpty ? null : {'mentions': mentions},
             ),
           )
           .withNetworkTimeout();
@@ -318,7 +320,7 @@ class SplitBillController extends _$SplitBillController {
     state = await AsyncValue.guard(() async {
       try {
         final repo = ref.read(splitBillRepositoryProvider);
-      
+
         final url = await repo
             .uploadActivityPhoto(groupId: groupId, file: file)
             .withNetworkTimeout(const Duration(seconds: 30));

@@ -15,7 +15,8 @@ import 'package:salapify/features/split_bill/presentation/widgets/balance_summar
 import 'package:salapify/features/split_bill/presentation/widgets/bills_carousel.dart';
 import 'package:salapify/features/split_bill/presentation/widgets/message_input.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
-import 'package:salapify/features/split_bill/domain/utils/chat_filter.dart';
+import 'package:salapify/features/split_bill/domain/utils/mention_utils.dart';
+import 'package:salapify/features/split_bill/domain/utils/link_utils.dart';
 import 'package:salapify/features/split_bill/presentation/screens/report_user_screen.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
 import 'dart:io';
@@ -36,6 +37,7 @@ class _SplitGroupDetailScreenState
     extends ConsumerState<SplitGroupDetailScreen> {
   final _messageController = TextEditingController();
   final _activityScrollController = ScrollController();
+  final _picked = <String, String>{};
 
   @override
   void initState() {
@@ -70,17 +72,21 @@ class _SplitGroupDetailScreenState
     final raw = _messageController.text.trim();
     if (raw.isEmpty) return;
 
-    final text = ChatFilter.mask(raw);
+    final mentions = MentionUtils.resolve(raw, _picked);
+    final protected = [...mentions, ...LinkUtils.ranges(raw)]
+      ..sort((a, b) => (a['start'] as int).compareTo(b['start'] as int));
+    final text = MentionUtils.maskOutside(raw, protected);
 
     _messageController.clear();
     await ref
         .read(splitBillControllerProvider.notifier)
-        .sendMessage(groupId: widget.groupId, text: text);
+        .sendMessage(groupId: widget.groupId, text: text, mentions: mentions);
 
     final error = ref.read(splitBillControllerProvider).error;
     if (error != null && mounted) {
-      _messageController.text =
-          raw; // restore original on failure, not the masked version
+      _messageController.text = raw;
+    } else {
+      _picked.clear();
     }
   }
 
@@ -289,11 +295,20 @@ class _SplitGroupDetailScreenState
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, _) => Center(child: Text('Failed to load bills: $err')),
           data: (bills) {
+            final membersReady = membersAsync.hasValue || membersAsync.hasError;
+            if (!membersReady) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
             final members = membersAsync.value ?? {};
-            // Derived username-only map: keeps every existing `names[id]`
-            // call site below unchanged.
             final names = {
               for (final e in members.entries) e.key: e.value.username,
+            };
+
+            final candidates = {
+              for (final e in members.entries)
+                if (e.key != currentUid && !blockedIds.contains(e.key))
+                  e.key: e.value,
             };
 
             return Column(
@@ -355,6 +370,8 @@ class _SplitGroupDetailScreenState
                   onPoke: _sendPoke,
                   onAddPhoto: _pickAndSendPhoto,
                   maxCharacters: 1000,
+                  mentionCandidates: candidates,
+                  onMentionPicked: (id, name) => _picked[id] = name,
                 ),
               ],
             );

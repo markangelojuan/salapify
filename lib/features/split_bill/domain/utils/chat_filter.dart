@@ -1,10 +1,9 @@
 class ChatFilter {
   // Keep this short and deliberate — mild profanity + slurs only.
-
   static final _badWords = <String>{
     // English
     'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'dick', 'piss',
-    'nigga', 'nigger', 'fuck you', 'fuckyou',
+    'nigga', 'nigger', 'fuck you', 'fuckyou', 'niggas'
 
     // Filipino/Tagalog
     'gago',
@@ -35,7 +34,11 @@ class ChatFilter {
   };
 
   static final _pattern = RegExp(
-    r'\b(' + _badWords.map(RegExp.escape).join('|') + r')\b',
+    r'\b(' +
+        (_badWords.toList()..sort((a, b) => b.length.compareTo(a.length)))
+            .map(RegExp.escape)
+            .join('|') +
+        r')\b',
     caseSensitive: false,
   );
 

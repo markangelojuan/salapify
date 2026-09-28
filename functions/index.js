@@ -13,6 +13,29 @@ const PLAY_SERVICE_ACCOUNT_KEY = defineSecret("PLAY_SERVICE_ACCOUNT_KEY");
 
 const ANDROID_PACKAGE_NAME = "com.mrkj.salapify";
 
+const NOTIFY_TYPES = new Set([
+  "billAdded",
+  "memberAdded",
+  "paymentMarked",
+  "paymentConfirmed",
+  "paymentDisputed",
+]);
+
+const MAX_MENTIONS_PER_MESSAGE = 5;
+const EVERYONE_ID = "__everyone__";
+
+function mentionedIds(activity) {
+  const list = Array.isArray(activity.metadata?.mentions)
+    ? activity.metadata.mentions
+    : [];
+  return list
+    .map((m) => m && m.userId)
+    .filter((id) => typeof id === "string");
+}
+
+function mentionsEveryone(activity) {
+  return mentionedIds(activity).includes(EVERYONE_ID);
+}
 
 exports.onActivityCreated = onDocumentCreated(
   "splitGroups/{groupId}/activity/{activityId}",
@@ -22,6 +45,13 @@ exports.onActivityCreated = onDocumentCreated(
 
     const activity = snap.data();
     const { groupId } = event.params;
+
+
+    const hasMentions =
+      activity.type === "message" &&
+      Array.isArray(activity.metadata?.mentions) &&
+      activity.metadata.mentions.length > 0;
+    if (!NOTIFY_TYPES.has(activity.type) && !hasMentions) return;
 
     const groupDoc = await db.collection("splitGroups").doc(groupId).get();
     if (!groupDoc.exists) return;
@@ -55,6 +85,9 @@ exports.onActivityCreated = onDocumentCreated(
         const userTokens = userData?.fcmTokens || [];
         tokens.push(...userTokens);
 
+        // Mentions are push-only
+        if (notif.notificationType === "mention") return;
+
         await db
           .collection("notifications")
           .doc(uid)
@@ -77,6 +110,8 @@ exports.onActivityCreated = onDocumentCreated(
     await messaging.sendEachForMulticast({
       tokens,
       notification: { title: notif.title, body: notif.body },
+      
+      android: { notification: { channelId: "default_channel" } },
       data: { groupId, type: activity.type || "" },
     });
   }
@@ -89,8 +124,18 @@ function resolveRecipients(activity, group) {
   const others = memberIds.filter((id) => id !== activity.senderId);
 
   switch (activity.type) {
-    case "message":
-      return []; // push-only, handled separately if you re-add message pushes; no notification-list entry
+    case "message": {
+      // Only people explicitly @mentioned. Intersecting with memberIds
+      // ignores forged/non-member ids; capped to limit fan-out.
+      // Sender must be a current member, so outsiders can't trigger pushes.
+      if (!memberIds.includes(activity.senderId)) return [];
+      // "@everyone" notifies every other member.
+      if (mentionsEveryone(activity)) return others.slice(0, 50);
+      const mentioned = new Set(mentionedIds(activity));
+      return memberIds
+        .filter((id) => mentioned.has(id) && id !== activity.senderId)
+        .slice(0, MAX_MENTIONS_PER_MESSAGE);
+    }
     case "billAdded":
     case "memberAdded":
       return others;
@@ -110,6 +155,16 @@ function resolveRecipients(activity, group) {
 
 function buildNotification(activity, senderName, groupName) {
   switch (activity.type) {
+    case "message": {
+      const preview = (activity.text || "").slice(0, 80);
+      return {
+        notificationType: "mention",
+        title: groupName,
+        body: mentionsEveryone(activity)
+          ? `${senderName} mentioned everyone: ${preview}`
+          : `${senderName} mentioned you: ${preview}`,
+      };
+    }
     case "billAdded": {
       const billTitle = activity.metadata?.billTitle || "a bill";
       return {
@@ -164,7 +219,7 @@ exports.verifyPurchase = onCall(
         "productId and purchaseToken are required."
       );
     }
-    console.log("DEBUG purchaseToken:", purchaseToken);
+    
     // Only the product(s) you actually sell — prevents a forged call from
     // claiming premium via an arbitrary productId string.
     const ALLOWED_PRODUCT_IDS = new Set(["premium_upgrade"]);

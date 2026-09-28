@@ -1,11 +1,15 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
 import 'package:salapify/features/split_bill/domain/entities/activity_entry.dart';
+import 'package:salapify/features/split_bill/domain/utils/link_utils.dart';
+import 'package:salapify/features/split_bill/domain/utils/mention_utils.dart';
 import 'package:salapify/features/split_bill/presentation/widgets/member_avatar.dart';
 import 'package:salapify/features/authentication/domain/entities/avatar_option.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ActivityFeedView extends StatelessWidget {
   const ActivityFeedView({
@@ -75,12 +79,48 @@ class ActivityFeedView extends StatelessWidget {
         return '$senderName added $targetName to the group';
       case ActivityType.poke:
         final character =
-            avatarById(members[entry.senderId]?.avatarId)?.name ?? 'Former Beast';
+            avatarById(members[entry.senderId]?.avatarId)?.name ??
+            'Former Beast';
         final article = 'AEIOU'.contains(character[0]) ? 'An' : 'A';
         return '$article $character poked the group!';
       case ActivityType.photo:
         return '$senderName sent a photo';
     }
+  }
+
+  /// Chat message body. Renders mention ranges (bold, tinted) and tappable
+  /// links. Falls back to plain text when there is nothing to decorate.
+  Widget _messageText(ActivityEntry entry, AppColorsExt colors) {
+    final text = entry.text ?? '';
+    final ranges = <(int, int, String)>[];
+    final raw = entry.metadata?['mentions'];
+    if (raw is List) {
+      for (final m in raw) {
+        if (m is! Map) continue;
+        final s = (m['start'] as num?)?.toInt();
+        final e = (m['end'] as num?)?.toInt();
+        final id = m['userId'];
+        if (s == null || e == null || id is! String) continue;
+        if (s < 0 || e > text.length || s >= e) continue;
+        // former member -> plain text ("@everyone" is always valid)
+        if (id != MentionUtils.everyoneId && !members.containsKey(id)) continue;
+        ranges.add((s, e, id));
+      }
+      ranges.sort((a, b) => a.$1.compareTo(b.$1));
+    }
+
+    if (ranges.isEmpty && !LinkUtils.hasUrl(text)) {
+      return Text(
+        text,
+        style: TextStyle(fontSize: 15, color: colors.textPrimary),
+      );
+    }
+    return _MessageRichText(
+      text: text,
+      mentions: ranges,
+      currentUid: currentUid,
+      colors: colors,
+    );
   }
 
   bool _isSameDay(DateTime a, DateTime b) =>
@@ -251,13 +291,7 @@ class ActivityFeedView extends StatelessWidget {
                             uploadFailed: entry.uploadFailed,
                           )
                         else
-                          Text(
-                            _label(entry),
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: colors.textPrimary,
-                            ),
-                          ),
+                          _messageText(entry, colors),
                       ],
                     ),
                   ),
@@ -515,6 +549,168 @@ class _PhotoViewerDialog extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Message body with mention spans and tappable links. Stateful only so the
+/// tap recognizers can be disposed.
+class _MessageRichText extends StatefulWidget {
+  const _MessageRichText({
+    required this.text,
+    required this.mentions,
+    required this.currentUid,
+    required this.colors,
+  });
+
+  final String text;
+  final List<(int, int, String)> mentions;
+  final String? currentUid;
+  final AppColorsExt colors;
+
+  @override
+  State<_MessageRichText> createState() => _MessageRichTextState();
+}
+
+class _MessageRichTextState extends State<_MessageRichText> {
+  final _recognizers = <TapGestureRecognizer>[];
+
+  void _clearRecognizers() {
+    for (final r in _recognizers) {
+      r.dispose();
+    }
+    _recognizers.clear();
+  }
+
+  @override
+  void dispose() {
+    _clearRecognizers();
+    super.dispose();
+  }
+
+  Future<void> _open(String url) async {
+    final uri = LinkUtils.toUri(url);
+    if (uri == null) {
+      _showOpenError();
+      return;
+    }
+
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        final c = Theme.of(ctx).extension<AppColorsExt>()!;
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text('Open link?'),
+          content: Text(
+            'You\'re about to leave Salapify and open:\n\n$uri',
+            maxLines: 6,
+            overflow: TextOverflow.ellipsis,
+          ),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: c.textPrimary,
+                side: BorderSide(color: c.border),
+                shape: const StadiumBorder(),
+              ),
+              child: const Text('Cancel'),
+            ),
+            OutlinedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: c.primary,
+                side: BorderSide(color: c.primary),
+                shape: const StadiumBorder(),
+              ),
+              child: const Text('Open'),
+            ),
+          ],
+        );
+      },
+    );
+    if (go != true || !mounted) return;
+
+    var ok = false;
+    try {
+      ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      ok = false;
+    }
+    if (!ok) _showOpenError();
+  }
+
+  void _showOpenError() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Couldn\'t open this link.')));
+  }
+
+  void _addPlain(List<InlineSpan> spans, String segment) {
+    var cursor = 0;
+    for (final r in LinkUtils.ranges(segment)) {
+      final s = r['start'] as int;
+      final e = r['end'] as int;
+      if (s > cursor) spans.add(TextSpan(text: segment.substring(cursor, s)));
+      final url = segment.substring(s, e);
+      final rec = TapGestureRecognizer()..onTap = () => _open(url);
+      _recognizers.add(rec);
+      spans.add(
+        TextSpan(
+          text: url,
+          recognizer: rec,
+          style: TextStyle(
+            color: widget.colors.primary,
+            decoration: TextDecoration.underline,
+            decorationColor: widget.colors.primary,
+          ),
+        ),
+      );
+      cursor = e;
+    }
+    if (cursor < segment.length) {
+      spans.add(TextSpan(text: segment.substring(cursor)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _clearRecognizers();
+    final colors = widget.colors;
+    final text = widget.text;
+    final spans = <InlineSpan>[];
+    var cursor = 0;
+
+    for (final r in widget.mentions) {
+      if (r.$1 < cursor) continue; // skip overlapping ranges
+      if (r.$1 > cursor) _addPlain(spans, text.substring(cursor, r.$1));
+      spans.add(
+        TextSpan(
+          text: text.substring(r.$1, r.$2),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: colors.primary,
+            backgroundColor:
+                (r.$3 == widget.currentUid || r.$3 == MentionUtils.everyoneId)
+                ? colors.primary.withValues(alpha: 0.15)
+                : null,
+          ),
+        ),
+      );
+      cursor = r.$2;
+    }
+    if (cursor < text.length) _addPlain(spans, text.substring(cursor));
+
+    return Text.rich(
+      TextSpan(
+        style: TextStyle(fontSize: 15, color: colors.textPrimary),
+        children: spans,
       ),
     );
   }
