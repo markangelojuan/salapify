@@ -117,6 +117,12 @@ class AuthController extends _$AuthController {
         await ref.read(entitlementRepositoryProvider).clearLocal();
       });
 
+      try {
+        await ref.read(pushNotificationServiceProvider).cancelMonthlyReminders();
+      } catch (_) {
+        // Never block sign-out because of a reminder cleanup failure.
+      }
+
       await ref.read(settingsRepositoryProvider).clearAll();
 
       ref.invalidate(budgetingPeriodSettingProvider);

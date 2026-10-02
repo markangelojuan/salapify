@@ -15,17 +15,16 @@ class AvatarOption {
 }
 
 const List<AvatarOption> kAvatarOptions = [
-  AvatarOption(id: 'covetous_snake', assetPath: 'assets/images/covetous_snake.png', name: 'Covetous Snake'),
-  AvatarOption(id: 'frugal_zebra', assetPath: 'assets/images/frugal_zebra.png', name: 'Frugal Zebra'),
-  AvatarOption(id: 'canny_buffalo', assetPath: 'assets/images/canny_buffalo.png', name: 'Canny Buffalo'),
-  AvatarOption(id: 'lavish_dog', assetPath: 'assets/images/lavish_dog.png', name: 'Lavish Dog'),
+  AvatarOption(id: 'luxurious_dog', assetPath: 'assets/images/luxurious_dog.png', name: 'Luxurious Dog'),
   AvatarOption(id: 'savvy_monkey', assetPath: 'assets/images/savvy_monkey.png', name: 'Savvy Monkey'),
+  AvatarOption(id: 'covetous_snake', assetPath: 'assets/images/covetous_snake.png', name: 'Covetous Snake'),
   AvatarOption(id: 'thrifty_pig', assetPath: 'assets/images/thrifty_pig.png', name: 'Thrifty Pig'),
-  AvatarOption(id: 'stingy_turtle', assetPath: 'assets/images/stingy_turtle.png', name: 'Stingy Turtle'),
-  AvatarOption(id: 'prosperous_panda', assetPath: 'assets/images/prosperous_panda.png', name: 'Prosperous Panda'),
-  AvatarOption(id: 'opulent_walrus', assetPath: 'assets/images/opulent_walrus.png', name: 'Opulent Walrus'),
+  AvatarOption(id: 'frugal_shark', assetPath: 'assets/images/frugal_shark.png', name: 'Frugal Shark'),
   AvatarOption(id: 'greedy_cat', assetPath: 'assets/images/greedy_cat.png', name: 'Greedy Cat'),
-  AvatarOption(id: 'impecunious_eagle', assetPath: 'assets/images/impecunious_eagle.png', name: 'Impecunious Eagle', isHidden: true),
+  AvatarOption(id: 'prosperous_panda', assetPath: 'assets/images/prosperous_panda.png', name: 'Prosperous Panda'),
+  AvatarOption(id: 'stingy_turtle', assetPath: 'assets/images/stingy_turtle.png', name: 'Stingy Turtle'),
+  AvatarOption(id: 'opulent_walrus', assetPath: 'assets/images/opulent_walrus.png', name: 'Opulent Walrus'),
+  AvatarOption(id: 'broke_eagle', assetPath: 'assets/images/broke_eagle.png', name: 'Broke Eagle', isHidden: true),
 ];
 
 /// What the picker screen shows: everything except hidden avatars.

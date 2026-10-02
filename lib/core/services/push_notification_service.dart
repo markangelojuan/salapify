@@ -27,6 +27,13 @@ class PushNotificationService {
     playSound: true,
   );
 
+  static const _reminderChannel = AndroidNotificationChannel(
+    'reminders_channel',
+    'Budget Reminders',
+    description: 'Monthly nudges to update your budget',
+    importance: Importance.defaultImportance,
+  );
+
   static const _reminderIds = [1001, 1002];
 
   Future<void> initForUser(String uid) async {
@@ -47,7 +54,7 @@ class PushNotificationService {
   }
 
   Future<void> _setupLocalNotifications() async {
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidInit = AndroidInitializationSettings('ic_notification');
     const initSettings = InitializationSettings(android: androidInit);
     await _localNotifications.initialize(
       settings: initSettings,
@@ -63,6 +70,12 @@ class PushNotificationService {
           AndroidFlutterLocalNotificationsPlugin
         >()
         ?.createNotificationChannel(_channel);
+
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(_reminderChannel);
   }
 
   void _listenForForegroundMessages() {
@@ -137,13 +150,14 @@ class PushNotificationService {
     );
     await _scheduleMonthly(
       id: 1002,
-      day: 16,
+      day: 15, // was 16
       title: 'Midmonth check-in 💸',
       body: "Don't forget to log your recent expenses.",
     );
   }
 
   Future<void> cancelMonthlyReminders() async {
+    await ensureLocalNotificationsInitialized();
     for (final id in _reminderIds) {
       await _localNotifications.cancel(id: id);
     }
@@ -168,9 +182,9 @@ class PushNotificationService {
       scheduledDate: scheduled, // was positional, now named
       notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
-          _channel.id,
-          _channel.name,
-          channelDescription: _channel.description,
+          _reminderChannel.id,
+          _reminderChannel.name,
+          channelDescription: _reminderChannel.description,
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
         ),
@@ -185,7 +199,6 @@ class PushNotificationService {
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
         >();
-
 
     if (androidImpl == null) return true;
 

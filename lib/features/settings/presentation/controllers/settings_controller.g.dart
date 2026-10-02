@@ -223,7 +223,7 @@ final class ReminderNotificationsSettingProvider
 }
 
 String _$reminderNotificationsSettingHash() =>
-    r'67d11643bfe3736ac16483bb599a3828d3850da0';
+    r'1124f36f1cf941710da4b396c8801623021534e2';
 
 abstract class _$ReminderNotificationsSetting extends $AsyncNotifier<bool> {
   FutureOr<bool> build();

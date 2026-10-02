@@ -21,6 +21,8 @@ import 'package:salapify/features/premium/data/services/purchase_service.dart';
 import 'package:salapify/core/widgets/global_loading.dart';
 import 'core/lifecycle/period_reset_lifecycle_observer.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +33,13 @@ void main() async {
   ]);
 
   tz_data.initializeTimeZones();
+  try {
+    final tzInfo = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(tzInfo.identifier));
+  } catch (_) {
+    // Falls back to UTC if the device timezone can't be read.
+  }
+  
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await GoogleSignIn.instance.initialize(

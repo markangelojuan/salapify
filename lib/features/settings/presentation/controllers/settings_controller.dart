@@ -199,6 +199,10 @@ class ReminderNotificationsSetting extends _$ReminderNotificationsSetting {
         // Leave the switch as it was; don't persist "enabled" if the
         // user denied the OS prompt.
         state = previous;
+        ref.read(settingsSyncWarningProvider.notifier).set(
+          'Notifications are turned off for Salapify. '
+          'Enable them in your phone settings to get reminders.',
+        );
         return;
       }
     }
