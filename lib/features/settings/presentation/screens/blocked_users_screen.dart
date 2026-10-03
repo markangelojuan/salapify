@@ -4,6 +4,7 @@ import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
 import 'package:salapify/features/split_bill/presentation/widgets/member_avatar.dart';
+import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
 
 class BlockedUsersScreen extends ConsumerWidget {
   const BlockedUsersScreen({super.key});
@@ -15,6 +16,15 @@ class BlockedUsersScreen extends ConsumerWidget {
   ) async {
     final currentUid = ref.read(currentUserProvider)?.uid;
     if (currentUid == null) return;
+
+    final confirmed = await CommonConfirmationDialog.show(
+      context,
+      title: 'Unblock ${user.username}?',
+      message: 'They will be able to interact with you again.',
+      confirmLabel: 'Unblock',
+    );
+    if (!confirmed) return;
+
     try {
       await ref
           .read(userRepositoryProvider)

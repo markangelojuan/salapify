@@ -21,6 +21,8 @@ import 'package:salapify/features/settings/domain/currency.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
 
+const double kMaxBillAmount = 1000000000;
+
 class BillFormArgs {
   const BillFormArgs({required this.group, this.existingBill});
 
@@ -411,6 +413,9 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                                     final val = double.tryParse(v ?? '');
                                     if (val == null || val <= 0) {
                                       return 'Enter a valid amount';
+                                    }
+                                    if (val > kMaxBillAmount) {
+                                      return 'Amount can\'t exceed ${currency.symbol}1,000,000,000';
                                     }
                                     return null;
                                   },
@@ -930,18 +935,25 @@ class _CustomShareField extends StatelessWidget {
                   decimal: true,
                 ),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                  FilteringTextInputFormatter.allow(
+                    RegExp(r'^\d{0,9}\.?\d{0,2}'),
+                  ),
                 ],
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
                   color: colors.textPrimary,
                 ),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   isDense: true,
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.zero,
                   hintText: '0.00',
+                  hintStyle: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    color: colors.textSecondary.withValues(alpha: 0.4),
+                  ),
                 ),
               ),
             ),

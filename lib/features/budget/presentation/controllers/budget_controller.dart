@@ -189,7 +189,7 @@ class BudgetActions extends _$BudgetActions {
         firstHalfEndDay: firstHalfEndDay,
         now: now,
       );
-      final autoFillId = 'autofill_${category.id}_$periodKey';
+      final autoFillId = '$kAutoFillPrefix${category.id}_$periodKey';
       final transactionRepo = ref.read(transactionRepositoryProvider);
 
       await ref.read(appDatabaseProvider).transaction(() async {

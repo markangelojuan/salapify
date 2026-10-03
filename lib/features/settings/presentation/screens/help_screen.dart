@@ -25,12 +25,12 @@ const List<FaqSection> kSalapifyFaqs = [
     title: 'Getting Started',
     entries: [
       FaqEntry(
-        question: 'What does Salapify actually do?',
+        question: 'What does Salapify do?',
         answer:
             'Salapify combines budget tracking with bill splitting. Use the '
             'Budget tab to allocate money into categories, the Transactions '
-            'tab to log income and spending, and the Split Bills tab to '
-            'settle shared expenses with friends or other users — all in one '
+            'tab to log your income and spending, and the Split Bills tab to '
+            'settle shared expenses with friends or other users, all in one '
             'place.',
       ),
     ],
@@ -42,32 +42,31 @@ const List<FaqSection> kSalapifyFaqs = [
       FaqEntry(
         question: 'How do I create a budget category?',
         answer:
-            'Tap the FAB on the Budget tab. Give your category a name, such '
-            'as Internet Bill or Groceries, then choose whether it\'s Fixed '
-            'or Variable. Complete the remaining fields and save your '
-            'category.',
+            'Tap the + button on the Budget tab. Enter a category name, such '
+            'as Internet Bill or Groceries, then set its allocation. Choose '
+            'whether it\'s Fixed or Variable, and set how often it repeats. '
+            'Fill in the remaining fields, then save your category.',
       ),
       FaqEntry(
         question: 'What\'s the difference between Fixed and Variable?',
         answer:
-            'Fixed is for predictable costs like an Internet Bill — you set '
-            'one amount. Variable is for spending that changes, like '
-            'Groceries — you set a target ceiling instead of an exact '
-            'amount. Both can be marked as recurring every period or as a '
-            'one-time category.',
+            'Fixed is for predictable costs, like an Internet Bill, where you '
+            'set one exact amount. Variable is for spending that changes, '
+            'like Groceries, where you set a target ceiling instead of an '
+            'exact amount.',
       ),
       FaqEntry(
         question: 'What happens when I check off a category as completed?',
         answer:
             'Marking a category as complete automatically logs it as a '
-            'transaction for the current period, so a Fixed bill like '
-            'Internet doesn\'t need to be entered twice.',
+            'transaction for the current period. The category is also marked '
+            'as done and moved to the bottom of the list.',
       ),
       FaqEntry(
         question: 'Why are some categories dimmed on my Budget tab?',
         answer:
-            'Dimmed categories belong to a different half of the period '
-            'when using bi-monthly budgeting. They\'ll come back into focus '
+            'Dimmed categories belong to the other half of the period when '
+            'you use bi-monthly budgeting. They\'ll come back into focus '
             'automatically when their half of the period begins.',
       ),
     ],
@@ -80,29 +79,29 @@ const List<FaqSection> kSalapifyFaqs = [
         question: 'How do I add income?',
         answer:
             'From the Transactions tab, add an income entry and mark it as '
-            'One-time or Recurring. Recurring income is automatically '
-            'added again at the start of each new period.',
+            'One-time or Recurring. Recurring income is added again '
+            'automatically at the start of each new period.',
       ),
       FaqEntry(
         question: 'How do transactions affect my budget?',
         answer:
             'When you log a transaction, you assign it to a budget '
             'category. The amount is automatically deducted from that '
-            'category\'s allocation, so your Budget tab always reflects '
+            'category\'s allocation, so your Budget tab always shows '
             'what\'s left to spend.',
       ),
       FaqEntry(
         question: 'How do I delete an income or expense?',
         answer:
             'Go to the Transactions tab and swipe left on the income or '
-            'expense you want to remove. Then confirm the deletion if '
+            'expense you want to remove. Confirm the deletion if you are '
             'prompted.',
       ),
       FaqEntry(
         question: 'Why don\'t I see last period\'s transactions?',
         answer:
             'The Budget and Transactions tabs only show totals for the '
-            'current period, based on the budgeting period you\'ve set in '
+            'current period, based on the budgeting period you set in '
             'Settings. This keeps the numbers focused on what you can '
             'still act on.',
       ),
@@ -117,44 +116,44 @@ const List<FaqSection> kSalapifyFaqs = [
         answer:
             'Create a group and add members by their usernames. Inside the '
             'group, create a bill (e.g. "Dinner @ KFC"), enter the amount '
-            'you paid, and split it equally or with custom shares per '
+            'you paid, and split it equally or with custom shares for each '
             'member.',
       ),
       FaqEntry(
         question: 'How do I delete a Split Bills group?',
         answer:
-            'If you created the group, swipe left on the group to delete '
-            'it. Deleting a group removes the group and its shared bill '
+            'If you created the group, swipe left on it to delete it. '
+            'Deleting a group also removes all of its shared bill '
             'activity.',
       ),
       FaqEntry(
         question: 'How do I leave a Split Bills group?',
         answer:
-            'If you\'re a member of a group, swipe left on the group and '
-            'choose to leave. Leaving removes you from the group without '
-            'deleting the group for everyone else.',
+            'If you\'re a member of a group, swipe left on it and choose '
+            'Leave. This removes you from the group without deleting it for '
+            'everyone else.',
       ),
       FaqEntry(
         question: 'Can I share receipts or chat with my group?',
         answer:
-            'Yes. Every group has an Activity section for messaging '
-            'members and sharing photos, like receipts, right alongside '
-            'the bill history.',
+            'Yes. Every group has an Activity section where you can message '
+            'members and share photos, such as receipts, alongside the bill '
+            'history.',
       ),
       FaqEntry(
         question: 'Do Split Bills affect my personal budget?',
         answer:
-            'No — Split Bills is kept separate from your Budget and '
-            'Transactions tabs. If you want a settled bill reflected in '
+            'No. Split Bills is kept separate from your Budget and '
+            'Transactions tabs. If you want a settled bill to count toward '
             'your spending, log it manually as a transaction.',
       ),
       FaqEntry(
         question: 'How do I report or block someone in a group?',
         answer:
-            'In the group\'s Activity tab, press and hold that member\'s '
-            'avatar next to their message. This opens a menu where you can '
-            'Report or Block them. Blocking hides their messages and '
-            'activity. You can undo it anytime from Settings.',
+            'In the group\'s Activity tab, press and hold a member\'s '
+            'avatar next to their message to open a menu with Report and '
+            'Block options. Blocking hides their messages and activity, and '
+            'you can undo it anytime from Settings.',
       ),
     ],
   ),
@@ -166,7 +165,7 @@ const List<FaqSection> kSalapifyFaqs = [
         question: 'What\'s the difference between Monthly and Bi-Monthly?',
         answer:
             'Monthly resets your budget on the 1st of every month. '
-            'Bi-Monthly splits the month into two halves — you choose the '
+            'Bi-Monthly splits the month into two halves: you choose the '
             'day the first half ends, and the rest of the month becomes '
             'the second half.',
       ),
@@ -175,15 +174,15 @@ const List<FaqSection> kSalapifyFaqs = [
         answer:
             'Existing categories are converted to match the new period and '
             'keep their amounts. Categories tied to a specific half will '
-            'now count toward the full month, or vice versa, so it\'s '
-            'worth reviewing them afterward for duplicates.',
+            'now count toward the full month (or vice versa), so review '
+            'them afterward to check for duplicates.',
       ),
       FaqEntry(
         question: 'How does recurrence work with bi-monthly budgeting?',
         answer:
-            'A recurring category or income repeats every half you\'ve '
-            'set it for. Switch to Monthly and the same item simply '
-            'repeats once a month instead.',
+            'A recurring category repeats in every half you\'ve assigned '
+            'it to. If you switch to Monthly, the same item simply repeats '
+            'once a month instead.',
       ),
     ],
   ),
@@ -194,16 +193,15 @@ const List<FaqSection> kSalapifyFaqs = [
       FaqEntry(
         question: 'What shows up in the Notifications tab?',
         answer:
-            'Notifications include budget reminders, updates on Split '
-            'Bills activity, and alerts when a payer disputes or confirms '
-            'one of your shares.',
+            'You\'ll see updates on Split Bills activity, as well as '
+            'alerts when a payer disputes or confirms one of your shares.',
       ),
       FaqEntry(
         question: 'Can I turn off notifications?',
         answer:
-            'Yes. From your device Settings > Apps > Salapify > '
-            'Notifications, you can turn off alerts entirely or fine-tune '
-            'which types of alerts you want to receive.',
+            'Yes. Go to your device Settings > Apps > Salapify > '
+            'Notifications, where you can turn off alerts entirely or '
+            'choose which types of alerts you want to receive.',
       ),
     ],
   ),

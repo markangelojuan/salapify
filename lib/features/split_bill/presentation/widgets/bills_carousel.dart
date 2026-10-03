@@ -15,7 +15,6 @@ import 'package:salapify/features/split_bill/presentation/screens/bill_form_scre
 import 'package:salapify/features/premium/presentation/widgets/premium_upsell_sheet.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:salapify/features/premium/data/services/purchase_service.dart';
-import 'package:flutter/foundation.dart';
 
 class BillsCarousel extends ConsumerWidget {
   const BillsCarousel({
@@ -36,7 +35,7 @@ class BillsCarousel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SizedBox(
-      height: 190,
+      height: 170,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -236,6 +235,8 @@ class _BillCard extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Text(
                   'Total ${currency.format(bill.totalAmount)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
@@ -245,6 +246,8 @@ class _BillCard extends ConsumerWidget {
                 const SizedBox(height: 2),
                 Text(
                   'Paid by ${isPayer ? "you" : (names[bill.paidBy] ?? '...')}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontSize: 11, color: colors.textSecondary),
                 ),
                 const Spacer(),
@@ -323,8 +326,9 @@ class _BillCard extends ConsumerWidget {
           ),
           TextButton(
             style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.symmetric(vertical: 1),
               minimumSize: const Size(0, 0),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               foregroundColor: colors.primary,
             ),
             onPressed: () => ref
@@ -370,8 +374,9 @@ class _BillCard extends ConsumerWidget {
         ),
         TextButton(
           style: TextButton.styleFrom(
-            padding: EdgeInsets.zero,
+            padding: const EdgeInsets.symmetric(vertical: 1),
             minimumSize: const Size(0, 0),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             foregroundColor: colors.primary,
           ),
           onPressed: () => ref

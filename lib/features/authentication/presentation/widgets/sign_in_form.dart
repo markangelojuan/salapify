@@ -269,7 +269,9 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                 hint: "Enter your password",
                 maxCharacters: 128,
                 textInputAction: TextInputAction.done,
-                onFieldSubmitted: (_) {FocusScope.of(context).unfocus();},
+                onFieldSubmitted: (_) {
+                  FocusScope.of(context).unfocus();
+                },
                 label: "Password",
                 isPassword: true,
                 isPasswordVisible: _isPasswordVisible,
@@ -404,27 +406,31 @@ class _SignInFormState extends ConsumerState<SignInForm> {
               ),
           const SizedBox(height: 20),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "Not part of the club yet? ",
-                style: TextStyle(color: colors.textPrimary),
-              ),
-              TextButton(
-                onPressed: () => context.pushNamed(AppRoutes.signUp.name),
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  foregroundColor: colors.textPrimary,
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  "Not part of the club yet? ",
+                  style: TextStyle(color: colors.textPrimary),
                 ),
-                child: const Text(
-                  "Sign Up",
-                  style: TextStyle(fontWeight: FontWeight.w700),
+                TextButton(
+                  onPressed: () => context.pushNamed(AppRoutes.signUp.name),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    foregroundColor: colors.textPrimary,
+                  ),
+                  child: const Text(
+                    "Sign Up",
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 8),
 

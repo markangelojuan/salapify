@@ -1,3 +1,5 @@
+const String kAutoFillPrefix = 'autofill_';
+
 class TransactionEntry {
   const TransactionEntry({
     required this.id,
@@ -20,6 +22,8 @@ class TransactionEntry {
   final DateTime? updatedAt;
   final bool isSynced;
   final bool isDeleted;
+
+  bool get isAutoFilled => id.startsWith(kAutoFillPrefix);
 
   TransactionEntry copyWith({
     String? id,

@@ -19,7 +19,7 @@ class ExpenseRow extends StatelessWidget {
   /// normally happen since categories are soft-deleted, but guarded here).
   final BudgetCategory? category;
 
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final VoidCallback onDelete;
 
   @override

@@ -8,6 +8,8 @@ import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/features/authentication/domain/entities/avatar_option.dart';
 import 'package:salapify/features/authentication/presentation/controllers/avatar_controller.dart';
 import 'package:salapify/features/authentication/presentation/controllers/app_user_controller.dart';
+import 'package:salapify/features/premium/data/repositories/entitlement_repository.dart';
+
 
 class AvatarPickerScreen extends ConsumerStatefulWidget {
   const AvatarPickerScreen({super.key});
@@ -45,6 +47,9 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
     if (ref.read(avatarControllerProvider).isLoading) return;
 
     final avatar = kSelectableAvatars[_selectedIndex];
+    final isPremium = ref.read(isPremiumProvider).value ?? false;
+    if (avatar.isPremiumOnly && !isPremium) return;
+
     await ref.read(avatarControllerProvider.notifier).selectAvatar(avatar.id);
 
     if (!mounted) return;
@@ -64,14 +69,15 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final avatarState = ref.watch(avatarControllerProvider);
+    final isPremium = ref.watch(isPremiumProvider).value ?? false;
 
     ref.listen<AsyncValue<void>>(avatarControllerProvider, (previous, next) {
       next.whenOrNull(error: (e, _) => CommonSnackbar.showError(context, e));
     });
 
     final selected = kSelectableAvatars[_selectedIndex];
+    final isLocked = selected.isPremiumOnly && !isPremium;
 
-   
     final canGoBack = context.canPop();
 
     return Scaffold(
@@ -122,6 +128,7 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
                           onPageChanged: (i) =>
                               setState(() => _selectedIndex = i),
                           itemBuilder: (context, index) {
+                            final option = kSelectableAvatars[index];
                             return AnimatedBuilder(
                               animation: _pageController,
                               builder: (context, child) {
@@ -140,8 +147,9 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
                                 );
                               },
                               child: _AvatarCircle(
-                                avatar: kSelectableAvatars[index],
+                                avatar: option,
                                 isSelected: index == _selectedIndex,
+                                isLocked: option.isPremiumOnly && !isPremium,
                                 colors: colors,
                               ),
                             );
@@ -176,7 +184,7 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
                           label: 'Confirm',
                           btnColor: colors.textPrimary,
                           labelColor: colors.background,
-                          onPressed: _confirm,
+                          onPressed: isLocked ? null : _confirm,
                           isLoading: avatarState.isLoading,
                         ),
                       ),
@@ -196,10 +204,12 @@ class _AvatarCircle extends StatelessWidget {
   const _AvatarCircle({
     required this.avatar,
     required this.isSelected,
+    required this.isLocked,
     required this.colors,
   });
   final AvatarOption avatar;
   final bool isSelected;
+  final bool isLocked;
   final AppColorsExt colors;
 
   @override
@@ -224,7 +234,32 @@ class _AvatarCircle extends StatelessWidget {
               ]
             : [],
       ),
-      child: ClipOval(child: Image.asset(avatar.assetPath, fit: BoxFit.cover)),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned.fill(
+            child: ClipOval(
+              child: Opacity(
+                opacity: isLocked ? 0.45 : 1,
+                child: Image.asset(avatar.assetPath, fit: BoxFit.cover),
+              ),
+            ),
+          ),
+          if (isLocked)
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.black.withValues(alpha: 0.55),
+              ),
+              child: const Icon(
+                Icons.lock_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

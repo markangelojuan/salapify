@@ -149,8 +149,12 @@ class ExpensesTab extends ConsumerWidget {
                   (t) => ExpenseRow(
                     transaction: t,
                     category: categoryById[t.categoryId],
-                    onTap: () =>
-                        context.pushNamed(AppRoutes.expenseForm.name, extra: t),
+                    onTap: t.isAutoFilled
+                        ? null
+                        : () => context.pushNamed(
+                            AppRoutes.expenseForm.name,
+                            extra: t,
+                          ),
                     onDelete: () => _confirmDelete(context, ref, t.id),
                   ),
                 ),
