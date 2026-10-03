@@ -279,7 +279,7 @@ class _Header extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           isPremium
-              ? 'Thanks for supporting Salapify.'
+              ? 'Thanks for helping us maintain Salapify.'
               : 'One-time payment. No subscription, ever.',
           style: _font(TextStyle(fontSize: 13, color: colors.textSecondary)),
         ),
@@ -555,7 +555,7 @@ class _StickyCta extends StatelessWidget {
         future: priceFuture,
         builder: (context, snapshot) {
           final price = snapshot.data;
-          final label = price == null ? 'Go Premium' : 'Go Premium — $price';
+          final label = price == null ? 'Go Premium' : 'Buy — $price';
           return CommonButton(
             label: label,
             btnColor: colors.textPrimary,

@@ -17,8 +17,8 @@ Future<void> showPremiumUpsellSheet(
   required PremiumLimit limit,
   Future<PurchaseOutcome> Function()? onUnlock,
   Future<PurchaseOutcome> Function()? onRestore,
-  String priceLabel = '₱59',
-  String benefit = 'Remove every free-plan limit',
+  String priceLabel = '₱39',
+  String benefit = 'One-time Premium unlock',
 }) {
   return showModalBottomSheet<void>(
     context: context,
@@ -159,7 +159,7 @@ class _PremiumUpsellSheetState extends State<_PremiumUpsellSheet> {
                       TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
-                        height: 1.25,
+                        height: 1.15,
                         letterSpacing: -0.4,
                         color: colors.textPrimary,
                       ),
@@ -173,7 +173,7 @@ class _PremiumUpsellSheetState extends State<_PremiumUpsellSheet> {
                     textAlign: TextAlign.center,
                     style: _font(
                       TextStyle(
-                        fontSize: 40,
+                        fontSize: 30,
                         fontWeight: FontWeight.w800,
                         height: 1.0,
                         letterSpacing: -1,
@@ -213,7 +213,7 @@ class _PremiumUpsellSheetState extends State<_PremiumUpsellSheet> {
                   const SizedBox(height: 24),
 
                   CommonButton(
-                    label: 'Go Premium — ${widget.priceLabel}',
+                    label: 'Buy — ${widget.priceLabel}',
                     btnColor: colors.textPrimary,
                     labelColor: colors.background,
                     isLoading: _busy,
@@ -221,7 +221,7 @@ class _PremiumUpsellSheetState extends State<_PremiumUpsellSheet> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'No subscription. Just one-time fee.',
+                    'Support the app with a one-time purchase.',
                     textAlign: TextAlign.center,
                     style: _font(
                       TextStyle(fontSize: 12, color: colors.textSecondary),
