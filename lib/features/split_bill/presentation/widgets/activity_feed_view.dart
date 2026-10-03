@@ -418,6 +418,18 @@ class _ActivityPhoto extends StatelessWidget {
   bool get _isExpired =>
       expiresAt != null && DateTime.now().isAfter(expiresAt!);
 
+  String _expiryLabel() {
+    final exp = expiresAt;
+    if (exp == null) return 'This photo will expire in 3 days';
+    final mins = exp.difference(DateTime.now()).inMinutes;
+    if (mins >= 1440) {
+      final days = (mins / 1440).ceil();
+      return 'Expires in $days day${days == 1 ? '' : 's'}';
+    }
+    if (mins >= 60) return 'Expires in ${mins ~/ 60}h';
+    return 'Expires in ${mins < 1 ? 1 : mins}m';
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
@@ -497,10 +509,10 @@ class _ActivityPhoto extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 4),
               color: Colors.black.withValues(alpha: 0.45),
-              child: const Text(
-                'This photo will expire in 3 days',
+              child: Text(
+                _expiryLabel(),
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white, fontSize: 10),
+                style: const TextStyle(color: Colors.white, fontSize: 10),
               ),
             ),
           ],

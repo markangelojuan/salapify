@@ -195,7 +195,12 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
     final controller = ref.read(splitBillControllerProvider.notifier);
 
     if (widget.existingBill != null) {
-      final existing = widget.existingBill!;
+      final existing =
+          ref
+              .read(splitBillsProvider(widget.group.id))
+              .value
+              ?.firstWhereOrNull((b) => b.id == widget.existingBill!.id) ??
+          widget.existingBill!;
       final updatedBill = existing.copyWith(
         title: _titleController.text.trim(),
         totalAmount: _total,

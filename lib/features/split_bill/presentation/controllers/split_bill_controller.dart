@@ -19,6 +19,8 @@ part 'split_bill_controller.g.dart';
 
 @Riverpod(keepAlive: true)
 class SplitBillController extends _$SplitBillController {
+  final _inFlightShares = <String>{};
+  
   @override
   FutureOr<void> build() {
     return null;
@@ -246,48 +248,54 @@ class SplitBillController extends _$SplitBillController {
     required String billId,
     required String userId,
     required PaymentStatus status,
-    required String
-    payerId, // NEW — needed so paymentMarked can notify the payer
+    required String payerId,
     String? actorId,
   }) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final repo = ref.read(splitBillRepositoryProvider);
-      await repo
-          .updateShareStatus(
-            groupId: groupId,
-            billId: billId,
-            userId: userId,
-            status: status,
-          )
-          .withNetworkTimeout();
+    final key = '$billId:$userId';
+    if (!_inFlightShares.add(key)) return; // same share already updating, ignore
 
-      final activityType = switch (status) {
-        PaymentStatus.markedPaid => ActivityType.paymentMarked,
-        PaymentStatus.confirmed => ActivityType.paymentConfirmed,
-        PaymentStatus.disputed => ActivityType.paymentDisputed,
-        PaymentStatus.unpaid => null,
-      };
-      if (activityType == null) return;
-
-      await repo
-          .addActivity(
-            ActivityEntry(
-              id: '',
+    try {
+      state = const AsyncLoading();
+      state = await AsyncValue.guard(() async {
+        final repo = ref.read(splitBillRepositoryProvider);
+        await repo
+            .updateShareStatus(
               groupId: groupId,
-              senderId: actorId ?? userId,
-              type: activityType,
-              createdAt: DateTime.now(),
-              metadata: switch (status) {
-                PaymentStatus.markedPaid => {'payerId': payerId},
-                PaymentStatus.confirmed ||
-                PaymentStatus.disputed => {'targetUserId': userId},
-                PaymentStatus.unpaid => null,
-              },
-            ),
-          )
-          .withNetworkTimeout();
-    });
+              billId: billId,
+              userId: userId,
+              status: status,
+            )
+            .withNetworkTimeout();
+
+        final activityType = switch (status) {
+          PaymentStatus.markedPaid => ActivityType.paymentMarked,
+          PaymentStatus.confirmed => ActivityType.paymentConfirmed,
+          PaymentStatus.disputed => ActivityType.paymentDisputed,
+          PaymentStatus.unpaid => null,
+        };
+        if (activityType == null) return;
+
+        await repo
+            .addActivity(
+              ActivityEntry(
+                id: '',
+                groupId: groupId,
+                senderId: actorId ?? userId,
+                type: activityType,
+                createdAt: DateTime.now(),
+                metadata: switch (status) {
+                  PaymentStatus.markedPaid => {'payerId': payerId},
+                  PaymentStatus.confirmed ||
+                  PaymentStatus.disputed => {'targetUserId': userId},
+                  PaymentStatus.unpaid => null,
+                },
+              ),
+            )
+            .withNetworkTimeout();
+      });
+    } finally {
+      _inFlightShares.remove(key);
+    }
   }
 
   Future<void> pokeGroup(String groupId) async {

@@ -116,23 +116,34 @@ class ActivityFeed extends _$ActivityFeed {
     final repo = ref.watch(splitBillRepositoryProvider);
     final completer = Completer<List<ActivityEntry>>();
 
-    _liveSub = repo.watchActivity(groupId, limit: _pageSize).listen((live) {
-      if (!completer.isCompleted) {
-        _confirmed = live;
-        completer.complete(_combined());
-        return;
-      }
-      // Merge: live window is authoritative for recent entries; keep
-      // whatever older, non-overlapping tail we've already paginated in.
-      final liveIds = live.map((e) => e.id).toSet();
-      final cutoff = live.isNotEmpty ? live.last.createdAt : null;
-      final tail = _confirmed
-          .where((e) => !liveIds.contains(e.id))
-          .where((e) => cutoff == null || e.createdAt.isBefore(cutoff))
-          .toList();
-      _confirmed = [...live, ...tail];
-      state = AsyncData(_combined());
-    });
+    _liveSub = repo
+        .watchActivity(groupId, limit: _pageSize)
+        .listen(
+          (live) {
+            if (!completer.isCompleted) {
+              _confirmed = live;
+              completer.complete(_combined());
+              return;
+            }
+            // Merge: live window is authoritative for recent entries; keep
+            // whatever older, non-overlapping tail we've already paginated in.
+            final liveIds = live.map((e) => e.id).toSet();
+            final cutoff = live.isNotEmpty ? live.last.createdAt : null;
+            final tail = _confirmed
+                .where((e) => !liveIds.contains(e.id))
+                .where((e) => cutoff == null || e.createdAt.isBefore(cutoff))
+                .toList();
+            _confirmed = [...live, ...tail];
+            state = AsyncData(_combined());
+          },
+          onError: (Object error, StackTrace stack) {
+            // Only the first snapshot decides loading vs. error. After that, keep
+            // showing what we already have instead of wiping the feed.
+            if (!completer.isCompleted) {
+              completer.completeError(error, stack);
+            }
+          },
+        );
 
     return completer.future;
   }
@@ -143,7 +154,6 @@ class ActivityFeed extends _$ActivityFeed {
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return [...pendingList, ..._confirmed];
   }
-
 
   String addOptimisticPhoto({required String senderId}) {
     final tempId = 'pending-${DateTime.now().microsecondsSinceEpoch}';
@@ -159,13 +169,14 @@ class ActivityFeed extends _$ActivityFeed {
     return tempId;
   }
 
-
   void resolvePending(String tempId) {
+    if (!ref.mounted) return;
     _pending.remove(tempId);
     state = AsyncData(_combined());
   }
 
   void markPendingFailed(String tempId) {
+    if (!ref.mounted) return;
     final entry = _pending[tempId];
     if (entry == null) return;
     _pending[tempId] = entry.copyWith(isUploading: false, uploadFailed: true);
@@ -188,8 +199,13 @@ class ActivityFeed extends _$ActivityFeed {
       if (older.length < _pageSize) _hasMore = false;
       _confirmed = [..._confirmed, ...older];
       state = AsyncData(_combined());
+    } catch (_) {
+      // Non-critical: the user can scroll again to retry. `_hasMore` stays
+      // true and the loading flag still resets in `finally`.
     } finally {
-      ref.read(activityLoadingMoreProvider(groupId).notifier).state = false;
+      if (ref.mounted) {
+        ref.read(activityLoadingMoreProvider(groupId).notifier).state = false;
+      }
     }
   }
 }

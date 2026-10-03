@@ -602,7 +602,7 @@ final class ActivityFeedProvider
   }
 }
 
-String _$activityFeedHash() => r'b8d237514bd92549286dd1894b9405886d577949';
+String _$activityFeedHash() => r'9f175090fea486ae17106c0607d306d3215bc29d';
 
 final class ActivityFeedFamily extends $Family
     with
