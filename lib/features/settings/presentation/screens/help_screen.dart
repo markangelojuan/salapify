@@ -76,11 +76,11 @@ const List<FaqSection> kSalapifyFaqs = [
     title: 'Transactions & Income',
     entries: [
       FaqEntry(
-        question: 'How do I add income?',
+        question: 'How do I add a transaction or income?',
         answer:
-            'From the Transactions tab, add an income entry and mark it as '
-            'One-time or Recurring. Recurring income is added again '
-            'automatically at the start of each new period.',
+            'From the Transactions tab, tap + to add an expense or income entry. '
+            'For income, choose whether it\'s One-time or Recurring. Recurring entries are '
+            'added automatically at the start of each new period.',
       ),
       FaqEntry(
         question: 'How do transactions affect my budget?',

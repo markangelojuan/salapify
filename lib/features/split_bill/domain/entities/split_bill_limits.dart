@@ -4,7 +4,7 @@ class SplitBillLimits {
   static const int freeMaxActiveGroups = 1;
   static const int premiumMaxActiveGroups = 100;
 
-  static const int freeMaxBillsPerGroup = 2;
+  static const int freeMaxBillsPerGroup = 1;
   static const int premiumMaxBillsPerGroup = 20;
 
   static const int maxGroupMembers = 21;

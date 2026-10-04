@@ -144,7 +144,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       if (currentCount >= limit) {
         if (!context.mounted) return;
-        await _showPremiumUpsell(PremiumLimit.categories);
+        if (isPremium) {
+          CommonSnackbar.showWarning(
+            context,
+            'You\'ve reached the limit of '
+            '${BudgetLimits.premiumMaxActiveCategories} active categories. '
+            'Delete one to add a new one.',
+          );
+        } else {
+          await _showPremiumUpsell(PremiumLimit.categories);
+        }
         return;
       }
       if (context.mounted) {
@@ -174,7 +183,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       if (ownedCount >= limit) {
         if (!context.mounted) return;
-        await _showPremiumUpsell(PremiumLimit.groups);
+        if (isPremium) {
+          CommonSnackbar.showWarning(
+            context,
+            'You\'ve reached the limit of '
+            '${SplitBillLimits.premiumMaxActiveGroups} groups. '
+            'Delete a group to create a new one.',
+          );
+        } else {
+          await _showPremiumUpsell(PremiumLimit.groups);
+        }
         return;
       }
       if (context.mounted) {

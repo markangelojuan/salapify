@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 
-
 class CashFlowSummaryStrip extends StatelessWidget {
   const CashFlowSummaryStrip({
     super.key,
@@ -34,10 +33,7 @@ class CashFlowSummaryStrip extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 "Your expected income and savings this month. No history kept.",
-                style: TextStyle(
-                  fontSize: 11,
-                  color: colors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 11, color: colors.textSecondary),
               ),
             ],
           ),
@@ -54,9 +50,7 @@ class CashFlowSummaryStrip extends StatelessWidget {
                 colors.primary.withValues(alpha: 0.02),
               ],
             ),
-            border: Border.all(
-              color: colors.primary.withValues(alpha: 0.08),
-            ),
+            border: Border.all(color: colors.primary.withValues(alpha: 0.08)),
           ),
           child: Row(
             children: [
@@ -107,29 +101,32 @@ class _SummaryItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
-    return Column(
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            color: colors.textSecondary,
+    return Padding(
+      // Keeps text away from the dividers.
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: 11, color: colors.textSecondary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          amount.toStringAsFixed(2),
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            color: color,
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              amount.toStringAsFixed(2),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+              maxLines: 1,
+            ),
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -141,10 +138,6 @@ class _VerticalDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 32,
-      color: color,
-    );
+    return Container(width: 1, height: 32, color: color);
   }
 }

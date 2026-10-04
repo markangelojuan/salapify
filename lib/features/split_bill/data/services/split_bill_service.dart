@@ -211,16 +211,26 @@ class SplitBillFirestoreService {
 
   Future<void> createBillWithActivity(
     String groupId,
+    String billId,
     Map<String, dynamic> billData,
     Map<String, dynamic> activityData, {
     required int billLimit,
   }) async {
     final groupRef = _groups.doc(groupId);
-    final billRef = _bills(groupId).doc();
-    final activityRef = _activity(groupId).doc();
+    final billRef = _bills(groupId).doc(billId);
+    // Deterministic, so a retry can never produce a second "bill added" entry.
+    final activityRef = _activity(groupId).doc('billAdded_$billId');
 
     await _firestore.runTransaction((txn) async {
+      // All reads must come before any writes in a transaction.
       final groupSnap = await txn.get(groupRef);
+      final billSnap = await txn.get(billRef);
+
+      // Idempotency guard: an earlier attempt already committed (e.g. it was
+      // slow, the client timed out, and the user retried). Nothing to do —
+      // no second bill, no second activity entry, no second count increment.
+      if (billSnap.exists) return;
+
       if (!groupSnap.exists) {
         throw StateError('Group not found');
       }

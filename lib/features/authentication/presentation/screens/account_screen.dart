@@ -453,7 +453,7 @@ class _MembershipCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isPremium ? 'Premium' : 'Upgrade to Premium',
+                      isPremium ? 'Premium' : "See what's inside",
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
@@ -463,8 +463,8 @@ class _MembershipCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       isPremium
-                          ? 'Every limit removed on this account'
-                          : 'Remove category, group and bill limits',
+                          ? 'Higher limits unlocked on this account'
+                          : 'Lift category, group and bill limits',
                       style: TextStyle(
                         fontSize: 12,
                         color: colors.textSecondary,

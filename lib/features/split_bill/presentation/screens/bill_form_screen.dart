@@ -20,6 +20,7 @@ import 'package:salapify/features/split_bill/domain/entities/payment_status.dart
 import 'package:salapify/features/settings/domain/currency.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
+import 'package:uuid/uuid.dart';
 
 const double kMaxBillAmount = 1000000000;
 
@@ -52,6 +53,8 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
 
   final Map<String, String> _resolvedNames = {};
   final Set<String> _namesBeingResolved = {};
+
+  final String _newBillId = const Uuid().v4();
 
   Set<String>? _knownMemberIds;
 
@@ -186,6 +189,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
   }
 
   Future<void> _save(Map<String, String> names) async {
+    if (_isSaving) return;
     if (!_formKey.currentState!.validate()) return;
     if (_paidBy == null) return;
 
@@ -221,7 +225,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
       await controller.updateBill(updatedBill);
     } else {
       final bill = SplitBill(
-        id: '',
+        id: _newBillId,
         groupId: widget.group.id,
         title: _titleController.text.trim(),
         totalAmount: _total,
@@ -254,6 +258,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
   }
 
   Future<void> _delete() async {
+    if (_isSaving) return;
     final confirmed = await CommonConfirmationDialog.show(
       context,
       title: 'Delete this bill?',

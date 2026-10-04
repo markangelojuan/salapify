@@ -50,6 +50,9 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
   late IncomePeriod _period;
   late DateTime _date;
 
+  static const int _maxIntegerDigits = 12;
+  static const double _maxAmount = 999999999999.99;
+
   @override
   void initState() {
     super.initState();
@@ -197,9 +200,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                     decimal: true,
                   ),
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                      RegExp(r'^\d*\.?\d{0,2}'),
-                    ),
+                    _AmountInputFormatter(maxIntegerDigits: _maxIntegerDigits),
                   ],
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -208,6 +209,9 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                     final parsed = double.tryParse(value.trim());
                     if (parsed == null || parsed <= 0) {
                       return 'Enter a valid amount';
+                    }
+                    if (parsed > _maxAmount) {
+                      return 'Amount is too large';
                     }
                     return null;
                   },
@@ -334,5 +338,27 @@ class _DateField extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+
+class _AmountInputFormatter extends TextInputFormatter {
+  _AmountInputFormatter({
+    required this.maxIntegerDigits,
+    this.maxDecimalDigits = 2,
+  }) : _pattern = RegExp(
+         '^\\d{0,$maxIntegerDigits}(\\.\\d{0,$maxDecimalDigits})?\$',
+       );
+
+  final int maxIntegerDigits;
+  final int maxDecimalDigits;
+  final RegExp _pattern;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return _pattern.hasMatch(newValue.text) ? newValue : oldValue;
   }
 }

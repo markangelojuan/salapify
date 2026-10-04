@@ -135,7 +135,14 @@ class _SplitGroupDetailScreenState
             children: [
               const Icon(Icons.block_rounded, size: 18),
               const SizedBox(width: 8),
-              Text('Block $username'),
+              Flexible(
+                child: Text(
+                  'Block $username',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
+                ),
+              ),
             ],
           ),
         ),
@@ -145,7 +152,14 @@ class _SplitGroupDetailScreenState
             children: [
               const Icon(Icons.flag_outlined, size: 18),
               const SizedBox(width: 8),
-              Text('Report $username'),
+              Flexible(
+                child: Text(
+                  'Report $username',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
+                ),
+              ),
             ],
           ),
         ),

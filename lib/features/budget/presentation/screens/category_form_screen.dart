@@ -42,6 +42,9 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   static const String _fixedHint = 'Same amount each time.';
   static const String _variableHint = 'Amount may change each time.';
 
+  static const int _maxIntegerDigits = 12;
+  static const double _maxAmount = 999999999999.99;
+
   @override
   void initState() {
     super.initState();
@@ -51,7 +54,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
         BudgetingPeriod.monthly;
 
     _nameController.text = existing?.name ?? '';
-    _amountController.text = existing?.amount.toString() ?? '';
+    _amountController.text = existing?.amount.toStringAsFixed(2) ?? '';
     _type = existing?.type ?? BudgetCategoryType.variable;
     _frequency =
         existing?.frequency ??
@@ -175,9 +178,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                     decimal: true,
                   ),
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                      RegExp(r'^\d*\.?\d{0,2}'),
-                    ),
+                    _AmountInputFormatter(maxIntegerDigits: _maxIntegerDigits),
                   ],
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -186,6 +187,9 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                     final parsed = double.tryParse(value.trim());
                     if (parsed == null || parsed <= 0) {
                       return 'Enter a valid amount';
+                    }
+                    if (parsed > _maxAmount) {
+                      return 'Amount is too large';
                     }
                     return null;
                   },
@@ -366,5 +370,27 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
         );
       }).toList(),
     );
+  }
+}
+
+
+class _AmountInputFormatter extends TextInputFormatter {
+  _AmountInputFormatter({
+    required this.maxIntegerDigits,
+    this.maxDecimalDigits = 2,
+  }) : _pattern = RegExp(
+         '^\\d{0,$maxIntegerDigits}(\\.\\d{0,$maxDecimalDigits})?\$',
+       );
+
+  final int maxIntegerDigits;
+  final int maxDecimalDigits;
+  final RegExp _pattern;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return _pattern.hasMatch(newValue.text) ? newValue : oldValue;
   }
 }

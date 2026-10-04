@@ -20,7 +20,7 @@ part 'split_bill_controller.g.dart';
 @Riverpod(keepAlive: true)
 class SplitBillController extends _$SplitBillController {
   final _inFlightShares = <String>{};
-  
+
   @override
   FutureOr<void> build() {
     return null;
@@ -146,39 +146,47 @@ class SplitBillController extends _$SplitBillController {
     }
   }
 
+  final _inFlightBills = <String>{};
+
   Future<void> createBill(SplitBill bill) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final repo = ref.read(splitBillRepositoryProvider);
+    if (!_inFlightBills.add(bill.id)) return; // this bill is already saving
 
-      final group = await repo.getGroup(bill.groupId).withNetworkTimeout();
-      if (group == null) throw StateError('Group not found');
+    try {
+      state = const AsyncLoading();
+      state = await AsyncValue.guard(() async {
+        final repo = ref.read(splitBillRepositoryProvider);
 
-      final creatorIsPremium = await ref
-          .read(userRepositoryProvider)
-          .isPremiumUser(group.createdBy)
-          .withNetworkTimeout();
-      final limit = SplitBillLimits.maxBillsPerGroupFor(
-        isPremium: creatorIsPremium,
-      );
+        final group = await repo.getGroup(bill.groupId).withNetworkTimeout();
+        if (group == null) throw StateError('Group not found');
 
-      await repo
-          .createBillWithActivity(
-            bill,
-            ActivityEntry(
-              id: '',
-              groupId: bill.groupId,
-              senderId: bill.paidBy,
-              type: ActivityType.billAdded,
-              createdAt: DateTime.now(),
-              metadata: {'billTitle': bill.title, 'amount': bill.totalAmount},
-            ),
-            billLimit: limit,
-          )
-          .withNetworkTimeout();
+        final creatorIsPremium = await ref
+            .read(userRepositoryProvider)
+            .isPremiumUser(group.createdBy)
+            .withNetworkTimeout();
+        final limit = SplitBillLimits.maxBillsPerGroupFor(
+          isPremium: creatorIsPremium,
+        );
 
-      ref.invalidate(splitGroupProvider(bill.groupId));
-    });
+        await repo
+            .createBillWithActivity(
+              bill,
+              ActivityEntry(
+                id: '',
+                groupId: bill.groupId,
+                senderId: bill.paidBy,
+                type: ActivityType.billAdded,
+                createdAt: DateTime.now(),
+                metadata: {'billTitle': bill.title, 'amount': bill.totalAmount},
+              ),
+              billLimit: limit,
+            )
+            .withNetworkTimeout();
+
+        ref.invalidate(splitGroupProvider(bill.groupId));
+      });
+    } finally {
+      _inFlightBills.remove(bill.id);
+    }
   }
 
   /// Full edit of an existing bill. Enforce "only the creator can edit" in
@@ -252,7 +260,8 @@ class SplitBillController extends _$SplitBillController {
     String? actorId,
   }) async {
     final key = '$billId:$userId';
-    if (!_inFlightShares.add(key)) return; // same share already updating, ignore
+    if (!_inFlightShares.add(key))
+      return; // same share already updating, ignore
 
     try {
       state = const AsyncLoading();

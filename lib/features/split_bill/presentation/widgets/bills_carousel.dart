@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
 import 'package:salapify/features/split_bill/domain/entities/bill_share.dart';
 import 'package:salapify/features/split_bill/domain/entities/payment_status.dart';
@@ -110,7 +111,18 @@ class _AddBillCard extends ConsumerWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: atLimit
-              ? () => _showPremiumUpsell(context, ref)
+              ? () {
+                  if (isPremium) {
+                    CommonSnackbar.showWarning(
+                      context,
+                      'This group has reached its limit of '
+                      '${SplitBillLimits.premiumMaxBillsPerGroup} bills. '
+                      'Delete a bill to add a new one.',
+                    );
+                  } else {
+                    _showPremiumUpsell(context, ref);
+                  }
+                }
               : () => context.pushNamed(
                   AppRoutes.billForm.name,
                   extra: BillFormArgs(group: group),
