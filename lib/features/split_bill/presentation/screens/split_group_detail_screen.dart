@@ -22,6 +22,7 @@ import 'package:salapify/features/settings/domain/currency.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:salapify/router/routes.dart';
+import 'package:salapify/features/split_bill/presentation/game/whack_a_debt_screen.dart';
 
 class SplitGroupDetailScreen extends ConsumerStatefulWidget {
   const SplitGroupDetailScreen({super.key, required this.groupId});
@@ -243,6 +244,31 @@ class _SplitGroupDetailScreenState
     }
   }
 
+  Future<void> _openGame() async {
+    final members = ref.read(groupMembersProvider(widget.groupId)).value ?? {};
+    final score = await Navigator.of(context).push<int>(
+      MaterialPageRoute(
+        builder: (_) => withGradientBackground(
+          WhackADebtScreen(
+            avatarIds: members.values
+                .map((m) => m.avatarId)
+                .whereType<String>()
+                .toList(),
+          ),
+        ),
+      ),
+    );
+
+    if (score == null || score <= 0 || !mounted) return;
+
+    await ref
+        .read(splitBillControllerProvider.notifier)
+        .sendMessage(
+          groupId: widget.groupId,
+          text: '🎮 I scored $score in Whack-a-Debt!',
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<AsyncValue<List<ActivityEntry>>>(
@@ -303,7 +329,15 @@ class _SplitGroupDetailScreenState
         ref.watch(blockedUserIdsProvider).value ?? const <String>[];
 
     return Scaffold(
-      appBar: AppBar(title: Text(group.name)),
+      appBar: AppBar(
+        title: Text(group.name),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.sports_esports_rounded),
+            onPressed: _openGame,
+          ),
+        ],
+      ),
       body: SafeArea(
         child: billsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),

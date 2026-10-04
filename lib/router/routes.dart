@@ -43,6 +43,8 @@ Widget _withGradientBackground(Widget child) {
   );
 }
 
+Widget withGradientBackground(Widget child) => _withGradientBackground(child);
+
 enum AppRoutes {
   home,
   signIn,

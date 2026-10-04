@@ -68,6 +68,7 @@ dependencies:
   url_launcher: ^6.3.2
   showcaseview: ^5.1.0
   flutter_timezone: ^5.1.0
+  audioplayers: ^6.7.1
 
 dev_dependencies:
   flutter_test:
@@ -129,6 +130,24 @@ flutter:
     - assets/images/thrifty_pig.png
     - assets/images/google_logo.png
     - assets/images/chat_graphic.png
+    
+    - assets/images/game/covetous_snake_hit.png
+    - assets/images/game/frugal_shark_hit.png
+    - assets/images/game/greedy_cat_hit.png
+    - assets/images/game/luxurious_dog_hit.png
+    - assets/images/game/broke_eagle_hit.png
+    - assets/images/game/savvy_monkey_hit.png
+    - assets/images/game/prosperous_panda_hit.png
+    - assets/images/game/opulent_walrus_hit.png
+    - assets/images/game/stingy_turtle_hit.png
+    - assets/images/game/thrifty_pig_hit.png
+    - assets/images/game/enemy_rhino.png
+    - assets/images/game/enemy_rhino_hit.png
+
+    - assets/sounds/game/failed_whack.wav
+    - assets/sounds/game/successful_whack.wav
+    - assets/sounds/game/karaoke_score.wav
+    - assets/sounds/game/suspense_music.wav
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
