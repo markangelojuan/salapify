@@ -48,6 +48,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // Showcase keys
   final _fabKey = GlobalKey();
+  final _budgetKey = GlobalKey();
   final _txKey = GlobalKey();
   final _splitKey = GlobalKey();
   final _menuKey = GlobalKey();
@@ -109,7 +110,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     await prefs.setBool('seen_home_tour', true);
     if (!mounted) return;
-    ShowcaseView.get().startShowCase([_fabKey, _txKey, _splitKey, _menuKey]);
+    ShowcaseView.get().startShowCase([
+      _fabKey,
+      _budgetKey,
+      _txKey,
+      _splitKey,
+      _menuKey,
+    ]);
   }
 
   VoidCallback? _fabActionForIndex(int index) {
@@ -246,6 +253,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         fabOnPressed: _fabActionForIndex(_currentIndex),
         fabLoading: _isFabBusy,
         fabKey: _fabKey,
+        budgetKey: _budgetKey,
         txKey: _txKey,
         splitKey: _splitKey,
       ),
@@ -259,6 +267,7 @@ class _FloatingNavBar extends StatelessWidget {
   final VoidCallback? fabOnPressed;
   final bool fabLoading;
   final GlobalKey fabKey;
+  final GlobalKey budgetKey;
   final GlobalKey txKey;
   final GlobalKey splitKey;
 
@@ -267,6 +276,7 @@ class _FloatingNavBar extends StatelessWidget {
     required this.onTap,
     required this.fabOnPressed,
     required this.fabKey,
+    required this.budgetKey,
     required this.txKey,
     required this.splitKey,
     this.fabLoading = false,
@@ -307,6 +317,7 @@ class _FloatingNavBar extends StatelessWidget {
                       currentIndex: currentIndex,
                       onTap: onTap,
                       reserveCenterGap: fabOnPressed != null || fabLoading,
+                      budgetKey: budgetKey,
                       txKey: txKey,
                       splitKey: splitKey,
                     ),
@@ -354,6 +365,7 @@ class _Pill extends ConsumerWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
   final bool reserveCenterGap;
+  final GlobalKey budgetKey;
   final GlobalKey txKey;
   final GlobalKey splitKey;
 
@@ -361,6 +373,7 @@ class _Pill extends ConsumerWidget {
     required this.currentIndex,
     required this.onTap,
     required this.reserveCenterGap,
+    required this.budgetKey,
     required this.txKey,
     required this.splitKey,
   });
@@ -412,9 +425,21 @@ class _Pill extends ConsumerWidget {
             selectedIndex: currentIndex,
             onDestinationSelected: onTap,
             destinations: [
-              const NavigationDestination(
-                icon: Icon(Icons.account_balance_wallet_outlined),
-                selectedIcon: Icon(Icons.account_balance_wallet_rounded),
+              NavigationDestination(
+                icon: AppShowcase(
+                  showcaseKey: budgetKey,
+                  title: 'Plan Your Budget',
+                  description:
+                      'Set spending limits per category\nand see how much you have left.',
+                  child: const Icon(Icons.account_balance_wallet_outlined),
+                ),
+                selectedIcon: AppShowcase(
+                  showcaseKey: budgetKey,
+                  title: 'Plan Your Budget',
+                  description:
+                      'Set spending limits per category\nand see how much you have left.',
+                  child: const Icon(Icons.account_balance_wallet_rounded),
+                ),
                 label: 'Budget',
               ),
               NavigationDestination(

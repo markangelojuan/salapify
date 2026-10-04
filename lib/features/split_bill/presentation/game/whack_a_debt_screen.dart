@@ -35,19 +35,19 @@ class WhackADebtScreen extends StatefulWidget {
 
 class _WhackADebtScreenState extends State<WhackADebtScreen>
     with WidgetsBindingObserver {
-  // --- Tuning ---------------------------------------------------------------
   static const _totalSeconds = 30;
   static const _holeCount = 9;
   static const _hitLingerMs = 250;
-  static const _tallyMs = 6000; // length of the karaoke build-up
+  static const _tallyMs = 6000; 
   static const _firstSpawnDelayMs = 400;
   static const _enemyChance = 0.25;
   static const _enemyPenalty = 2;
-  // Difficulty ramps from 0 to 1 over the round: gap/life shrink by these.
   static const _gapStartMs = 700, _gapShrinkMs = 350;
   static const _lifeStartMs = 1100, _lifeShrinkMs = 500;
 
-  // Overlay card widths. The result modal is a little wider than the others.
+  static const _gridSpacing = 12.0;
+  static const _maxGridSide = 420.0;
+
   static const _overlayMaxWidth = 360.0;
   static const _resultMaxWidth = 390.0;
 
@@ -99,7 +99,6 @@ class _WhackADebtScreenState extends State<WhackADebtScreen>
     super.dispose();
   }
 
-  // --- Audio / lifecycle ----------------------------------------------------
 
   /// Resumes whichever track belongs to the current phase (no-op if muted).
   void _resumeAudioForPhase() {
@@ -124,7 +123,6 @@ class _WhackADebtScreenState extends State<WhackADebtScreen>
     if (!_audio.muted) _resumeAudioForPhase();
   }
 
-  // --- Game loop ------------------------------------------------------------
 
   void _clearHoles() {
     for (var i = 0; i < _holeCount; i++) {
@@ -219,7 +217,6 @@ class _WhackADebtScreenState extends State<WhackADebtScreen>
         .clamp(0, _totalSeconds);
   }
 
-  // --- UI -------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -255,14 +252,34 @@ class _WhackADebtScreenState extends State<WhackADebtScreen>
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: GridView.count(
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        for (var i = 0; i < _holeCount; i++) _hole(i, colors),
-                      ],
+                    // The grid is a square sized by the SMALLER of the
+                    // available width/height, so all 3x3 holes always fit
+                    // on one screen (phones, foldables, tablets, landscape).
+                    child: LayoutBuilder(
+                      builder: (context, box) {
+                        final side = min(
+                          min(box.maxWidth, box.maxHeight),
+                          _maxGridSide,
+                        );
+                        return Align(
+                          alignment: const Alignment(0, -0.3),
+                          child: SizedBox(
+                            width: side,
+                            height: side,
+                            child: GridView.count(
+                              crossAxisCount: 3,
+                              padding: EdgeInsets.zero,
+                              mainAxisSpacing: _gridSpacing,
+                              crossAxisSpacing: _gridSpacing,
+                              physics: const NeverScrollableScrollPhysics(),
+                              children: [
+                                for (var i = 0; i < _holeCount; i++)
+                                  _hole(i, colors),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -283,7 +300,7 @@ class _WhackADebtScreenState extends State<WhackADebtScreen>
   }
 
   Widget _targetImage(_Target t, double size) {
-    final diameter = size * 0.68; // same for avatars and rhino
+    final diameter = size * 0.72;
 
     if (t.kind == _Kind.enemy) {
       return CircleSprite(
@@ -299,7 +316,6 @@ class _WhackADebtScreenState extends State<WhackADebtScreen>
       assetPath: option == null
           ? null
           : (t.hit ? GameAssets.hitSprite(option.id) : option.assetPath),
-      // if a hit sprite is missing, fall back to the normal avatar
       fallbackPath: option?.assetPath,
       diameter: diameter,
     );

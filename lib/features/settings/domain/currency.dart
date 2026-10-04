@@ -5,7 +5,8 @@ enum AppCurrency {
   sgd('S\$', 'Singapore Dollar', 2),
   twd('NT\$', 'New Taiwan Dollar', 2),
   eur('€', 'Euro', 2),
-  thb('฿', 'Thai Baht', 2);
+  thb('฿', 'Thai Baht', 2),
+  inr('₹', 'Indian Rupee', 2);
 
   const AppCurrency(this.symbol, this.label, this.decimalDigits);
 

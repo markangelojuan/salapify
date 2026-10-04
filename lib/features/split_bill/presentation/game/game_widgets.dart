@@ -6,8 +6,6 @@ import 'game_assets.dart';
 AppColorsExt _colorsOf(BuildContext context) =>
     Theme.of(context).extension<AppColorsExt>()!;
 
-/// Primary action button, styled like the form screens' CommonButton
-/// (textPrimary fill, background-colored label) so it adapts to light/dark.
 ButtonStyle _pillFilled(AppColorsExt colors) => FilledButton.styleFrom(
       backgroundColor: colors.textPrimary,
       foregroundColor: colors.background,
@@ -16,9 +14,6 @@ ButtonStyle _pillFilled(AppColorsExt colors) => FilledButton.styleFrom(
       textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
     );
 
-// ---------------------------------------------------------------------------
-// Small building blocks
-// ---------------------------------------------------------------------------
 
 class GameStat extends StatelessWidget {
   const GameStat({super.key, required this.label, required this.value});
@@ -30,11 +25,11 @@ class GameStat extends StatelessWidget {
     final colors = _colorsOf(context);
     return Column(
       children: [
-        Text(label, style: TextStyle(fontSize: 12, color: colors.textSecondary)),
+        Text(label, style: TextStyle(fontSize: 14, color: colors.textSecondary)),
         Text(
           value,
           style: TextStyle(
-            fontSize: 24,
+            fontSize: 30,
             fontWeight: FontWeight.w800,
             color: colors.textPrimary,
           ),
@@ -154,9 +149,6 @@ class InstructionRow extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Overlay cards (one per non-playing phase)
-// ---------------------------------------------------------------------------
 
 /// Dimmed backdrop + pop-in card. Re-runs the pop-in whenever [phaseKey]
 /// changes, so pass the current phase. Use [maxWidth] to widen the card
