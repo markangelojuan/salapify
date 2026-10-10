@@ -329,12 +329,12 @@ class ResultCard extends StatelessWidget {
   final VoidCallback onDone;
 
   String get _message => score < 8
-      ? 'Just warming up!'
-      : score < 18
-          ? 'Nice whacking!'
-          : score < 28
-              ? 'Debt crusher!'
-              : 'Absolute legend!';
+    ? 'Just warming up!'
+    : score < 18
+        ? 'Nice whacking!'
+        : score < 30
+            ? 'You\'re a great whacker!'
+            : 'Whack superstar!';
 
   @override
   Widget build(BuildContext context) {

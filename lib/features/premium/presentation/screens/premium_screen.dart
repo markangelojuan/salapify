@@ -149,6 +149,11 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                           subtitle:
                               'Free plan: up to ${SplitBillLimits.freeMaxBillsPerGroup} per group',
                         ),
+                        _FeatureItem(
+                          icon: Icons.face_rounded,
+                          title: 'More beasts unlocked',
+                          subtitle: 'Extra avatars to personalize your profile',
+                        ),
                       ],
                     ),
                     const SizedBox(height: 28),

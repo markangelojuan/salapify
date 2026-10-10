@@ -245,7 +245,7 @@ class _WhackADebtScreenState extends State<WhackADebtScreen>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       GameStat(label: 'Time', value: '$_secondsLeft s'),
-                      GameStat(label: 'Score', value: '$_score'),
+                      GameStat(label: 'Score', value: _phase == _Phase.tallying ? '--' : '$_score',),
                     ],
                   ),
                 ),
