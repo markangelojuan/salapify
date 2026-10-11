@@ -60,16 +60,24 @@ class CommonTextField extends StatelessWidget {
           textInputAction: textInputAction,
           onFieldSubmitted: onFieldSubmitted,
           autovalidateMode: AutovalidateMode.onUserInteraction,
+          textAlignVertical: TextAlignVertical.center,
           style: TextStyle(
             color: colors.textPrimary,
             fontWeight: FontWeight.w600,
+            fontSize: 16,
+            height: 1.0,
           ),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: colors.textSecondary, fontSize: 15),
+            isDense: true,
+            hintStyle: TextStyle(
+              color: colors.textSecondary,
+              fontSize: 16,
+              height: 1.0,
+            ),
             prefixIcon: prefixText != null
                 ? Padding(
-                    padding: const EdgeInsets.only(left: 16, right: 8),
+                    padding: const EdgeInsets.only(left: 16, right: 6),
                     child: Center(
                       widthFactor: 1,
                       child: Text(
@@ -78,14 +86,23 @@ class CommonTextField extends StatelessWidget {
                           color: colors.primary,
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
+                          height: 1.0,
                         ),
                       ),
                     ),
                   )
                 : Icon(icon, color: colors.primary, size: 22),
+            prefixIconConstraints: prefixText != null
+                ? const BoxConstraints(minWidth: 0, minHeight: 0)
+                : const BoxConstraints(minWidth: 48, minHeight: 0),
             suffixIcon: suffix,
-            counterText:
-                (maxCharacters != null && !showCharacterCount) ? '' : null,
+            suffixIconConstraints: const BoxConstraints(
+              minWidth: 48,
+              minHeight: 0,
+            ),
+            counterText: (maxCharacters != null && !showCharacterCount)
+                ? ''
+                : null,
             contentPadding: const EdgeInsets.symmetric(
               vertical: 18,
               horizontal: 16,

@@ -38,12 +38,19 @@ class CurrencyOptionTile extends StatelessWidget {
                     : colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
-              child: Text(
-                currency.symbol,
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                  color: selected ? Colors.white : colorScheme.onSurface,
+              // Wide symbols (NZ$, HK$, NT$, NRs, KSh) shrink to fit.
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    currency.symbol,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      color: selected ? Colors.white : colorScheme.onSurface,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -53,7 +60,7 @@ class CurrencyOptionTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    currency.name.toUpperCase(),
+                    currency.code,
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,

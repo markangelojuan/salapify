@@ -610,12 +610,19 @@ class _CurrencyTile extends StatelessWidget {
                 color: AppColors.primary.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: Text(
-                currency.symbol,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                  color: AppColors.primary,
+              // Wide symbols (NZ$, HK$, NT$, NRs, KSh) shrink to fit.
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    currency.symbol,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: AppColors.primary,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -625,7 +632,7 @@ class _CurrencyTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    currency.name.toUpperCase(),
+                    currency.code,
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
@@ -740,21 +747,29 @@ class _CurrencyPickerSheet extends StatelessWidget {
                                   : colorScheme.surfaceContainerHighest,
                               shape: BoxShape.circle,
                             ),
-                            child: Text(
-                              currency.symbol,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                                color: isSelected
-                                    ? Colors.white
-                                    : colorScheme.onSurface,
+                            // Wide symbols shrink to fit the circle.
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 3),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  currency.symbol,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : colorScheme.onSurface,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                           const SizedBox(width: 14),
                           Expanded(
                             child: Text(
-                              currency.name.toUpperCase(),
+                              currency.code,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,

@@ -5,6 +5,7 @@ import 'package:salapify/features/shell/presentation/screens/home_screen.dart';
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:salapify/router/routes.dart';
+import 'dart:async';
 
 part 'push_notification_service.g.dart';
 
@@ -15,6 +16,16 @@ class PushNotificationService {
   final Ref _ref;
 
   final _localNotifications = FlutterLocalNotificationsPlugin();
+
+  StreamSubscription<RemoteMessage>? _onMessageSub;
+  StreamSubscription<RemoteMessage>? _onOpenedSub;
+  StreamSubscription<String>? _onTokenSub;
+
+  String? _initializedUid;
+  String? _initInFlightUid;
+  Future<void>? _initInFlight;
+  String? _savedToken; // last token saved this session, fallback for removal
+  int _generation = 0;
 
   bool _localInitialized = false;
 
@@ -36,21 +47,65 @@ class PushNotificationService {
 
   static const _reminderIds = [1001, 1002];
 
-  Future<void> initForUser(String uid) async {
-    await _messaging.requestPermission(alert: true, badge: true, sound: true);
-
-    await ensureLocalNotificationsInitialized();
-    _listenForForegroundMessages();
-    _listenForNotificationTaps();
-
-    final token = await _messaging.getToken();
-    if (token != null) {
-      await _userRepository.saveFcmToken(uid, token);
+  Future<void> initForUser(String uid) {
+    // Session switched users without clearForUser (disabled/revoked account).
+    if ((_initializedUid != null && _initializedUid != uid) ||
+        (_initInFlightUid != null && _initInFlightUid != uid)) {
+      _generation++;
+      _initializedUid = null;
+      _initInFlight = null;
+      _initInFlightUid = null;
     }
 
-    _messaging.onTokenRefresh.listen((newToken) {
-      _userRepository.saveFcmToken(uid, newToken);
+    if (_initializedUid == uid) return Future.value();
+    final inFlight = _initInFlight;
+    if (inFlight != null && _initInFlightUid == uid) return inFlight;
+
+    late final Future<void> future;
+    future = _initForUser(uid).whenComplete(() {
+      if (identical(_initInFlight, future)) {
+        _initInFlight = null;
+        _initInFlightUid = null;
+      }
     });
+    _initInFlight = future;
+    _initInFlightUid = uid;
+    return future;
+  }
+
+  Future<void> _initForUser(String uid) async {
+    final gen = _generation;
+    try {
+      await _messaging.requestPermission(alert: true, badge: true, sound: true);
+      await ensureLocalNotificationsInitialized();
+      if (gen != _generation) return;
+
+      _listenForForegroundMessages();
+      _listenForNotificationTaps();
+
+      final token = await _messaging.getToken().timeout(
+        const Duration(seconds: 10),
+      );
+      if (gen != _generation || token == null) return;
+
+      await _userRepository.saveFcmToken(uid, token);
+      if (gen != _generation) return;
+      _savedToken = token;
+
+      await _onTokenSub?.cancel();
+      if (gen != _generation) return;
+      _onTokenSub = _messaging.onTokenRefresh.listen((t) async {
+        try {
+          await _userRepository.saveFcmToken(uid, t);
+          _savedToken = t;
+        } catch (_) {}
+      });
+
+      // Marked done only after full success, so failures retry next time.
+      _initializedUid = uid;
+    } catch (_) {
+      // FCM unavailable: local reminders and the in-app list still work.
+    }
   }
 
   Future<void> _setupLocalNotifications() async {
@@ -79,7 +134,8 @@ class PushNotificationService {
   }
 
   void _listenForForegroundMessages() {
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    _onMessageSub?.cancel();
+    _onMessageSub = FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       final notification = message.notification;
       if (notification == null) return;
 
@@ -105,13 +161,12 @@ class PushNotificationService {
   }
 
   void _listenForNotificationTaps() {
-    // App was backgrounded (not killed) when tapped
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+    _onOpenedSub?.cancel();
+    _onOpenedSub = FirebaseMessaging.onMessageOpenedApp.listen((message) {
       final groupId = message.data['groupId'];
       if (groupId != null) _navigateToGroup(groupId);
     });
 
-    // App was fully killed, opened via notification tap
     FirebaseMessaging.instance.getInitialMessage().then((message) {
       final groupId = message?.data['groupId'];
       if (groupId != null) _navigateToGroup(groupId);
@@ -129,10 +184,34 @@ class PushNotificationService {
   }
 
   Future<void> clearForUser(String uid) async {
-    final token = await _messaging.getToken();
-    if (token != null) {
-      await _userRepository.removeFcmToken(uid, token);
+    _generation++; 
+    _initInFlight = null;
+    _initInFlightUid = null;
+
+    await _onTokenSub?.cancel(); // stop refresh-triggered saves
+    _onTokenSub = null;
+
+    String? token;
+    try {
+      token = await _messaging.getToken().timeout(const Duration(seconds: 3));
+    } catch (_) {}
+
+    final saved = _savedToken;
+    try {
+      for (final t in {if (token != null) token, if (saved != null) saved}) {
+        await _userRepository.removeFcmToken(uid, t);
+      }
+      _savedToken = null;
+    } catch (_) {
+      _initializedUid = null;
+      unawaited(initForUser(uid));
+      rethrow;
     }
+
+    await _onMessageSub?.cancel();
+    await _onOpenedSub?.cancel();
+    _onMessageSub = _onOpenedSub = null;
+    _initializedUid = null;
   }
 
   Future<void> ensureLocalNotificationsInitialized() async {

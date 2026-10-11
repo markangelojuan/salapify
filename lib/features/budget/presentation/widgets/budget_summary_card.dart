@@ -1,9 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 
-class BudgetSummaryCard extends StatelessWidget {
+class BudgetSummaryCard extends ConsumerWidget {
   const BudgetSummaryCard({
     super.key,
     required this.totalSpent,
@@ -59,8 +62,10 @@ class BudgetSummaryCard extends StatelessWidget {
   bool get _isOverBudget => totalSpent > totalAllocated;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
     final remaining = totalAllocated - totalSpent;
     final statusColor = _isOverBudget ? colors.error : colors.primary;
 
@@ -205,11 +210,10 @@ class BudgetSummaryCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      remaining.abs().toStringAsFixed(2),
+                      currency.formatAmount(remaining.abs()),
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
-                       
                         color: statusColor,
                       ),
                     ),
@@ -217,11 +221,13 @@ class BudgetSummaryCard extends StatelessWidget {
                     _AmountRow(
                       label: 'Spent',
                       amount: totalSpent,
+                      currency: currency,
                     ),
                     const SizedBox(height: 4),
                     _AmountRow(
                       label: 'Allocated',
                       amount: totalAllocated,
+                      currency: currency,
                     ),
                   ],
                 ),
@@ -250,10 +256,12 @@ class _AmountRow extends StatelessWidget {
   const _AmountRow({
     required this.label,
     required this.amount,
+    required this.currency,
   });
 
   final String label;
   final double amount;
+  final AppCurrency currency;
 
   @override
   Widget build(BuildContext context) {
@@ -269,7 +277,7 @@ class _AmountRow extends StatelessWidget {
           ),
         ),
         Text(
-          amount.toStringAsFixed(2),
+          currency.formatAmount(amount),
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 
-class CashFlowSummaryStrip extends StatelessWidget {
+class CashFlowSummaryStrip extends ConsumerWidget {
   const CashFlowSummaryStrip({
     super.key,
     required this.income,
@@ -14,8 +17,10 @@ class CashFlowSummaryStrip extends StatelessWidget {
   final double savings;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,6 +64,7 @@ class CashFlowSummaryStrip extends StatelessWidget {
                   label: 'Income',
                   amount: income,
                   color: colors.primary,
+                  currency: currency,
                 ),
               ),
               _VerticalDivider(color: colors.border),
@@ -67,6 +73,7 @@ class CashFlowSummaryStrip extends StatelessWidget {
                   label: 'Spent',
                   amount: spent,
                   color: colors.error,
+                  currency: currency,
                 ),
               ),
               _VerticalDivider(color: colors.border),
@@ -77,6 +84,7 @@ class CashFlowSummaryStrip extends StatelessWidget {
                   color: Theme.of(context).brightness == Brightness.dark
                       ? const Color(0xFF7EB6E8)
                       : const Color(0xFF3D7EBF),
+                  currency: currency,
                 ),
               ),
             ],
@@ -92,11 +100,13 @@ class _SummaryItem extends StatelessWidget {
     required this.label,
     required this.amount,
     required this.color,
+    required this.currency,
   });
 
   final String label;
   final double amount;
   final Color color;
+  final AppCurrency currency;
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +126,7 @@ class _SummaryItem extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              amount.toStringAsFixed(2),
+              currency.formatAmount(amount),
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,

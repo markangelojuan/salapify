@@ -63,7 +63,7 @@ class AuthController extends _$AuthController {
         emailVerified: false,
       );
       await authRepository.sendEmailVerification();
-      await ref.read(pushNotificationServiceProvider).initForUser(uid);
+      unawaited(ref.read(pushNotificationServiceProvider).initForUser(uid));
     });
   }
 
@@ -89,7 +89,7 @@ class AuthController extends _$AuthController {
         throw const AccountDisabledException();
       }
 
-      await ref.read(pushNotificationServiceProvider).initForUser(uid);
+      unawaited(ref.read(pushNotificationServiceProvider).initForUser(uid));
     });
   }
 
@@ -173,7 +173,7 @@ class AuthController extends _$AuthController {
         }
       }
 
-      await ref.read(pushNotificationServiceProvider).initForUser(uid);
+      unawaited(ref.read(pushNotificationServiceProvider).initForUser(uid));
     });
   }
 

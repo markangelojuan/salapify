@@ -20,6 +20,7 @@ import 'package:salapify/features/split_bill/domain/entities/payment_status.dart
 import 'package:salapify/features/settings/domain/currency.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
+import 'package:salapify/core/utils/amount_input_formatter.dart';
 import 'package:uuid/uuid.dart';
 
 const double kMaxBillAmount = 1000000000;
@@ -85,10 +86,12 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
     super.initState();
     final existing = widget.existingBill;
 
+    final currency = ref.read(currencySettingProvider).value ?? AppCurrency.php;
+
     if (existing != null) {
       _paidBy = existing.paidBy;
       _titleController.text = existing.title;
-      _totalController.text = existing.totalAmount.toString();
+      _totalController.text = currency.formatForInput(existing.totalAmount);
       _splitType = existing.splitType;
     } else {
       _paidBy = ref.read(authRepositoryProvider).currentUser?.uid;
@@ -99,7 +102,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
       if (existing != null && existing.splitType == SplitType.custom) {
         final share = existing.shares.firstWhereOrNull((s) => s.userId == id);
         if (share != null) {
-          controller.text = share.amountOwed.toString();
+          controller.text = currency.formatForInput(share.amountOwed);
         }
       }
       _customControllers[id] = controller;
@@ -173,12 +176,14 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
 
   Map<String, double> _computeShares() {
     final others = _participantIds.where((id) => id != _paidBy).toList();
+    final currency = ref.read(currencySettingProvider).value ?? AppCurrency.php;
 
     if (_splitType == SplitType.equal) {
       return SplitBalanceCalculator.splitEqually(
         totalAmount: _total,
         memberIds: _participantIds,
         paidBy: _paidBy!,
+        decimalDigits: currency.decimalDigits,
       );
     }
 
@@ -325,6 +330,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
             totalAmount: _total,
             memberIds: _participantIds,
             paidBy: _paidBy ?? '',
+            decimalDigits: currency.decimalDigits,
           )
         : <String, double>{};
 
@@ -408,15 +414,15 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                                   controller: _totalController,
                                   icon: Icons.attach_money_rounded,
                                   prefixText: currency.symbol,
-                                  hint: '0.00',
+                                  hint: currency.amountHint,
                                   label: 'Total amount',
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(
-                                        decimal: true,
-                                      ),
+                                  keyboardType: TextInputType.numberWithOptions(
+                                    decimal: currency.decimalDigits > 0,
+                                  ),
                                   inputFormatters: [
-                                    FilteringTextInputFormatter.allow(
-                                      RegExp(r'^\d*\.?\d{0,2}'),
+                                    AmountInputFormatter(
+                                      maxIntegerDigits: 10,
+                                      maxDecimalDigits: currency.decimalDigits,
                                     ),
                                   ],
                                   validator: (v) {
@@ -871,7 +877,7 @@ class _SharePreviewRow extends StatelessWidget {
             ),
           ),
           Text(
-            '${currency.symbol}${amount.toStringAsFixed(2)}',
+            '${currency.symbol}${amount.toStringAsFixed(currency.decimalDigits)}',
             style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 14,
@@ -941,12 +947,13 @@ class _CustomShareField extends StatelessWidget {
               child: TextFormField(
                 controller: controller,
                 textAlign: TextAlign.right,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+                keyboardType: TextInputType.numberWithOptions(
+                  decimal: currency.decimalDigits > 0,
                 ),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(
-                    RegExp(r'^\d{0,9}\.?\d{0,2}'),
+                  AmountInputFormatter(
+                    maxIntegerDigits: 9,
+                    maxDecimalDigits: currency.decimalDigits,
                   ),
                 ],
                 style: TextStyle(
@@ -958,7 +965,7 @@ class _CustomShareField extends StatelessWidget {
                   isDense: true,
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.zero,
-                  hintText: '0.00',
+                  hintText: currency.amountHint,
                   hintStyle: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 14,
@@ -1146,7 +1153,7 @@ class _ShareStatusRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${currency.symbol}${share.amountOwed.toStringAsFixed(2)} · $label',
+                  '${currency.symbol}${share.amountOwed.toStringAsFixed(currency.decimalDigits)} · $label',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/budget/domain/entities/budget_category.dart';
 import 'package:salapify/features/budget/presentation/constants/category_icons.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/transaction/domain/entities/transaction_entry.dart';
 
-class ExpenseRow extends StatelessWidget {
+class ExpenseRow extends ConsumerWidget {
   const ExpenseRow({
     super.key,
     required this.transaction,
@@ -23,8 +26,10 @@ class ExpenseRow extends StatelessWidget {
   final VoidCallback onDelete;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
 
     return Dismissible(
       key: ValueKey(transaction.id),
@@ -98,7 +103,7 @@ class ExpenseRow extends StatelessWidget {
                 ),
               ),
               Text(
-                '-${transaction.amount.toStringAsFixed(2)}',
+                '-${currency.formatAmount(transaction.amount)}',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 14,

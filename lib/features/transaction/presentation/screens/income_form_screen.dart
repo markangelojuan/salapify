@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:salapify/features/transaction/domain/entities/income_period.dart';
 import 'package:uuid/uuid.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/core/utils/amount_input_formatter.dart';
 import 'package:salapify/core/widgets/common_button.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/core/widgets/common_text_field.dart';
@@ -11,7 +12,6 @@ import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/transaction/domain/entities/income_source.dart';
 import 'package:salapify/features/transaction/presentation/controllers/income_source_controller.dart';
-import 'package:flutter/services.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
 
 const _monthNames = [
@@ -57,9 +57,11 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
   void initState() {
     super.initState();
     final existing = widget.existingSource;
+    final currency =
+        ref.read(currencySettingProvider).value ?? AppCurrency.php;
     _sourceController = TextEditingController(text: existing?.source ?? '');
     _amountController = TextEditingController(
-      text: existing != null ? existing.amount.toStringAsFixed(2) : '',
+      text: existing != null ? currency.formatForInput(existing.amount) : '',
     );
     _isRecurring = existing?.isRecurring ?? false;
     _recurringDay = existing?.recurringDay ?? DateTime.now().day;
@@ -194,13 +196,16 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                   controller: _amountController,
                   icon: Icons.attach_money_rounded,
                   prefixText: currency.symbol,
-                  hint: '0.00',
+                  hint: currency.amountHint,
                   label: 'Amount',
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
+                  keyboardType: TextInputType.numberWithOptions(
+                    decimal: currency.decimalDigits > 0,
                   ),
                   inputFormatters: [
-                    _AmountInputFormatter(maxIntegerDigits: _maxIntegerDigits),
+                    AmountInputFormatter(
+                      maxIntegerDigits: _maxIntegerDigits,
+                      maxDecimalDigits: currency.decimalDigits,
+                    ),
                   ],
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -338,27 +343,5 @@ class _DateField extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-
-class _AmountInputFormatter extends TextInputFormatter {
-  _AmountInputFormatter({
-    required this.maxIntegerDigits,
-    this.maxDecimalDigits = 2,
-  }) : _pattern = RegExp(
-         '^\\d{0,$maxIntegerDigits}(\\.\\d{0,$maxDecimalDigits})?\$',
-       );
-
-  final int maxIntegerDigits;
-  final int maxDecimalDigits;
-  final RegExp _pattern;
-
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    return _pattern.hasMatch(newValue.text) ? newValue : oldValue;
   }
 }

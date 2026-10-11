@@ -49,7 +49,7 @@ class SplitBalanceCalculator {
         final aOwesB = ledger[from]?[to] ?? 0;
         final bOwesA = ledger[to]?[from] ?? 0;
         final net = aOwesB - bOwesA;
-
+        if (net.abs() < 0.005) continue;
         if (net > 0) {
           result.add(NetBalance(fromUserId: from, toUserId: to, amount: net));
         } else if (net < 0) {
@@ -78,16 +78,23 @@ class SplitBalanceCalculator {
   /// Equal-split helper: divides [totalAmount] among [memberIds] (excluding
   /// the payer), rounding remainders onto the last share so amounts always
   /// sum exactly to totalAmount minus the payer's own share.
+  /// Equal-split helper: divides [totalAmount] among [memberIds] (excluding
+  /// the payer), rounding remainders onto the last share so amounts always
+  /// sum exactly to totalAmount minus the payer's own share.
+  ///
+  /// [decimalDigits] is the currency's minor-unit precision (2 for PHP/USD,
+  /// 0 for IDR/VND).
   static Map<String, double> splitEqually({
     required double totalAmount,
     required List<String> memberIds, // all members including payer
     required String paidBy,
+    int decimalDigits = 2,
   }) {
     final others = memberIds.where((id) => id != paidBy).toList();
     if (others.isEmpty) return {};
 
     final perHead = totalAmount / memberIds.length;
-    final rounded = double.parse(perHead.toStringAsFixed(2));
+    final rounded = double.parse(perHead.toStringAsFixed(decimalDigits));
 
     final shares = <String, double>{};
     double runningTotal = 0;
@@ -95,7 +102,9 @@ class SplitBalanceCalculator {
       if (i == others.length - 1) {
         // last member absorbs rounding difference
         final remaining = double.parse(
-          (perHead * others.length - runningTotal).toStringAsFixed(2),
+          (perHead * others.length - runningTotal).toStringAsFixed(
+            decimalDigits,
+          ),
         );
         shares[others[i]] = remaining;
       } else {

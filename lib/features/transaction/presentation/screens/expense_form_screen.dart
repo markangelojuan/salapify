@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/core/utils/amount_input_formatter.dart';
 import 'package:salapify/core/widgets/common_button.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/core/widgets/common_text_field.dart';
@@ -13,7 +14,6 @@ import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/transaction/domain/entities/transaction_entry.dart';
 import 'package:salapify/features/transaction/presentation/controllers/transaction_controller.dart';
-import 'package:flutter/services.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
 
 class ExpenseFormScreen extends ConsumerStatefulWidget {
@@ -43,8 +43,10 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
   void initState() {
     super.initState();
     final existing = widget.existingTransaction;
+    final currency =
+        ref.read(currencySettingProvider).value ?? AppCurrency.php;
     _amountController = TextEditingController(
-      text: existing != null ? existing.amount.toStringAsFixed(2) : '',
+      text: existing != null ? currency.formatForInput(existing.amount) : '',
     );
     _noteController = TextEditingController(text: existing?.note ?? '');
     _selectedCategoryId = existing?.categoryId;
@@ -158,13 +160,16 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                   controller: _amountController,
                   icon: Icons.attach_money_rounded,
                   prefixText: currency.symbol,
-                  hint: '0.00',
+                  hint: currency.amountHint,
                   label: 'Amount',
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
+                  keyboardType: TextInputType.numberWithOptions(
+                    decimal: currency.decimalDigits > 0,
                   ),
                   inputFormatters: [
-                    _AmountInputFormatter(maxIntegerDigits: _maxIntegerDigits),
+                    AmountInputFormatter(
+                      maxIntegerDigits: _maxIntegerDigits,
+                      maxDecimalDigits: currency.decimalDigits,
+                    ),
                   ],
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -322,27 +327,5 @@ class _CategoryPicker extends StatelessWidget {
         );
       }).toList(),
     );
-  }
-}
-
-
-class _AmountInputFormatter extends TextInputFormatter {
-  _AmountInputFormatter({
-    required this.maxIntegerDigits,
-    this.maxDecimalDigits = 2,
-  }) : _pattern = RegExp(
-         '^\\d{0,$maxIntegerDigits}(\\.\\d{0,$maxDecimalDigits})?\$',
-       );
-
-  final int maxIntegerDigits;
-  final int maxDecimalDigits;
-  final RegExp _pattern;
-
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    return _pattern.hasMatch(newValue.text) ? newValue : oldValue;
   }
 }
