@@ -38,31 +38,31 @@ class AnimatedGreeting extends StatefulWidget {
       Greeting('Hello'), // English
       Greeting('Kumusta'), // Filipino
       Greeting('Ciao'), // Italian
-      Greeting('Halo'), // Indonesian
-      Greeting('Helo'), // Malay
-      Greeting('สวัสดี'), // Thai
-      Greeting('হ্যালো'), // Bengali
       Greeting('नमस्ते'), // Hindi / Nepali
+      Greeting('Halo'), // Indonesian
+      Greeting('สวัสดี'), // Thai
+      Greeting('Merhaba'), // Turkish
+      Greeting('হ্যালো'), // Bengali
+      Greeting('Cześć'), // Polish
       Greeting('你好', locale: _zhTW), // Chinese (Taiwan / Hong Kong)
       Greeting('Hola'), // Spanish
       Greeting('Hallo'), // Dutch
-      Greeting('Merhaba'), // Turkish
-      Greeting('Cześć'), // Polish
+      Greeting('Helo'), // Malay
     ],
     GreetingMode.welcome: [
-      Greeting('Welcome'), // English
       Greeting('Maligayang pagdating'), // Filipino
+      Greeting('Welcome'), // English
+      Greeting('ยินดีต้อนรับ'), // Thai
       Greeting('Benvenuto'), // Italian
       Greeting('Selamat datang'), // Indonesian / Malay
-      Greeting('ยินดีต้อนรับ'), // Thai
-      Greeting('স্বাগতম'), // Bengali
-      Greeting('स्वागत है'), // Hindi
-      Greeting('歡迎', locale: _zhTW), // Chinese (Taiwan / Hong Kong)
-      Greeting('Bienvenido'), // Spanish
-      Greeting('Welkom'), // Dutch
       Greeting('Hoş geldiniz'), // Turkish
+      Greeting('স্বাগতম'), // Bengali
+      Greeting('Bienvenido'), // Spanish
+      Greeting('स्वागत है'), // Hindi
+      Greeting('Welkom'), // Dutch
       Greeting('स्वागत छ'), // Nepali
       Greeting('Witamy'), // Polish
+      Greeting('歡迎', locale: _zhTW), // Chinese (Taiwan / Hong Kong)
     ],
   };
 

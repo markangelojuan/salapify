@@ -126,7 +126,7 @@ class _SummaryItem extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              currency.formatAmount(amount),
+              currency.formatCompactWithSymbol(amount),
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,

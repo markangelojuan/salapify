@@ -209,12 +209,20 @@ class BudgetSummaryCard extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      currency.formatAmount(remaining.abs()),
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: statusColor,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        currency.formatCompactWithSymbol(
+                          remaining.abs(),
+                          threshold: 10000,
+                        ),
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: statusColor,
+                        ),
+                        maxLines: 1,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -276,12 +284,16 @@ class _AmountRow extends StatelessWidget {
             color: colors.textSecondary,
           ),
         ),
-        Text(
-          currency.formatAmount(amount),
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: colors.textPrimary,
+        Flexible(
+          child: Text(
+            currency.formatCompactWithSymbol(amount, threshold: 1000000),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: colors.textPrimary,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

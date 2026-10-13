@@ -2,9 +2,10 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
 import 'package:salapify/features/split_bill/domain/entities/bill_share.dart';
 import 'package:salapify/features/split_bill/domain/entities/payment_status.dart';
@@ -24,14 +25,12 @@ class BillsCarousel extends ConsumerWidget {
     required this.group,
     required this.currentUid,
     required this.names,
-    required this.currency,
   });
 
   final List<SplitBill> bills;
   final SplitGroup group;
   final String? currentUid;
   final Map<String, String> names;
-  final NumberFormat currency;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -51,7 +50,6 @@ class BillsCarousel extends ConsumerWidget {
             group: group,
             currentUid: currentUid,
             names: names,
-            currency: currency,
           );
         },
       ),
@@ -172,18 +170,18 @@ class _BillCard extends ConsumerWidget {
     required this.group,
     required this.currentUid,
     required this.names,
-    required this.currency,
   });
 
   final SplitBill bill;
   final SplitGroup group;
   final String? currentUid;
   final Map<String, String> names;
-  final NumberFormat currency;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
     final isPayer = bill.paidBy == currentUid;
     final myShare = bill.shares.firstWhereOrNull((s) => s.userId == currentUid);
 
@@ -246,7 +244,7 @@ class _BillCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Total ${currency.format(bill.totalAmount)}',
+                  'Total ${currency.formatCompactWithSymbol(bill.totalAmount)}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -315,6 +313,8 @@ class _BillCard extends ConsumerWidget {
     BillShare share,
     AppColorsExt colors,
   ) {
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
     final status = share.status;
     final amount = share.amountOwed;
 
@@ -374,7 +374,7 @@ class _BillCard extends ConsumerWidget {
       children: [
         Expanded(
           child: Text(
-            'You owe ${currency.format(amount)}',
+            'You owe ${currency.formatCompactWithSymbol(amount, threshold: 10000)}',
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 12,

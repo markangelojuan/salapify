@@ -37,7 +37,7 @@ enum AppCurrency {
   final String label;
   final int decimalDigits;
 
-    /// ISO-style code for display ("TRY", not "TRY_").
+  /// ISO-style code for display ("TRY", not "TRY_").
   String get code => name.replaceAll('_', '').toUpperCase();
 
   /// Input hint matching this currency's decimals: "0.00" or "0".
@@ -47,9 +47,34 @@ enum AppCurrency {
   /// Formats an amount for a text field, e.g. 150.5 -> "150.50" or "151".
   String formatForInput(double amount) => amount.toStringAsFixed(decimalDigits);
 
-    /// Formats an amount for display, e.g. 1500.5 -> "1500.50" or "1501".
-  String formatAmount(double amount) =>
-    NumberFormat.decimalPatternDigits(decimalDigits: decimalDigits).format(amount);
+  /// Formats an amount for display, e.g. 1500.5 -> "1500.50" or "1501".
+  String formatAmount(double amount) => NumberFormat.decimalPatternDigits(
+    decimalDigits: decimalDigits,
+  ).format(amount);
+
+  String formatCompactWithSymbol(double amount, {double threshold = 1000000}) {
+    final sign = amount < 0 ? '-' : '';
+    final abs = amount.abs();
+
+    // 0-decimal currencies (IDR, VND) have large nominal values and shorter
+    // strings, so they show full digits longer.
+    final cutoff = decimalDigits == 0 ? 100000000.0 : 1000000.0;
+    if (abs < cutoff) return '$sign$symbol${formatAmount(abs)}';
+
+    const units = [(1e12, 'T'), (1e9, 'B'), (1e6, 'M')];
+    for (final (size, suffix) in units) {
+      if (abs >= size) {
+        // Truncate (not round) to hundredths so we never overstate the
+        // amount or roll 999.999M over to "1000M".
+        final hundredths = (abs / (size / 100)).floor();
+        final whole = hundredths ~/ 100;
+        final frac = hundredths % 100;
+        final fracText = frac == 0
+            ? ''
+            : '.${frac.toString().padLeft(2, '0').replaceFirst(RegExp(r'0$'), '')}';
+        return '$sign$symbol$whole$fracText$suffix';
+      }
+    }
+    return '$sign$symbol${formatAmount(abs)}';
+  }
 }
-
-

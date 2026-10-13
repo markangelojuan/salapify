@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_bill.dart';
 import 'package:salapify/features/split_bill/domain/split_balance_calculator.dart';
 
-class BalanceSummaryCard extends StatelessWidget {
+class BalanceSummaryCard extends ConsumerWidget {
   const BalanceSummaryCard({
     super.key,
     required this.bills,
     required this.currentUid,
-    required this.currency,
   });
 
   final List<SplitBill> bills;
   final String? currentUid;
-  final NumberFormat currency;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (currentUid == null) return const SizedBox.shrink();
+
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
 
     final balances = SplitBalanceCalculator.forUser(bills, currentUid!);
     final totalYouOwe = balances.youOwe.fold<double>(0, (a, b) => a + b.amount);
@@ -71,7 +74,7 @@ class BalanceSummaryCard extends StatelessWidget {
                   child: _BalanceItem(
                     icon: Icons.south_west_rounded,
                     label: 'Owed to you',
-                    amount: currency.format(totalOwedToYou),
+                    amount: currency.formatCompactWithSymbol(totalOwedToYou),
                     color: Colors.green[700]!,
                   ),
                 ),
@@ -84,7 +87,7 @@ class BalanceSummaryCard extends StatelessWidget {
                   child: _BalanceItem(
                     icon: Icons.north_east_rounded,
                     label: 'You owe',
-                    amount: currency.format(totalYouOwe),
+                    amount: currency.formatCompactWithSymbol(totalYouOwe),
                     color: Colors.red[600]!,
                   ),
                 ),
@@ -109,36 +112,44 @@ class _BalanceItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 30,
-          height: 30,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color.withValues(alpha: 0.12),
+    return Padding(
+      // Keeps text away from the divider.
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withValues(alpha: 0.12),
+            ),
+            child: Icon(icon, size: 16, color: color),
           ),
-          child: Icon(icon, size: 16, color: color),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            color: AppColors.textPrimary.withValues(alpha: 0.6),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: AppColors.textPrimary.withValues(alpha: 0.6),
+            ),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          amount,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: color,
+          const SizedBox(height: 2),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              amount,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+              maxLines: 1,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

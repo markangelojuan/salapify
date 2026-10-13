@@ -369,7 +369,6 @@ class _SplitGroupDetailScreenState
                         BalanceSummaryCard(
                           bills: bills,
                           currentUid: currentUid,
-                          currency: currencyFormat,
                         ),
                         const SizedBox(height: 12),
                         BillsCarousel(
@@ -377,7 +376,6 @@ class _SplitGroupDetailScreenState
                           group: group,
                           currentUid: currentUid,
                           names: names,
-                          currency: currencyFormat,
                         ),
                         Divider(
                           height: 24,
