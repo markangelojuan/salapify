@@ -243,7 +243,7 @@ class ReadyCard extends StatelessWidget {
         const SizedBox(height: 24),
         InstructionRow(
           leading: CircleSprite(assetPath: sampleAvatarPath, diameter: 48),
-          title: 'Whack your friends',
+          title: 'Whack the beasts',
           subtitle: '+1 point for every hit',
           accent: colors.primary,
         ),

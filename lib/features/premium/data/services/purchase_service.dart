@@ -89,7 +89,6 @@ class PurchaseService {
     return _cachedProduct;
   }
 
-  /// The store-formatted price (e.g. "₱59.00"), or null if not loaded yet.
   Future<String?> premiumPriceLabel() async {
     if (!await _iap.isAvailable()) return null;
     return (await _loadProduct())?.price;

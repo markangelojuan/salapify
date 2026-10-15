@@ -64,7 +64,7 @@ class _AddBillCard extends ConsumerWidget {
 
   Future<void> _showPremiumUpsell(BuildContext context, WidgetRef ref) async {
     final purchaseService = ref.read(purchaseServiceProvider);
-    final price = await purchaseService.premiumPriceLabel() ?? '₱59';
+    final price = await purchaseService.premiumPriceLabel() ?? '₱39';
     if (!context.mounted) return;
 
     await showPremiumUpsellSheet(

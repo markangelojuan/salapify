@@ -56,9 +56,8 @@ enum AppCurrency {
     final sign = amount < 0 ? '-' : '';
     final abs = amount.abs();
 
-    // 0-decimal currencies (IDR, VND) have large nominal values and shorter
-    // strings, so they show full digits longer.
-    final cutoff = decimalDigits == 0 ? 100000000.0 : 1000000.0;
+    // Show the full value up to 99,999,999.99; abbreviate from 100M upward.
+    const cutoff = 1e8;
     if (abs < cutoff) return '$sign$symbol${formatAmount(abs)}';
 
     const units = [(1e12, 'T'), (1e9, 'B'), (1e6, 'M')];

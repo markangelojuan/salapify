@@ -114,9 +114,10 @@ class PushNotificationService {
     await _localNotifications.initialize(
       settings: initSettings,
       onDidReceiveNotificationResponse: (response) {
-        // Handles taps while app is in foreground/background but still alive
-        final groupId = response.payload;
-        if (groupId != null) _navigateToGroup(groupId);
+        // Handles taps while app is in foreground/background but still alive.
+        // Payload is a groupId for chat/bill notifications; reminders carry
+        // none (null or empty), which _navigateToGroup sends to /home.
+        _navigateToGroup(response.payload);
       },
     );
 
@@ -173,8 +174,16 @@ class PushNotificationService {
     });
   }
 
-  void _navigateToGroup(String groupId) {
+  void _navigateToGroup(String? groupId) {
     final router = _ref.read(goRouterProvider);
+
+    // Budget reminders (and any payload-less notification): open Home on Budget.
+    if (groupId == null || groupId.isEmpty) {
+      _ref.read(homeTabIndexProvider.notifier).state = 0;
+      router.go('/home');
+      return;
+    }
+
     _ref.read(homeTabIndexProvider.notifier).state = 2;
     router.go('/home');
     router.pushNamed(
@@ -184,7 +193,7 @@ class PushNotificationService {
   }
 
   Future<void> clearForUser(String uid) async {
-    _generation++; 
+    _generation++;
     _initInFlight = null;
     _initInFlightUid = null;
 
@@ -229,7 +238,7 @@ class PushNotificationService {
     );
     await _scheduleMonthly(
       id: 1002,
-      day: 15, // was 16
+      day: 15,
       title: 'Midmonth check-in 💸',
       body: "Don't forget to log your recent expenses.",
     );
@@ -258,7 +267,7 @@ class PushNotificationService {
       id: id,
       title: title,
       body: body,
-      scheduledDate: scheduled, // was positional, now named
+      scheduledDate: scheduled,
       notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           _reminderChannel.id,

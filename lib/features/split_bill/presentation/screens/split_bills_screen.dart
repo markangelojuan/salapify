@@ -10,6 +10,8 @@ import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 import 'package:salapify/features/split_bill/domain/split_balance_calculator.dart';
 import 'package:salapify/features/split_bill/presentation/controllers/split_bill_controller.dart';
 import 'package:salapify/features/split_bill/presentation/widgets/guest_split_bills_promo.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/router/routes.dart';
@@ -345,30 +347,38 @@ class _Pill extends StatelessWidget {
 /// Balance-state pill for a single group — mirrors the color language of
 /// SplitGroupDetailScreen's _BalanceSummary (green = owed to you, red = you
 /// owe) so the list and detail screens read as the same system.
-class _BalancePill extends StatelessWidget {
+class _BalancePill extends ConsumerWidget {
   const _BalancePill({required this.bills, required this.currentUid});
 
   final List<SplitBill> bills;
   final String currentUid;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
+
     final balances = SplitBalanceCalculator.forUser(bills, currentUid);
     final youOwe = balances.youOwe.fold<double>(0, (a, b) => a + b.amount);
     final owedToYou = balances.owedToYou.fold<double>(
       0,
       (a, b) => a + b.amount,
     );
-    final net = owedToYou - youOwe;
+
+    // Round to the currency's decimals so floating-point leftovers
+    // (e.g. 0.0000001) still count as "Settled".
+    final net = double.parse(
+      (owedToYou - youOwe).toStringAsFixed(currency.decimalDigits),
+    );
 
     if (net == 0) {
       return _Pill(label: 'Settled', color: colors.primary);
     }
+
     final isPositive = net > 0;
-    final label = isPositive
-        ? 'Owed ₱${net.toStringAsFixed(0)}'
-        : 'You owe ₱${net.abs().toStringAsFixed(0)}';
+    final amountText = '${currency.symbol}${currency.formatAmount(net.abs())}';
+    final label = isPositive ? 'Owed $amountText' : 'You owe $amountText';
     return _Pill(
       label: label,
       color: isPositive ? colors.primary : colors.error,

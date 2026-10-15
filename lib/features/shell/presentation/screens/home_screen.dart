@@ -39,8 +39,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  int _currentIndex = 0;
-
   // Guards the FAB's async pre-checks (premium/limit lookups) against
   // double-taps and gives visual feedback instead of appearing to do
   // nothing while offline requests are in flight.
@@ -228,9 +226,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    
+    final currentIndex = ref.watch(homeTabIndexProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(_titles[_currentIndex]),
+        title: Text(_titles[currentIndex]),
         leading: Builder(
           builder: (ctx) => AppShowcase(
             showcaseKey: _menuKey,
@@ -246,11 +247,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       drawer: const AppDrawer(),
       extendBody: true,
-      body: IndexedStack(index: _currentIndex, children: _screens),
+      body: IndexedStack(index: currentIndex, children: _screens),
       bottomNavigationBar: _FloatingNavBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        fabOnPressed: _fabActionForIndex(_currentIndex),
+        currentIndex: currentIndex,
+        onTap: (index) => ref.read(homeTabIndexProvider.notifier).state = index,
+        fabOnPressed: _fabActionForIndex(currentIndex),
         fabLoading: _isFabBusy,
         fabKey: _fabKey,
         budgetKey: _budgetKey,
