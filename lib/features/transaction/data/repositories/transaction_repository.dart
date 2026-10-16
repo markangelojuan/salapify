@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:salapify/core/database/app_database.dart';
-import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/transaction/data/mappers/transaction_mapper.dart';
 import 'package:salapify/features/transaction/domain/entities/transaction_entry.dart';
 
@@ -68,36 +67,36 @@ class TransactionRepository {
         );
   }
 
-  Future<List<String>> deleteStaleAutofillTransactions({
-    required BudgetingPeriod globalPeriod,
-    required int firstHalfEndDay,
-    required DateTime now,
-  }) async {
-    final rows = await (_db.select(
-      _db.transactions,
-    )..where((t) => t.id.like('autofill_%') & t.isDeleted.equals(false))).get();
+  // Future<List<String>> deleteStaleAutofillTransactions({
+  //   required BudgetingPeriod globalPeriod,
+  //   required int firstHalfEndDay,
+  //   required DateTime now,
+  // }) async {
+  //   final rows = await (_db.select(
+  //     _db.transactions,
+  //   )..where((t) => t.id.like('autofill_%') & t.isDeleted.equals(false))).get();
 
-    bool inCurrentPeriod(DateTime date) {
-      if (date.year != now.year || date.month != now.month) return false;
-      if (globalPeriod == BudgetingPeriod.monthly) return true;
-      final isCurrentFirstHalf = now.day <= firstHalfEndDay;
-      final isDateFirstHalf = date.day <= firstHalfEndDay;
-      return isCurrentFirstHalf == isDateFirstHalf;
-    }
+  //   bool inCurrentPeriod(DateTime date) {
+  //     if (date.year != now.year || date.month != now.month) return false;
+  //     if (globalPeriod == BudgetingPeriod.monthly) return true;
+  //     final isCurrentFirstHalf = now.day <= firstHalfEndDay;
+  //     final isDateFirstHalf = date.day <= firstHalfEndDay;
+  //     return isCurrentFirstHalf == isDateFirstHalf;
+  //   }
 
-    final staleIds = rows
-        .where((r) => !inCurrentPeriod(r.date))
-        .map((r) => r.id)
-        .toList();
+  //   final staleIds = rows
+  //       .where((r) => !inCurrentPeriod(r.date))
+  //       .map((r) => r.id)
+  //       .toList();
 
-    if (staleIds.isEmpty) return const [];
+  //   if (staleIds.isEmpty) return const [];
 
-    await (_db.delete(
-      _db.transactions,
-    )..where((t) => t.id.isIn(staleIds))).go();
+  //   await (_db.delete(
+  //     _db.transactions,
+  //   )..where((t) => t.id.isIn(staleIds))).go();
 
-    return staleIds;
-  }
+  //   return staleIds;
+  // }
 
   /// Permanently deletes every transaction (regardless of sync/deleted
   /// flags) with a `date` older than [cutoff].

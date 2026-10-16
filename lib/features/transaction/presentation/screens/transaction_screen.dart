@@ -63,10 +63,8 @@ class _TransactionScreenState extends ConsumerState<TransactionScreen>
       globalPeriod: globalPeriod,
       firstHalfEndDay: firstHalfEndDay,
     );
-    final spent = TransactionTotalsCalculator.totalSpent(
+    final spent = TransactionTotalsCalculator.totalSpentForMonth(
       transactions: transactionsAsync.value ?? [],
-      globalPeriod: globalPeriod,
-      firstHalfEndDay: firstHalfEndDay,
     );
     final savings = income - spent;
 
@@ -98,10 +96,7 @@ class _TransactionScreenState extends ConsumerState<TransactionScreen>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: const [
-                ExpensesTab(),
-                IncomeTab(),
-              ],
+              children: const [ExpensesTab(), IncomeTab()],
             ),
           ),
         ],

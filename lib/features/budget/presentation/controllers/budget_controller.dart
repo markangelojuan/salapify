@@ -65,25 +65,6 @@ class PeriodResetGuard extends _$PeriodResetGuard {
 
     if (lastKey != currentKey) {
       await ref.read(budgetRepositoryProvider).resetAllCompleted();
-      final removedIds = await ref
-          .read(transactionRepositoryProvider)
-          .deleteStaleAutofillTransactions(
-            globalPeriod: globalPeriod,
-            firstHalfEndDay: firstHalfEndDay,
-            now: DateTime.now(),
-          );
-
-      final isOnline = ref.read(isOnlineProvider).value ?? true;
-      if (uid != null && isOnline && removedIds.isNotEmpty) {
-        final syncService = ref.read(transactionSyncServiceProvider);
-        for (final id in removedIds) {
-          try {
-            await syncService.deleteTransactionRemote(uid, id);
-          } catch (_) {
-            //  offline/guest just leaves an orphaned doc
-          }
-        }
-      }
       await settingsRepo.setLastResetPeriodKey(currentKey, uid);
     }
   }
@@ -122,7 +103,7 @@ class BudgetActions extends _$BudgetActions {
     final result = await AsyncValue.guard(() async {
       final isPremium =
           (await ref.read(entitlementRepositoryProvider).watch().first)
-              .isPremium; 
+              .isPremium;
       final limit = BudgetLimits.maxActiveCategoriesFor(isPremium: isPremium);
       final currentCount = await ref
           .read(budgetRepositoryProvider)
@@ -221,6 +202,7 @@ class BudgetActions extends _$BudgetActions {
                 note: 'Remaining budget (auto)',
                 date: now,
                 createdAt: now,
+                updatedAt: now,
               ),
             );
           }
@@ -307,12 +289,13 @@ class BudgetActions extends _$BudgetActions {
 class BudgetCompletionGuard extends _$BudgetCompletionGuard {
   @override
   Future<void> build() async {
+    await ref.watch(periodResetGuardProvider.future);
     final categories = await ref.watch(budgetCategoriesProvider.future);
     final transactions = await ref.watch(transactionsProvider.future);
-    final globalPeriod =
-        await ref.watch(budgetingPeriodSettingProvider.future);
-    final firstHalfEndDay =
-        await ref.watch(firstHalfEndDaySettingProvider.future);
+    final globalPeriod = await ref.watch(budgetingPeriodSettingProvider.future);
+    final firstHalfEndDay = await ref.watch(
+      firstHalfEndDaySettingProvider.future,
+    );
     final now = DateTime.now();
 
     for (final category in categories) {
@@ -336,10 +319,12 @@ class BudgetCompletionGuard extends _$BudgetCompletionGuard {
       if (shouldBeCompleted != category.isCompleted) {
         ref
             .read(budgetCompletionEventProvider.notifier)
-            .emit(BudgetCompletionEvent(
-              categoryName: category.name,
-              isCompleted: shouldBeCompleted,
-            ));
+            .emit(
+              BudgetCompletionEvent(
+                categoryName: category.name,
+                isCompleted: shouldBeCompleted,
+              ),
+            );
         await ref
             .read(budgetActionsProvider.notifier)
             .setCompleted(category, shouldBeCompleted);
@@ -356,7 +341,6 @@ class BudgetCompletionEvent {
   final String categoryName;
   final bool isCompleted;
 }
-
 
 @riverpod
 class BudgetCompletionEventNotifier extends _$BudgetCompletionEventNotifier {

@@ -59,4 +59,18 @@ class TransactionTotalsCalculator {
     final isDateFirstHalf = date.day <= firstHalfEndDay;
     return isCurrentFirstHalf == isDateFirstHalf;
   }
+
+   static double totalSpentForMonth({
+    required List<TransactionEntry> transactions,
+  }) {
+    final now = DateTime.now();
+    return transactions
+        .where(
+          (t) =>
+              !t.isDeleted &&
+              t.date.year == now.year &&
+              t.date.month == now.month,
+        )
+        .fold(0.0, (sum, t) => sum + t.amount);
+  }
 }
