@@ -158,8 +158,8 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             textInputAction: TextInputAction.next,
             icon: Icons.lock_open_rounded,
             maxCharacters: 120,
-            hint: "Enter your password",
-            label: "Password",
+            hint: "Enter your password / PIN",
+            label: "Password / PIN",
             isPassword: true,
             isPasswordVisible: _isPasswordVisible,
             validator: (value) {
@@ -185,8 +185,8 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             textInputAction: TextInputAction.done,
             icon: Icons.lock_outline_rounded,
             maxCharacters: 120,
-            hint: "Re-enter your password",
-            label: "Confirm Password",
+            hint: "Re-enter your password / PIN",
+            label: "Confirm Password / PIN",
             isPassword: true,
             isPasswordVisible: _isConfirmPasswordVisible,
             onFieldSubmitted: (_) {

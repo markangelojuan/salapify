@@ -108,7 +108,7 @@ final class PeriodResetGuardProvider
   PeriodResetGuard create() => PeriodResetGuard();
 }
 
-String _$periodResetGuardHash() => r'49adebc51632d7d890cd6fd9bde47bc8e0ebc761';
+String _$periodResetGuardHash() => r'e0c007d3d2d5565521ca57cc42bc03276614f81c';
 
 abstract class _$PeriodResetGuard extends $AsyncNotifier<void> {
   FutureOr<void> build();
@@ -152,7 +152,7 @@ final class BudgetActionsProvider
   BudgetActions create() => BudgetActions();
 }
 
-String _$budgetActionsHash() => r'ef9cf39a15cdb56c69080c969bb643a79f16cc97';
+String _$budgetActionsHash() => r'15bd0b6c9434b741bf6743e6970e317e83393b55';
 
 abstract class _$BudgetActions extends $AsyncNotifier<void> {
   FutureOr<void> build();
@@ -201,7 +201,7 @@ final class BudgetCompletionGuardProvider
 }
 
 String _$budgetCompletionGuardHash() =>
-    r'4e8ced0f3e02c211710049fa899f95021c507a7a';
+    r'7a706c0e8257ca24139e7157e368b01fb14a3034';
 
 /// Keeps `isCompleted` in sync with actual spend
 

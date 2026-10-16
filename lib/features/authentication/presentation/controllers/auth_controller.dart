@@ -118,7 +118,9 @@ class AuthController extends _$AuthController {
       });
 
       try {
-        await ref.read(pushNotificationServiceProvider).cancelMonthlyReminders();
+        await ref
+            .read(pushNotificationServiceProvider)
+            .cancelMonthlyReminders();
       } catch (_) {
         // Never block sign-out because of a reminder cleanup failure.
       }
@@ -312,6 +314,27 @@ class AuthController extends _$AuthController {
           .updateUsername(uid: uid, newUsername: username.trim())
           .withNetworkTimeout();
       ref.invalidate(currentAppUserProvider);
+    });
+  }
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final authRepository = ref.read(authRepositoryProvider);
+      try {
+        await authRepository
+            .reauthenticateWithPassword(currentPassword)
+            .withNetworkTimeout();
+        await authRepository.updatePassword(newPassword).withNetworkTimeout();
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
+          throw const WrongPasswordException();
+        }
+        rethrow;
+      }
     });
   }
 }

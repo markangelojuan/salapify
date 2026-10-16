@@ -88,10 +88,14 @@ class CommonSnackbar {
         'invalid-credential': "Those login details don't look right.",
         'email-already-in-use': 'This email is already part of the club.',
         'network-request-failed':
-            'The internet wandered off. Check your connection and try again.',
+            'Please check your connection and try again.',
         'too-many-requests':
-            'You just requested a code. Give it a minute before trying again.',
+            'Too many attempts. Give it a minute before trying again.',
         'user-disabled': 'This account is currently taking a vacation.',
+        'weak-password':
+            'That password is too easy to guess. Try a longer one.',
+        'requires-recent-login':
+            'For your security, please sign out and back in, then try again.',
       };
       return codeMap[error.code] ?? 'A tiny hiccup! Try again?';
     }

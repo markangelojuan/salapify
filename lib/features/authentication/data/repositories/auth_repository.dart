@@ -113,6 +113,16 @@ class AuthRepository {
   Future<void> deleteCurrentUser() async {
     await _auth.currentUser?.delete();
   }
+
+  bool get hasPasswordProvider =>
+      _auth.currentUser?.providerData.any((p) => p.providerId == 'password') ??
+      false;
+
+  Future<void> updatePassword(String newPassword) async {
+    final user = _auth.currentUser;
+    if (user == null) throw StateError('No current user');
+    await user.updatePassword(newPassword);
+  }
 }
 
 @Riverpod(keepAlive: true)

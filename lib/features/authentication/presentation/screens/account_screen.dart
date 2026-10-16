@@ -5,6 +5,7 @@ import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/authentication/domain/entities/avatar_option.dart';
 import 'package:salapify/features/authentication/presentation/controllers/app_user_controller.dart';
 import 'package:salapify/features/authentication/presentation/widgets/account_bottom_sheet.dart';
+import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/premium/data/repositories/entitlement_repository.dart';
 import 'package:salapify/router/routes.dart';
 
@@ -18,6 +19,7 @@ class AccountScreen extends ConsumerWidget {
     final isPremium = ref.watch(isPremiumProvider).value ?? false;
     final user = userAsync.value;
     final avatar = avatarById(user?.avatarId);
+    final hasPassword = ref.read(authRepositoryProvider).hasPasswordProvider;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -164,6 +166,28 @@ class AccountScreen extends ConsumerWidget {
                         label: 'Email',
                         value: user?.email ?? '—',
                       ),
+                      Divider(height: 1, color: colors.border),
+                      if (hasPassword)
+                        _InfoRow(
+                          colors: colors,
+                          icon: Icons.lock_outline_rounded,
+                          label: 'Password',
+                          value: '••••••••',
+                          trailing: TextButton(
+                            onPressed: () => showChangePasswordSheet(context),
+                            child: Text(
+                              'Change',
+                              style: TextStyle(color: colors.primary),
+                            ),
+                          ),
+                        )
+                      else
+                        _InfoRow(
+                          colors: colors,
+                          icon: Icons.lock_outline_rounded,
+                          label: 'Sign-in method',
+                          value: 'Google',
+                        ),
                       Divider(height: 1, color: colors.border),
                       _InfoRow(
                         colors: colors,

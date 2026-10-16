@@ -21,6 +21,15 @@ Future<void> showEditUsernameSheet(
   );
 }
 
+Future<void> showChangePasswordSheet(BuildContext context) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (ctx) => const _ChangePasswordSheet(),
+  );
+}
+
 Future<void> showDeleteAccountSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
@@ -417,6 +426,7 @@ class _EditUsernameSheetState extends ConsumerState<_EditUsernameSheet> {
       },
       data: (_) {
         if (!mounted) return;
+        CommonSnackbar.showSuccess(context, 'Username updated');
         Navigator.of(context).pop();
       },
     );
@@ -448,6 +458,144 @@ class _EditUsernameSheetState extends ConsumerState<_EditUsernameSheet> {
         actions: [
           CommonButton(
             label: 'Save',
+            btnColor: colors.textPrimary,
+            labelColor: colors.background,
+            isLoading: _isSubmitting,
+            onPressed: _handleSave,
+          ),
+          _secondaryButton(
+            onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChangePasswordSheet extends ConsumerStatefulWidget {
+  const _ChangePasswordSheet();
+
+  @override
+  ConsumerState<_ChangePasswordSheet> createState() =>
+      _ChangePasswordSheetState();
+}
+
+class _ChangePasswordSheetState extends ConsumerState<_ChangePasswordSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _currentController = TextEditingController();
+  final _newController = TextEditingController();
+  final _confirmController = TextEditingController();
+  String? _currentError;
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentController.addListener(() {
+      if (_currentError != null) setState(() => _currentError = null);
+    });
+  }
+
+  @override
+  void dispose() {
+    _currentController.dispose();
+    _newController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSave() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isSubmitting = true);
+
+    await ref
+        .read(authControllerProvider.notifier)
+        .changePassword(
+          currentPassword: _currentController.text,
+          newPassword: _newController.text,
+        );
+    if (!mounted) return;
+
+    ref
+        .read(authControllerProvider)
+        .whenOrNull(
+          error: (error, _) {
+            setState(() => _isSubmitting = false);
+            if (error is WrongPasswordException) {
+              setState(() => _currentError = 'Incorrect password');
+              _formKey.currentState!.validate();
+            } else {
+              CommonSnackbar.showError(context, error);
+            }
+          },
+          data: (_) {
+            CommonSnackbar.showSuccess(context, 'Password updated');
+            Navigator.of(context).pop();
+          },
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
+    return PopScope(
+      canPop: !_isSubmitting,
+      child: _AccountBottomSheetScaffold(
+        title: 'Change password',
+        colors: colors,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _currentController,
+                obscureText: true,
+                autofocus: true,
+                enabled: !_isSubmitting,
+                decoration: const InputDecoration(
+                  labelText: 'Current password / PIN',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Required';
+                  return _currentError;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _newController,
+                obscureText: true,
+                enabled: !_isSubmitting,
+                decoration: const InputDecoration(
+                  labelText: 'New password / PIN',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) {
+                  if (v == null || v.length < 6) return 'Minimum 6 characters';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _confirmController,
+                obscureText: true,
+                enabled: !_isSubmitting,
+                decoration: const InputDecoration(
+                  labelText: 'Confirm new password / PIN',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) =>
+                    v != _newController.text ? "Passwords don't match" : null,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          CommonButton(
+            label: 'Update password',
             btnColor: colors.textPrimary,
             labelColor: colors.background,
             isLoading: _isSubmitting,
