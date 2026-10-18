@@ -152,7 +152,7 @@ final class BudgetActionsProvider
   BudgetActions create() => BudgetActions();
 }
 
-String _$budgetActionsHash() => r'15bd0b6c9434b741bf6743e6970e317e83393b55';
+String _$budgetActionsHash() => r'fbfacc31f0e951b744b623f87207d2817009719e';
 
 abstract class _$BudgetActions extends $AsyncNotifier<void> {
   FutureOr<void> build();
@@ -201,7 +201,7 @@ final class BudgetCompletionGuardProvider
 }
 
 String _$budgetCompletionGuardHash() =>
-    r'7a706c0e8257ca24139e7157e368b01fb14a3034';
+    r'c32bc149cc64ae4f129cac45c806bc2db8e8940b';
 
 /// Keeps `isCompleted` in sync with actual spend
 

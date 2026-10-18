@@ -157,6 +157,14 @@ class BudgetRepository {
         .map((rows) => rows.isNotEmpty);
   }
 
+  Future<bool> existsActive(String id) async {
+    final row =
+        await (_db.select(_db.budgetCategories)
+              ..where((t) => t.id.equals(id) & t.isDeleted.equals(false)))
+            .getSingleOrNull();
+    return row != null;
+  }
+
   Future<int> countActive() async {
     final query = _db.selectOnly(_db.budgetCategories)
       ..addColumns([_db.budgetCategories.id.count()])

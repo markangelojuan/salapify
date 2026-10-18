@@ -116,7 +116,6 @@ class AuthController extends _$AuthController {
         await ref.read(budgetRepositoryProvider).clearAllCategories();
         await ref.read(entitlementRepositoryProvider).clearLocal();
       });
-
       try {
         await ref
             .read(pushNotificationServiceProvider)

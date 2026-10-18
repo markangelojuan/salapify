@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:salapify/core/services/connectivity_service.dart';
+import 'package:salapify/core/services/initial_sync_status.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/authentication/domain/entities/app_user.dart';
 import 'package:salapify/features/budget/data/services/budget_sync_service.dart';
@@ -42,9 +43,21 @@ class SyncTrigger extends _$SyncTrigger {
     });
   }
 
+  // Wraps the initial sync so guards that compare categories against
+  // transactions (BudgetCompletionGuard) pause until everything is pulled.
+  Future<void> _onSignedIn(String uid) async {
+    final status = ref.read(initialSyncStatusProvider.notifier);
+    status.set(true); // set synchronously, before any await
+    try {
+      await _runInitialSync(uid);
+    } finally {
+      status.set(false); // always released, even if a pull throws or times out
+    }
+  }
+
   // Fires once per guest -> signed-in transition. Pushes any local guest
   // data up first, then pulls whatever's already on the account
-  Future<void> _onSignedIn(String uid) async {
+  Future<void> _runInitialSync(String uid) async {
     try {
       final syncService = ref.read(budgetSyncServiceProvider);
       await syncService.migrateGuestDataToAccount(uid);

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:salapify/core/database/app_database.dart';
 import 'package:salapify/core/services/connectivity_service.dart';
+import 'package:salapify/core/services/initial_sync_status.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/budget/data/repositories/budget_repository.dart';
 import 'package:salapify/features/budget/data/services/budget_sync_service.dart';
@@ -173,7 +174,18 @@ class BudgetActions extends _$BudgetActions {
       final autoFillId = '$kAutoFillPrefix${category.id}_$periodKey';
       final transactionRepo = ref.read(transactionRepositoryProvider);
 
+      var skipped = false;
       await ref.read(appDatabaseProvider).transaction(() async {
+        // Category may have been wiped (sign-out), deleted, or replaced by a
+        // sync while a stale guard loop was still running.
+        final stillExists = await ref
+            .read(budgetRepositoryProvider)
+            .existsActive(category.id);
+        if (!stillExists) {
+          skipped = true;
+          return;
+        }
+
         await ref
             .read(budgetRepositoryProvider)
             .setCompleted(category.id, isCompleted);
@@ -210,6 +222,8 @@ class BudgetActions extends _$BudgetActions {
           await transactionRepo.deleteTransaction(autoFillId);
         }
       });
+
+      if (skipped) return;
 
       final uid = ref.read(currentUserProvider)?.uid;
       if (uid == null || !_isOnline) return;
@@ -289,6 +303,11 @@ class BudgetActions extends _$BudgetActions {
 class BudgetCompletionGuard extends _$BudgetCompletionGuard {
   @override
   Future<void> build() async {
+    var disposed = false;
+    ref.onDispose(() => disposed = true);
+    final syncing = ref.watch(initialSyncStatusProvider);
+    if (syncing) return; // initial pull in progress, judge once it's done
+
     await ref.watch(periodResetGuardProvider.future);
     final categories = await ref.watch(budgetCategoriesProvider.future);
     final transactions = await ref.watch(transactionsProvider.future);
@@ -299,6 +318,7 @@ class BudgetCompletionGuard extends _$BudgetCompletionGuard {
     final now = DateTime.now();
 
     for (final category in categories) {
+      if (disposed) return;
       if (category.isDeleted || category.amount <= 0) continue;
       if (!category.isActiveFor(
         globalPeriod: globalPeriod,
@@ -317,6 +337,11 @@ class BudgetCompletionGuard extends _$BudgetCompletionGuard {
       final shouldBeCompleted = totalSpent >= category.amount;
 
       if (shouldBeCompleted != category.isCompleted) {
+        final stillExists = await ref
+            .read(budgetRepositoryProvider)
+            .existsActive(category.id);
+        if (!stillExists || disposed) continue;
+
         ref
             .read(budgetCompletionEventProvider.notifier)
             .emit(
