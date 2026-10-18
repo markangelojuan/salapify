@@ -4,12 +4,18 @@ const { defineSecret } = require("firebase-functions/params");
 const functionsV1 = require("firebase-functions/v1");
 const { google } = require("googleapis");
 const admin = require("firebase-admin");
+const nodemailer = require("nodemailer");
+
 admin.initializeApp();
 
 const db = admin.firestore();
 const messaging = admin.messaging();
 
 const PLAY_SERVICE_ACCOUNT_KEY = defineSecret("PLAY_SERVICE_ACCOUNT_KEY");
+const GMAIL_APP_PASS = defineSecret("GMAIL_APP_PASS");
+
+const SENDER_EMAIL = "mark1.notifier@gmail.com";
+const ADMIN_EMAIL = "support@salapify.co.uk";
 
 const ANDROID_PACKAGE_NAME = "com.mrkj.salapify";
 
@@ -114,6 +120,50 @@ exports.onActivityCreated = onDocumentCreated(
       android: { notification: { channelId: "default_channel" } },
       data: { groupId, type: activity.type || "" },
     });
+  }
+);
+
+//emails the support whenever a new report is created in /reports.
+exports.onReportCreated = onDocumentCreated(
+  { document: "reports/{reportId}", secrets: [GMAIL_APP_PASS] },
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return;
+
+    const report = snap.data();
+    const { reportId } = event.params;
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { user: SENDER_EMAIL, pass: GMAIL_APP_PASS.value() },
+    });
+
+    // Plain text only, so user-submitted content can't inject HTML.
+    const lines = Object.entries(report).map(([key, value]) => {
+      const text =
+        value && typeof value.toDate === "function"
+          ? value.toDate().toISOString() // Firestore Timestamp
+          : typeof value === "object"
+          ? JSON.stringify(value)
+          : String(value);
+      return `${key}: ${text.slice(0, 1000)}`;
+    });
+
+    // Change these fields to whatever best summarizes your reports.
+    const subjectHint = String(
+      report.reason || report.type || reportId
+    ).slice(0, 80);
+
+    try {
+      await transporter.sendMail({
+        from: `"Salapify Reports" <${SENDER_EMAIL}>`,
+        to: ADMIN_EMAIL,
+        subject: `New report: ${subjectHint}`,
+        text: `Report ID: ${reportId}\n\n${lines.join("\n")}`,
+      });
+    } catch (err) {
+      console.error("Failed to send report email", err?.message || err);
+    }
   }
 );
 
