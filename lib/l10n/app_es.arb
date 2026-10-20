@@ -1,0 +1,7 @@
+{
+  "@@locale": "es",
+  "settingsTitle": "Configuración",
+  "settingsLanguage": "Idioma",
+  "languageSystemDefault": "Predeterminado del sistema",
+  "languageChoose": "Elegir idioma"
+}

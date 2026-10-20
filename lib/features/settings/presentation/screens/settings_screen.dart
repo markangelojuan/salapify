@@ -4,7 +4,10 @@ import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/core/localization/app_languages.dart';
+import 'package:salapify/core/localization/locale_controller.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:go_router/go_router.dart';
 
@@ -65,6 +68,25 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _openLanguagePicker(
+    BuildContext context,
+    WidgetRef ref,
+    Locale? selected,
+  ) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _LanguagePickerSheet(
+        selected: selected,
+        onSelect: (l) {
+          ref.read(localeControllerProvider.notifier).set(l);
+          Navigator.pop(ctx);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final periodAsync = ref.watch(budgetingPeriodSettingProvider);
@@ -89,7 +111,7 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).settingsTitle)),
       body: period == null
           ? (periodAsync.hasError
                 ? Center(
@@ -249,6 +271,51 @@ class SettingsScreen extends ConsumerWidget {
                           currency: currency,
                           onTap: () =>
                               _openCurrencyPicker(context, ref, currency),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                _SectionLabel(
+                  icon: Icons.language_rounded,
+                  title: AppLocalizations.of(context).settingsLanguage,
+                ),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final locale = ref.watch(localeControllerProvider);
+                    final l10n = AppLocalizations.of(context);
+                    return _SettingsCard(
+                      children: [
+                        InkWell(
+                          onTap: () =>
+                              _openLanguagePicker(context, ref, locale),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 14,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    nativeNameFor(locale) ??
+                                        l10n.languageSystemDefault,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15,
+                                      color: colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: colorScheme.onSurface.withValues(
+                                    alpha: 0.35,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     );
@@ -749,8 +816,9 @@ class _CurrencyPickerSheet extends StatelessWidget {
                             ),
                             // Wide symbols shrink to fit the circle.
                             child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 3),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 3,
+                              ),
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: Text(
@@ -790,6 +858,93 @@ class _CurrencyPickerSheet extends StatelessWidget {
                 },
               ),
             ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LanguagePickerSheet extends StatelessWidget {
+  const _LanguagePickerSheet({required this.selected, required this.onSelect});
+
+  final Locale? selected;
+  final ValueChanged<Locale?> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
+
+    final options = <(Locale?, String)>[
+      (null, l10n.languageSystemDefault),
+      for (final l in supportedLanguages) (l.locale, l.nativeName),
+    ];
+
+    return SafeArea(
+      child: Container(
+        margin: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 10),
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colorScheme.onSurface.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  l10n.languageChoose,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 17,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ),
+            ),
+            for (final (locale, label) in options)
+              InkWell(
+                onTap: () => onSelect(locale),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 14,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      if (locale == selected)
+                        const Icon(
+                          Icons.check_rounded,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
             const SizedBox(height: 8),
           ],
         ),

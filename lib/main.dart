@@ -4,6 +4,8 @@ import 'package:salapify/core/services/connectivity_service.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/theme/app_theme.dart';
 import 'package:salapify/core/theme/theme_controller.dart';
+import 'package:salapify/l10n/app_localizations.dart';
+import 'package:salapify/core/localization/locale_controller.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/budget/data/services/budget_sync_service.dart';
 import 'package:salapify/features/settings/data/services/settings_sync_service.dart';
@@ -52,16 +54,20 @@ void main() async {
   final initialThemeMode = savedTheme == 'dark'
       ? ThemeMode.dark
       : ThemeMode.light;
+  final initialLocale = LocaleController.parse(prefs.getString(LocaleController.prefsKey));
 
   runApp(
     ProviderScope(
-      overrides: [
-        themeControllerProvider.overrideWith(
-          () => ThemeController(initialThemeMode),
-        ),
-      ],
-      child: const MyApp(),
-    ),
+    overrides: [
+      themeControllerProvider.overrideWith(
+        () => ThemeController(initialThemeMode),
+      ),
+      localeControllerProvider.overrideWith(
+        () => LocaleController(initialLocale),
+      ),
+    ],
+    child: const MyApp(),
+  ),
   );
 }
 
@@ -164,6 +170,9 @@ class _MyAppState extends ConsumerState<MyApp> {
       child: MaterialApp.router(
         routerConfig: ref.watch(goRouterProvider),
         title: 'Salapify',
+        locale: ref.watch(localeControllerProvider),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
