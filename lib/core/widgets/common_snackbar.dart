@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/core/localization/localized_exception.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class CommonSnackbar {
   static OverlayEntry? _currentEntry;
@@ -8,9 +10,10 @@ class CommonSnackbar {
 
   static void showError(BuildContext context, Object error) {
     final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final l10n = AppLocalizations.of(context);
     _show(
       context,
-      _sanitizeError(error),
+      _sanitizeError(error, l10n),
       colors.error,
       Icons.error_outline_rounded,
     );
@@ -81,39 +84,32 @@ class CommonSnackbar {
     overlay.insert(entry);
   }
 
-  static String _sanitizeError(Object error) {
+  static String _sanitizeError(Object error, AppLocalizations l10n) {
     if (error is FirebaseAuthException) {
-      const codeMap = {
-        'user-not-found': "Hmm… we couldn't find that account.",
-        'invalid-credential': "Those login details don't look right.",
-        'email-already-in-use': 'This email is already part of the club.',
-        'network-request-failed':
-            'Please check your connection and try again.',
-        'too-many-requests':
-            'Too many attempts. Give it a minute before trying again.',
-        'user-disabled': 'This account is currently taking a vacation.',
-        'weak-password':
-            'That password is too easy to guess. Try a longer one.',
-        'requires-recent-login':
-            'For your security, please sign out and back in, then try again.',
+      return switch (error.code) {
+        'user-not-found' => l10n.errorUserNotFound,
+        'invalid-credential' => l10n.errorInvalidCredential,
+        'email-already-in-use' => l10n.errorEmailInUse,
+        'network-request-failed' => l10n.errorNetwork,
+        'too-many-requests' => l10n.errorTooManyRequests,
+        'user-disabled' => l10n.errorUserDisabled,
+        'weak-password' => l10n.errorWeakPassword,
+        'requires-recent-login' => l10n.errorRequiresRecentLogin,
+        _ => l10n.errorGeneric,
       };
-      return codeMap[error.code] ?? 'A tiny hiccup! Try again?';
     }
+
+    if (error is LocalizedException) return error.localizedMessage(l10n);
 
     if (error is String) return error;
 
-    if (_looksLikeNetworkError(error)) {
-      return "You're offline. Check your connection and try again.";
-    }
+    if (_looksLikeNetworkError(error)) return l10n.errorOffline;
 
-    // Catch-all for your app's own exceptions (UsernameTakenException,
-    // EmailAlreadyInUseException, WrongPasswordException,
-    // ReauthCancelledException, AccountDisabledException, etc.) — all of
-    // them communicate via a custom toString(), so use it directly instead
-    // of falling through to the generic message.
+    // Exceptions not yet migrated to LocalizedException still show their
+    // English toString() until we get to them.
     if (error is Exception) return error.toString();
 
-    return 'A tiny hiccup! Try again?';
+    return l10n.errorGeneric;
   }
 
   static bool _looksLikeNetworkError(Object error) {

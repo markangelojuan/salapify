@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:salapify/core/services/push_notification_service.dart';
+import 'package:salapify/features/settings/data/repositories/settings_repository.dart';
 
 /// Null state = follow the device language (falls back to English if the
 /// device language isn't supported).
@@ -22,6 +24,7 @@ class LocaleController extends Notifier<Locale?> {
     } else {
       await prefs.setString(prefsKey, encode(locale));
     }
+    await _rescheduleReminders();
   }
 
   /// "zh_Hant_TW" style tags, so Traditional Chinese works later without
@@ -44,6 +47,21 @@ class LocaleController extends Notifier<Locale?> {
         countryCode: p[2],
       ),
     };
+  }
+
+  Future<void> _rescheduleReminders() async {
+    try {
+      final enabled = await ref
+          .read(settingsRepositoryProvider)
+          .getLocalRemindersEnabled();
+      if (!enabled) return;
+
+      final push = ref.read(pushNotificationServiceProvider);
+      if (!await push.hasNotificationPermission()) return;
+      await push.scheduleMonthlyReminders();
+    } catch (_) {
+      // Non-critical: reminders get rescheduled on next app start anyway.
+    }
   }
 }
 

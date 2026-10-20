@@ -8,6 +8,8 @@ import 'package:salapify/l10n/app_localizations.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
 import 'package:salapify/core/localization/app_languages.dart';
 import 'package:salapify/core/localization/locale_controller.dart';
+import 'package:salapify/features/settings/domain/settings_warning.dart';
+import 'package:salapify/features/settings/presentation/widgets/settings_warning_text.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:go_router/go_router.dart';
 
@@ -20,25 +22,21 @@ class SettingsScreen extends ConsumerWidget {
     BudgetingPeriod newPeriod,
   ) async {
     if (ref.read(budgetingPeriodSettingProvider).value == newPeriod) return;
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Change Budgeting Period'),
-        content: const Text(
-          'Existing categories will be converted to match the new period '
-          '(amounts stay the same). Categories set for a specific half will '
-          'now count toward the full month, or vice versa — you may want to '
-          'review and consolidate any duplicates afterward. Continue?',
-        ),
+        title: Text(l10n.changePeriodTitle),
+        content: Text(l10n.changePeriodMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Continue'),
+            child: Text(l10n.commonContinue),
           ),
         ],
       ),
@@ -91,6 +89,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final periodAsync = ref.watch(budgetingPeriodSettingProvider);
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     ref.listen<AsyncValue<BudgetingPeriod>>(budgetingPeriodSettingProvider, (
       previous,
@@ -100,9 +99,9 @@ class SettingsScreen extends ConsumerWidget {
         CommonSnackbar.showError(context, next.error!);
       }
     });
-    ref.listen<String?>(settingsSyncWarningProvider, (previous, next) {
+    ref.listen<SettingsWarning?>(settingsSyncWarningProvider, (previous, next) {
       if (next != null) {
-        CommonSnackbar.showWarning(context, next);
+        CommonSnackbar.showWarning(context, next.text(l10n));
         ref.read(settingsSyncWarningProvider.notifier).set(null);
       }
     });
@@ -116,22 +115,22 @@ class SettingsScreen extends ConsumerWidget {
           ? (periodAsync.hasError
                 ? Center(
                     child: Text(
-                      'Failed to load settings: ${periodAsync.error}',
+                      l10n.settingsLoadFailed('${periodAsync.error}'),
                     ),
                   )
                 : const Center(child: CircularProgressIndicator()))
           : ListView(
               padding: const EdgeInsets.only(top: 12, bottom: 24),
               children: [
-                const _SectionLabel(
+                _SectionLabel(
                   icon: Icons.calendar_today_rounded,
-                  title: 'Budgeting Period',
+                  title: l10n.settingsBudgetingPeriod,
                 ),
                 _SettingsCard(
                   children: [
                     _SelectableOptionTile(
-                      label: 'Monthly',
-                      subtitle: 'Track budgets once per month',
+                      label: l10n.budgetingPeriodMonthly,
+                      subtitle: l10n.budgetingPeriodMonthlyDesc,
                       selected: period == BudgetingPeriod.monthly,
                       onTap: () => _confirmAndSetPeriod(
                         context,
@@ -141,8 +140,8 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                     _CardDivider(colorScheme: colorScheme),
                     _SelectableOptionTile(
-                      label: 'Bi-Monthly',
-                      subtitle: 'Split the month into two halves',
+                      label: l10n.budgetingPeriodBiMonthly,
+                      subtitle: l10n.budgetingPeriodBiMonthlyDesc,
                       selected: period == BudgetingPeriod.biMonthly,
                       onTap: () => _confirmAndSetPeriod(
                         context,
@@ -210,7 +209,7 @@ class SettingsScreen extends ConsumerWidget {
                                             ),
                                             const SizedBox(width: 6),
                                             Text(
-                                              'First half ends on',
+                                              l10n.settingsFirstHalfEndsOn,
                                               style: TextStyle(
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: 12,
@@ -239,9 +238,9 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const _SectionLabel(
+                _SectionLabel(
                   icon: Icons.payments_rounded,
-                  title: 'Currency',
+                  title: l10n.settingsCurrency,
                 ),
                 Consumer(
                   builder: (context, ref, _) {
@@ -278,12 +277,11 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 _SectionLabel(
                   icon: Icons.language_rounded,
-                  title: AppLocalizations.of(context).settingsLanguage,
+                  title: l10n.settingsLanguage,
                 ),
                 Consumer(
                   builder: (context, ref, _) {
                     final locale = ref.watch(localeControllerProvider);
-                    final l10n = AppLocalizations.of(context);
                     return _SettingsCard(
                       children: [
                         InkWell(
@@ -321,9 +319,9 @@ class SettingsScreen extends ConsumerWidget {
                     );
                   },
                 ),
-                const _SectionLabel(
+                _SectionLabel(
                   icon: Icons.notifications_active_rounded,
-                  title: 'Reminders',
+                  title: l10n.settingsReminders,
                 ),
                 Consumer(
                   builder: (context, ref, _) {
@@ -352,16 +350,16 @@ class SettingsScreen extends ConsumerWidget {
                     return _SettingsCard(
                       children: [
                         SwitchListTile(
-                          title: const Text(
-                            'App reminders',
+                          title: Text(
+                            l10n.settingsAppReminders,
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 15,
                             ),
                           ),
-                          subtitle: const Text(
-                            'Nudge occasionally to update your budget',
-                            style: TextStyle(fontSize: 12),
+                          subtitle: Text(
+                            l10n.settingsAppRemindersDesc,
+                            style: const TextStyle(fontSize: 12),
                           ),
                           value: enabled,
                           activeThumbColor: AppColors.primary,
@@ -375,9 +373,9 @@ class SettingsScreen extends ConsumerWidget {
                     );
                   },
                 ),
-                const _SectionLabel(
+                _SectionLabel(
                   icon: Icons.block_rounded,
-                  title: 'Privacy',
+                  title: l10n.settingsPrivacy,
                 ),
                 _SettingsCard(
                   children: [
@@ -393,7 +391,7 @@ class SettingsScreen extends ConsumerWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                'Blocked users',
+                                l10n.settingsBlockedUsers,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15,
@@ -663,6 +661,8 @@ class _CurrencyTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
+
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -708,7 +708,7 @@ class _CurrencyTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Tap to change',
+                    l10n.currencyTapToChange,
                     style: TextStyle(
                       fontSize: 12,
                       color: colorScheme.onSurface.withValues(alpha: 0.5),
@@ -739,6 +739,8 @@ class _CurrencyPickerSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
+
     return SafeArea(
       child: Container(
         margin: const EdgeInsets.all(12),
@@ -766,7 +768,7 @@ class _CurrencyPickerSheet extends StatelessWidget {
               child: Row(
                 children: [
                   Text(
-                    'Choose Currency',
+                    l10n.currencyChoose,
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 17,

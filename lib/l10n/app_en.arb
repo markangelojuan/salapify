@@ -15,5 +15,55 @@
   "languageChoose": "Choose Language",
   "@languageChoose": {
     "description": "Title of the language picker sheet"
-  }
+  },
+  "settingsBudgetingPeriod": "Budgeting Period",
+  "budgetingPeriodMonthly": "Monthly",
+  "budgetingPeriodMonthlyDesc": "Track budgets once per month",
+  "budgetingPeriodBiMonthly": "Bi-Monthly",
+  "budgetingPeriodBiMonthlyDesc": "Split the month into two halves",
+  "settingsFirstHalfEndsOn": "First half ends on",
+  "settingsCurrency": "Currency",
+  "settingsReminders": "Reminders",
+  "settingsAppReminders": "App reminders",
+  "settingsAppRemindersDesc": "Nudge occasionally to update your budget",
+  "settingsPrivacy": "Privacy",
+  "settingsBlockedUsers": "Blocked users",
+  "changePeriodTitle": "Change Budgeting Period",
+  "changePeriodMessage": "Existing categories will be converted to match the new period (amounts stay the same). Categories set for a specific half will now count toward the full month, or vice versa — you may want to review and consolidate any duplicates afterward. Continue?",
+  "commonCancel": "Cancel",
+  "commonContinue": "Continue",
+  "settingsLoadFailed": "Failed to load settings: {error}",
+  "@settingsLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyTapToChange": "Tap to change",
+  "currencyChoose": "Choose Currency",
+  "reminderMonthStartTitle": "New month, fresh budget 📊",
+  "reminderMonthStartBody": "Update your budget and log any pending transactions.",
+  "reminderMidMonthTitle": "Midmonth check-in 💸",
+  "reminderMidMonthBody": "Don't forget to log your recent expenses.",
+  "settingsSyncFailedPeriod": "Budgeting period saved on this device, but couldn't sync to your account.",
+  "settingsSyncFailedGeneric": "Setting saved on this device, but couldn't sync to your account.",
+  "settingsSyncFailedCurrency": "Currency saved on this device, but couldn't sync to your account.",
+  "settingsNotificationsDisabled": "Notifications are turned off for Salapify. Enable them in your phone settings to get reminders.",
+  "settingsConvertingCategories": "Converting your categories…",
+  "errorUserNotFound": "Hmm… we couldn't find that account.",
+  "errorInvalidCredential": "Those login details don't look right.",
+  "errorEmailInUse": "This email is already part of the club.",
+  "errorNetwork": "Please check your connection and try again.",
+  "errorTooManyRequests": "Too many attempts. Give it a minute before trying again.",
+  "errorUserDisabled": "This account is currently taking a vacation.",
+  "errorWeakPassword": "That password is too easy to guess. Try a longer one.",
+  "errorRequiresRecentLogin": "For your security, please sign out and back in, then try again.",
+  "errorOffline": "You're offline. Check your connection and try again.",
+  "errorGeneric": "A tiny hiccup! Try again?",
+  "errorUsernameTaken": "Username is already taken",
+  "errorEmailRegistered": "Email is already registered",
+  "errorWrongPassword": "That password doesn't look right",
+  "errorReauthCancelled": "Confirmation was cancelled",
+  "errorAccountDisabled": "This account has been disabled"
 }
