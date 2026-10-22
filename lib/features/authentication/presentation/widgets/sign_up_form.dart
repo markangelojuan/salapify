@@ -8,6 +8,7 @@ import 'package:salapify/core/widgets/common_text_field.dart';
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
 import 'package:salapify/features/authentication/domain/exceptions/auth_exceptions.dart';
 import 'package:salapify/features/authentication/presentation/controllers/auth_controller.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class SignUpForm extends ConsumerStatefulWidget {
   const SignUpForm({super.key});
@@ -56,6 +57,8 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final l10n = AppLocalizations.of(context);
+
     final username = _usernameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
@@ -68,7 +71,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
     if (!mounted) return;
     setState(() {
       _isCheckingUsername = false;
-      _usernameError = existingUid != null ? 'Username is already taken' : null;
+      _usernameError = existingUid != null ? l10n.errorUsernameTaken : null;
     });
     if (existingUid != null) {
       _formKey.currentState!.validate();
@@ -87,13 +90,14 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
     // Email uniqueness is only known after the create attempt.
     final error = ref.read(authControllerProvider).error;
     if (error is EmailAlreadyInUseException) {
-      setState(() => _emailError = 'Email is already registered');
+      setState(() => _emailError = l10n.errorEmailRegistered);
       _formKey.currentState!.validate();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final authState = ref.watch(authControllerProvider);
     ref.listen<AsyncValue<void>>(authControllerProvider, (_, state) {
       state.whenOrNull(
@@ -116,23 +120,24 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
           CommonTextField(
             controller: _usernameController,
             icon: Icons.alternate_email_rounded,
-            hint: "Enter your preferred username",
+            hint: l10n.authUsernameHint,
             maxCharacters: 18,
             textInputAction: TextInputAction.next,
-            label: "Username",
+            label: l10n.authUsernameLabel,
             validator: (value) {
-              if (value == null || value.isEmpty) return "Username is required";
-              if (value != value.trim()) return "No leading or trailing spaces";
+              if (value == null || value.isEmpty)
+                return l10n.authUsernameRequired;
+              if (value != value.trim()) return l10n.authUsernameNoSpaces;
               if (!RegExp(r'^[a-zA-Z]').hasMatch(value)) {
-                return "Must start with a letter";
+                return l10n.authUsernameStartLetter;
               }
               if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) {
-                return "Only letters, numbers, and underscores allowed";
+                return l10n.authUsernameAllowedChars;
               }
               final letterCount = RegExp(r'[a-zA-Z]').allMatches(value).length;
-              if (letterCount < 3) return "Minimum 3 letters";
+              if (letterCount < 3) return l10n.authUsernameMinLetters;
               final digitCount = RegExp(r'[0-9]').allMatches(value).length;
-              if (digitCount > 3) return "Maximum 3 numbers";
+              if (digitCount > 3) return l10n.authUsernameMaxNumbers;
               if (_usernameError != null) return _usernameError;
               return null;
             },
@@ -143,11 +148,11 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             textInputAction: TextInputAction.next,
             icon: Icons.mail_outline_rounded,
             maxCharacters: 255,
-            hint: "Enter your email",
-            label: "Email Address",
+            hint: l10n.authEmailHint,
+            label: l10n.authEmailLabel,
             validator: (value) {
-              if (value == null || value.isEmpty) return "Email is required";
-              if (!value.contains("@")) return "Enter a valid email";
+              if (value == null || value.isEmpty) return l10n.authEmailRequired;
+              if (!value.contains("@")) return l10n.authEmailInvalid;
               if (_emailError != null) return _emailError;
               return null;
             },
@@ -158,13 +163,14 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             textInputAction: TextInputAction.next,
             icon: Icons.lock_open_rounded,
             maxCharacters: 120,
-            hint: "Enter your password / PIN",
-            label: "Password / PIN",
+            hint: l10n.authPasswordPinHint,
+            label: l10n.authPasswordPinLabel,
             isPassword: true,
             isPasswordVisible: _isPasswordVisible,
             validator: (value) {
-              if (value == null || value.isEmpty) return "Password is required";
-              if (value.length < 6) return "Minimum 6 characters";
+              if (value == null || value.isEmpty)
+                return l10n.authPasswordRequired;
+              if (value.length < 6) return l10n.authPasswordMinLength;
               return null;
             },
             suffix: IconButton(
@@ -185,8 +191,8 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             textInputAction: TextInputAction.done,
             icon: Icons.lock_outline_rounded,
             maxCharacters: 120,
-            hint: "Re-enter your password / PIN",
-            label: "Confirm Password / PIN",
+            hint: l10n.authConfirmPasswordHint,
+            label: l10n.authConfirmPasswordLabel,
             isPassword: true,
             isPasswordVisible: _isConfirmPasswordVisible,
             onFieldSubmitted: (_) {
@@ -194,10 +200,10 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             },
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return "Please confirm your password";
+                return l10n.authConfirmPasswordRequired;
               }
               if (value != _passwordController.text) {
-                return "Passwords do not match";
+                return l10n.authPasswordsMismatch;
               }
               return null;
             },
@@ -226,7 +232,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                 child: GestureDetector(
                   onTap: () => _showPolicyDialog(),
                   child: Text(
-                    'I agree to the Terms of Service and Privacy Policy',
+                    l10n.authAgreeTerms,
                     softWrap: true,
                     style: TextStyle(
                       color: AppColors.black,
@@ -239,7 +245,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
           ),
           const SizedBox(height: 18),
           CommonButton(
-            label: "Sign Up",
+            label: l10n.authSignUp,
             btnColor: AppColors.black,
             labelColor: AppColors.white,
             onPressed: _isChecked ? _submit : null,
@@ -247,7 +253,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
           ),
           const SizedBox(height: 12),
           CommonButton(
-            label: "Cancel",
+            label: l10n.commonCancel,
             btnColor: AppColors.white,
             labelColor: AppColors.black,
             onPressed: () => context.pop(),
@@ -259,6 +265,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
   }
 
   void _showPolicyDialog() {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -267,63 +274,46 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
             horizontal: 24,
             vertical: 60,
           ),
-          title: const Text("Terms & Privacy"),
+          title: Text(l10n.termsDialogTitle),
           content: SizedBox(
             height: 360,
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Terms of Service",
+                  Text(
+                    l10n.termsServiceHeading,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    "By using Salapify, you agree to use the app responsibly "
-                    "and provide accurate information. You are responsible "
-                    "for your account and the information you enter.",
-                  ),
+                  Text(l10n.termsServiceBody),
 
                   const SizedBox(height: 16),
 
-                  const Text(
-                    "Privacy Policy",
+                  Text(
+                    l10n.termsPrivacyHeading,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    "Salapify collects information needed to provide your "
-                    "account, budgeting, expense tracking, groups, and "
-                    "bill-splitting features. We do not connect to your "
-                    "bank accounts or financial accounts, and we do not "
-                    "sell your personal information.",
-                  ),
+                  Text(l10n.termsPrivacyBody),
 
                   const SizedBox(height: 16),
 
-                  const Text(
-                    "Shared Information",
+                  Text(
+                    l10n.termsSharedHeading,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    "When you join groups or split bills, relevant information "
-                    "such as your username, bills, and shares may be visible "
-                    "to other members of those groups.",
-                  ),
+                  Text(l10n.termsSharedBody),
 
                   const SizedBox(height: 16),
 
-                  const Text(
-                    "Important",
+                  Text(
+                    l10n.termsImportantHeading,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    "Salapify is a budgeting and organization tool, not a bank, "
-                    "payment service, or financial adviser.",
-                  ),
+                  Text(l10n.termsImportantBody),
 
                   const SizedBox(height: 20),
 
@@ -343,12 +333,10 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                           setDialogState(() {});
                         },
                       ),
-                      const Expanded(
+                      Expanded(
                         child: Padding(
                           padding: EdgeInsets.only(top: 6),
-                          child: Text(
-                            "I agree to the Terms of Service and Privacy Policy.",
-                          ),
+                          child: Text(l10n.authAgreeTerms),
                         ),
                       ),
                     ],
@@ -360,7 +348,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text("Close"),
+              child: Text(l10n.commonClose),
             ),
           ],
         ),

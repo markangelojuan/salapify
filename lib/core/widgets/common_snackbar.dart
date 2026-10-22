@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/localization/localized_exception.dart';
 import 'package:salapify/l10n/app_localizations.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class CommonSnackbar {
   static OverlayEntry? _currentEntry;
@@ -100,6 +101,8 @@ class CommonSnackbar {
     }
 
     if (error is LocalizedException) return error.localizedMessage(l10n);
+
+    if (error is GoogleSignInException) return l10n.errorGeneric;
 
     if (error is String) return error;
 

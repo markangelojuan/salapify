@@ -7,6 +7,8 @@ import 'package:salapify/features/authentication/presentation/controllers/app_us
 import 'package:salapify/features/authentication/presentation/widgets/account_bottom_sheet.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/premium/data/repositories/entitlement_repository.dart';
+import 'package:salapify/l10n/app_localizations.dart';
+import 'package:salapify/features/authentication/presentation/widgets/avatar_name_text.dart';
 import 'package:salapify/router/routes.dart';
 
 class AccountScreen extends ConsumerWidget {
@@ -14,6 +16,7 @@ class AccountScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final userAsync = ref.watch(currentAppUserProvider);
     final isPremium = ref.watch(isPremiumProvider).value ?? false;
@@ -113,7 +116,7 @@ class AccountScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            avatar.name,
+                            avatar.localizedName(l10n),
                             style: TextStyle(
                               color: colors.onPrimary,
                               fontSize: 12,
@@ -193,7 +196,7 @@ class AccountScreen extends ConsumerWidget {
                         colors: colors,
                         icon: Icons.pets_rounded,
                         label: 'Avatar',
-                        value: avatar?.name ?? 'Not selected',
+                        value: avatar?.localizedName(l10n) ?? l10n.accountAvatarNotSelected,
                         trailing: TextButton(
                           onPressed: () => context.push('/avatar-picker'),
                           child: Text(

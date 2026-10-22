@@ -164,4 +164,235 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errorAccountDisabled => 'Esta cuenta ha sido deshabilitada';
+
+  @override
+  String get authSignInSubtitle =>
+      'Ingresa tus credenciales para acceder a tu cuenta';
+
+  @override
+  String get authEmailLabel => 'Correo electrónico';
+
+  @override
+  String get authEmailHint => 'Ingresa tu correo';
+
+  @override
+  String get authEmailRequired => 'El correo es obligatorio';
+
+  @override
+  String get authEmailInvalid => 'Ingresa un correo válido';
+
+  @override
+  String get authPasswordLabel => 'Contraseña';
+
+  @override
+  String get authPasswordHint => 'Ingresa tu contraseña';
+
+  @override
+  String get authPasswordRequired => 'La contraseña es obligatoria';
+
+  @override
+  String get authPasswordInvalid => 'Contraseña no válida';
+
+  @override
+  String get authForgotPassword => '¿Olvidaste tu contraseña?';
+
+  @override
+  String get authSignIn => 'Iniciar sesión';
+
+  @override
+  String get authSignUp => 'Regístrate';
+
+  @override
+  String get authOrContinueWith => 'O continúa con';
+
+  @override
+  String get authContinueWithGoogle => 'Continuar con Google';
+
+  @override
+  String get authNotMemberYet => '¿Aún no eres parte del club?';
+
+  @override
+  String get authContinueAsGuest => 'Continuar como invitado';
+
+  @override
+  String get authResetPasswordTitle => 'Restablece tu contraseña';
+
+  @override
+  String get authResetPasswordPrompt =>
+      'Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.';
+
+  @override
+  String get authResetLinkSent =>
+      'Si existe una cuenta con ese correo, el enlace de restablecimiento va en camino. Revisa tu bandeja de entrada (y la carpeta de spam).';
+
+  @override
+  String get authSendLink => 'Enviar enlace';
+
+  @override
+  String get commonDone => 'Listo';
+
+  @override
+  String get authSignUpSubtitle => 'Crea una cuenta para comenzar';
+
+  @override
+  String get authUsernameLabel => 'Nombre de usuario';
+
+  @override
+  String get authUsernameHint => 'Ingresa tu nombre de usuario preferido';
+
+  @override
+  String get authUsernameRequired => 'El nombre de usuario es obligatorio';
+
+  @override
+  String get authUsernameNoSpaces => 'Sin espacios al inicio ni al final';
+
+  @override
+  String get authUsernameStartLetter => 'Debe comenzar con una letra';
+
+  @override
+  String get authUsernameAllowedChars =>
+      'Solo se permiten letras, números y guiones bajos';
+
+  @override
+  String get authUsernameMinLetters => 'Mínimo 3 letras';
+
+  @override
+  String get authUsernameMaxNumbers => 'Máximo 3 números';
+
+  @override
+  String get authPasswordPinLabel => 'Contraseña / PIN';
+
+  @override
+  String get authPasswordPinHint => 'Ingresa tu contraseña / PIN';
+
+  @override
+  String get authPasswordMinLength => 'Mínimo 6 caracteres';
+
+  @override
+  String get authConfirmPasswordLabel => 'Confirmar contraseña / PIN';
+
+  @override
+  String get authConfirmPasswordHint => 'Vuelve a ingresar tu contraseña / PIN';
+
+  @override
+  String get authConfirmPasswordRequired => 'Por favor confirma tu contraseña';
+
+  @override
+  String get authPasswordsMismatch => 'Las contraseñas no coinciden';
+
+  @override
+  String get authAgreeTerms =>
+      'Acepto los Términos de servicio y la Política de privacidad';
+
+  @override
+  String get termsDialogTitle => 'Términos y privacidad';
+
+  @override
+  String get termsServiceHeading => 'Términos de servicio';
+
+  @override
+  String get termsServiceBody =>
+      'Al usar Salapify, aceptas usar la app de forma responsable y proporcionar información veraz. Eres responsable de tu cuenta y de la información que ingreses.';
+
+  @override
+  String get termsPrivacyHeading => 'Política de privacidad';
+
+  @override
+  String get termsPrivacyBody =>
+      'Salapify recopila la información necesaria para ofrecer tu cuenta, presupuestos, seguimiento de gastos, grupos y división de cuentas. No nos conectamos a tus cuentas bancarias ni financieras, y no vendemos tu información personal.';
+
+  @override
+  String get termsSharedHeading => 'Información compartida';
+
+  @override
+  String get termsSharedBody =>
+      'Cuando te unes a grupos o divides cuentas, información relevante como tu nombre de usuario, cuentas y partes puede ser visible para los demás miembros de esos grupos.';
+
+  @override
+  String get termsImportantHeading => 'Importante';
+
+  @override
+  String get termsImportantBody =>
+      'Salapify es una herramienta de presupuesto y organización, no un banco, un servicio de pagos ni un asesor financiero.';
+
+  @override
+  String get commonClose => 'Cerrar';
+
+  @override
+  String get verifyEmailTitle => 'Verifica tu correo';
+
+  @override
+  String get verifyEmailSentGeneric => 'Te enviamos un enlace de verificación.';
+
+  @override
+  String verifyEmailSentTo(String email) {
+    return 'Enviamos un enlace de verificación a $email.';
+  }
+
+  @override
+  String get verifyEmailInstructions =>
+      'Haz clic en el enlace de ese correo y luego toca el botón de abajo.';
+
+  @override
+  String get verifyEmailIVerified => 'Ya verifiqué';
+
+  @override
+  String get verifyEmailResend => 'Reenviar correo';
+
+  @override
+  String verifyEmailResendIn(int seconds) {
+    return 'Reenviar en $seconds s';
+  }
+
+  @override
+  String get verifyEmailResent => 'Correo de verificación enviado.';
+
+  @override
+  String get verifyEmailNotYet =>
+      'Aún no está verificado — revisa tu bandeja de entrada (y el spam).';
+
+  @override
+  String get commonSignOut => 'Cerrar sesión';
+
+  @override
+  String get avatarPickerTitle => '¿Qué monstruito del dinero eres?';
+
+  @override
+  String get avatarPickerSubtitle => 'Puedes cambiarlo en cualquier momento';
+
+  @override
+  String get commonConfirm => 'Confirmar';
+
+  @override
+  String get avatarLuxuriousDog => 'Perro lujoso';
+
+  @override
+  String get avatarSavvyMonkey => 'Mono astuto';
+
+  @override
+  String get avatarGreedyCat => 'Gato avaricioso';
+
+  @override
+  String get avatarThriftyPig => 'Cerdito ahorrador';
+
+  @override
+  String get avatarStingyTurtle => 'Tortuga tacaña';
+
+  @override
+  String get avatarCovetousSnake => 'Serpiente codiciosa';
+
+  @override
+  String get avatarProsperousPanda => 'Panda próspero';
+
+  @override
+  String get avatarFrugalShark => 'Tiburón frugal';
+
+  @override
+  String get avatarOpulentWalrus => 'Morsa opulenta';
+
+  @override
+  String get avatarBrokeEagle => 'Águila sin un peso';
+
+  @override
+  String get accountAvatarNotSelected => 'Sin seleccionar';
 }

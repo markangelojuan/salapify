@@ -379,6 +379,438 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This account has been disabled'**
   String get errorAccountDisabled;
+
+  /// No description provided for @authSignInSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your credentials to access your account'**
+  String get authSignInSubtitle;
+
+  /// No description provided for @authEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Address'**
+  String get authEmailLabel;
+
+  /// No description provided for @authEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email'**
+  String get authEmailHint;
+
+  /// No description provided for @authEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email is required'**
+  String get authEmailRequired;
+
+  /// No description provided for @authEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get authEmailInvalid;
+
+  /// No description provided for @authPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get authPasswordLabel;
+
+  /// No description provided for @authPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get authPasswordHint;
+
+  /// No description provided for @authPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required'**
+  String get authPasswordRequired;
+
+  /// No description provided for @authPasswordInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid password'**
+  String get authPasswordInvalid;
+
+  /// No description provided for @authForgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get authForgotPassword;
+
+  /// No description provided for @authSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get authSignIn;
+
+  /// No description provided for @authSignUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Up'**
+  String get authSignUp;
+
+  /// No description provided for @authOrContinueWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Or continue with'**
+  String get authOrContinueWith;
+
+  /// No description provided for @authContinueWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get authContinueWithGoogle;
+
+  /// No description provided for @authNotMemberYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not part of the club yet?'**
+  String get authNotMemberYet;
+
+  /// No description provided for @authContinueAsGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as guest'**
+  String get authContinueAsGuest;
+
+  /// No description provided for @authResetPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset your password'**
+  String get authResetPasswordTitle;
+
+  /// No description provided for @authResetPasswordPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address and we\'ll send you a link to reset your password.'**
+  String get authResetPasswordPrompt;
+
+  /// No description provided for @authResetLinkSent.
+  ///
+  /// In en, this message translates to:
+  /// **'If an account exists for that email, a reset link is on its way. Check your inbox (and spam folder).'**
+  String get authResetLinkSent;
+
+  /// No description provided for @authSendLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Send link'**
+  String get authSendLink;
+
+  /// No description provided for @commonDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get commonDone;
+
+  /// No description provided for @authSignUpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account to get started'**
+  String get authSignUpSubtitle;
+
+  /// No description provided for @authUsernameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get authUsernameLabel;
+
+  /// No description provided for @authUsernameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your preferred username'**
+  String get authUsernameHint;
+
+  /// No description provided for @authUsernameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Username is required'**
+  String get authUsernameRequired;
+
+  /// No description provided for @authUsernameNoSpaces.
+  ///
+  /// In en, this message translates to:
+  /// **'No leading or trailing spaces'**
+  String get authUsernameNoSpaces;
+
+  /// No description provided for @authUsernameStartLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Must start with a letter'**
+  String get authUsernameStartLetter;
+
+  /// No description provided for @authUsernameAllowedChars.
+  ///
+  /// In en, this message translates to:
+  /// **'Only letters, numbers, and underscores allowed'**
+  String get authUsernameAllowedChars;
+
+  /// No description provided for @authUsernameMinLetters.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum 3 letters'**
+  String get authUsernameMinLetters;
+
+  /// No description provided for @authUsernameMaxNumbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum 3 numbers'**
+  String get authUsernameMaxNumbers;
+
+  /// No description provided for @authPasswordPinLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password / PIN'**
+  String get authPasswordPinLabel;
+
+  /// No description provided for @authPasswordPinHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password / PIN'**
+  String get authPasswordPinHint;
+
+  /// No description provided for @authPasswordMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum 6 characters'**
+  String get authPasswordMinLength;
+
+  /// No description provided for @authConfirmPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password / PIN'**
+  String get authConfirmPasswordLabel;
+
+  /// No description provided for @authConfirmPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter your password / PIN'**
+  String get authConfirmPasswordHint;
+
+  /// No description provided for @authConfirmPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your password'**
+  String get authConfirmPasswordRequired;
+
+  /// No description provided for @authPasswordsMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get authPasswordsMismatch;
+
+  /// No description provided for @authAgreeTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree to the Terms of Service and Privacy Policy'**
+  String get authAgreeTerms;
+
+  /// No description provided for @termsDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms & Privacy'**
+  String get termsDialogTitle;
+
+  /// No description provided for @termsServiceHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get termsServiceHeading;
+
+  /// No description provided for @termsServiceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'By using Salapify, you agree to use the app responsibly and provide accurate information. You are responsible for your account and the information you enter.'**
+  String get termsServiceBody;
+
+  /// No description provided for @termsPrivacyHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get termsPrivacyHeading;
+
+  /// No description provided for @termsPrivacyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Salapify collects information needed to provide your account, budgeting, expense tracking, groups, and bill-splitting features. We do not connect to your bank accounts or financial accounts, and we do not sell your personal information.'**
+  String get termsPrivacyBody;
+
+  /// No description provided for @termsSharedHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared Information'**
+  String get termsSharedHeading;
+
+  /// No description provided for @termsSharedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When you join groups or split bills, relevant information such as your username, bills, and shares may be visible to other members of those groups.'**
+  String get termsSharedBody;
+
+  /// No description provided for @termsImportantHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Important'**
+  String get termsImportantHeading;
+
+  /// No description provided for @termsImportantBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Salapify is a budgeting and organization tool, not a bank, payment service, or financial adviser.'**
+  String get termsImportantBody;
+
+  /// No description provided for @commonClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get commonClose;
+
+  /// No description provided for @verifyEmailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your email'**
+  String get verifyEmailTitle;
+
+  /// No description provided for @verifyEmailSentGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'We’ve sent you a verification link.'**
+  String get verifyEmailSentGeneric;
+
+  /// No description provided for @verifyEmailSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'We’ve sent a verification link to {email}.'**
+  String verifyEmailSentTo(String email);
+
+  /// No description provided for @verifyEmailInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Click the link in that email, then tap the button below.'**
+  String get verifyEmailInstructions;
+
+  /// No description provided for @verifyEmailIVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'I’ve verified'**
+  String get verifyEmailIVerified;
+
+  /// No description provided for @verifyEmailResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend email'**
+  String get verifyEmailResend;
+
+  /// No description provided for @verifyEmailResendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend in {seconds}s'**
+  String verifyEmailResendIn(int seconds);
+
+  /// No description provided for @verifyEmailResent.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification email sent.'**
+  String get verifyEmailResent;
+
+  /// No description provided for @verifyEmailNotYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not verified yet — check your inbox (and spam).'**
+  String get verifyEmailNotYet;
+
+  /// No description provided for @commonSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get commonSignOut;
+
+  /// No description provided for @avatarPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Which little money beast are you?'**
+  String get avatarPickerTitle;
+
+  /// No description provided for @avatarPickerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change this anytime'**
+  String get avatarPickerSubtitle;
+
+  /// No description provided for @commonConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get commonConfirm;
+
+  /// No description provided for @avatarLuxuriousDog.
+  ///
+  /// In en, this message translates to:
+  /// **'Luxurious Dog'**
+  String get avatarLuxuriousDog;
+
+  /// No description provided for @avatarSavvyMonkey.
+  ///
+  /// In en, this message translates to:
+  /// **'Savvy Monkey'**
+  String get avatarSavvyMonkey;
+
+  /// No description provided for @avatarGreedyCat.
+  ///
+  /// In en, this message translates to:
+  /// **'Greedy Cat'**
+  String get avatarGreedyCat;
+
+  /// No description provided for @avatarThriftyPig.
+  ///
+  /// In en, this message translates to:
+  /// **'Thrifty Pig'**
+  String get avatarThriftyPig;
+
+  /// No description provided for @avatarStingyTurtle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stingy Turtle'**
+  String get avatarStingyTurtle;
+
+  /// No description provided for @avatarCovetousSnake.
+  ///
+  /// In en, this message translates to:
+  /// **'Covetous Snake'**
+  String get avatarCovetousSnake;
+
+  /// No description provided for @avatarProsperousPanda.
+  ///
+  /// In en, this message translates to:
+  /// **'Prosperous Panda'**
+  String get avatarProsperousPanda;
+
+  /// No description provided for @avatarFrugalShark.
+  ///
+  /// In en, this message translates to:
+  /// **'Frugal Shark'**
+  String get avatarFrugalShark;
+
+  /// No description provided for @avatarOpulentWalrus.
+  ///
+  /// In en, this message translates to:
+  /// **'Opulent Walrus'**
+  String get avatarOpulentWalrus;
+
+  /// No description provided for @avatarBrokeEagle.
+  ///
+  /// In en, this message translates to:
+  /// **'Broke Eagle'**
+  String get avatarBrokeEagle;
+
+  /// No description provided for @accountAvatarNotSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not selected'**
+  String get accountAvatarNotSelected;
 }
 
 class _AppLocalizationsDelegate

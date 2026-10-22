@@ -9,7 +9,8 @@ import 'package:salapify/features/authentication/domain/entities/avatar_option.d
 import 'package:salapify/features/authentication/presentation/controllers/avatar_controller.dart';
 import 'package:salapify/features/authentication/presentation/controllers/app_user_controller.dart';
 import 'package:salapify/features/premium/data/repositories/entitlement_repository.dart';
-
+import 'package:salapify/l10n/app_localizations.dart';
+import 'package:salapify/features/authentication/presentation/widgets/avatar_name_text.dart';
 
 class AvatarPickerScreen extends ConsumerStatefulWidget {
   const AvatarPickerScreen({super.key});
@@ -67,6 +68,7 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final avatarState = ref.watch(avatarControllerProvider);
     final isPremium = ref.watch(isPremiumProvider).value ?? false;
@@ -108,14 +110,14 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
                         child: Lottie.asset('assets/lottie/curious.json'),
                       ),
                       Text(
-                        'Which little money beast are you?',
+                        l10n.avatarPickerTitle,
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(color: colors.textPrimary),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'You can change this anytime',
+                        l10n.avatarPickerSubtitle,
                         style: TextStyle(color: colors.textSecondary),
                         textAlign: TextAlign.center,
                       ),
@@ -160,7 +162,7 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 250),
                         child: Text(
-                          selected.name,
+                          selected.localizedName(l10n),
                           key: ValueKey(selected.id),
                           style: TextStyle(
                             fontSize: 18,
@@ -181,7 +183,7 @@ class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
                           vertical: 20,
                         ),
                         child: CommonButton(
-                          label: 'Confirm',
+                          label: l10n.commonConfirm,
                           btnColor: colors.textPrimary,
                           labelColor: colors.background,
                           onPressed: isLocked ? null : _confirm,

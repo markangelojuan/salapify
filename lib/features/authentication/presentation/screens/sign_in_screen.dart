@@ -5,12 +5,14 @@ import 'package:salapify/features/authentication/presentation/widgets/sign_in_fo
 import '../widgets/background_decoration.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/animated_greeting.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final lightTheme = Theme.of(
       context,
     ).copyWith(brightness: Brightness.light, extensions: [AppColorsExt.light]);
@@ -43,8 +45,7 @@ class SignInScreen extends StatelessWidget {
                                   title: const AnimatedGreeting(
                                     mode: GreetingMode.hello,
                                   ),
-                                  subtitle:
-                                      "Enter your credentials to access your account",
+                                  subtitle: l10n.authSignInSubtitle,
                                 ),
                               )
                               .animate()

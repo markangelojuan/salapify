@@ -11,6 +11,7 @@ import 'package:salapify/features/authentication/data/repositories/auth_reposito
 import 'package:salapify/features/authentication/presentation/controllers/auth_controller.dart';
 import '../widgets/background_decoration.dart';
 import '../widgets/auth_header.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class VerifyEmailScreen extends ConsumerStatefulWidget {
   const VerifyEmailScreen({super.key});
@@ -48,7 +49,10 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
     final state = ref.read(authControllerProvider);
     if (!state.hasError) {
       _startCooldown();
-      CommonSnackbar.showSuccess(context, "Verification email sent.");
+      CommonSnackbar.showSuccess(
+        context,
+        AppLocalizations.of(context).verifyEmailResent,
+      );
     }
   }
 
@@ -65,7 +69,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
       } else {
         CommonSnackbar.showWarning(
           context,
-          "Not verified yet — check your inbox (and spam).",
+          AppLocalizations.of(context).verifyEmailNotYet,
         );
       }
     } catch (e) {
@@ -78,6 +82,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final email = ref.watch(authRepositoryProvider).currentUser?.email ?? '';
     final authState = ref.watch(authControllerProvider);
     ref.listen<AsyncValue<void>>(authControllerProvider, (_, state) {
@@ -101,10 +106,10 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                   Align(
                         alignment: Alignment.centerLeft,
                         child: AuthHeader(
-                          title: const Text("Verify your email"),
+                          title: Text(l10n.verifyEmailTitle),
                           subtitle: email.isEmpty
-                              ? "We've sent you a verification link."
-                              : "We've sent a verification link to $email.",
+                              ? l10n.verifyEmailSentGeneric
+                              : l10n.verifyEmailSentTo(email),
                         ),
                       )
                       .animate()
@@ -117,7 +122,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                       ),
                   const SizedBox(height: 48),
                   Text(
-                    "Click the link in that email, then tap the button below.",
+                    l10n.verifyEmailInstructions,
                     style: TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 14,
@@ -125,7 +130,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                   ),
                   const SizedBox(height: 32),
                   CommonButton(
-                    label: "I've verified",
+                    label: l10n.verifyEmailIVerified,
                     btnColor: AppColors.black,
                     labelColor: AppColors.white,
                     isLoading: _isChecking,
@@ -134,8 +139,8 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                   const SizedBox(height: 12),
                   CommonButton(
                     label: _cooldownSeconds > 0
-                        ? "Resend in ${_cooldownSeconds}s"
-                        : "Resend email",
+                        ? l10n.verifyEmailResendIn(_cooldownSeconds)
+                        : l10n.verifyEmailResend,
                     btnColor: AppColors.white,
                     labelColor: AppColors.black,
                     isLoading: authState.isLoading,
@@ -148,7 +153,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                         ref.read(authControllerProvider.notifier).signOut();
                       },
                       child: Text(
-                        "Sign out",
+                        l10n.commonSignOut,
                         style: TextStyle(
                           color: AppColors.textPrimary.withOpacity(0.6),
                           fontSize: 13,
