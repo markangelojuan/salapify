@@ -118,5 +118,18 @@
   "avatarFrugalShark": "Tiburón frugal",
   "avatarOpulentWalrus": "Morsa opulenta",
   "avatarBrokeEagle": "Águila sin un peso",
-  "accountAvatarNotSelected": "Sin seleccionar"
+  "accountAvatarNotSelected": "Sin seleccionar",
+  "prefsBudgetTitle": "¿Cómo haces tu presupuesto?",
+  "prefsBudgetDescription": "Tu periodo de presupuesto decide cuándo se reinician los presupuestos de tus categorías.",
+  "prefsMonthlyDesc": "Un presupuesto para todo el mes",
+  "prefsTwiceMonthly": "Dos veces al mes",
+  "prefsTwiceMonthlyDesc": "Dividido en dos mitades, ideal si te pagan dos veces",
+  "prefsFirstHalfRange": "La primera mitad va del día 1 al día {day}.",
+  "prefsCurrencyTitle": "Elige tu moneda",
+  "prefsCurrencyDescription": "Este es el símbolo que se muestra en tus presupuestos y transacciones.",
+  "prefsGetStarted": "Comenzar",
+  "prefsUseDefaults": "Usar valores predeterminados",
+  "prefsChangeLater": "Puedes cambiar esto cuando quieras en Ajustes",
+  "commonNext": "Siguiente",
+  "commonBack": "Atrás"
 }

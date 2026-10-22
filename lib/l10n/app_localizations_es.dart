@@ -395,4 +395,49 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get accountAvatarNotSelected => 'Sin seleccionar';
+
+  @override
+  String get prefsBudgetTitle => '¿Cómo haces tu presupuesto?';
+
+  @override
+  String get prefsBudgetDescription =>
+      'Tu periodo de presupuesto decide cuándo se reinician los presupuestos de tus categorías.';
+
+  @override
+  String get prefsMonthlyDesc => 'Un presupuesto para todo el mes';
+
+  @override
+  String get prefsTwiceMonthly => 'Dos veces al mes';
+
+  @override
+  String get prefsTwiceMonthlyDesc =>
+      'Dividido en dos mitades, ideal si te pagan dos veces';
+
+  @override
+  String prefsFirstHalfRange(int day) {
+    return 'La primera mitad va del día 1 al día $day.';
+  }
+
+  @override
+  String get prefsCurrencyTitle => 'Elige tu moneda';
+
+  @override
+  String get prefsCurrencyDescription =>
+      'Este es el símbolo que se muestra en tus presupuestos y transacciones.';
+
+  @override
+  String get prefsGetStarted => 'Comenzar';
+
+  @override
+  String get prefsUseDefaults => 'Usar valores predeterminados';
+
+  @override
+  String get prefsChangeLater =>
+      'Puedes cambiar esto cuando quieras en Ajustes';
+
+  @override
+  String get commonNext => 'Siguiente';
+
+  @override
+  String get commonBack => 'Atrás';
 }

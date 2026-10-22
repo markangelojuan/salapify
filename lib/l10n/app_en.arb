@@ -151,5 +151,25 @@
   "avatarFrugalShark": "Frugal Shark",
   "avatarOpulentWalrus": "Opulent Walrus",
   "avatarBrokeEagle": "Broke Eagle",
-  "accountAvatarNotSelected": "Not selected"
+  "accountAvatarNotSelected": "Not selected",
+  "prefsBudgetTitle": "How do you budget?",
+  "prefsBudgetDescription": "Your budget period decides when your category budgets reset.",
+  "prefsMonthlyDesc": "One budget for the whole month",
+  "prefsTwiceMonthly": "Twice a month",
+  "prefsTwiceMonthlyDesc": "Split into two halves, great if you get paid twice",
+  "prefsFirstHalfRange": "The first half runs from day 1 to day {day}.",
+  "@prefsFirstHalfRange": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "prefsCurrencyTitle": "Pick your currency",
+  "prefsCurrencyDescription": "This is the symbol shown across your budgets and transactions.",
+  "prefsGetStarted": "Get started",
+  "prefsUseDefaults": "Use defaults",
+  "prefsChangeLater": "You can change these anytime in Settings",
+  "commonNext": "Next",
+  "commonBack": "Back"
 }

@@ -811,6 +811,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not selected'**
   String get accountAvatarNotSelected;
+
+  /// No description provided for @prefsBudgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you budget?'**
+  String get prefsBudgetTitle;
+
+  /// No description provided for @prefsBudgetDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your budget period decides when your category budgets reset.'**
+  String get prefsBudgetDescription;
+
+  /// No description provided for @prefsMonthlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'One budget for the whole month'**
+  String get prefsMonthlyDesc;
+
+  /// No description provided for @prefsTwiceMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Twice a month'**
+  String get prefsTwiceMonthly;
+
+  /// No description provided for @prefsTwiceMonthlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Split into two halves, great if you get paid twice'**
+  String get prefsTwiceMonthlyDesc;
+
+  /// No description provided for @prefsFirstHalfRange.
+  ///
+  /// In en, this message translates to:
+  /// **'The first half runs from day 1 to day {day}.'**
+  String prefsFirstHalfRange(int day);
+
+  /// No description provided for @prefsCurrencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick your currency'**
+  String get prefsCurrencyTitle;
+
+  /// No description provided for @prefsCurrencyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the symbol shown across your budgets and transactions.'**
+  String get prefsCurrencyDescription;
+
+  /// No description provided for @prefsGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get prefsGetStarted;
+
+  /// No description provided for @prefsUseDefaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Use defaults'**
+  String get prefsUseDefaults;
+
+  /// No description provided for @prefsChangeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change these anytime in Settings'**
+  String get prefsChangeLater;
+
+  /// No description provided for @commonNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get commonNext;
+
+  /// No description provided for @commonBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get commonBack;
 }
 
 class _AppLocalizationsDelegate
