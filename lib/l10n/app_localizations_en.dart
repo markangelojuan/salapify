@@ -438,4 +438,238 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonBack => 'Back';
+
+  @override
+  String get commonChange => 'Change';
+
+  @override
+  String get accountUserFallback => 'User';
+
+  @override
+  String get accountProfileInfo => 'Profile info';
+
+  @override
+  String get accountEmail => 'Email';
+
+  @override
+  String get accountSignInMethod => 'Sign-in method';
+
+  @override
+  String get accountAvatar => 'Avatar';
+
+  @override
+  String get accountMembership => 'Membership';
+
+  @override
+  String get accountDangerZone => 'Danger zone';
+
+  @override
+  String get accountDeleteAccount => 'Delete account';
+
+  @override
+  String get accountDeleteAccountDesc =>
+      'Permanently remove your account and all data';
+
+  @override
+  String get accountPremium => 'Premium';
+
+  @override
+  String get accountSeeWhatsInside => 'See what’s inside';
+
+  @override
+  String get accountPremiumDesc => 'Higher limits unlocked on this account';
+
+  @override
+  String get accountFreeDesc => 'Lift category, group and bill limits';
+
+  @override
+  String get commonSave => 'Save';
+
+  @override
+  String get commonRequired => 'Required';
+
+  @override
+  String get accountDeleteConfirmPhrase => 'Save small sums, see savings soar';
+
+  @override
+  String get accountDeleteWarning =>
+      'This action is permanent and cannot be undone. All your data, transactions, and settings will be permanently deleted.';
+
+  @override
+  String accountDeleteTypePhrase(String phrase) {
+    return 'Type “$phrase” to confirm';
+  }
+
+  @override
+  String get accountDeleteReauthGoogle =>
+      'For your security, please confirm your identity with Google before we delete your account.';
+
+  @override
+  String get accountDeleteReauthPassword =>
+      'For your security, please enter your password to confirm.';
+
+  @override
+  String get accountVerifyWithGoogle => 'Verify with Google';
+
+  @override
+  String get accountDeletePermanently => 'Delete permanently';
+
+  @override
+  String get accountIncorrectPasswordRetry =>
+      'Incorrect password. Please try again.';
+
+  @override
+  String get accountChangeUsername => 'Change username';
+
+  @override
+  String get accountUsernameUpdated => 'Username updated';
+
+  @override
+  String get accountChangePassword => 'Change password';
+
+  @override
+  String get accountCurrentPassword => 'Current password / PIN';
+
+  @override
+  String get accountNewPassword => 'New password / PIN';
+
+  @override
+  String get accountConfirmNewPassword => 'Confirm new password / PIN';
+
+  @override
+  String get accountIncorrectPassword => 'Incorrect password';
+
+  @override
+  String get accountPasswordUpdated => 'Password updated';
+
+  @override
+  String get accountUpdatePassword => 'Update password';
+
+  @override
+  String get premiumHeaderBadge => 'Be premium';
+
+  @override
+  String get premiumHeaderActiveBadge => 'You are premium';
+
+  @override
+  String get premiumHeadline => 'Remove every free-plan limit';
+
+  @override
+  String get premiumHeadlineActive => 'Every limit is removed on this account.';
+
+  @override
+  String get premiumSub => 'One-time payment. No subscription, ever.';
+
+  @override
+  String get premiumSubActive => 'Thanks for helping us maintain Salapify.';
+
+  @override
+  String get premiumWhatYouGet => 'What you get';
+
+  @override
+  String premiumFeatureCategories(int count) {
+    return '$count active budget categories';
+  }
+
+  @override
+  String premiumFeatureCategoriesFree(int count) {
+    return 'Free plan: up to $count active';
+  }
+
+  @override
+  String premiumFeatureGroups(int count) {
+    return '$count active groups';
+  }
+
+  @override
+  String premiumFeatureGroupsFree(int count) {
+    return 'Free plan: up to $count active';
+  }
+
+  @override
+  String premiumFeatureBills(int count) {
+    return '$count active bills per group';
+  }
+
+  @override
+  String premiumFeatureBillsFree(int count) {
+    return 'Free plan: up to $count per group';
+  }
+
+  @override
+  String get premiumFeatureAvatars => 'More beasts unlocked';
+
+  @override
+  String get premiumFeatureAvatarsDesc =>
+      'Extra avatars to personalize your profile';
+
+  @override
+  String get premiumPricing => 'Pricing';
+
+  @override
+  String get premiumBestValue => 'BEST VALUE — PAY ONCE';
+
+  @override
+  String get premiumOneTimeFee => 'one-time fee';
+
+  @override
+  String get premiumRestorePurchase => 'Restore purchase';
+
+  @override
+  String get premiumSecurePayment => 'Secure one-time payment via App Store';
+
+  @override
+  String get premiumActiveOnAccount => 'Premium is active on this account';
+
+  @override
+  String get premiumGo => 'Go Premium';
+
+  @override
+  String premiumBuyWithPrice(String price) {
+    return 'Buy — $price';
+  }
+
+  @override
+  String get premiumRestored => 'Purchase restored — enjoy!';
+
+  @override
+  String get premiumUnlocked => 'You’re premium now — enjoy!';
+
+  @override
+  String get premiumErrorOtherAccount =>
+      'This purchase is linked to a different account. Sign in with that account to restore it.';
+
+  @override
+  String get premiumNothingToRestore =>
+      'No previous purchase found to restore.';
+
+  @override
+  String get premiumSignInFirst => 'Please sign in first to unlock premium.';
+
+  @override
+  String get premiumBillingUnavailable =>
+      'Billing is unavailable right now. Please try again later.';
+
+  @override
+  String get premiumPurchaseFailed =>
+      'Purchase didn’t go through. Please try again.';
+
+  @override
+  String get premiumLimitCategories =>
+      'Your budget is growing! You’ve filled every free category.';
+
+  @override
+  String get premiumLimitGroups =>
+      'Your free group is all booked. Only one active at a time.';
+
+  @override
+  String get premiumLimitBills =>
+      'Your bills are multiplying! The free slots are all used up.';
+
+  @override
+  String get premiumUpsellBenefit => 'One-time Premium unlock';
+
+  @override
+  String get premiumUpsellSupport =>
+      'Support the app with a one-time purchase.';
 }

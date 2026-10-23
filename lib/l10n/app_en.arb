@@ -171,5 +171,129 @@
   "prefsUseDefaults": "Use defaults",
   "prefsChangeLater": "You can change these anytime in Settings",
   "commonNext": "Next",
-  "commonBack": "Back"
+  "commonBack": "Back",
+  "commonChange": "Change",
+  "accountUserFallback": "User",
+  "accountProfileInfo": "Profile info",
+  "accountEmail": "Email",
+  "accountSignInMethod": "Sign-in method",
+  "accountAvatar": "Avatar",
+  "accountMembership": "Membership",
+  "accountDangerZone": "Danger zone",
+  "accountDeleteAccount": "Delete account",
+  "accountDeleteAccountDesc": "Permanently remove your account and all data",
+  "accountPremium": "Premium",
+  "accountSeeWhatsInside": "See what’s inside",
+  "accountPremiumDesc": "Higher limits unlocked on this account",
+  "accountFreeDesc": "Lift category, group and bill limits",
+  "commonSave": "Save",
+  "commonRequired": "Required",
+  "accountDeleteConfirmPhrase": "Save small sums, see savings soar",
+  "accountDeleteWarning": "This action is permanent and cannot be undone. All your data, transactions, and settings will be permanently deleted.",
+  "accountDeleteTypePhrase": "Type “{phrase}” to confirm",
+  "@accountDeleteTypePhrase": {
+    "placeholders": {
+      "phrase": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDeleteReauthGoogle": "For your security, please confirm your identity with Google before we delete your account.",
+  "accountDeleteReauthPassword": "For your security, please enter your password to confirm.",
+  "accountVerifyWithGoogle": "Verify with Google",
+  "accountDeletePermanently": "Delete permanently",
+  "accountIncorrectPasswordRetry": "Incorrect password. Please try again.",
+  "accountChangeUsername": "Change username",
+  "accountUsernameUpdated": "Username updated",
+  "accountChangePassword": "Change password",
+  "accountCurrentPassword": "Current password / PIN",
+  "accountNewPassword": "New password / PIN",
+  "accountConfirmNewPassword": "Confirm new password / PIN",
+  "accountIncorrectPassword": "Incorrect password",
+  "accountPasswordUpdated": "Password updated",
+  "accountUpdatePassword": "Update password",
+  "premiumHeaderBadge": "Be premium",
+  "premiumHeaderActiveBadge": "You are premium",
+  "premiumHeadline": "Remove every free-plan limit",
+  "premiumHeadlineActive": "Every limit is removed on this account.",
+  "premiumSub": "One-time payment. No subscription, ever.",
+  "premiumSubActive": "Thanks for helping us maintain Salapify.",
+  "premiumWhatYouGet": "What you get",
+  "premiumFeatureCategories": "{count} active budget categories",
+  "@premiumFeatureCategories": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "premiumFeatureCategoriesFree": "Free plan: up to {count} active",
+  "@premiumFeatureCategoriesFree": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "premiumFeatureGroups": "{count} active groups",
+  "@premiumFeatureGroups": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "premiumFeatureGroupsFree": "Free plan: up to {count} active",
+  "@premiumFeatureGroupsFree": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "premiumFeatureBills": "{count} active bills per group",
+  "@premiumFeatureBills": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "premiumFeatureBillsFree": "Free plan: up to {count} per group",
+  "@premiumFeatureBillsFree": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "premiumFeatureAvatars": "More beasts unlocked",
+  "premiumFeatureAvatarsDesc": "Extra avatars to personalize your profile",
+  "premiumPricing": "Pricing",
+  "premiumBestValue": "BEST VALUE — PAY ONCE",
+  "premiumOneTimeFee": "one-time fee",
+  "premiumRestorePurchase": "Restore purchase",
+  "premiumSecurePayment": "Secure one-time payment via App Store",
+  "premiumActiveOnAccount": "Premium is active on this account",
+  "premiumGo": "Go Premium",
+  "premiumBuyWithPrice": "Buy — {price}",
+  "@premiumBuyWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "premiumRestored": "Purchase restored — enjoy!",
+  "premiumUnlocked": "You’re premium now — enjoy!",
+  "premiumErrorOtherAccount": "This purchase is linked to a different account. Sign in with that account to restore it.",
+  "premiumNothingToRestore": "No previous purchase found to restore.",
+  "premiumSignInFirst": "Please sign in first to unlock premium.",
+  "premiumBillingUnavailable": "Billing is unavailable right now. Please try again later.",
+  "premiumPurchaseFailed": "Purchase didn’t go through. Please try again.",
+  "premiumLimitCategories": "Your budget is growing! You’ve filled every free category.",
+  "premiumLimitGroups": "Your free group is all booked. Only one active at a time.",
+  "premiumLimitBills": "Your bills are multiplying! The free slots are all used up.",
+  "premiumUpsellBenefit": "One-time Premium unlock",
+  "premiumUpsellSupport": "Support the app with a one-time purchase."
 }

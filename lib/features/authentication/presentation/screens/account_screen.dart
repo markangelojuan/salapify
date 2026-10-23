@@ -97,7 +97,7 @@ class AccountScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 14),
                       Text(
-                        user?.username ?? 'User',
+                        user?.username ?? l10n.accountUserFallback,
                         style: TextStyle(
                           color: colors.onPrimary,
                           fontSize: 20,
@@ -138,7 +138,7 @@ class AccountScreen extends ConsumerWidget {
                 children: [
                   _SectionHeader(
                     icon: Icons.person_outline_rounded,
-                    title: 'Profile info',
+                    title: l10n.accountProfileInfo,
                     colors: colors,
                     iconColor: colors.primary,
                   ),
@@ -149,7 +149,7 @@ class AccountScreen extends ConsumerWidget {
                       _InfoRow(
                         colors: colors,
                         icon: Icons.alternate_email_rounded,
-                        label: 'Username',
+                        label: l10n.authUsernameLabel,
                         value: user?.username ?? '—',
                         trailing: TextButton(
                           onPressed: () => showEditUsernameSheet(
@@ -157,7 +157,7 @@ class AccountScreen extends ConsumerWidget {
                             user?.username ?? '',
                           ),
                           child: Text(
-                            'Change',
+                            l10n.commonChange,
                             style: TextStyle(color: colors.primary),
                           ),
                         ),
@@ -166,7 +166,7 @@ class AccountScreen extends ConsumerWidget {
                       _InfoRow(
                         colors: colors,
                         icon: Icons.mail_outline_rounded,
-                        label: 'Email',
+                        label: l10n.accountEmail,
                         value: user?.email ?? '—',
                       ),
                       Divider(height: 1, color: colors.border),
@@ -174,12 +174,12 @@ class AccountScreen extends ConsumerWidget {
                         _InfoRow(
                           colors: colors,
                           icon: Icons.lock_outline_rounded,
-                          label: 'Password',
+                          label: l10n.authPasswordLabel,
                           value: '••••••••',
                           trailing: TextButton(
                             onPressed: () => showChangePasswordSheet(context),
                             child: Text(
-                              'Change',
+                              l10n.commonChange,
                               style: TextStyle(color: colors.primary),
                             ),
                           ),
@@ -188,19 +188,21 @@ class AccountScreen extends ConsumerWidget {
                         _InfoRow(
                           colors: colors,
                           icon: Icons.lock_outline_rounded,
-                          label: 'Sign-in method',
+                          label: l10n.accountSignInMethod,
                           value: 'Google',
                         ),
                       Divider(height: 1, color: colors.border),
                       _InfoRow(
                         colors: colors,
                         icon: Icons.pets_rounded,
-                        label: 'Avatar',
-                        value: avatar?.localizedName(l10n) ?? l10n.accountAvatarNotSelected,
+                        label: l10n.accountAvatar,
+                        value:
+                            avatar?.localizedName(l10n) ??
+                            l10n.accountAvatarNotSelected,
                         trailing: TextButton(
                           onPressed: () => context.push('/avatar-picker'),
                           child: Text(
-                            'Change',
+                            l10n.commonChange,
                             style: TextStyle(color: colors.primary),
                           ),
                         ),
@@ -210,7 +212,7 @@ class AccountScreen extends ConsumerWidget {
                   const SizedBox(height: 32),
                   _SectionHeader(
                     icon: Icons.workspace_premium_rounded,
-                    title: 'Membership',
+                    title: l10n.accountMembership,
                     colors: colors,
                     iconColor: isPremium
                         ? colors.primary
@@ -225,7 +227,7 @@ class AccountScreen extends ConsumerWidget {
                   const SizedBox(height: 32),
                   _SectionHeader(
                     icon: Icons.warning_amber_rounded,
-                    title: 'Danger zone',
+                    title: l10n.accountDangerZone,
                     colors: colors,
                     iconColor: Colors.red,
                   ),
@@ -362,6 +364,7 @@ class _DangerZoneCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       decoration: BoxDecoration(
         color: Colors.red.withValues(alpha: 0.06),
@@ -394,9 +397,9 @@ class _DangerZoneCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Delete account',
-                      style: TextStyle(
+                    Text(
+                      l10n.accountDeleteAccount,
+                      style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
                         color: Colors.red,
@@ -404,7 +407,7 @@ class _DangerZoneCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Permanently remove your account and all data',
+                      l10n.accountDeleteAccountDesc,
                       style: TextStyle(
                         fontSize: 12,
                         color: colors.textSecondary,
@@ -438,6 +441,7 @@ class _MembershipCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       decoration: BoxDecoration(
         color: isPremium
@@ -480,7 +484,9 @@ class _MembershipCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isPremium ? 'Premium' : "See what's inside",
+                      isPremium
+                          ? l10n.accountPremium
+                          : l10n.accountSeeWhatsInside,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
@@ -490,8 +496,8 @@ class _MembershipCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       isPremium
-                          ? 'Higher limits unlocked on this account'
-                          : 'Lift category, group and bill limits',
+                          ? l10n.accountPremiumDesc
+                          : l10n.accountFreeDesc,
                       style: TextStyle(
                         fontSize: 12,
                         color: colors.textSecondary,

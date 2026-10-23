@@ -440,4 +440,242 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get commonBack => 'Atrás';
+
+  @override
+  String get commonChange => 'Cambiar';
+
+  @override
+  String get accountUserFallback => 'Usuario';
+
+  @override
+  String get accountProfileInfo => 'Información del perfil';
+
+  @override
+  String get accountEmail => 'Correo electrónico';
+
+  @override
+  String get accountSignInMethod => 'Método de inicio de sesión';
+
+  @override
+  String get accountAvatar => 'Avatar';
+
+  @override
+  String get accountMembership => 'Membresía';
+
+  @override
+  String get accountDangerZone => 'Zona de peligro';
+
+  @override
+  String get accountDeleteAccount => 'Eliminar cuenta';
+
+  @override
+  String get accountDeleteAccountDesc =>
+      'Elimina permanentemente tu cuenta y todos tus datos';
+
+  @override
+  String get accountPremium => 'Premium';
+
+  @override
+  String get accountSeeWhatsInside => 'Descubre qué incluye';
+
+  @override
+  String get accountPremiumDesc =>
+      'Límites más altos desbloqueados en esta cuenta';
+
+  @override
+  String get accountFreeDesc =>
+      'Quita los límites de categorías, grupos y cuentas';
+
+  @override
+  String get commonSave => 'Guardar';
+
+  @override
+  String get commonRequired => 'Obligatorio';
+
+  @override
+  String get accountDeleteConfirmPhrase => 'Ahorra poco a poco, ahorra mucho';
+
+  @override
+  String get accountDeleteWarning =>
+      'Esta acción es permanente y no se puede deshacer. Todos tus datos, transacciones y ajustes se eliminarán de forma permanente.';
+
+  @override
+  String accountDeleteTypePhrase(String phrase) {
+    return 'Escribe “$phrase” para confirmar';
+  }
+
+  @override
+  String get accountDeleteReauthGoogle =>
+      'Por tu seguridad, confirma tu identidad con Google antes de eliminar tu cuenta.';
+
+  @override
+  String get accountDeleteReauthPassword =>
+      'Por tu seguridad, ingresa tu contraseña para confirmar.';
+
+  @override
+  String get accountVerifyWithGoogle => 'Verificar con Google';
+
+  @override
+  String get accountDeletePermanently => 'Eliminar permanentemente';
+
+  @override
+  String get accountIncorrectPasswordRetry =>
+      'Contraseña incorrecta. Inténtalo de nuevo.';
+
+  @override
+  String get accountChangeUsername => 'Cambiar nombre de usuario';
+
+  @override
+  String get accountUsernameUpdated => 'Nombre de usuario actualizado';
+
+  @override
+  String get accountChangePassword => 'Cambiar contraseña';
+
+  @override
+  String get accountCurrentPassword => 'Contraseña / PIN actual';
+
+  @override
+  String get accountNewPassword => 'Nueva contraseña / PIN';
+
+  @override
+  String get accountConfirmNewPassword => 'Confirmar nueva contraseña / PIN';
+
+  @override
+  String get accountIncorrectPassword => 'Contraseña incorrecta';
+
+  @override
+  String get accountPasswordUpdated => 'Contraseña actualizada';
+
+  @override
+  String get accountUpdatePassword => 'Actualizar contraseña';
+
+  @override
+  String get premiumHeaderBadge => 'Hazte premium';
+
+  @override
+  String get premiumHeaderActiveBadge => 'Eres premium';
+
+  @override
+  String get premiumHeadline => 'Elimina todos los límites del plan gratuito';
+
+  @override
+  String get premiumHeadlineActive =>
+      'Se eliminaron todos los límites en esta cuenta.';
+
+  @override
+  String get premiumSub => 'Pago único. Sin suscripción, nunca.';
+
+  @override
+  String get premiumSubActive => 'Gracias por ayudarnos a mantener Salapify.';
+
+  @override
+  String get premiumWhatYouGet => 'Lo que obtienes';
+
+  @override
+  String premiumFeatureCategories(int count) {
+    return '$count categorías de presupuesto activas';
+  }
+
+  @override
+  String premiumFeatureCategoriesFree(int count) {
+    return 'Plan gratuito: hasta $count activas';
+  }
+
+  @override
+  String premiumFeatureGroups(int count) {
+    return '$count grupos activos';
+  }
+
+  @override
+  String premiumFeatureGroupsFree(int count) {
+    return 'Plan gratuito: hasta $count activos';
+  }
+
+  @override
+  String premiumFeatureBills(int count) {
+    return '$count cuentas activas por grupo';
+  }
+
+  @override
+  String premiumFeatureBillsFree(int count) {
+    return 'Plan gratuito: hasta $count por grupo';
+  }
+
+  @override
+  String get premiumFeatureAvatars => 'Más monstruitos desbloqueados';
+
+  @override
+  String get premiumFeatureAvatarsDesc =>
+      'Avatares extra para personalizar tu perfil';
+
+  @override
+  String get premiumPricing => 'Precio';
+
+  @override
+  String get premiumBestValue => 'MEJOR VALOR — PAGA UNA VEZ';
+
+  @override
+  String get premiumOneTimeFee => 'pago único';
+
+  @override
+  String get premiumRestorePurchase => 'Restaurar compra';
+
+  @override
+  String get premiumSecurePayment =>
+      'Pago único y seguro a través de App Store';
+
+  @override
+  String get premiumActiveOnAccount => 'Premium está activo en esta cuenta';
+
+  @override
+  String get premiumGo => 'Hazte Premium';
+
+  @override
+  String premiumBuyWithPrice(String price) {
+    return 'Comprar — $price';
+  }
+
+  @override
+  String get premiumRestored => 'Compra restaurada. ¡Disfruta!';
+
+  @override
+  String get premiumUnlocked => '¡Ya eres premium! Disfruta.';
+
+  @override
+  String get premiumErrorOtherAccount =>
+      'Esta compra está vinculada a otra cuenta. Inicia sesión con esa cuenta para restaurarla.';
+
+  @override
+  String get premiumNothingToRestore =>
+      'No se encontró ninguna compra anterior para restaurar.';
+
+  @override
+  String get premiumSignInFirst =>
+      'Inicia sesión primero para desbloquear premium.';
+
+  @override
+  String get premiumBillingUnavailable =>
+      'La facturación no está disponible en este momento. Inténtalo de nuevo más tarde.';
+
+  @override
+  String get premiumPurchaseFailed =>
+      'La compra no se completó. Inténtalo de nuevo.';
+
+  @override
+  String get premiumLimitCategories =>
+      '¡Tu presupuesto está creciendo! Llenaste todas las categorías gratuitas.';
+
+  @override
+  String get premiumLimitGroups =>
+      'Tu grupo gratuito ya está ocupado. Solo puedes tener uno activo a la vez.';
+
+  @override
+  String get premiumLimitBills =>
+      '¡Tus cuentas se multiplican! Se acabaron los espacios gratuitos.';
+
+  @override
+  String get premiumUpsellBenefit => 'Desbloqueo Premium de pago único';
+
+  @override
+  String get premiumUpsellSupport => 'Apoya la app con una compra única.';
 }

@@ -7,6 +7,7 @@ import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/features/authentication/domain/exceptions/auth_exceptions.dart';
 import 'package:salapify/features/authentication/presentation/controllers/auth_controller.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 import 'package:salapify/router/routes.dart';
 
 Future<void> showEditUsernameSheet(
@@ -154,7 +155,8 @@ class _DeleteAccountSheet extends ConsumerStatefulWidget {
 }
 
 class _DeleteAccountSheetState extends ConsumerState<_DeleteAccountSheet> {
-  static const _confirmWord = 'Save small sums, see savings soar';
+  String get _confirmWord =>
+    AppLocalizations.of(context).accountDeleteConfirmPhrase;
 
   final _wordController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -221,7 +223,7 @@ class _DeleteAccountSheetState extends ConsumerState<_DeleteAccountSheet> {
         if (error is WrongPasswordException) {
           setState(() {
             _isBusy = false;
-            _errorText = 'Incorrect password. Please try again.';
+           _errorText = AppLocalizations.of(context).accountIncorrectPasswordRetry;
           });
           return;
         }
@@ -241,13 +243,14 @@ class _DeleteAccountSheetState extends ConsumerState<_DeleteAccountSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final isGoogle = _isGoogle;
 
     return PopScope(
       canPop: !_isBusy,
       child: _AccountBottomSheetScaffold(
-        title: 'Delete account',
+        title: l10n.accountDeleteAccount,
         colors: colors,
         child: _step == _DeleteStep.confirmWord
             ? _buildConfirmWordStep(colors)
@@ -255,7 +258,7 @@ class _DeleteAccountSheetState extends ConsumerState<_DeleteAccountSheet> {
         actions: _step == _DeleteStep.confirmWord
             ? [
                 CommonButton(
-                  label: 'Continue',
+                  label: l10n.commonContinue,
                   btnColor: Colors.red,
                   labelColor: Colors.white,
                   onPressed: _canProceed
@@ -264,12 +267,12 @@ class _DeleteAccountSheetState extends ConsumerState<_DeleteAccountSheet> {
                 ),
                 _secondaryButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(l10n.commonCancel),
                 ),
               ]
             : [
                 CommonButton(
-                  label: isGoogle ? 'Verify with Google' : 'Delete permanently',
+                  label: isGoogle ? l10n.accountVerifyWithGoogle : l10n.accountDeletePermanently,
                   btnColor: Colors.red,
                   labelColor: Colors.white,
                   isLoading: _isBusy,
@@ -279,7 +282,7 @@ class _DeleteAccountSheetState extends ConsumerState<_DeleteAccountSheet> {
                   onPressed: _isBusy
                       ? null
                       : () => setState(() => _step = _DeleteStep.confirmWord),
-                  child: const Text('Back'),
+                  child: Text(l10n.commonBack),
                 ),
               ],
       ),
@@ -287,18 +290,18 @@ class _DeleteAccountSheetState extends ConsumerState<_DeleteAccountSheet> {
   }
 
   Widget _buildConfirmWordStep(AppColorsExt colors) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'This action is permanent and cannot be undone. All your data, '
-          'transactions, and settings will be permanently deleted.',
+          l10n.accountDeleteWarning,
           style: TextStyle(color: colors.textSecondary, fontSize: 13),
         ),
         const SizedBox(height: 16),
         Text(
-          'Type "$_confirmWord" to confirm',
+          l10n.accountDeleteTypePhrase(_confirmWord),
           style: TextStyle(
             fontWeight: FontWeight.w600,
             color: colors.textPrimary,
@@ -308,24 +311,22 @@ class _DeleteAccountSheetState extends ConsumerState<_DeleteAccountSheet> {
         TextField(
           controller: _wordController,
           autofocus: true,
-          decoration: const InputDecoration(
-            hintText: _confirmWord,
-            border: OutlineInputBorder(),
-          ),
+          decoration: InputDecoration(hintText: _confirmWord, border: const OutlineInputBorder())
         ),
       ],
     );
   }
 
   Widget _buildReauthStep(AppColorsExt colors, bool isGoogle) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           isGoogle
-              ? 'For your security, please confirm your identity with Google before we delete your account.'
-              : 'For your security, please enter your password to confirm.',
+              ? l10n.accountDeleteReauthGoogle
+              : l10n.accountDeleteReauthPassword,
           style: TextStyle(color: colors.textSecondary, fontSize: 13),
         ),
         if (!isGoogle) ...[
@@ -335,8 +336,8 @@ class _DeleteAccountSheetState extends ConsumerState<_DeleteAccountSheet> {
             obscureText: true,
             autofocus: true,
             enabled: !_isBusy,
-            decoration: const InputDecoration(
-              labelText: 'Password',
+            decoration: InputDecoration(
+              labelText: l10n.authPasswordLabel,
               border: OutlineInputBorder(),
             ),
           ),
@@ -380,18 +381,19 @@ class _EditUsernameSheetState extends ConsumerState<_EditUsernameSheet> {
   }
 
   String? _validateUsername(String? value) {
-    if (value == null || value.isEmpty) return "Username is required";
-    if (value != value.trim()) return "No leading or trailing spaces";
+    final l10n = AppLocalizations.of(context);
+    if (value == null || value.isEmpty) return l10n.authUsernameRequired;
+    if (value != value.trim()) return l10n.authUsernameNoSpaces;
     if (!RegExp(r'^[a-zA-Z]').hasMatch(value)) {
-      return "Must start with a letter";
+      return l10n.authUsernameStartLetter;
     }
     if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) {
-      return "Only letters, numbers, and underscores allowed";
+      return l10n.authUsernameAllowedChars;
     }
     final letterCount = RegExp(r'[a-zA-Z]').allMatches(value).length;
-    if (letterCount < 3) return "Minimum 3 letters";
+    if (letterCount < 3) return l10n.authUsernameMinLetters;
     final digitCount = RegExp(r'[0-9]').allMatches(value).length;
-    if (digitCount > 3) return "Maximum 3 numbers";
+    if (digitCount > 3) return l10n.authUsernameMaxNumbers;
     if (_usernameError != null) return _usernameError;
     return null;
   }
@@ -417,7 +419,7 @@ class _EditUsernameSheetState extends ConsumerState<_EditUsernameSheet> {
         setState(() => _isSubmitting = false);
         if (error is UsernameTakenException) {
           setState(() {
-            _usernameError = 'Username is already taken';
+            _usernameError = AppLocalizations.of(context).errorUsernameTaken;
           });
           _formKey.currentState!.validate();
         } else {
@@ -426,7 +428,7 @@ class _EditUsernameSheetState extends ConsumerState<_EditUsernameSheet> {
       },
       data: (_) {
         if (!mounted) return;
-        CommonSnackbar.showSuccess(context, 'Username updated');
+        CommonSnackbar.showSuccess(context, AppLocalizations.of(context).accountUsernameUpdated);
         Navigator.of(context).pop();
       },
     );
@@ -434,12 +436,13 @@ class _EditUsernameSheetState extends ConsumerState<_EditUsernameSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
 
     return PopScope(
       canPop: !_isSubmitting,
       child: _AccountBottomSheetScaffold(
-        title: 'Change username',
+        title: l10n.accountChangeUsername,
         colors: colors,
         child: Form(
           key: _formKey,
@@ -448,8 +451,8 @@ class _EditUsernameSheetState extends ConsumerState<_EditUsernameSheet> {
             autofocus: true,
             enabled: !_isSubmitting,
             maxLength: 20,
-            decoration: const InputDecoration(
-              labelText: 'Username',
+            decoration: InputDecoration(
+              labelText: l10n.authUsernameLabel,
               border: OutlineInputBorder(),
             ),
             validator: _validateUsername,
@@ -457,7 +460,7 @@ class _EditUsernameSheetState extends ConsumerState<_EditUsernameSheet> {
         ),
         actions: [
           CommonButton(
-            label: 'Save',
+            label: l10n.commonSave,
             btnColor: colors.textPrimary,
             labelColor: colors.background,
             isLoading: _isSubmitting,
@@ -465,7 +468,7 @@ class _EditUsernameSheetState extends ConsumerState<_EditUsernameSheet> {
           ),
           _secondaryButton(
             onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
         ],
       ),
@@ -523,14 +526,14 @@ class _ChangePasswordSheetState extends ConsumerState<_ChangePasswordSheet> {
           error: (error, _) {
             setState(() => _isSubmitting = false);
             if (error is WrongPasswordException) {
-              setState(() => _currentError = 'Incorrect password');
+              setState(() => _currentError = AppLocalizations.of(context).accountIncorrectPassword);
               _formKey.currentState!.validate();
             } else {
               CommonSnackbar.showError(context, error);
             }
           },
           data: (_) {
-            CommonSnackbar.showSuccess(context, 'Password updated');
+            CommonSnackbar.showSuccess(context, AppLocalizations.of(context).accountPasswordUpdated);
             Navigator.of(context).pop();
           },
         );
@@ -538,12 +541,13 @@ class _ChangePasswordSheetState extends ConsumerState<_ChangePasswordSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
 
     return PopScope(
       canPop: !_isSubmitting,
       child: _AccountBottomSheetScaffold(
-        title: 'Change password',
+        title: l10n.accountChangePassword,
         colors: colors,
         child: Form(
           key: _formKey,
@@ -555,12 +559,12 @@ class _ChangePasswordSheetState extends ConsumerState<_ChangePasswordSheet> {
                 obscureText: true,
                 autofocus: true,
                 enabled: !_isSubmitting,
-                decoration: const InputDecoration(
-                  labelText: 'Current password / PIN',
+                decoration: InputDecoration(
+                  labelText: l10n.accountCurrentPassword,
                   border: OutlineInputBorder(),
                 ),
                 validator: (v) {
-                  if (v == null || v.isEmpty) return 'Required';
+                  if (v == null || v.isEmpty) return l10n.commonRequired;
                   return _currentError;
                 },
               ),
@@ -569,12 +573,12 @@ class _ChangePasswordSheetState extends ConsumerState<_ChangePasswordSheet> {
                 controller: _newController,
                 obscureText: true,
                 enabled: !_isSubmitting,
-                decoration: const InputDecoration(
-                  labelText: 'New password / PIN',
+                decoration: InputDecoration(
+                  labelText: l10n.accountNewPassword,
                   border: OutlineInputBorder(),
                 ),
                 validator: (v) {
-                  if (v == null || v.length < 6) return 'Minimum 6 characters';
+                  if (v == null || v.length < 6) return l10n.authPasswordMinLength;
                   return null;
                 },
               ),
@@ -583,19 +587,19 @@ class _ChangePasswordSheetState extends ConsumerState<_ChangePasswordSheet> {
                 controller: _confirmController,
                 obscureText: true,
                 enabled: !_isSubmitting,
-                decoration: const InputDecoration(
-                  labelText: 'Confirm new password / PIN',
+                decoration: InputDecoration(
+                  labelText: l10n.accountConfirmNewPassword,
                   border: OutlineInputBorder(),
                 ),
                 validator: (v) =>
-                    v != _newController.text ? "Passwords don't match" : null,
+                    v != _newController.text ? l10n.authPasswordsMismatch : null,
               ),
             ],
           ),
         ),
         actions: [
           CommonButton(
-            label: 'Update password',
+            label: l10n.accountUpdatePassword,
             btnColor: colors.textPrimary,
             labelColor: colors.background,
             isLoading: _isSubmitting,
@@ -603,7 +607,7 @@ class _ChangePasswordSheetState extends ConsumerState<_ChangePasswordSheet> {
           ),
           _secondaryButton(
             onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
         ],
       ),

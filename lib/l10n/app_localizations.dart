@@ -889,6 +889,414 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back'**
   String get commonBack;
+
+  /// No description provided for @commonChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get commonChange;
+
+  /// No description provided for @accountUserFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get accountUserFallback;
+
+  /// No description provided for @accountProfileInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile info'**
+  String get accountProfileInfo;
+
+  /// No description provided for @accountEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get accountEmail;
+
+  /// No description provided for @accountSignInMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in method'**
+  String get accountSignInMethod;
+
+  /// No description provided for @accountAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Avatar'**
+  String get accountAvatar;
+
+  /// No description provided for @accountMembership.
+  ///
+  /// In en, this message translates to:
+  /// **'Membership'**
+  String get accountMembership;
+
+  /// No description provided for @accountDangerZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger zone'**
+  String get accountDangerZone;
+
+  /// No description provided for @accountDeleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get accountDeleteAccount;
+
+  /// No description provided for @accountDeleteAccountDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently remove your account and all data'**
+  String get accountDeleteAccountDesc;
+
+  /// No description provided for @accountPremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get accountPremium;
+
+  /// No description provided for @accountSeeWhatsInside.
+  ///
+  /// In en, this message translates to:
+  /// **'See what’s inside'**
+  String get accountSeeWhatsInside;
+
+  /// No description provided for @accountPremiumDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher limits unlocked on this account'**
+  String get accountPremiumDesc;
+
+  /// No description provided for @accountFreeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Lift category, group and bill limits'**
+  String get accountFreeDesc;
+
+  /// No description provided for @commonSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get commonSave;
+
+  /// No description provided for @commonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get commonRequired;
+
+  /// No description provided for @accountDeleteConfirmPhrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Save small sums, see savings soar'**
+  String get accountDeleteConfirmPhrase;
+
+  /// No description provided for @accountDeleteWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This action is permanent and cannot be undone. All your data, transactions, and settings will be permanently deleted.'**
+  String get accountDeleteWarning;
+
+  /// No description provided for @accountDeleteTypePhrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Type “{phrase}” to confirm'**
+  String accountDeleteTypePhrase(String phrase);
+
+  /// No description provided for @accountDeleteReauthGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'For your security, please confirm your identity with Google before we delete your account.'**
+  String get accountDeleteReauthGoogle;
+
+  /// No description provided for @accountDeleteReauthPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'For your security, please enter your password to confirm.'**
+  String get accountDeleteReauthPassword;
+
+  /// No description provided for @accountVerifyWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify with Google'**
+  String get accountVerifyWithGoogle;
+
+  /// No description provided for @accountDeletePermanently.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete permanently'**
+  String get accountDeletePermanently;
+
+  /// No description provided for @accountIncorrectPasswordRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect password. Please try again.'**
+  String get accountIncorrectPasswordRetry;
+
+  /// No description provided for @accountChangeUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Change username'**
+  String get accountChangeUsername;
+
+  /// No description provided for @accountUsernameUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Username updated'**
+  String get accountUsernameUpdated;
+
+  /// No description provided for @accountChangePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get accountChangePassword;
+
+  /// No description provided for @accountCurrentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password / PIN'**
+  String get accountCurrentPassword;
+
+  /// No description provided for @accountNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password / PIN'**
+  String get accountNewPassword;
+
+  /// No description provided for @accountConfirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new password / PIN'**
+  String get accountConfirmNewPassword;
+
+  /// No description provided for @accountIncorrectPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect password'**
+  String get accountIncorrectPassword;
+
+  /// No description provided for @accountPasswordUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated'**
+  String get accountPasswordUpdated;
+
+  /// No description provided for @accountUpdatePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Update password'**
+  String get accountUpdatePassword;
+
+  /// No description provided for @premiumHeaderBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Be premium'**
+  String get premiumHeaderBadge;
+
+  /// No description provided for @premiumHeaderActiveBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'You are premium'**
+  String get premiumHeaderActiveBadge;
+
+  /// No description provided for @premiumHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove every free-plan limit'**
+  String get premiumHeadline;
+
+  /// No description provided for @premiumHeadlineActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Every limit is removed on this account.'**
+  String get premiumHeadlineActive;
+
+  /// No description provided for @premiumSub.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time payment. No subscription, ever.'**
+  String get premiumSub;
+
+  /// No description provided for @premiumSubActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for helping us maintain Salapify.'**
+  String get premiumSubActive;
+
+  /// No description provided for @premiumWhatYouGet.
+  ///
+  /// In en, this message translates to:
+  /// **'What you get'**
+  String get premiumWhatYouGet;
+
+  /// No description provided for @premiumFeatureCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} active budget categories'**
+  String premiumFeatureCategories(int count);
+
+  /// No description provided for @premiumFeatureCategoriesFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free plan: up to {count} active'**
+  String premiumFeatureCategoriesFree(int count);
+
+  /// No description provided for @premiumFeatureGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} active groups'**
+  String premiumFeatureGroups(int count);
+
+  /// No description provided for @premiumFeatureGroupsFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free plan: up to {count} active'**
+  String premiumFeatureGroupsFree(int count);
+
+  /// No description provided for @premiumFeatureBills.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} active bills per group'**
+  String premiumFeatureBills(int count);
+
+  /// No description provided for @premiumFeatureBillsFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free plan: up to {count} per group'**
+  String premiumFeatureBillsFree(int count);
+
+  /// No description provided for @premiumFeatureAvatars.
+  ///
+  /// In en, this message translates to:
+  /// **'More beasts unlocked'**
+  String get premiumFeatureAvatars;
+
+  /// No description provided for @premiumFeatureAvatarsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra avatars to personalize your profile'**
+  String get premiumFeatureAvatarsDesc;
+
+  /// No description provided for @premiumPricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing'**
+  String get premiumPricing;
+
+  /// No description provided for @premiumBestValue.
+  ///
+  /// In en, this message translates to:
+  /// **'BEST VALUE — PAY ONCE'**
+  String get premiumBestValue;
+
+  /// No description provided for @premiumOneTimeFee.
+  ///
+  /// In en, this message translates to:
+  /// **'one-time fee'**
+  String get premiumOneTimeFee;
+
+  /// No description provided for @premiumRestorePurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchase'**
+  String get premiumRestorePurchase;
+
+  /// No description provided for @premiumSecurePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure one-time payment via App Store'**
+  String get premiumSecurePayment;
+
+  /// No description provided for @premiumActiveOnAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium is active on this account'**
+  String get premiumActiveOnAccount;
+
+  /// No description provided for @premiumGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Premium'**
+  String get premiumGo;
+
+  /// No description provided for @premiumBuyWithPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy — {price}'**
+  String premiumBuyWithPrice(String price);
+
+  /// No description provided for @premiumRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase restored — enjoy!'**
+  String get premiumRestored;
+
+  /// No description provided for @premiumUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re premium now — enjoy!'**
+  String get premiumUnlocked;
+
+  /// No description provided for @premiumErrorOtherAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'This purchase is linked to a different account. Sign in with that account to restore it.'**
+  String get premiumErrorOtherAccount;
+
+  /// No description provided for @premiumNothingToRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'No previous purchase found to restore.'**
+  String get premiumNothingToRestore;
+
+  /// No description provided for @premiumSignInFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in first to unlock premium.'**
+  String get premiumSignInFirst;
+
+  /// No description provided for @premiumBillingUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing is unavailable right now. Please try again later.'**
+  String get premiumBillingUnavailable;
+
+  /// No description provided for @premiumPurchaseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase didn’t go through. Please try again.'**
+  String get premiumPurchaseFailed;
+
+  /// No description provided for @premiumLimitCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Your budget is growing! You’ve filled every free category.'**
+  String get premiumLimitCategories;
+
+  /// No description provided for @premiumLimitGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Your free group is all booked. Only one active at a time.'**
+  String get premiumLimitGroups;
+
+  /// No description provided for @premiumLimitBills.
+  ///
+  /// In en, this message translates to:
+  /// **'Your bills are multiplying! The free slots are all used up.'**
+  String get premiumLimitBills;
+
+  /// No description provided for @premiumUpsellBenefit.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time Premium unlock'**
+  String get premiumUpsellBenefit;
+
+  /// No description provided for @premiumUpsellSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Support the app with a one-time purchase.'**
+  String get premiumUpsellSupport;
 }
 
 class _AppLocalizationsDelegate
