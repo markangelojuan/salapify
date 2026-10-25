@@ -295,5 +295,42 @@
   "premiumLimitGroups": "Your free group is all booked. Only one active at a time.",
   "premiumLimitBills": "Your bills are multiplying! The free slots are all used up.",
   "premiumUpsellBenefit": "One-time Premium unlock",
-  "premiumUpsellSupport": "Support the app with a one-time purchase."
+  "premiumUpsellSupport": "Support the app with a one-time purchase.",
+  "blockedUsersTitle": "Blocked Users",
+  "blockedUsersEmpty": "No blocked users",
+  "unblockTitle": "Unblock {username}?",
+  "@unblockTitle": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "unblockMessage": "They will be able to interact with you again.",
+  "unblockAction": "Unblock",
+  "unblockedSnack": "Unblocked {username}",
+  "@unblockedSnack": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "commonLoadFailed": "Failed to load: {error}",
+  "@commonLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "commonDelete": "Delete",
+  "confirmDeleteMessage": "Are you sure you want to delete “{itemName}”? This cannot be undone.",
+  "@confirmDeleteMessage": {
+    "placeholders": {
+      "itemName": {
+        "type": "String"
+      }
+    }
+  }
 }

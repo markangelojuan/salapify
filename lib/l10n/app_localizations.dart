@@ -1297,6 +1297,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Support the app with a one-time purchase.'**
   String get premiumUpsellSupport;
+
+  /// No description provided for @blockedUsersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked Users'**
+  String get blockedUsersTitle;
+
+  /// No description provided for @blockedUsersEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No blocked users'**
+  String get blockedUsersEmpty;
+
+  /// No description provided for @unblockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unblock {username}?'**
+  String unblockTitle(String username);
+
+  /// No description provided for @unblockMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'They will be able to interact with you again.'**
+  String get unblockMessage;
+
+  /// No description provided for @unblockAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Unblock'**
+  String get unblockAction;
+
+  /// No description provided for @unblockedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Unblocked {username}'**
+  String unblockedSnack(String username);
+
+  /// No description provided for @commonLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load: {error}'**
+  String commonLoadFailed(String error);
+
+  /// No description provided for @commonDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get commonDelete;
+
+  /// No description provided for @confirmDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete “{itemName}”? This cannot be undone.'**
+  String confirmDeleteMessage(String itemName);
 }
 
 class _AppLocalizationsDelegate

@@ -678,4 +678,40 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get premiumUpsellSupport => 'Apoya la app con una compra única.';
+
+  @override
+  String get blockedUsersTitle => 'Usuarios bloqueados';
+
+  @override
+  String get blockedUsersEmpty => 'No hay usuarios bloqueados';
+
+  @override
+  String unblockTitle(String username) {
+    return '¿Desbloquear a $username?';
+  }
+
+  @override
+  String get unblockMessage =>
+      'Esta persona podrá volver a interactuar contigo.';
+
+  @override
+  String get unblockAction => 'Desbloquear';
+
+  @override
+  String unblockedSnack(String username) {
+    return 'Desbloqueaste a $username';
+  }
+
+  @override
+  String commonLoadFailed(String error) {
+    return 'Error al cargar: $error';
+  }
+
+  @override
+  String get commonDelete => 'Eliminar';
+
+  @override
+  String confirmDeleteMessage(String itemName) {
+    return '¿Seguro que quieres eliminar “$itemName”? Esta acción no se puede deshacer.';
+  }
 }

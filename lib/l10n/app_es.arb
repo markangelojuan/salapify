@@ -199,5 +199,14 @@
   "premiumLimitGroups": "Tu grupo gratuito ya está ocupado. Solo puedes tener uno activo a la vez.",
   "premiumLimitBills": "¡Tus cuentas se multiplican! Se acabaron los espacios gratuitos.",
   "premiumUpsellBenefit": "Desbloqueo Premium de pago único",
-  "premiumUpsellSupport": "Apoya la app con una compra única."
+  "premiumUpsellSupport": "Apoya la app con una compra única.",
+  "blockedUsersTitle": "Usuarios bloqueados",
+  "blockedUsersEmpty": "No hay usuarios bloqueados",
+  "unblockTitle": "¿Desbloquear a {username}?",
+  "unblockMessage": "Esta persona podrá volver a interactuar contigo.",
+  "unblockAction": "Desbloquear",
+  "unblockedSnack": "Desbloqueaste a {username}",
+  "commonLoadFailed": "Error al cargar: {error}",
+  "commonDelete": "Eliminar",
+  "confirmDeleteMessage": "¿Seguro que quieres eliminar “{itemName}”? Esta acción no se puede deshacer."
 }
