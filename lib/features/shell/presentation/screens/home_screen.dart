@@ -26,6 +26,7 @@ import 'package:salapify/features/notification/data/providers/notification_provi
 import 'package:salapify/features/premium/data/services/purchase_service.dart';
 import 'package:salapify/core/layout/breakpoints.dart';
 import 'package:salapify/core/widgets/nav_badge.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 import 'package:salapify/router/routes.dart';
 
@@ -58,12 +59,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     NotificationScreen(),
   ];
 
-  static const List<String> _titles = [
-    'Budget',
-    'Transactions',
-    'Split Bill',
-    'Notifications',
-  ];
+  String _titleFor(int index, AppLocalizations l10n) => switch (index) {
+    0 => l10n.navBudget,
+    1 => l10n.navTransactions,
+    2 => l10n.navSplitBill,
+    _ => l10n.navNotifications,
+  };
 
   @override
   void initState() {
@@ -149,12 +150,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       if (currentCount >= limit) {
         if (!context.mounted) return;
+        final l10n = AppLocalizations.of(context);
         if (isPremium) {
           CommonSnackbar.showWarning(
             context,
-            'You\'ve reached the limit of '
-            '${BudgetLimits.premiumMaxActiveCategories} active categories. '
-            'Delete one to add a new one.',
+            l10n.limitReachedCategories(
+              BudgetLimits.premiumMaxActiveCategories,
+            ),
           );
         } else {
           await _showPremiumUpsell(PremiumLimit.categories);
@@ -188,12 +190,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       if (ownedCount >= limit) {
         if (!context.mounted) return;
+        final l10n = AppLocalizations.of(context);
         if (isPremium) {
           CommonSnackbar.showWarning(
             context,
-            'You\'ve reached the limit of '
-            '${SplitBillLimits.premiumMaxActiveGroups} groups. '
-            'Delete a group to create a new one.',
+            l10n.limitReachedGroups(SplitBillLimits.premiumMaxActiveGroups),
           );
         } else {
           await _showPremiumUpsell(PremiumLimit.groups);
@@ -226,18 +227,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    
+    final l10n = AppLocalizations.of(context);
     final currentIndex = ref.watch(homeTabIndexProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_titles[currentIndex]),
+        title: Text(_titleFor(currentIndex, l10n)),
         leading: Builder(
           builder: (ctx) => AppShowcase(
             showcaseKey: _menuKey,
-            title: 'More Options',
-            description:
-                'Manage your account, budget period,\nother settings, and get help.',
+            title: l10n.tourMenuTitle,
+            description: l10n.tourMenuDesc,
             child: IconButton(
               icon: const Icon(Icons.menu),
               onPressed: () => Scaffold.of(ctx).openDrawer(),
@@ -290,6 +290,8 @@ class _FloatingNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return MediaQuery.removePadding(
       context: context,
       removeBottom: true,
@@ -330,9 +332,8 @@ class _FloatingNavBar extends StatelessWidget {
                     child: AppShowcase(
                       showcaseKey: fabKey,
                       circle: true,
-                      title: 'Quick Add',
-                      description:
-                          'Tap + to quickly add a category,\ntransaction, or split-bill group.',
+                      title: l10n.tourFabTitle,
+                      description: l10n.tourFabDesc,
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 220),
                         transitionBuilder: (child, anim) => ScaleTransition(
@@ -381,6 +382,7 @@ class _Pill extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final unreadSplitCount = ref.watch(totalUnreadSplitCountProvider);
     final unreadNotifCount = ref.watch(unreadNotificationCountProvider);
@@ -429,45 +431,42 @@ class _Pill extends ConsumerWidget {
               NavigationDestination(
                 icon: AppShowcase(
                   showcaseKey: budgetKey,
-                  title: 'Plan Your Budget',
-                  description:
-                      'Set spending limits per category\nand see how much you have left.',
+                  title: l10n.tourBudgetTitle,
+                  description: l10n.tourBudgetDesc,
                   child: const Icon(Icons.account_balance_wallet_outlined),
                 ),
                 selectedIcon: AppShowcase(
                   showcaseKey: budgetKey,
-                  title: 'Plan Your Budget',
-                  description:
-                      'Set spending limits per category\nand see how much you have left.',
+                  title: l10n.tourBudgetTitle,
+                  description: l10n.tourBudgetDesc,
                   child: const Icon(Icons.account_balance_wallet_rounded),
                 ),
-                label: 'Budget',
+                label: l10n.navBudget,
               ),
               NavigationDestination(
                 icon: AppShowcase(
                   showcaseKey: txKey,
-                  title: 'Track Your Expenses',
-                  description:
-                      'Track your income and expenses.\nUse + to add a transaction.',
+                  title: l10n.tourTransactionsTitle,
+                  description: l10n.tourTransactionsDesc,
                   child: const Icon(Icons.payments_outlined),
                 ),
                 selectedIcon: const Icon(Icons.payments_rounded),
-                label: 'Transactions',
+                label: l10n.navTransactions,
               ),
               NavigationDestination(
                 icon: AppShowcase(
                   showcaseKey: splitKey,
-                  title: 'Split Bills Easily',
+                  title: l10n.tourSplitTitle,
                   description: isGuest
-                      ? 'Split expenses with friends.\nSign in to unlock this feature.'
-                      : "Create a group, add bills,\nand chat with everyone.",
+                      ? l10n.tourSplitDescGuest
+                      : l10n.tourSplitDesc,
                   child: NavBadge(
                     count: unreadSplitCount,
                     child: const Icon(Icons.receipt_long_outlined),
                   ),
                 ),
                 selectedIcon: const Icon(Icons.receipt_long_rounded),
-                label: 'Split Bill',
+                label: l10n.navSplitBill,
               ),
               NavigationDestination(
                 icon: NavBadge(
@@ -475,7 +474,7 @@ class _Pill extends ConsumerWidget {
                   child: const Icon(Icons.notifications_outlined),
                 ),
                 selectedIcon: const Icon(Icons.notifications_rounded),
-                label: 'Notifications',
+                label: l10n.navNotifications,
               ),
             ],
           ),

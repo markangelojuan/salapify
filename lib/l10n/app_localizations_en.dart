@@ -707,4 +707,83 @@ class AppLocalizationsEn extends AppLocalizations {
   String confirmDeleteMessage(String itemName) {
     return 'Are you sure you want to delete “$itemName”? This cannot be undone.';
   }
+
+  @override
+  String get navBudget => 'Budget';
+
+  @override
+  String get navTransactions => 'Transactions';
+
+  @override
+  String get navSplitBill => 'Split Bill';
+
+  @override
+  String get navNotifications => 'Notifications';
+
+  @override
+  String get tourMenuTitle => 'More Options';
+
+  @override
+  String get tourMenuDesc =>
+      'Manage your account, budget period,\nother settings, and get help.';
+
+  @override
+  String get tourFabTitle => 'Quick Add';
+
+  @override
+  String get tourFabDesc =>
+      'Tap + to quickly add a category,\ntransaction, or split-bill group.';
+
+  @override
+  String get tourBudgetTitle => 'Plan Your Budget';
+
+  @override
+  String get tourBudgetDesc =>
+      'Set spending limits per category\nand see how much you have left.';
+
+  @override
+  String get tourTransactionsTitle => 'Track Your Expenses';
+
+  @override
+  String get tourTransactionsDesc =>
+      'Track your income and expenses.\nUse + to add a transaction.';
+
+  @override
+  String get tourSplitTitle => 'Split Bills Easily';
+
+  @override
+  String get tourSplitDesc =>
+      'Create a group, add bills,\nand chat with everyone.';
+
+  @override
+  String get tourSplitDescGuest =>
+      'Split expenses with friends.\nSign in to unlock this feature.';
+
+  @override
+  String limitReachedCategories(int count) {
+    return 'You’ve reached the limit of $count active categories. Delete one to add a new one.';
+  }
+
+  @override
+  String limitReachedGroups(int count) {
+    return 'You’ve reached the limit of $count groups. Delete a group to create a new one.';
+  }
+
+  @override
+  String get drawerGuest => 'Guest';
+
+  @override
+  String get drawerGuestSubtitle => 'Sign in to save your data';
+
+  @override
+  String get drawerAccount => 'Account';
+
+  @override
+  String get drawerDarkMode => 'Dark Mode';
+
+  @override
+  String get drawerHelp => 'Help / FAQ';
+
+  @override
+  String get drawerLogout => 'Logout';
 }

@@ -714,4 +714,83 @@ class AppLocalizationsEs extends AppLocalizations {
   String confirmDeleteMessage(String itemName) {
     return '¿Seguro que quieres eliminar “$itemName”? Esta acción no se puede deshacer.';
   }
+
+  @override
+  String get navBudget => 'Presupuesto';
+
+  @override
+  String get navTransactions => 'Transacciones';
+
+  @override
+  String get navSplitBill => 'Dividir cuentas';
+
+  @override
+  String get navNotifications => 'Notificaciones';
+
+  @override
+  String get tourMenuTitle => 'Más opciones';
+
+  @override
+  String get tourMenuDesc =>
+      'Administra tu cuenta, el periodo de presupuesto,\notros ajustes y obtén ayuda.';
+
+  @override
+  String get tourFabTitle => 'Añadir rápido';
+
+  @override
+  String get tourFabDesc =>
+      'Toca + para añadir rápidamente una categoría,\nuna transacción o un grupo para dividir cuentas.';
+
+  @override
+  String get tourBudgetTitle => 'Planea tu presupuesto';
+
+  @override
+  String get tourBudgetDesc =>
+      'Define límites de gasto por categoría\ny mira cuánto te queda.';
+
+  @override
+  String get tourTransactionsTitle => 'Controla tus gastos';
+
+  @override
+  String get tourTransactionsDesc =>
+      'Registra tus ingresos y gastos.\nUsa + para añadir una transacción.';
+
+  @override
+  String get tourSplitTitle => 'Divide cuentas fácilmente';
+
+  @override
+  String get tourSplitDesc =>
+      'Crea un grupo, añade cuentas\ny chatea con todos.';
+
+  @override
+  String get tourSplitDescGuest =>
+      'Divide gastos con tus amigos.\nInicia sesión para desbloquear esta función.';
+
+  @override
+  String limitReachedCategories(int count) {
+    return 'Llegaste al límite de $count categorías activas. Elimina una para añadir otra.';
+  }
+
+  @override
+  String limitReachedGroups(int count) {
+    return 'Llegaste al límite de $count grupos. Elimina un grupo para crear otro.';
+  }
+
+  @override
+  String get drawerGuest => 'Invitado';
+
+  @override
+  String get drawerGuestSubtitle => 'Inicia sesión para guardar tus datos';
+
+  @override
+  String get drawerAccount => 'Cuenta';
+
+  @override
+  String get drawerDarkMode => 'Modo oscuro';
+
+  @override
+  String get drawerHelp => 'Ayuda / Preguntas frecuentes';
+
+  @override
+  String get drawerLogout => 'Cerrar sesión';
 }

@@ -332,5 +332,42 @@
         "type": "String"
       }
     }
-  }
+  },
+  "navBudget": "Budget",
+  "navTransactions": "Transactions",
+  "navSplitBill": "Split Bill",
+  "navNotifications": "Notifications",
+  "tourMenuTitle": "More Options",
+  "tourMenuDesc": "Manage your account, budget period,\nother settings, and get help.",
+  "tourFabTitle": "Quick Add",
+  "tourFabDesc": "Tap + to quickly add a category,\ntransaction, or split-bill group.",
+  "tourBudgetTitle": "Plan Your Budget",
+  "tourBudgetDesc": "Set spending limits per category\nand see how much you have left.",
+  "tourTransactionsTitle": "Track Your Expenses",
+  "tourTransactionsDesc": "Track your income and expenses.\nUse + to add a transaction.",
+  "tourSplitTitle": "Split Bills Easily",
+  "tourSplitDesc": "Create a group, add bills,\nand chat with everyone.",
+  "tourSplitDescGuest": "Split expenses with friends.\nSign in to unlock this feature.",
+  "limitReachedCategories": "You’ve reached the limit of {count} active categories. Delete one to add a new one.",
+  "@limitReachedCategories": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "limitReachedGroups": "You’ve reached the limit of {count} groups. Delete a group to create a new one.",
+  "@limitReachedGroups": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "drawerGuest": "Guest",
+  "drawerGuestSubtitle": "Sign in to save your data",
+  "drawerAccount": "Account",
+  "drawerDarkMode": "Dark Mode",
+  "drawerHelp": "Help / FAQ",
+  "drawerLogout": "Logout"
 }

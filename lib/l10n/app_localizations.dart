@@ -1351,6 +1351,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to delete “{itemName}”? This cannot be undone.'**
   String confirmDeleteMessage(String itemName);
+
+  /// No description provided for @navBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get navBudget;
+
+  /// No description provided for @navTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get navTransactions;
+
+  /// No description provided for @navSplitBill.
+  ///
+  /// In en, this message translates to:
+  /// **'Split Bill'**
+  String get navSplitBill;
+
+  /// No description provided for @navNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get navNotifications;
+
+  /// No description provided for @tourMenuTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'More Options'**
+  String get tourMenuTitle;
+
+  /// No description provided for @tourMenuDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your account, budget period,\nother settings, and get help.'**
+  String get tourMenuDesc;
+
+  /// No description provided for @tourFabTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Add'**
+  String get tourFabTitle;
+
+  /// No description provided for @tourFabDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to quickly add a category,\ntransaction, or split-bill group.'**
+  String get tourFabDesc;
+
+  /// No description provided for @tourBudgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan Your Budget'**
+  String get tourBudgetTitle;
+
+  /// No description provided for @tourBudgetDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Set spending limits per category\nand see how much you have left.'**
+  String get tourBudgetDesc;
+
+  /// No description provided for @tourTransactionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track Your Expenses'**
+  String get tourTransactionsTitle;
+
+  /// No description provided for @tourTransactionsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Track your income and expenses.\nUse + to add a transaction.'**
+  String get tourTransactionsDesc;
+
+  /// No description provided for @tourSplitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Split Bills Easily'**
+  String get tourSplitTitle;
+
+  /// No description provided for @tourSplitDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a group, add bills,\nand chat with everyone.'**
+  String get tourSplitDesc;
+
+  /// No description provided for @tourSplitDescGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Split expenses with friends.\nSign in to unlock this feature.'**
+  String get tourSplitDescGuest;
+
+  /// No description provided for @limitReachedCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'You’ve reached the limit of {count} active categories. Delete one to add a new one.'**
+  String limitReachedCategories(int count);
+
+  /// No description provided for @limitReachedGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'You’ve reached the limit of {count} groups. Delete a group to create a new one.'**
+  String limitReachedGroups(int count);
+
+  /// No description provided for @drawerGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get drawerGuest;
+
+  /// No description provided for @drawerGuestSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to save your data'**
+  String get drawerGuestSubtitle;
+
+  /// No description provided for @drawerAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get drawerAccount;
+
+  /// No description provided for @drawerDarkMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark Mode'**
+  String get drawerDarkMode;
+
+  /// No description provided for @drawerHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Help / FAQ'**
+  String get drawerHelp;
+
+  /// No description provided for @drawerLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get drawerLogout;
 }
 
 class _AppLocalizationsDelegate
