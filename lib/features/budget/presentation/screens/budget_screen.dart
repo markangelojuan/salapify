@@ -15,6 +15,7 @@ import 'package:salapify/features/settings/presentation/controllers/settings_con
 import 'package:salapify/features/transaction/domain/transaction_totals_calculator.dart';
 import 'package:salapify/features/transaction/presentation/controllers/transaction_controller.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:lottie/lottie.dart';
 import 'package:salapify/core/layout/breakpoints.dart';
@@ -43,6 +44,8 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     ref.listen<AsyncValue<void>>(budgetActionsProvider, (previous, next) {
       if (next.hasError) {
         CommonSnackbar.showError(context, next.error!);
@@ -68,7 +71,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
 
       CommonSnackbar.showWarning(
         context,
-        '${next.categoryName} auto-completed — spending reached the budget.',
+        AppLocalizations.of(context).budgetAutoCompleted(next.categoryName),
       );
     });
 
@@ -82,7 +85,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
 
     return categoriesAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => Center(child: Text('Failed to load categories: $err')),
+      error: (err, _) => Center(child: Text(l10n.budgetLoadFailed('$err'))),
       data: (categories) {
         // Totals are ALWAYS computed from the unfiltered category/transaction
         // lists — the filter only affects which cards are shown below.
@@ -162,7 +165,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                           Padding(
                             padding: const EdgeInsets.only(top: 6),
                             child: Text(
-                              'Clear filters to reorder categories',
+                              l10n.budgetClearFiltersToReorder,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: Theme.of(
@@ -190,7 +193,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                             height: 180,
                           ),
                           Text(
-                            'No categories yet',
+                            l10n.budgetNoCategories,
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   color: Theme.of(
@@ -307,6 +310,7 @@ class _FilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final active = activeCount > 0;
 
@@ -315,7 +319,7 @@ class _FilterBar extends StatelessWidget {
         Icon(Icons.category_rounded, size: 15, color: AppColors.primary),
         const SizedBox(width: 6),
         Text(
-          'ALLOCATIONS',
+          l10n.budgetAllocations,
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 12,
@@ -350,7 +354,9 @@ class _FilterBar extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  active ? 'Filters ($activeCount)' : 'Filter',
+                  active
+                      ? l10n.budgetFiltersCount(activeCount)
+                      : l10n.budgetFilter,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 12.5,
@@ -376,6 +382,7 @@ class _FilteredEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     return Transform.translate(
       offset: const Offset(0, -40),
@@ -390,7 +397,7 @@ class _FilteredEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'No categories match your filters',
+              l10n.budgetNoMatch,
               style: TextStyle(
                 fontSize: 13,
                 color: colorScheme.onSurface.withValues(alpha: 0.55),
@@ -399,7 +406,7 @@ class _FilteredEmptyState extends StatelessWidget {
             const SizedBox(height: 12),
             TextButton(
               onPressed: onClearFilters,
-              child: const Text('Clear filters'),
+              child: Text(l10n.budgetClearFilters),
             ),
           ],
         ),

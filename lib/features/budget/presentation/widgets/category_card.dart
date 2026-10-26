@@ -9,6 +9,7 @@ import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/transaction/domain/transaction_totals_calculator.dart';
 import 'package:salapify/features/transaction/presentation/controllers/transaction_controller.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
 
 class CategoryCard extends ConsumerWidget {
@@ -32,27 +33,26 @@ class CategoryCard extends ConsumerWidget {
   // is confirmed, if contrast turns out to be an issue in dark mode.
   Color get _accentColor => _isFixed ? Colors.blue : Colors.orange;
 
-  String get _frequencyLabel {
+  String _frequencyLabel(AppLocalizations l10n) {
     switch (category.frequency) {
       case BudgetFrequency.monthly:
-        return 'Monthly';
+        return l10n.budgetingPeriodMonthly;
       case BudgetFrequency.biMonthly:
-        return _periodLabel;
+        return _periodLabel(l10n);
       case BudgetFrequency.once:
-        return 'One-time';
+        return l10n.budgetFreqOnce;
     }
   }
 
-  String get _periodLabel {
+  String _periodLabel(AppLocalizations l10n) {
     switch (category.period) {
       case BudgetPeriod.firstHalf:
-        return '1st half';
+        return l10n.categoryCardFirstHalf;
       case BudgetPeriod.secondHalf:
-        return '2nd half';
+        return l10n.categoryCardSecondHalf;
       case BudgetPeriod.both:
-        return 'Bi-monthly';
       case null:
-        return 'Bi-monthly';
+        return l10n.categoryCardBiMonthly;
     }
   }
 
@@ -62,14 +62,12 @@ class CategoryCard extends ConsumerWidget {
       onToggleComplete(true);
       return;
     }
-
+    final l10n = AppLocalizations.of(context);
     final confirmed = await CommonConfirmationDialog.show(
       context,
-      title: 'Mark as incomplete?',
-      message:
-          'Auto-generated expenses will be deleted. '
-          'Manually added expenses will remain and may mark this category complete again.',
-      confirmLabel: 'Mark Incomplete',
+      title: l10n.categoryMarkIncompleteTitle,
+      message: l10n.categoryMarkIncompleteMessage,
+      confirmLabel: l10n.categoryMarkIncompleteAction,
       isDestructive: true,
     );
 
@@ -80,6 +78,7 @@ class CategoryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final globalPeriod =
         ref.watch(budgetingPeriodSettingProvider).value ??
@@ -134,7 +133,7 @@ class CategoryCard extends ConsumerWidget {
                     ),
                     const Spacer(),
                     _TypeChip(
-                      label: _isFixed ? 'Fixed' : 'Variable',
+                      label: _isFixed ? l10n.budgetTypeFixed : l10n.budgetTypeVariable,
                       color: _accentColor,
                     ),
                     const SizedBox(width: 8),
@@ -190,7 +189,7 @@ class CategoryCard extends ConsumerWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        _frequencyLabel,
+                        _frequencyLabel(l10n),
                         style: TextStyle(
                           fontSize: 11,
                           color: colors.textSecondary,

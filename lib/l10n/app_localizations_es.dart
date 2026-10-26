@@ -793,4 +793,215 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get drawerLogout => 'Cerrar sesión';
+
+  @override
+  String get budgetAllocations => 'ASIGNACIONES';
+
+  @override
+  String get budgetNoCategories => 'Aún no hay categorías';
+
+  @override
+  String get budgetFilter => 'Filtrar';
+
+  @override
+  String budgetFiltersCount(int count) {
+    return 'Filtros ($count)';
+  }
+
+  @override
+  String get budgetClearFiltersToReorder =>
+      'Quita los filtros para reordenar las categorías';
+
+  @override
+  String get budgetNoMatch => 'Ninguna categoría coincide con tus filtros';
+
+  @override
+  String get budgetClearFilters => 'Quitar filtros';
+
+  @override
+  String budgetLoadFailed(String error) {
+    return 'Error al cargar las categorías: $error';
+  }
+
+  @override
+  String budgetAutoCompleted(String name) {
+    return '$name se completó automáticamente: el gasto alcanzó el presupuesto.';
+  }
+
+  @override
+  String get budgetFilterTitle => 'Filtrar categorías';
+
+  @override
+  String get commonClearAll => 'Borrar todo';
+
+  @override
+  String get budgetFilterStatus => 'Estado';
+
+  @override
+  String get budgetFilterAll => 'Todas';
+
+  @override
+  String get budgetFilterPending => 'Pendientes';
+
+  @override
+  String get budgetFilterCompleted => 'Completadas';
+
+  @override
+  String get budgetFilterType => 'Tipo';
+
+  @override
+  String get budgetTypeFixed => 'Fijo';
+
+  @override
+  String get budgetTypeVariable => 'Variable';
+
+  @override
+  String get budgetFilterRecurrence => 'Recurrencia';
+
+  @override
+  String get commonApply => 'Aplicar';
+
+  @override
+  String commonApplyCount(int count) {
+    return 'Aplicar ($count)';
+  }
+
+  @override
+  String get budgetFreqOnce => 'Una sola vez';
+
+  @override
+  String get budgetFreqRecurring => 'Recurrente';
+
+  @override
+  String get budgetFreqFirstHalf => 'Primera mitad';
+
+  @override
+  String get budgetFreqSecondHalf => 'Segunda mitad';
+
+  @override
+  String budgetPeriodMonthly(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMM(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String budgetPeriodFirstHalf(DateTime month, int start, int end) {
+    final intl.DateFormat monthDateFormat = intl.DateFormat.MMM(localeName);
+    final String monthString = monthDateFormat.format(month);
+
+    return '1.ª mitad · $monthString $start–$end';
+  }
+
+  @override
+  String budgetPeriodSecondHalf(DateTime month, int start, int end) {
+    final intl.DateFormat monthDateFormat = intl.DateFormat.MMM(localeName);
+    final String monthString = monthDateFormat.format(month);
+
+    return '2.ª mitad · $monthString $start–$end';
+  }
+
+  @override
+  String get budgetUsed => 'usado';
+
+  @override
+  String get budgetOverBudget => 'Excedido';
+
+  @override
+  String get budgetRemaining => 'Restante';
+
+  @override
+  String get budgetSpent => 'Gastado';
+
+  @override
+  String get budgetAllocated => 'Asignado';
+
+  @override
+  String get categoryCardFirstHalf => '1.ª mitad';
+
+  @override
+  String get categoryCardSecondHalf => '2.ª mitad';
+
+  @override
+  String get categoryCardBiMonthly => 'Quincenal';
+
+  @override
+  String get categoryMarkIncompleteTitle => '¿Marcar como incompleta?';
+
+  @override
+  String get categoryMarkIncompleteMessage =>
+      'Los gastos generados automáticamente se eliminarán. Los gastos añadidos manualmente permanecerán y pueden volver a marcar esta categoría como completa.';
+
+  @override
+  String get categoryMarkIncompleteAction => 'Marcar como incompleta';
+
+  @override
+  String get categoryAdd => 'Añadir categoría';
+
+  @override
+  String get categoryEdit => 'Editar categoría';
+
+  @override
+  String get categoryDelete => 'Eliminar categoría';
+
+  @override
+  String get categoryNameLabel => 'Nombre de la categoría';
+
+  @override
+  String get categoryNameHint => 'p. ej. Supermercado, Internet';
+
+  @override
+  String get categoryNameRequired => 'El nombre es obligatorio';
+
+  @override
+  String amountLabelWithSymbol(String symbol) {
+    return 'Monto ($symbol)';
+  }
+
+  @override
+  String get amountRequired => 'El monto es obligatorio';
+
+  @override
+  String get amountInvalid => 'Ingresa un monto válido';
+
+  @override
+  String get amountTooLarge => 'El monto es demasiado grande';
+
+  @override
+  String get categoryTypeLabel => 'Tipo';
+
+  @override
+  String get categoryFixedTooltip => 'Fijo: el mismo monto cada vez.';
+
+  @override
+  String get categoryVariableTooltip =>
+      'Variable: el monto puede cambiar cada vez.';
+
+  @override
+  String get categoryRepeat => 'Repetir';
+
+  @override
+  String get categoryEveryMonth => 'Cada mes';
+
+  @override
+  String get categoryOnce => 'Una vez';
+
+  @override
+  String get categoryEveryPeriod => 'Cada periodo';
+
+  @override
+  String get categoryBothHalves => 'Ambas mitades';
+
+  @override
+  String get categoryFirstHalf => 'Primera mitad';
+
+  @override
+  String get categorySecondHalf => 'Segunda mitad';
+
+  @override
+  String get categoryIcon => 'Ícono';
+
+  @override
+  String get commonSaveChanges => 'Guardar cambios';
 }

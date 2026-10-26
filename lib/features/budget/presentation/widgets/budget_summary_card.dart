@@ -5,6 +5,7 @@ import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class BudgetSummaryCard extends ConsumerWidget {
   const BudgetSummaryCard({
@@ -20,12 +21,11 @@ class BudgetSummaryCard extends ConsumerWidget {
   final BudgetingPeriod period;
   final int firstHalfEndDay;
 
-  String get _periodLabel {
+  String _periodLabel(AppLocalizations l10n) {
     final now = DateTime.now();
-    final monthName = _monthNames[now.month - 1];
 
     if (period == BudgetingPeriod.monthly) {
-      return '$monthName ${now.year}';
+      return l10n.budgetPeriodMonthly(now);
     }
 
     final lastDayOfMonth = DateTime(now.year, now.month + 1, 0).day;
@@ -33,24 +33,10 @@ class BudgetSummaryCard extends ConsumerWidget {
     final rangeStart = isFirstHalf ? 1 : firstHalfEndDay + 1;
     final rangeEnd = isFirstHalf ? firstHalfEndDay : lastDayOfMonth;
 
-    return '${isFirstHalf ? "1st" : "2nd"} Half · '
-        '$monthName $rangeStart–$rangeEnd';
+    return isFirstHalf
+        ? l10n.budgetPeriodFirstHalf(now, rangeStart, rangeEnd)
+        : l10n.budgetPeriodSecondHalf(now, rangeStart, rangeEnd);
   }
-
-  static const _monthNames = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
 
   double get _percentUsed {
     if (totalAllocated <= 0) return 0;
@@ -63,6 +49,7 @@ class BudgetSummaryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final currency =
         ref.watch(currencySettingProvider).value ?? AppCurrency.php;
@@ -80,9 +67,7 @@ class BudgetSummaryCard extends ConsumerWidget {
             colors.primary.withValues(alpha: 0.02),
           ],
         ),
-        border: Border.all(
-          color: colors.primary.withValues(alpha: 0.08),
-        ),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.08)),
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -90,10 +75,7 @@ class BudgetSummaryCard extends ConsumerWidget {
         children: [
           // Period label
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 5,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
               color: colors.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(20),
@@ -108,7 +90,7 @@ class BudgetSummaryCard extends ConsumerWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  _periodLabel,
+                  _periodLabel(l10n),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -158,9 +140,7 @@ class BudgetSummaryCard extends ConsumerWidget {
                               ),
                               PieChartSectionData(
                                 value: (1 - _percentUsed) * 100,
-                                color: colors.primary.withValues(
-                                  alpha: 0.06,
-                                ),
+                                color: colors.primary.withValues(alpha: 0.06),
                                 showTitle: false,
                                 radius: 16,
                               ),
@@ -179,7 +159,7 @@ class BudgetSummaryCard extends ConsumerWidget {
                               ),
                             ),
                             Text(
-                              'used',
+                              l10n.budgetUsed,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: colors.textSecondary,
@@ -202,7 +182,7 @@ class BudgetSummaryCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _isOverBudget ? 'Over budget' : 'Remaining',
+                      _isOverBudget ? l10n.budgetOverBudget : l10n.budgetRemaining,
                       style: TextStyle(
                         fontSize: 13,
                         color: colors.textSecondary,
@@ -227,13 +207,13 @@ class BudgetSummaryCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 12),
                     _AmountRow(
-                      label: 'Spent',
+                      label: l10n.budgetSpent,
                       amount: totalSpent,
                       currency: currency,
                     ),
                     const SizedBox(height: 4),
                     _AmountRow(
-                      label: 'Allocated',
+                      label: l10n.budgetAllocated,
                       amount: totalAllocated,
                       currency: currency,
                     ),
@@ -279,10 +259,7 @@ class _AmountRow extends StatelessWidget {
       children: [
         Text(
           '$label: ',
-          style: TextStyle(
-            fontSize: 12,
-            color: colors.textSecondary,
-          ),
+          style: TextStyle(fontSize: 12, color: colors.textSecondary),
         ),
         Flexible(
           child: Text(

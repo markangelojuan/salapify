@@ -786,4 +786,215 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get drawerLogout => 'Logout';
+
+  @override
+  String get budgetAllocations => 'ALLOCATIONS';
+
+  @override
+  String get budgetNoCategories => 'No categories yet';
+
+  @override
+  String get budgetFilter => 'Filter';
+
+  @override
+  String budgetFiltersCount(int count) {
+    return 'Filters ($count)';
+  }
+
+  @override
+  String get budgetClearFiltersToReorder =>
+      'Clear filters to reorder categories';
+
+  @override
+  String get budgetNoMatch => 'No categories match your filters';
+
+  @override
+  String get budgetClearFilters => 'Clear filters';
+
+  @override
+  String budgetLoadFailed(String error) {
+    return 'Failed to load categories: $error';
+  }
+
+  @override
+  String budgetAutoCompleted(String name) {
+    return '$name auto-completed — spending reached the budget.';
+  }
+
+  @override
+  String get budgetFilterTitle => 'Filter Categories';
+
+  @override
+  String get commonClearAll => 'Clear all';
+
+  @override
+  String get budgetFilterStatus => 'Status';
+
+  @override
+  String get budgetFilterAll => 'All';
+
+  @override
+  String get budgetFilterPending => 'Pending';
+
+  @override
+  String get budgetFilterCompleted => 'Completed';
+
+  @override
+  String get budgetFilterType => 'Type';
+
+  @override
+  String get budgetTypeFixed => 'Fixed';
+
+  @override
+  String get budgetTypeVariable => 'Variable';
+
+  @override
+  String get budgetFilterRecurrence => 'Recurrence';
+
+  @override
+  String get commonApply => 'Apply';
+
+  @override
+  String commonApplyCount(int count) {
+    return 'Apply ($count)';
+  }
+
+  @override
+  String get budgetFreqOnce => 'One-time';
+
+  @override
+  String get budgetFreqRecurring => 'Recurring';
+
+  @override
+  String get budgetFreqFirstHalf => 'First Half';
+
+  @override
+  String get budgetFreqSecondHalf => 'Second Half';
+
+  @override
+  String budgetPeriodMonthly(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMM(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String budgetPeriodFirstHalf(DateTime month, int start, int end) {
+    final intl.DateFormat monthDateFormat = intl.DateFormat.MMM(localeName);
+    final String monthString = monthDateFormat.format(month);
+
+    return '1st Half · $monthString $start–$end';
+  }
+
+  @override
+  String budgetPeriodSecondHalf(DateTime month, int start, int end) {
+    final intl.DateFormat monthDateFormat = intl.DateFormat.MMM(localeName);
+    final String monthString = monthDateFormat.format(month);
+
+    return '2nd Half · $monthString $start–$end';
+  }
+
+  @override
+  String get budgetUsed => 'used';
+
+  @override
+  String get budgetOverBudget => 'Over budget';
+
+  @override
+  String get budgetRemaining => 'Remaining';
+
+  @override
+  String get budgetSpent => 'Spent';
+
+  @override
+  String get budgetAllocated => 'Allocated';
+
+  @override
+  String get categoryCardFirstHalf => '1st half';
+
+  @override
+  String get categoryCardSecondHalf => '2nd half';
+
+  @override
+  String get categoryCardBiMonthly => 'Bi-monthly';
+
+  @override
+  String get categoryMarkIncompleteTitle => 'Mark as incomplete?';
+
+  @override
+  String get categoryMarkIncompleteMessage =>
+      'Auto-generated expenses will be deleted. Manually added expenses will remain and may mark this category complete again.';
+
+  @override
+  String get categoryMarkIncompleteAction => 'Mark Incomplete';
+
+  @override
+  String get categoryAdd => 'Add Category';
+
+  @override
+  String get categoryEdit => 'Edit Category';
+
+  @override
+  String get categoryDelete => 'Delete Category';
+
+  @override
+  String get categoryNameLabel => 'Category Name';
+
+  @override
+  String get categoryNameHint => 'e.g. Groceries, Internet Bill';
+
+  @override
+  String get categoryNameRequired => 'Name is required';
+
+  @override
+  String amountLabelWithSymbol(String symbol) {
+    return 'Amount ($symbol)';
+  }
+
+  @override
+  String get amountRequired => 'Amount is required';
+
+  @override
+  String get amountInvalid => 'Enter a valid amount';
+
+  @override
+  String get amountTooLarge => 'Amount is too large';
+
+  @override
+  String get categoryTypeLabel => 'Type';
+
+  @override
+  String get categoryFixedTooltip => 'Fixed: Same amount each time.';
+
+  @override
+  String get categoryVariableTooltip =>
+      'Variable: Amount may change each time.';
+
+  @override
+  String get categoryRepeat => 'Repeat';
+
+  @override
+  String get categoryEveryMonth => 'Every month';
+
+  @override
+  String get categoryOnce => 'Once';
+
+  @override
+  String get categoryEveryPeriod => 'Every period';
+
+  @override
+  String get categoryBothHalves => 'Both halves';
+
+  @override
+  String get categoryFirstHalf => 'First half';
+
+  @override
+  String get categorySecondHalf => 'Second half';
+
+  @override
+  String get categoryIcon => 'Icon';
+
+  @override
+  String get commonSaveChanges => 'Save Changes';
 }

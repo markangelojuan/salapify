@@ -3,7 +3,8 @@ import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/budget/domain/entities/budget_category_type.dart';
 import 'package:salapify/features/budget/domain/entities/budget_filter.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
-
+import 'package:salapify/l10n/app_localizations.dart';
+import 'package:salapify/features/budget/presentation/widgets/frequency_filter_text.dart';
 
 Future<BudgetFilter?> showBudgetFilterSheet(
   BuildContext context, {
@@ -41,6 +42,7 @@ class _BudgetFilterSheetState extends State<_BudgetFilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final frequencyOptions = FrequencyFilterOptions.optionsFor(
@@ -78,7 +80,7 @@ class _BudgetFilterSheetState extends State<_BudgetFilterSheet> {
               child: Row(
                 children: [
                   Text(
-                    'Filter Categories',
+                    l10n.budgetFilterTitle,
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 17,
@@ -93,7 +95,7 @@ class _BudgetFilterSheetState extends State<_BudgetFilterSheet> {
                         _types = {};
                         _frequencies = {};
                       }),
-                      child: const Text('Clear all'),
+                      child: Text(l10n.commonClearAll),
                     ),
                 ],
               ),
@@ -104,7 +106,7 @@ class _BudgetFilterSheetState extends State<_BudgetFilterSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const _FilterGroupLabel('Status'),
+                    _FilterGroupLabel(l10n.budgetFilterStatus),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -112,9 +114,11 @@ class _BudgetFilterSheetState extends State<_BudgetFilterSheet> {
                         for (final option in CompletionFilter.values)
                           _FilterChip(
                             label: switch (option) {
-                              CompletionFilter.all => 'All',
-                              CompletionFilter.pending => 'Pending',
-                              CompletionFilter.completed => 'Completed',
+                              CompletionFilter.all => l10n.budgetFilterAll,
+                              CompletionFilter.pending =>
+                                l10n.budgetFilterPending,
+                              CompletionFilter.completed =>
+                                l10n.budgetFilterCompleted,
                             },
                             selected: _completion == option,
                             onTap: () => setState(() => _completion = option),
@@ -122,7 +126,7 @@ class _BudgetFilterSheetState extends State<_BudgetFilterSheet> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    const _FilterGroupLabel('Type'),
+                    _FilterGroupLabel(l10n.budgetFilterType),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -130,8 +134,8 @@ class _BudgetFilterSheetState extends State<_BudgetFilterSheet> {
                         for (final type in BudgetCategoryType.values)
                           _FilterChip(
                             label: type == BudgetCategoryType.fixed
-                                ? 'Fixed'
-                                : 'Variable',
+                                ? l10n.budgetTypeFixed
+                                : l10n.budgetTypeVariable,
                             selected: _types.contains(type),
                             onTap: () => setState(() {
                               if (!_types.remove(type)) _types.add(type);
@@ -140,14 +144,14 @@ class _BudgetFilterSheetState extends State<_BudgetFilterSheet> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    const _FilterGroupLabel('Recurrence'),
+                    _FilterGroupLabel(l10n.budgetFilterRecurrence),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       children: [
                         for (final option in frequencyOptions)
                           _FilterChip(
-                            label: option.label,
+                            label: option.localizedLabel(l10n),
                             selected: _frequencies.contains(option),
                             onTap: () => setState(() {
                               if (!_frequencies.remove(option)) {
@@ -183,7 +187,9 @@ class _BudgetFilterSheetState extends State<_BudgetFilterSheet> {
                     ),
                   ),
                   child: Text(
-                    _activeCount > 0 ? 'Apply ($_activeCount)' : 'Apply',
+                    _activeCount > 0
+                        ? l10n.commonApplyCount(_activeCount)
+                        : l10n.commonApply,
                   ),
                 ),
               ),

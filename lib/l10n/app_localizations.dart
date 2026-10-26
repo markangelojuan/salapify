@@ -1489,6 +1489,372 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Logout'**
   String get drawerLogout;
+
+  /// No description provided for @budgetAllocations.
+  ///
+  /// In en, this message translates to:
+  /// **'ALLOCATIONS'**
+  String get budgetAllocations;
+
+  /// No description provided for @budgetNoCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories yet'**
+  String get budgetNoCategories;
+
+  /// No description provided for @budgetFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get budgetFilter;
+
+  /// No description provided for @budgetFiltersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters ({count})'**
+  String budgetFiltersCount(int count);
+
+  /// No description provided for @budgetClearFiltersToReorder.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters to reorder categories'**
+  String get budgetClearFiltersToReorder;
+
+  /// No description provided for @budgetNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories match your filters'**
+  String get budgetNoMatch;
+
+  /// No description provided for @budgetClearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get budgetClearFilters;
+
+  /// No description provided for @budgetLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load categories: {error}'**
+  String budgetLoadFailed(String error);
+
+  /// No description provided for @budgetAutoCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} auto-completed — spending reached the budget.'**
+  String budgetAutoCompleted(String name);
+
+  /// No description provided for @budgetFilterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Categories'**
+  String get budgetFilterTitle;
+
+  /// No description provided for @commonClearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get commonClearAll;
+
+  /// No description provided for @budgetFilterStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get budgetFilterStatus;
+
+  /// No description provided for @budgetFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get budgetFilterAll;
+
+  /// No description provided for @budgetFilterPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get budgetFilterPending;
+
+  /// No description provided for @budgetFilterCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get budgetFilterCompleted;
+
+  /// No description provided for @budgetFilterType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get budgetFilterType;
+
+  /// No description provided for @budgetTypeFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed'**
+  String get budgetTypeFixed;
+
+  /// No description provided for @budgetTypeVariable.
+  ///
+  /// In en, this message translates to:
+  /// **'Variable'**
+  String get budgetTypeVariable;
+
+  /// No description provided for @budgetFilterRecurrence.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurrence'**
+  String get budgetFilterRecurrence;
+
+  /// No description provided for @commonApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get commonApply;
+
+  /// No description provided for @commonApplyCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply ({count})'**
+  String commonApplyCount(int count);
+
+  /// No description provided for @budgetFreqOnce.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time'**
+  String get budgetFreqOnce;
+
+  /// No description provided for @budgetFreqRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring'**
+  String get budgetFreqRecurring;
+
+  /// No description provided for @budgetFreqFirstHalf.
+  ///
+  /// In en, this message translates to:
+  /// **'First Half'**
+  String get budgetFreqFirstHalf;
+
+  /// No description provided for @budgetFreqSecondHalf.
+  ///
+  /// In en, this message translates to:
+  /// **'Second Half'**
+  String get budgetFreqSecondHalf;
+
+  /// No description provided for @budgetPeriodMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String budgetPeriodMonthly(DateTime date);
+
+  /// No description provided for @budgetPeriodFirstHalf.
+  ///
+  /// In en, this message translates to:
+  /// **'1st Half · {month} {start}–{end}'**
+  String budgetPeriodFirstHalf(DateTime month, int start, int end);
+
+  /// No description provided for @budgetPeriodSecondHalf.
+  ///
+  /// In en, this message translates to:
+  /// **'2nd Half · {month} {start}–{end}'**
+  String budgetPeriodSecondHalf(DateTime month, int start, int end);
+
+  /// No description provided for @budgetUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'used'**
+  String get budgetUsed;
+
+  /// No description provided for @budgetOverBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Over budget'**
+  String get budgetOverBudget;
+
+  /// No description provided for @budgetRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get budgetRemaining;
+
+  /// No description provided for @budgetSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get budgetSpent;
+
+  /// No description provided for @budgetAllocated.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocated'**
+  String get budgetAllocated;
+
+  /// No description provided for @categoryCardFirstHalf.
+  ///
+  /// In en, this message translates to:
+  /// **'1st half'**
+  String get categoryCardFirstHalf;
+
+  /// No description provided for @categoryCardSecondHalf.
+  ///
+  /// In en, this message translates to:
+  /// **'2nd half'**
+  String get categoryCardSecondHalf;
+
+  /// No description provided for @categoryCardBiMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Bi-monthly'**
+  String get categoryCardBiMonthly;
+
+  /// No description provided for @categoryMarkIncompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as incomplete?'**
+  String get categoryMarkIncompleteTitle;
+
+  /// No description provided for @categoryMarkIncompleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-generated expenses will be deleted. Manually added expenses will remain and may mark this category complete again.'**
+  String get categoryMarkIncompleteMessage;
+
+  /// No description provided for @categoryMarkIncompleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Incomplete'**
+  String get categoryMarkIncompleteAction;
+
+  /// No description provided for @categoryAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Category'**
+  String get categoryAdd;
+
+  /// No description provided for @categoryEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Category'**
+  String get categoryEdit;
+
+  /// No description provided for @categoryDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Category'**
+  String get categoryDelete;
+
+  /// No description provided for @categoryNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Name'**
+  String get categoryNameLabel;
+
+  /// No description provided for @categoryNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Groceries, Internet Bill'**
+  String get categoryNameHint;
+
+  /// No description provided for @categoryNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Name is required'**
+  String get categoryNameRequired;
+
+  /// No description provided for @amountLabelWithSymbol.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount ({symbol})'**
+  String amountLabelWithSymbol(String symbol);
+
+  /// No description provided for @amountRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount is required'**
+  String get amountRequired;
+
+  /// No description provided for @amountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid amount'**
+  String get amountInvalid;
+
+  /// No description provided for @amountTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount is too large'**
+  String get amountTooLarge;
+
+  /// No description provided for @categoryTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get categoryTypeLabel;
+
+  /// No description provided for @categoryFixedTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed: Same amount each time.'**
+  String get categoryFixedTooltip;
+
+  /// No description provided for @categoryVariableTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Variable: Amount may change each time.'**
+  String get categoryVariableTooltip;
+
+  /// No description provided for @categoryRepeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get categoryRepeat;
+
+  /// No description provided for @categoryEveryMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Every month'**
+  String get categoryEveryMonth;
+
+  /// No description provided for @categoryOnce.
+  ///
+  /// In en, this message translates to:
+  /// **'Once'**
+  String get categoryOnce;
+
+  /// No description provided for @categoryEveryPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Every period'**
+  String get categoryEveryPeriod;
+
+  /// No description provided for @categoryBothHalves.
+  ///
+  /// In en, this message translates to:
+  /// **'Both halves'**
+  String get categoryBothHalves;
+
+  /// No description provided for @categoryFirstHalf.
+  ///
+  /// In en, this message translates to:
+  /// **'First half'**
+  String get categoryFirstHalf;
+
+  /// No description provided for @categorySecondHalf.
+  ///
+  /// In en, this message translates to:
+  /// **'Second half'**
+  String get categorySecondHalf;
+
+  /// No description provided for @categoryIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get categoryIcon;
+
+  /// No description provided for @commonSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get commonSaveChanges;
 }
 
 class _AppLocalizationsDelegate

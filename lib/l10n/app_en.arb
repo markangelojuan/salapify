@@ -369,5 +369,137 @@
   "drawerAccount": "Account",
   "drawerDarkMode": "Dark Mode",
   "drawerHelp": "Help / FAQ",
-  "drawerLogout": "Logout"
+  "drawerLogout": "Logout",
+  "budgetAllocations": "ALLOCATIONS",
+  "budgetNoCategories": "No categories yet",
+  "budgetFilter": "Filter",
+  "budgetFiltersCount": "Filters ({count})",
+  "@budgetFiltersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetClearFiltersToReorder": "Clear filters to reorder categories",
+  "budgetNoMatch": "No categories match your filters",
+  "budgetClearFilters": "Clear filters",
+  "budgetLoadFailed": "Failed to load categories: {error}",
+  "@budgetLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetAutoCompleted": "{name} auto-completed — spending reached the budget.",
+  "@budgetAutoCompleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetFilterTitle": "Filter Categories",
+  "commonClearAll": "Clear all",
+  "budgetFilterStatus": "Status",
+  "budgetFilterAll": "All",
+  "budgetFilterPending": "Pending",
+  "budgetFilterCompleted": "Completed",
+  "budgetFilterType": "Type",
+  "budgetTypeFixed": "Fixed",
+  "budgetTypeVariable": "Variable",
+  "budgetFilterRecurrence": "Recurrence",
+  "commonApply": "Apply",
+  "commonApplyCount": "Apply ({count})",
+  "@commonApplyCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetFreqOnce": "One-time",
+  "budgetFreqRecurring": "Recurring",
+  "budgetFreqFirstHalf": "First Half",
+  "budgetFreqSecondHalf": "Second Half",
+  "budgetPeriodMonthly": "{date}",
+  "@budgetPeriodMonthly": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMM"
+      }
+    }
+  },
+  "budgetPeriodFirstHalf": "1st Half · {month} {start}–{end}",
+  "@budgetPeriodFirstHalf": {
+    "placeholders": {
+      "month": {
+        "type": "DateTime",
+        "format": "MMM"
+      },
+      "start": {
+        "type": "int"
+      },
+      "end": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetPeriodSecondHalf": "2nd Half · {month} {start}–{end}",
+  "@budgetPeriodSecondHalf": {
+    "placeholders": {
+      "month": {
+        "type": "DateTime",
+        "format": "MMM"
+      },
+      "start": {
+        "type": "int"
+      },
+      "end": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetUsed": "used",
+  "budgetOverBudget": "Over budget",
+  "budgetRemaining": "Remaining",
+  "budgetSpent": "Spent",
+  "budgetAllocated": "Allocated",
+  "categoryCardFirstHalf": "1st half",
+  "categoryCardSecondHalf": "2nd half",
+  "categoryCardBiMonthly": "Bi-monthly",
+  "categoryMarkIncompleteTitle": "Mark as incomplete?",
+  "categoryMarkIncompleteMessage": "Auto-generated expenses will be deleted. Manually added expenses will remain and may mark this category complete again.",
+  "categoryMarkIncompleteAction": "Mark Incomplete",
+  "categoryAdd": "Add Category",
+  "categoryEdit": "Edit Category",
+  "categoryDelete": "Delete Category",
+  "categoryNameLabel": "Category Name",
+  "categoryNameHint": "e.g. Groceries, Internet Bill",
+  "categoryNameRequired": "Name is required",
+  "amountLabelWithSymbol": "Amount ({symbol})",
+  "@amountLabelWithSymbol": {
+    "placeholders": {
+      "symbol": {
+        "type": "String"
+      }
+    }
+  },
+  "amountRequired": "Amount is required",
+  "amountInvalid": "Enter a valid amount",
+  "amountTooLarge": "Amount is too large",
+  "categoryTypeLabel": "Type",
+  "categoryFixedTooltip": "Fixed: Same amount each time.",
+  "categoryVariableTooltip": "Variable: Amount may change each time.",
+  "categoryRepeat": "Repeat",
+  "categoryEveryMonth": "Every month",
+  "categoryOnce": "Once",
+  "categoryEveryPeriod": "Every period",
+  "categoryBothHalves": "Both halves",
+  "categoryFirstHalf": "First half",
+  "categorySecondHalf": "Second half",
+  "categoryIcon": "Icon",
+  "commonSaveChanges": "Save Changes"
 }
