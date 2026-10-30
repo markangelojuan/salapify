@@ -501,5 +501,98 @@
   "categoryFirstHalf": "First half",
   "categorySecondHalf": "Second half",
   "categoryIcon": "Icon",
-  "commonSaveChanges": "Save Changes"
+  "commonSaveChanges": "Save Changes",
+  "transactionTabExpenses": "Expenses",
+  "transactionTabIncome": "Income",
+  "dateToday": "Today",
+  "dateYesterday": "Yesterday",
+  "dateMonthDay": "{date}",
+  "@dateMonthDay": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMd"
+      }
+    }
+  },
+  "dateMonthDayYear": "{date}",
+  "@dateMonthDayYear": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMd"
+      }
+    }
+  },
+  "expensesEmpty": "No expenses yet",
+  "expensesLoadFailed": "Failed to load expenses: {error}",
+  "@expensesLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "expensesDeleteTitle": "Delete this expense?",
+  "expensesDeleteMessage": "It will no longer count toward your spending totals.",
+  "transactionDeletedCategory": "Deleted category",
+  "transactionAutoNote": "Remaining budget (auto)",
+  "incomeEmpty": "No income entries yet",
+  "incomeLoadFailed": "Failed to load income: {error}",
+  "@incomeLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "incomeDeleteTitle": "Delete this income entry?",
+  "incomeDeleteMessage": "It will no longer be counted toward total money.",
+  "incomeEveryMonthOnDay": "Every month on day {day}",
+  "@incomeEveryMonthOnDay": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "incomeEveryMonthOnDayClamped": "Every month on day {day} (day {effective} this month)",
+  "@incomeEveryMonthOnDayClamped": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "effective": {
+        "type": "int"
+      }
+    }
+  },
+  "cashFlowInfo": "Your expected income and savings this month. No history kept.",
+  "cashFlowSavings": "Savings",
+  "expenseAdd": "Add Expense",
+  "expenseEdit": "Edit Expense",
+  "amountLabel": "Amount",
+  "expenseCategory": "Category",
+  "expenseSelectCategory": "Please select a category",
+  "expenseNoCategories": "No categories yet — add one from the Budget tab.",
+  "expenseDate": "Date",
+  "expenseNoteLabel": "Note (optional)",
+  "expenseNoteHint": "e.g. Coffee with a friend",
+  "incomeAdd": "Add Income",
+  "incomeEdit": "Edit Income",
+  "incomeSourceLabel": "Source",
+  "incomeSourceHint": "e.g. Salary, Freelance, Gift",
+  "incomeSourceRequired": "Source is required",
+  "incomeSourceTooLong": "Keep it under 50 characters",
+  "incomeDepositDay": "Deposit day",
+  "incomeCountedEveryPeriod": "Counted as income for every period, regardless of the exact day.",
+  "incomeAddedTo": "Will be added to: {date}",
+  "@incomeAddedTo": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMM"
+      }
+    }
+  }
 }

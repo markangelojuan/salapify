@@ -15,6 +15,7 @@ import 'package:salapify/features/settings/presentation/controllers/settings_con
 import 'package:salapify/features/transaction/domain/entities/transaction_entry.dart';
 import 'package:salapify/features/transaction/presentation/controllers/transaction_controller.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class ExpenseFormScreen extends ConsumerStatefulWidget {
   const ExpenseFormScreen({super.key, this.existingTransaction});
@@ -43,8 +44,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
   void initState() {
     super.initState();
     final existing = widget.existingTransaction;
-    final currency =
-        ref.read(currencySettingProvider).value ?? AppCurrency.php;
+    final currency = ref.read(currencySettingProvider).value ?? AppCurrency.php;
     _amountController = TextEditingController(
       text: existing != null ? currency.formatForInput(existing.amount) : '',
     );
@@ -73,7 +73,10 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCategoryId == null) {
-      CommonSnackbar.showError(context, 'Please select a category');
+      CommonSnackbar.showError(
+        context,
+        AppLocalizations.of(context).expenseSelectCategory,
+      );
       return;
     }
 
@@ -138,6 +141,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final categoriesAsync = ref.watch(budgetCategoriesProvider);
     final actionsState = ref.watch(transactionActionsProvider);
@@ -146,7 +150,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isEditing ? 'Edit Expense' : 'Add Expense'),
+        title: Text(widget.isEditing ? l10n.expenseEdit : l10n.expenseAdd),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -161,7 +165,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                   icon: Icons.attach_money_rounded,
                   prefixText: currency.symbol,
                   hint: currency.amountHint,
-                  label: 'Amount',
+                  label: l10n.amountLabel,
                   keyboardType: TextInputType.numberWithOptions(
                     decimal: currency.decimalDigits > 0,
                   ),
@@ -173,28 +177,28 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                   ],
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Amount is required';
+                      return l10n.amountRequired;
                     }
                     final parsed = double.tryParse(value.trim());
                     if (parsed == null || parsed <= 0) {
-                      return 'Enter a valid amount';
+                      return l10n.amountInvalid;
                     }
                     if (parsed > _maxAmount) {
-                      return 'Amount is too large';
+                      return l10n.amountTooLarge;
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 18),
                 Text(
-                  'Category',
+                  l10n.expenseCategory,
                   style: TextStyle(color: colors.textPrimary),
                 ),
                 const SizedBox(height: 8),
                 categoriesAsync.when(
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Text('Failed to load categories: $e'),
+                  error: (e, _) => Text(l10n.budgetLoadFailed('$e')),
                   data: (categories) => _CategoryPicker(
                     categories: _visibleCategories(categories),
                     selectedId: _selectedCategoryId,
@@ -203,7 +207,10 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                   ),
                 ),
                 const SizedBox(height: 18),
-                Text('Date', style: TextStyle(color: colors.textPrimary)),
+                Text(
+                  l10n.expenseDate,
+                  style: TextStyle(color: colors.textPrimary),
+                ),
                 const SizedBox(height: 8),
                 InkWell(
                   onTap: _pickDate,
@@ -242,12 +249,14 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                   icon: Icons.notes_rounded,
                   textInputAction: TextInputAction.done,
                   maxCharacters: 150,
-                  hint: 'e.g. Coffee with a friend',
-                  label: 'Note (optional)',
+                  hint: l10n.expenseNoteHint,
+                  label: l10n.expenseNoteLabel,
                 ),
                 const SizedBox(height: 28),
                 CommonButton(
-                  label: widget.isEditing ? 'Save Changes' : 'Add Expense',
+                  label: widget.isEditing
+                      ? l10n.commonSaveChanges
+                      : l10n.expenseAdd,
                   btnColor: colors.textPrimary,
                   labelColor: colors.background,
                   isLoading: actionsState.isLoading,
@@ -278,11 +287,12 @@ class _CategoryPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
 
     if (categories.isEmpty) {
       return Text(
-        'No categories yet — add one from the Budget tab.',
+        l10n.expenseNoCategories,
         style: TextStyle(color: colors.textSecondary),
       );
     }

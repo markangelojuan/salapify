@@ -8,6 +8,7 @@ import 'package:salapify/router/routes.dart';
 import 'package:salapify/features/transaction/presentation/widgets/recurring_income_row.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class IncomeTab extends ConsumerWidget {
   const IncomeTab({super.key});
@@ -17,11 +18,12 @@ class IncomeTab extends ConsumerWidget {
     WidgetRef ref,
     String id,
   ) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await CommonConfirmationDialog.show(
       context,
-      title: 'Delete this income entry?',
-      message: 'It will no longer be counted toward total money.',
-      confirmLabel: 'Delete',
+      title: l10n.incomeDeleteTitle,
+      message: l10n.incomeDeleteMessage,
+      confirmLabel: l10n.commonDelete,
       isDestructive: true,
     );
     if (confirmed) {
@@ -31,6 +33,7 @@ class IncomeTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
 
     ref.listen<AsyncValue<void>>(incomeSourceActionsProvider, (previous, next) {
@@ -42,7 +45,7 @@ class IncomeTab extends ConsumerWidget {
 
     return sourcesAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => Center(child: Text('Failed to load income: $err')),
+      error: (err, _) => Center(child: Text(l10n.incomeLoadFailed('$err'))),
       data: (sources) {
         if (sources.isEmpty) {
           return Padding(
@@ -57,7 +60,7 @@ class IncomeTab extends ConsumerWidget {
                     height: 180,
                   ),
                   Text(
-                    'No income entries yet',
+                    l10n.incomeEmpty,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: colors.textSecondary,
                     ),

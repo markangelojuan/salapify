@@ -8,26 +8,11 @@ import 'package:salapify/core/utils/amount_input_formatter.dart';
 import 'package:salapify/core/widgets/common_button.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/core/widgets/common_text_field.dart';
-import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/transaction/domain/entities/income_source.dart';
 import 'package:salapify/features/transaction/presentation/controllers/income_source_controller.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
-
-const _monthNames = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
 
 class IncomeFormScreen extends ConsumerStatefulWidget {
   const IncomeFormScreen({super.key, this.existingSource});
@@ -57,8 +42,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
   void initState() {
     super.initState();
     final existing = widget.existingSource;
-    final currency =
-        ref.read(currencySettingProvider).value ?? AppCurrency.php;
+    final currency = ref.read(currencySettingProvider).value ?? AppCurrency.php;
     _sourceController = TextEditingController(text: existing?.source ?? '');
     _amountController = TextEditingController(
       text: existing != null ? currency.formatForInput(existing.amount) : '',
@@ -101,11 +85,6 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
       lastDate: now,
     );
     if (picked != null) setState(() => _date = picked);
-  }
-
-  String _currentPeriodLabel(BudgetingPeriod period, int firstHalfEndDay) {
-    final now = DateTime.now();
-    return '${_monthNames[now.month - 1]} ${now.year}';
   }
 
   Future<void> _submit() async {
@@ -152,19 +131,15 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
-    final globalPeriod =
-        ref.watch(budgetingPeriodSettingProvider).value ??
-        BudgetingPeriod.monthly;
-    final firstHalfEndDay =
-        ref.watch(firstHalfEndDaySettingProvider).value ?? 15;
     final actionsState = ref.watch(incomeSourceActionsProvider);
     final currency =
         ref.watch(currencySettingProvider).value ?? AppCurrency.php;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isEditing ? 'Edit Income' : 'Add Income'),
+        title: Text(widget.isEditing ? l10n.incomeEdit : l10n.incomeAdd),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -179,14 +154,14 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                   icon: Icons.badge_outlined,
                   textInputAction: TextInputAction.done,
                   maxCharacters: 50,
-                  hint: 'e.g. Salary, Freelance, Gift',
-                  label: 'Source',
+                  hint: l10n.incomeSourceHint,
+                  label: l10n.incomeSourceLabel,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Source is required';
+                      return l10n.incomeSourceRequired;
                     }
                     if (value.trim().length > 50) {
-                      return 'Keep it under 50 characters';
+                      return l10n.incomeSourceTooLong;
                     }
                     return null;
                   },
@@ -197,7 +172,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                   icon: Icons.attach_money_rounded,
                   prefixText: currency.symbol,
                   hint: currency.amountHint,
-                  label: 'Amount',
+                  label: l10n.amountLabel,
                   keyboardType: TextInputType.numberWithOptions(
                     decimal: currency.decimalDigits > 0,
                   ),
@@ -209,25 +184,34 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                   ],
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Amount is required';
+                      return l10n.amountRequired;
                     }
                     final parsed = double.tryParse(value.trim());
                     if (parsed == null || parsed <= 0) {
-                      return 'Enter a valid amount';
+                      return l10n.amountInvalid;
                     }
                     if (parsed > _maxAmount) {
-                      return 'Amount is too large';
+                      return l10n.amountTooLarge;
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 18),
-                Text('Type', style: TextStyle(color: colors.textPrimary)),
+                Text(
+                  l10n.categoryTypeLabel,
+                  style: TextStyle(color: colors.textPrimary),
+                ),
                 const SizedBox(height: 8),
                 SegmentedButton<bool>(
-                  segments: const [
-                    ButtonSegment(value: false, label: Text('One-time')),
-                    ButtonSegment(value: true, label: Text('Recurring')),
+                  segments: [
+                    ButtonSegment(
+                      value: false,
+                      label: Text(l10n.budgetFreqOnce),
+                    ),
+                    ButtonSegment(
+                      value: true,
+                      label: Text(l10n.budgetFreqRecurring),
+                    ),
                   ],
                   selected: {_isRecurring},
                   onSelectionChanged: (selection) =>
@@ -236,22 +220,27 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                 const SizedBox(height: 18),
                 if (_isRecurring) ...[
                   Text(
-                    'Deposit day',
+                    l10n.incomeDepositDay,
                     style: TextStyle(color: colors.textPrimary),
                   ),
                   const SizedBox(height: 8),
                   _DateField(
                     icon: Icons.event_repeat_rounded,
-                    label: 'Every month on day ${_recurringDay ?? '-'}',
+                    label: l10n.incomeEveryMonthOnDay(
+                      _recurringDay ?? DateTime.now().day,
+                    ),
                     onTap: _pickRecurringDay,
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Counted as income for every period, regardless of the exact day.',
+                    l10n.incomeCountedEveryPeriod,
                     style: TextStyle(fontSize: 12, color: colors.textSecondary),
                   ),
                 ] else ...[
-                  Text('Date', style: TextStyle(color: colors.textPrimary)),
+                  Text(
+                    l10n.expenseDate,
+                    style: TextStyle(color: colors.textPrimary),
+                  ),
                   const SizedBox(height: 8),
                   _DateField(
                     icon: Icons.calendar_today_rounded,
@@ -280,8 +269,7 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'Will be added to: '
-                            '${_currentPeriodLabel(globalPeriod, firstHalfEndDay)}',
+                            l10n.incomeAddedTo(DateTime.now()),
                             style: TextStyle(color: colors.textPrimary),
                           ),
                         ),
@@ -291,7 +279,9 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
                 ],
                 const SizedBox(height: 28),
                 CommonButton(
-                  label: widget.isEditing ? 'Save Changes' : 'Add Income',
+                  label: widget.isEditing
+                      ? l10n.commonSaveChanges
+                      : l10n.incomeAdd,
                   btnColor: colors.textPrimary,
                   labelColor: colors.background,
                   isLoading: actionsState.isLoading,

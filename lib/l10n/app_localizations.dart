@@ -1855,6 +1855,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save Changes'**
   String get commonSaveChanges;
+
+  /// No description provided for @transactionTabExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get transactionTabExpenses;
+
+  /// No description provided for @transactionTabIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get transactionTabIncome;
+
+  /// No description provided for @dateToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get dateToday;
+
+  /// No description provided for @dateYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get dateYesterday;
+
+  /// No description provided for @dateMonthDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String dateMonthDay(DateTime date);
+
+  /// No description provided for @dateMonthDayYear.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String dateMonthDayYear(DateTime date);
+
+  /// No description provided for @expensesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses yet'**
+  String get expensesEmpty;
+
+  /// No description provided for @expensesLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load expenses: {error}'**
+  String expensesLoadFailed(String error);
+
+  /// No description provided for @expensesDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this expense?'**
+  String get expensesDeleteTitle;
+
+  /// No description provided for @expensesDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It will no longer count toward your spending totals.'**
+  String get expensesDeleteMessage;
+
+  /// No description provided for @transactionDeletedCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted category'**
+  String get transactionDeletedCategory;
+
+  /// No description provided for @transactionAutoNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining budget (auto)'**
+  String get transactionAutoNote;
+
+  /// No description provided for @incomeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No income entries yet'**
+  String get incomeEmpty;
+
+  /// No description provided for @incomeLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load income: {error}'**
+  String incomeLoadFailed(String error);
+
+  /// No description provided for @incomeDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this income entry?'**
+  String get incomeDeleteTitle;
+
+  /// No description provided for @incomeDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It will no longer be counted toward total money.'**
+  String get incomeDeleteMessage;
+
+  /// No description provided for @incomeEveryMonthOnDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Every month on day {day}'**
+  String incomeEveryMonthOnDay(int day);
+
+  /// No description provided for @incomeEveryMonthOnDayClamped.
+  ///
+  /// In en, this message translates to:
+  /// **'Every month on day {day} (day {effective} this month)'**
+  String incomeEveryMonthOnDayClamped(int day, int effective);
+
+  /// No description provided for @cashFlowInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Your expected income and savings this month. No history kept.'**
+  String get cashFlowInfo;
+
+  /// No description provided for @cashFlowSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get cashFlowSavings;
+
+  /// No description provided for @expenseAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Expense'**
+  String get expenseAdd;
+
+  /// No description provided for @expenseEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Expense'**
+  String get expenseEdit;
+
+  /// No description provided for @amountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get amountLabel;
+
+  /// No description provided for @expenseCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get expenseCategory;
+
+  /// No description provided for @expenseSelectCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a category'**
+  String get expenseSelectCategory;
+
+  /// No description provided for @expenseNoCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories yet — add one from the Budget tab.'**
+  String get expenseNoCategories;
+
+  /// No description provided for @expenseDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get expenseDate;
+
+  /// No description provided for @expenseNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get expenseNoteLabel;
+
+  /// No description provided for @expenseNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Coffee with a friend'**
+  String get expenseNoteHint;
+
+  /// No description provided for @incomeAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Income'**
+  String get incomeAdd;
+
+  /// No description provided for @incomeEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Income'**
+  String get incomeEdit;
+
+  /// No description provided for @incomeSourceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get incomeSourceLabel;
+
+  /// No description provided for @incomeSourceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Salary, Freelance, Gift'**
+  String get incomeSourceHint;
+
+  /// No description provided for @incomeSourceRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Source is required'**
+  String get incomeSourceRequired;
+
+  /// No description provided for @incomeSourceTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it under 50 characters'**
+  String get incomeSourceTooLong;
+
+  /// No description provided for @incomeDepositDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit day'**
+  String get incomeDepositDay;
+
+  /// No description provided for @incomeCountedEveryPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Counted as income for every period, regardless of the exact day.'**
+  String get incomeCountedEveryPeriod;
+
+  /// No description provided for @incomeAddedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Will be added to: {date}'**
+  String incomeAddedTo(DateTime date);
 }
 
 class _AppLocalizationsDelegate

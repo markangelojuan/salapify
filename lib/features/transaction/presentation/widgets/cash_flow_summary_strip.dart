@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class CashFlowSummaryStrip extends ConsumerWidget {
   const CashFlowSummaryStrip({
@@ -18,6 +19,7 @@ class CashFlowSummaryStrip extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final currency =
         ref.watch(currencySettingProvider).value ?? AppCurrency.php;
@@ -36,9 +38,11 @@ class CashFlowSummaryStrip extends ConsumerWidget {
                 color: colors.textSecondary,
               ),
               const SizedBox(width: 4),
-              Text(
-                "Your expected income and savings this month. No history kept.",
-                style: TextStyle(fontSize: 11, color: colors.textSecondary),
+              Flexible(
+                child: Text(
+                  l10n.cashFlowInfo,
+                  style: TextStyle(fontSize: 11, color: colors.textSecondary),
+                ),
               ),
             ],
           ),
@@ -61,7 +65,7 @@ class CashFlowSummaryStrip extends ConsumerWidget {
             children: [
               Expanded(
                 child: _SummaryItem(
-                  label: 'Income',
+                  label: l10n.transactionTabIncome,
                   amount: income,
                   color: colors.primary,
                   currency: currency,
@@ -70,7 +74,7 @@ class CashFlowSummaryStrip extends ConsumerWidget {
               _VerticalDivider(color: colors.border),
               Expanded(
                 child: _SummaryItem(
-                  label: 'Spent',
+                  label: l10n.budgetSpent,
                   amount: spent,
                   color: colors.error,
                   currency: currency,
@@ -79,7 +83,7 @@ class CashFlowSummaryStrip extends ConsumerWidget {
               _VerticalDivider(color: colors.border),
               Expanded(
                 child: _SummaryItem(
-                  label: 'Savings',
+                  label: l10n.cashFlowSavings,
                   amount: savings,
                   color: Theme.of(context).brightness == Brightness.dark
                       ? const Color(0xFF7EB6E8)

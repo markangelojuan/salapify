@@ -997,4 +997,146 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonSaveChanges => 'Save Changes';
+
+  @override
+  String get transactionTabExpenses => 'Expenses';
+
+  @override
+  String get transactionTabIncome => 'Income';
+
+  @override
+  String get dateToday => 'Today';
+
+  @override
+  String get dateYesterday => 'Yesterday';
+
+  @override
+  String dateMonthDay(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.MMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String dateMonthDayYear(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String get expensesEmpty => 'No expenses yet';
+
+  @override
+  String expensesLoadFailed(String error) {
+    return 'Failed to load expenses: $error';
+  }
+
+  @override
+  String get expensesDeleteTitle => 'Delete this expense?';
+
+  @override
+  String get expensesDeleteMessage =>
+      'It will no longer count toward your spending totals.';
+
+  @override
+  String get transactionDeletedCategory => 'Deleted category';
+
+  @override
+  String get transactionAutoNote => 'Remaining budget (auto)';
+
+  @override
+  String get incomeEmpty => 'No income entries yet';
+
+  @override
+  String incomeLoadFailed(String error) {
+    return 'Failed to load income: $error';
+  }
+
+  @override
+  String get incomeDeleteTitle => 'Delete this income entry?';
+
+  @override
+  String get incomeDeleteMessage =>
+      'It will no longer be counted toward total money.';
+
+  @override
+  String incomeEveryMonthOnDay(int day) {
+    return 'Every month on day $day';
+  }
+
+  @override
+  String incomeEveryMonthOnDayClamped(int day, int effective) {
+    return 'Every month on day $day (day $effective this month)';
+  }
+
+  @override
+  String get cashFlowInfo =>
+      'Your expected income and savings this month. No history kept.';
+
+  @override
+  String get cashFlowSavings => 'Savings';
+
+  @override
+  String get expenseAdd => 'Add Expense';
+
+  @override
+  String get expenseEdit => 'Edit Expense';
+
+  @override
+  String get amountLabel => 'Amount';
+
+  @override
+  String get expenseCategory => 'Category';
+
+  @override
+  String get expenseSelectCategory => 'Please select a category';
+
+  @override
+  String get expenseNoCategories =>
+      'No categories yet — add one from the Budget tab.';
+
+  @override
+  String get expenseDate => 'Date';
+
+  @override
+  String get expenseNoteLabel => 'Note (optional)';
+
+  @override
+  String get expenseNoteHint => 'e.g. Coffee with a friend';
+
+  @override
+  String get incomeAdd => 'Add Income';
+
+  @override
+  String get incomeEdit => 'Edit Income';
+
+  @override
+  String get incomeSourceLabel => 'Source';
+
+  @override
+  String get incomeSourceHint => 'e.g. Salary, Freelance, Gift';
+
+  @override
+  String get incomeSourceRequired => 'Source is required';
+
+  @override
+  String get incomeSourceTooLong => 'Keep it under 50 characters';
+
+  @override
+  String get incomeDepositDay => 'Deposit day';
+
+  @override
+  String get incomeCountedEveryPeriod =>
+      'Counted as income for every period, regardless of the exact day.';
+
+  @override
+  String incomeAddedTo(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMM(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Will be added to: $dateString';
+  }
 }
