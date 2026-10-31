@@ -14,6 +14,7 @@ import 'package:salapify/features/settings/domain/currency.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 import 'package:salapify/router/routes.dart';
 
 class SplitBillsScreen extends ConsumerWidget {
@@ -25,13 +26,14 @@ class SplitBillsScreen extends ConsumerWidget {
     SplitGroup group,
     bool isCreator,
   ) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await CommonConfirmationDialog.show(
       context,
-      title: isCreator ? 'Delete this group?' : 'Leave this group?',
+      title: isCreator ? l10n.splitDeleteGroupTitle : l10n.splitLeaveGroupTitle,
       message: isCreator
-          ? 'This deletes "${group.name}" and its bills for everyone.'
-          : 'You\'ll no longer see "${group.name}" or its bills.',
-      confirmLabel: isCreator ? 'Delete' : 'Leave',
+          ? l10n.splitDeleteGroupMessage(group.name)
+          : l10n.splitLeaveGroupMessage(group.name),
+      confirmLabel: isCreator ? l10n.commonDelete : l10n.splitLeave,
       isDestructive: true,
     );
     if (!confirmed) return;
@@ -51,6 +53,7 @@ class SplitBillsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final currentUid = ref.watch(currentUserProvider)?.uid;
 
@@ -66,7 +69,8 @@ class SplitBillsScreen extends ConsumerWidget {
     return SafeArea(
       child: groupsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Failed to load groups: $err')),
+        error: (err, _) =>
+            Center(child: Text(l10n.splitGroupsLoadFailed('$err'))),
         data: (groups) {
           if (groups.isEmpty) {
             return Padding(
@@ -81,7 +85,7 @@ class SplitBillsScreen extends ConsumerWidget {
                       height: 180,
                     ),
                     Text(
-                      'No groups yet',
+                      l10n.splitNoGroups,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: colors.textSecondary,
                       ),
@@ -144,6 +148,7 @@ class _GroupRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final billsAsync = ref.watch(splitBillsProvider(group.id));
     final hasUnread = unreadCount > 0;
@@ -247,8 +252,9 @@ class _GroupRow extends ConsumerWidget {
                           runSpacing: 6,
                           children: [
                             _Pill(
-                              label:
-                                  '${group.memberIds.length} member${group.memberIds.length == 1 ? '' : 's'}',
+                              label: l10n.splitMembersCount(
+                                group.memberIds.length,
+                              ),
                               color: colors.primary,
                             ),
                             if (billsAsync.hasValue && currentUid != null)
@@ -355,6 +361,7 @@ class _BalancePill extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final currency =
         ref.watch(currencySettingProvider).value ?? AppCurrency.php;
@@ -373,12 +380,14 @@ class _BalancePill extends ConsumerWidget {
     );
 
     if (net == 0) {
-      return _Pill(label: 'Settled', color: colors.primary);
+      return _Pill(label: l10n.splitSettled, color: colors.primary);
     }
 
     final isPositive = net > 0;
     final amountText = '${currency.symbol}${currency.formatAmount(net.abs())}';
-    final label = isPositive ? 'Owed $amountText' : 'You owe $amountText';
+    final label = isPositive
+        ? l10n.splitOwed(amountText)
+        : l10n.splitYouOwe(amountText);
     return _Pill(
       label: label,
       color: isPositive ? colors.primary : colors.error,

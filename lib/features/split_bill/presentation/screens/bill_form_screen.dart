@@ -21,6 +21,7 @@ import 'package:salapify/features/settings/domain/currency.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
 import 'package:salapify/core/utils/amount_input_formatter.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
 const double kMaxBillAmount = 1000000000;
@@ -138,6 +139,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
   void _resolveMissingNames(
     Iterable<String> participantIds,
     Map<String, String> knownNames,
+    String unknown,
   ) {
     final missing = participantIds
         .where(
@@ -157,7 +159,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
     Future.wait(
           missing.map((id) async {
             final username = await userRepo.getUsername(id);
-            return MapEntry(id, username ?? 'Unknown');
+            return MapEntry(id, username ?? unknown);
           }),
         )
         .then((entries) {
@@ -249,26 +251,21 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
 
     final error = ref.read(splitBillControllerProvider).error;
     if (error != null) {
-      if (error is BillLimitExceededException) {
-        CommonSnackbar.showError(
-          context,
-          'This group has reached its limit of ${error.limit} bills.',
-        );
-      } else {
-        CommonSnackbar.showError(context, error);
-      }
+      CommonSnackbar.showError(context, error);
       return;
     }
+    Navigator.of(context).pop();
     Navigator.of(context).pop();
   }
 
   Future<void> _delete() async {
     if (_isSaving) return;
+    final l10n = AppLocalizations.of(context);
     final confirmed = await CommonConfirmationDialog.show(
       context,
-      title: 'Delete this bill?',
-      message: 'This cannot be undone.',
-      confirmLabel: 'Delete',
+      title: l10n.billDeleteTitle,
+      message: l10n.billDeleteMessage,
+      confirmLabel: l10n.commonDelete,
       isDestructive: true,
     );
     if (!confirmed) return;
@@ -294,10 +291,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
     if (!mounted) return;
 
     if (creatorIsPremium) {
-      CommonSnackbar.showSuccess(
-        context,
-        'Bill deleted. You can add a new one anytime.',
-      );
+      CommonSnackbar.showSuccess(context, l10n.billDeletedSnack);
     }
 
     Navigator.of(context).pop();
@@ -305,6 +299,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final currency =
         ref.watch(currencySettingProvider).value ?? AppCurrency.php;
@@ -320,7 +315,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
     }
 
     if (_isEditingExisting) {
-      _resolveMissingNames(_participantIds, groupNames);
+      _resolveMissingNames(_participantIds, groupNames, l10n.splitUnknownUser);
     }
     final names = {...groupNames, ..._resolvedNames};
     final others = _participantIds.where((id) => id != _paidBy).toList();
@@ -336,8 +331,8 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
 
     final canEdit = _canEdit;
     final title = !_isEditingExisting
-        ? 'Add Bill'
-        : (canEdit ? 'Edit Bill' : 'Bill Details');
+        ? l10n.billAdd
+        : (canEdit ? l10n.billEdit : l10n.billDetailsTitle);
 
     // Live bill lookup so payment-status changes (confirm/decline) made
     // from this same screen are reflected immediately, instead of relying
@@ -368,17 +363,11 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
             children: [
               if (_isEditingExisting && !canEdit) ...[
-                _ReadOnlyBanner(
-                  text: 'Only the person who paid can edit this bill.',
-                ),
+                _ReadOnlyBanner(text: l10n.billOnlyPayerEdit),
                 const SizedBox(height: 16),
               ],
               if (_isEditingExisting && canEdit && lockTotalAndSplit) ...[
-                _ReadOnlyBanner(
-                  text:
-                      'Total amount and split are locked — someone already '
-                      'has payment activity on this bill.',
-                ),
+                _ReadOnlyBanner(text: l10n.billLockedBanner),
                 const SizedBox(height: 16),
               ],
               AbsorbPointer(
@@ -389,7 +378,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _SectionCard(
-                        title: 'Bill details',
+                        title: l10n.billSectionDetails,
                         icon: Icons.receipt_long_rounded,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -399,10 +388,10 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                               textInputAction: TextInputAction.done,
                               icon: Icons.receipt_long_rounded,
                               maxCharacters: 55,
-                              hint: 'e.g. Dinner @ KFC',
-                              label: 'Title',
+                              hint: l10n.billTitleHint,
+                              label: l10n.billTitleLabel,
                               validator: (v) => (v == null || v.trim().isEmpty)
-                                  ? 'Enter a title'
+                                  ? l10n.billTitleRequired
                                   : null,
                             ),
                             const SizedBox(height: 18),
@@ -415,7 +404,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                                   icon: Icons.attach_money_rounded,
                                   prefixText: currency.symbol,
                                   hint: currency.amountHint,
-                                  label: 'Total amount',
+                                  label: l10n.billTotalAmountLabel,
                                   keyboardType: TextInputType.numberWithOptions(
                                     decimal: currency.decimalDigits > 0,
                                   ),
@@ -428,10 +417,12 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                                   validator: (v) {
                                     final val = double.tryParse(v ?? '');
                                     if (val == null || val <= 0) {
-                                      return 'Enter a valid amount';
+                                      return l10n.amountInvalid;
                                     }
                                     if (val > kMaxBillAmount) {
-                                      return 'Amount can\'t exceed ${currency.symbol}1,000,000,000';
+                                      return l10n.billAmountTooLarge(
+                                        '${currency.symbol}1,000,000,000',
+                                      );
                                     }
                                     return null;
                                   },
@@ -449,7 +440,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    'Locked — payment activity exists',
+                                    l10n.billLockedNote,
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: colors.textSecondary,
@@ -462,7 +453,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                         ),
                       ),
                       _SectionCard(
-                        title: 'Split',
+                        title: l10n.billSectionSplit,
                         icon: Icons.call_split_rounded,
                         trailing: others.isEmpty
                             ? null
@@ -477,7 +468,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                             // at them.
                             if (_isEditingExisting) ...[
                               Text(
-                                'Paid by',
+                                l10n.billPaidByLabel,
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -499,14 +490,14 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                                     // choice control, matching other option
                                     // pickers.
                                     SegmentedButton<SplitType>(
-                                      segments: const [
+                                      segments: [
                                         ButtonSegment(
                                           value: SplitType.equal,
-                                          label: Text('Equally'),
+                                          label: Text(l10n.billSplitEqually),
                                         ),
                                         ButtonSegment(
                                           value: SplitType.custom,
-                                          label: Text('Custom'),
+                                          label: Text(l10n.billSplitCustom),
                                         ),
                                       ],
                                       selected: {_splitType},
@@ -565,7 +556,9 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
               if (canEdit) ...[
                 const SizedBox(height: 8),
                 CommonButton(
-                  label: _isEditingExisting ? 'Save Changes' : 'Add Bill',
+                  label: _isEditingExisting
+                      ? l10n.commonSaveChanges
+                      : l10n.billAdd,
                   btnColor: colors.textPrimary,
                   labelColor: colors.background,
                   isLoading: _isSaving,
@@ -574,7 +567,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                 if (_isEditingExisting) ...[
                   const SizedBox(height: 12),
                   CommonButton(
-                    label: 'Delete Bill',
+                    label: l10n.billDelete,
                     btnColor: colors.surface,
                     labelColor: colors.error,
                     isLoading: _isSaving,
@@ -813,6 +806,7 @@ class _FormerMemberBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
 
     return Container(
@@ -823,7 +817,7 @@ class _FormerMemberBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        'Former member',
+        l10n.billFormerMember,
         style: TextStyle(
           fontSize: 9,
           fontWeight: FontWeight.w600,
@@ -1016,12 +1010,13 @@ class _PaymentStatusSection extends ConsumerWidget {
 
     final error = ref.read(splitBillControllerProvider).error;
     if (error != null && context.mounted) {
-      CommonSnackbar.showError(context, 'Failed to update status: $error');
+      CommonSnackbar.showError(context, error);
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final owerShares = bill.shares
         .where((s) => s.userId != bill.paidBy)
@@ -1033,7 +1028,7 @@ class _PaymentStatusSection extends ConsumerWidget {
         .length;
 
     return _SectionCard(
-      title: 'Payment status',
+      title: l10n.billPaymentStatus,
       icon: Icons.fact_check_rounded,
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1048,7 +1043,7 @@ class _PaymentStatusSection extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                '$pendingCount awaiting review',
+                l10n.billAwaitingReview(pendingCount),
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -1110,23 +1105,24 @@ class _ShareStatusRow extends StatelessWidget {
   final AppCurrency currency;
   final bool isFormerMember;
 
-  (String, Color) _statusMeta(AppColorsExt colors) {
+  (String, Color) _statusMeta(AppColorsExt colors, AppLocalizations l10n) {
     switch (share.status) {
       case PaymentStatus.unpaid:
-        return ('Unpaid', colors.textSecondary);
+        return (l10n.billStatusUnpaid, colors.textSecondary);
       case PaymentStatus.markedPaid:
-        return ('Says paid — review', colors.warning);
+        return (l10n.billStatusSaysPaid, colors.warning);
       case PaymentStatus.confirmed:
-        return ('Confirmed', colors.primary);
+        return (l10n.billStatusConfirmed, colors.primary);
       case PaymentStatus.disputed:
-        return ('Disputed', colors.error);
+        return (l10n.billDisputed, colors.error);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
-    final (label, color) = _statusMeta(colors);
+    final (label, color) = _statusMeta(colors, l10n);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: Row(
@@ -1169,13 +1165,13 @@ class _ShareStatusRow extends StatelessWidget {
                 Icons.check_circle_outline_rounded,
                 color: colors.primary,
               ),
-              tooltip: 'Confirm',
+              tooltip: l10n.commonConfirm,
               visualDensity: VisualDensity.compact,
               onPressed: onConfirm,
             ),
             IconButton(
               icon: Icon(Icons.cancel_outlined, color: colors.error),
-              tooltip: 'Decline',
+              tooltip: l10n.billDecline,
               visualDensity: VisualDensity.compact,
               onPressed: onDispute,
             ),

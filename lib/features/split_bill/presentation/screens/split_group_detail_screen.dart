@@ -23,6 +23,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:salapify/features/split_bill/presentation/game/whack_a_debt_screen.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class SplitGroupDetailScreen extends ConsumerStatefulWidget {
   const SplitGroupDetailScreen({super.key, required this.groupId});
@@ -120,6 +121,7 @@ class _SplitGroupDetailScreenState
   ) async {
     final currentUid = ref.read(currentUserProvider)?.uid;
     if (currentUid == null) return;
+    final l10n = AppLocalizations.of(context);
 
     final selected = await showMenu<String>(
       context: context,
@@ -138,7 +140,7 @@ class _SplitGroupDetailScreenState
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
-                  'Block $username',
+                  l10n.splitBlockUser(username),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   softWrap: false,
@@ -155,7 +157,7 @@ class _SplitGroupDetailScreenState
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
-                  'Report $username',
+                  l10n.splitReportUser(username),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   softWrap: false,
@@ -190,12 +192,8 @@ class _SplitGroupDetailScreenState
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: Text('Block $username?'),
-          content: Text(
-            'You won\'t see $username\'s messages or activity in shared '
-            'groups, including bill updates. You can unblock them anytime '
-            'from Settings.',
-          ),
+          title: Text(l10n.splitBlockTitle(username)),
+          content: Text(l10n.splitBlockMessage(username)),
           actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           actions: [
             OutlinedButton(
@@ -210,7 +208,7 @@ class _SplitGroupDetailScreenState
                   vertical: 10,
                 ),
               ),
-              child: const Text('Cancel'),
+              child: Text(l10n.commonCancel),
             ),
             OutlinedButton(
               onPressed: () => Navigator.pop(ctx, true),
@@ -224,7 +222,7 @@ class _SplitGroupDetailScreenState
                   vertical: 10,
                 ),
               ),
-              child: const Text('Block'),
+              child: Text(l10n.splitBlockAction),
             ),
           ],
         );
@@ -237,7 +235,7 @@ class _SplitGroupDetailScreenState
           .read(userRepositoryProvider)
           .blockUser(blockerId: currentUid, blockedId: userId);
       if (context.mounted) {
-        CommonSnackbar.showWarning(context, 'Blocked $username');
+        CommonSnackbar.showWarning(context, l10n.splitBlockedSnack(username));
       }
     } catch (e) {
       if (context.mounted) CommonSnackbar.showError(context, e);
@@ -260,17 +258,19 @@ class _SplitGroupDetailScreenState
     );
 
     if (score == null || score <= 0 || !mounted) return;
+    final l10n = AppLocalizations.of(context);
 
     await ref
         .read(splitBillControllerProvider.notifier)
         .sendMessage(
           groupId: widget.groupId,
-          text: '🎮 I scored $score in Whack-a-Debt!',
+          text: l10n.splitGameScoreMessage(score),
         );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     ref.listen<AsyncValue<List<ActivityEntry>>>(
       activityFeedProvider(widget.groupId),
       (previous, next) {
@@ -301,13 +301,13 @@ class _SplitGroupDetailScreenState
           const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (err, _) => Scaffold(
         appBar: AppBar(),
-        body: Center(child: Text('Failed to load group: $err')),
+        body: Center(child: Text(l10n.splitGroupLoadFailed('$err'))),
       ),
       data: (group) {
         if (group == null) {
           return Scaffold(
             appBar: AppBar(),
-            body: const Center(child: Text('Group not found')),
+            body: Center(child: Text(l10n.splitGroupNotFound)),
           );
         }
         return _buildScaffold(context, group, currencyFormat);
@@ -320,6 +320,7 @@ class _SplitGroupDetailScreenState
     SplitGroup group,
     NumberFormat currencyFormat,
   ) {
+    final l10n = AppLocalizations.of(context);
     final billsAsync = ref.watch(splitBillsProvider(group.id));
     final activityAsync = ref.watch(activityFeedProvider(group.id));
     final loadingMore = ref.watch(activityLoadingMoreProvider(group.id));
@@ -341,7 +342,7 @@ class _SplitGroupDetailScreenState
       body: SafeArea(
         child: billsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => Center(child: Text('Failed to load bills: $err')),
+          error: (err, _) => Center(child: Text(l10n.splitBillsLoadFailed('$err'))),
           data: (bills) {
             final membersReady = membersAsync.hasValue || membersAsync.hasError;
             if (!membersReady) {
@@ -389,7 +390,7 @@ class _SplitGroupDetailScreenState
                   child: activityAsync.when(
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
-                    error: (err, _) => Center(child: Text('$err')),
+                    error: (err, _) => Center(child: Text(l10n.commonLoadFailed('$err'))),
                     data: (activity) => ActivityFeedView(
                       activity: activity,
                       currentUid: currentUid,

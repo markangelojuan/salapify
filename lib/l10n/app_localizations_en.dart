@@ -1139,4 +1139,548 @@ class AppLocalizationsEn extends AppLocalizations {
 
     return 'Will be added to: $dateString';
   }
+
+  @override
+  String get splitGroupNew => 'New Group';
+
+  @override
+  String get splitGroupEdit => 'Edit Group';
+
+  @override
+  String get splitGroupCreate => 'Create Group';
+
+  @override
+  String get splitGroupNameLabel => 'Group name';
+
+  @override
+  String get splitGroupNameHint => 'e.g. Roommates, Baguio Trip';
+
+  @override
+  String get splitGroupNameRequired => 'Enter a group name';
+
+  @override
+  String get splitAddMembers => 'Add members';
+
+  @override
+  String splitGroupFull(int count) {
+    return 'Group is full ($count/$count members)';
+  }
+
+  @override
+  String get splitNoUserFound => 'No user found';
+
+  @override
+  String get splitSearchByUsername => 'Search by username';
+
+  @override
+  String get splitUnknownUser => 'Unknown';
+
+  @override
+  String errorBillLimit(int limit) {
+    String _temp0 = intl.Intl.pluralLogic(
+      limit,
+      locale: localeName,
+      other: '$limit bills',
+      one: '1 bill',
+    );
+    return 'This group has reached its limit of $_temp0';
+  }
+
+  @override
+  String errorGroupLimit(int limit) {
+    String _temp0 = intl.Intl.pluralLogic(
+      limit,
+      locale: localeName,
+      other: '$limit active groups',
+      one: '1 active group',
+    );
+    return 'You can only have $_temp0 on the free plan';
+  }
+
+  @override
+  String errorMaxMembers(int limit) {
+    String _temp0 = intl.Intl.pluralLogic(
+      limit,
+      locale: localeName,
+      other: '$limit members',
+      one: '1 member',
+    );
+    return 'Groups can have at most $_temp0';
+  }
+
+  @override
+  String get splitDeleteGroupTitle => 'Delete this group?';
+
+  @override
+  String get splitLeaveGroupTitle => 'Leave this group?';
+
+  @override
+  String splitDeleteGroupMessage(String name) {
+    return 'This deletes “$name” and its bills for everyone.';
+  }
+
+  @override
+  String splitLeaveGroupMessage(String name) {
+    return 'You’ll no longer see “$name” or its bills.';
+  }
+
+  @override
+  String get splitLeave => 'Leave';
+
+  @override
+  String splitGroupsLoadFailed(String error) {
+    return 'Failed to load groups: $error';
+  }
+
+  @override
+  String get splitNoGroups => 'No groups yet';
+
+  @override
+  String splitMembersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count members',
+      one: '1 member',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get splitSettled => 'Settled';
+
+  @override
+  String splitOwed(String amount) {
+    return 'Owed $amount';
+  }
+
+  @override
+  String splitYouOwe(String amount) {
+    return 'You owe $amount';
+  }
+
+  @override
+  String get guestSplitTagline => 'Chip in. Settle up. Stay friends.';
+
+  @override
+  String get guestSplitDescription =>
+      'Create groups, split bills, and see who owes who. Sign in to sync it all with your friends.';
+
+  @override
+  String get guestSplitCta => 'Sign in to get started';
+
+  @override
+  String splitBlockUser(String username) {
+    return 'Block $username';
+  }
+
+  @override
+  String splitReportUser(String username) {
+    return 'Report $username';
+  }
+
+  @override
+  String splitBlockTitle(String username) {
+    return 'Block $username?';
+  }
+
+  @override
+  String splitBlockMessage(String username) {
+    return 'You won’t see $username’s messages or activity in shared groups, including bill updates. You can unblock them anytime from Settings.';
+  }
+
+  @override
+  String get splitBlockAction => 'Block';
+
+  @override
+  String splitBlockedSnack(String username) {
+    return 'Blocked $username';
+  }
+
+  @override
+  String splitGameScoreMessage(int score) {
+    return '🎮 I scored $score in Whack-a-Debt!';
+  }
+
+  @override
+  String splitGroupLoadFailed(String error) {
+    return 'Failed to load group: $error';
+  }
+
+  @override
+  String get splitGroupNotFound => 'Group not found';
+
+  @override
+  String splitBillsLoadFailed(String error) {
+    return 'Failed to load bills: $error';
+  }
+
+  @override
+  String get balanceAllSettled => 'All settled up';
+
+  @override
+  String get balanceOwedToYou => 'Owed to you';
+
+  @override
+  String get balanceYouOwe => 'You owe';
+
+  @override
+  String get billAdd => 'Add Bill';
+
+  @override
+  String billLimitReachedPremium(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bills',
+      one: '1 bill',
+    );
+    return 'This group has reached its limit of $_temp0. Delete a bill to add a new one.';
+  }
+
+  @override
+  String billTotal(String amount) {
+    return 'Total $amount';
+  }
+
+  @override
+  String get billPaidByYou => 'Paid by you';
+
+  @override
+  String billPaidByName(String name) {
+    return 'Paid by $name';
+  }
+
+  @override
+  String get billAllConfirmed => 'All confirmed';
+
+  @override
+  String billDisputedReview(int count) {
+    return '$count disputed — tap to review';
+  }
+
+  @override
+  String billWaitingOnYou(int count) {
+    return '$count waiting on you';
+  }
+
+  @override
+  String get billWaitingPayments => 'Waiting on payments';
+
+  @override
+  String get billDisputed => 'Disputed';
+
+  @override
+  String get billMarkPaidAgain => 'Mark paid again';
+
+  @override
+  String get billWaitingConfirmation => 'Waiting on confirmation';
+
+  @override
+  String get billMarkPaid => 'Mark paid';
+
+  @override
+  String get activityFormerMemberCap => 'A former member';
+
+  @override
+  String get activityFormerMember => 'a former member';
+
+  @override
+  String get activityABill => 'a bill';
+
+  @override
+  String get activitySomeone => 'someone';
+
+  @override
+  String get activityFormerBeast => 'Former Beast';
+
+  @override
+  String activityBillAdded(String sender, String title) {
+    return '$sender added “$title”';
+  }
+
+  @override
+  String activityBillAddedAmount(String sender, String title, String amount) {
+    return '$sender added “$title” — $amount';
+  }
+
+  @override
+  String activityPaymentMarked(String sender) {
+    return '$sender marked their share as paid';
+  }
+
+  @override
+  String activityPaymentConfirmedTarget(String sender, String target) {
+    return '$sender confirmed $target’s payment';
+  }
+
+  @override
+  String activityPaymentConfirmed(String sender) {
+    return '$sender confirmed a payment';
+  }
+
+  @override
+  String activityPaymentDisputedTarget(String sender, String target) {
+    return '$sender disputed $target’s payment';
+  }
+
+  @override
+  String activityPaymentDisputed(String sender) {
+    return '$sender disputed a payment';
+  }
+
+  @override
+  String activityMemberAdded(String sender, String target) {
+    return '$sender added $target to the group';
+  }
+
+  @override
+  String activityPoke(String article, String character) {
+    return '$article $character poked the group!';
+  }
+
+  @override
+  String activityPhotoSent(String sender) {
+    return '$sender sent a photo';
+  }
+
+  @override
+  String get activityEmpty => 'No activity yet';
+
+  @override
+  String get photoExpiresIn3Days => 'This photo will expire in 3 days';
+
+  @override
+  String photoExpiresInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return 'Expires in $_temp0';
+  }
+
+  @override
+  String photoExpiresInHours(int count) {
+    return 'Expires in ${count}h';
+  }
+
+  @override
+  String photoExpiresInMinutes(int count) {
+    return 'Expires in ${count}m';
+  }
+
+  @override
+  String get photoExpired => 'Photo expired';
+
+  @override
+  String get linkOpenTitle => 'Open link?';
+
+  @override
+  String linkOpenMessage(String url) {
+    return 'You’re about to leave Salapify and open:\n\n$url';
+  }
+
+  @override
+  String get commonOpen => 'Open';
+
+  @override
+  String get linkOpenFailed => 'Couldn’t open this link.';
+
+  @override
+  String get chatNotifyAll => 'Notify all members';
+
+  @override
+  String get chatAddPhoto => 'Add photo';
+
+  @override
+  String get chatMessageHint => 'Message the group...';
+
+  @override
+  String get chatPokeGroup => 'Poke the group';
+
+  @override
+  String get chatSendMessage => 'Send message';
+
+  @override
+  String get reportTitle => 'Report User';
+
+  @override
+  String get reportReporting => 'Reporting';
+
+  @override
+  String get reportWhatsGoingOn => 'What’s going on?';
+
+  @override
+  String get reportBeSpecific =>
+      'Be as specific as possible — include what happened clearly.';
+
+  @override
+  String get reportHint => 'Describe what happened...';
+
+  @override
+  String get reportDescribeIssue => 'Please describe the issue';
+
+  @override
+  String get reportSubmitted => 'Report submitted';
+
+  @override
+  String get reportSubmit => 'Submit Report';
+
+  @override
+  String get billEdit => 'Edit Bill';
+
+  @override
+  String get billDetailsTitle => 'Bill Details';
+
+  @override
+  String get billOnlyPayerEdit =>
+      'Only the person who paid can edit this bill.';
+
+  @override
+  String get billLockedBanner =>
+      'Total amount and split are locked — someone already has payment activity on this bill.';
+
+  @override
+  String get billSectionDetails => 'Bill details';
+
+  @override
+  String get billTitleHint => 'e.g. Dinner @ KFC';
+
+  @override
+  String get billTitleLabel => 'Title';
+
+  @override
+  String get billTitleRequired => 'Enter a title';
+
+  @override
+  String get billTotalAmountLabel => 'Total amount';
+
+  @override
+  String billAmountTooLarge(String amount) {
+    return 'Amount can’t exceed $amount';
+  }
+
+  @override
+  String get billLockedNote => 'Locked — payment activity exists';
+
+  @override
+  String get billSectionSplit => 'Split';
+
+  @override
+  String get billPaidByLabel => 'Paid by';
+
+  @override
+  String get billSplitEqually => 'Equally';
+
+  @override
+  String get billSplitCustom => 'Custom';
+
+  @override
+  String get billDelete => 'Delete Bill';
+
+  @override
+  String get billDeleteTitle => 'Delete this bill?';
+
+  @override
+  String get billDeleteMessage => 'This cannot be undone.';
+
+  @override
+  String get billDeletedSnack => 'Bill deleted. You can add a new one anytime.';
+
+  @override
+  String get billFormerMember => 'Former member';
+
+  @override
+  String get billPaymentStatus => 'Payment status';
+
+  @override
+  String billAwaitingReview(int count) {
+    return '$count awaiting review';
+  }
+
+  @override
+  String get billStatusUnpaid => 'Unpaid';
+
+  @override
+  String get billStatusSaysPaid => 'Says paid — review';
+
+  @override
+  String get billStatusConfirmed => 'Confirmed';
+
+  @override
+  String get billDecline => 'Decline';
+
+  @override
+  String notificationsLoadFailed(String error) {
+    return 'Failed to load notifications: $error';
+  }
+
+  @override
+  String get notificationsEmpty => 'No notifications yet';
+
+  @override
+  String get notificationsEarlier => 'Earlier';
+
+  @override
+  String notificationsUnread(int count) {
+    return '$count unread';
+  }
+
+  @override
+  String get notificationsAllCaughtUp => 'You’re all caught up';
+
+  @override
+  String get notificationsMarkAllRead => 'Mark all read';
+
+  @override
+  String get notificationDeletedUser => 'Deleted user';
+
+  @override
+  String notificationAddedToGroup(String name, String group) {
+    return '$name added you to “$group”';
+  }
+
+  @override
+  String notificationBillAdded(String name, String title, String group) {
+    return '$name added “$title” in $group';
+  }
+
+  @override
+  String notificationPaymentMarked(String name, String group) {
+    return '$name marked their share as paid in $group';
+  }
+
+  @override
+  String notificationPaymentConfirmed(String name, String group) {
+    return '$name confirmed your payment in $group';
+  }
+
+  @override
+  String notificationPaymentDisputed(String name, String group) {
+    return '$name disputed your payment in $group';
+  }
+
+  @override
+  String get timeJustNow => 'Just now';
+
+  @override
+  String timeMinutesAgo(int count) {
+    return '${count}m ago';
+  }
+
+  @override
+  String timeHoursAgo(int count) {
+    return '${count}h ago';
+  }
+
+  @override
+  String timeDaysAgo(int count) {
+    return '${count}d ago';
+  }
+
+  @override
+  String get notificationGroupUnavailable =>
+      'This group is no longer available.';
 }

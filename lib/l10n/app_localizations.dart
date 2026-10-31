@@ -2083,6 +2083,816 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Will be added to: {date}'**
   String incomeAddedTo(DateTime date);
+
+  /// No description provided for @splitGroupNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New Group'**
+  String get splitGroupNew;
+
+  /// No description provided for @splitGroupEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Group'**
+  String get splitGroupEdit;
+
+  /// No description provided for @splitGroupCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Group'**
+  String get splitGroupCreate;
+
+  /// No description provided for @splitGroupNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Group name'**
+  String get splitGroupNameLabel;
+
+  /// No description provided for @splitGroupNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Roommates, Baguio Trip'**
+  String get splitGroupNameHint;
+
+  /// No description provided for @splitGroupNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a group name'**
+  String get splitGroupNameRequired;
+
+  /// No description provided for @splitAddMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Add members'**
+  String get splitAddMembers;
+
+  /// No description provided for @splitGroupFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Group is full ({count}/{count} members)'**
+  String splitGroupFull(int count);
+
+  /// No description provided for @splitNoUserFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No user found'**
+  String get splitNoUserFound;
+
+  /// No description provided for @splitSearchByUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by username'**
+  String get splitSearchByUsername;
+
+  /// No description provided for @splitUnknownUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get splitUnknownUser;
+
+  /// No description provided for @errorBillLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'This group has reached its limit of {limit, plural, =1{1 bill} other{{limit} bills}}'**
+  String errorBillLimit(int limit);
+
+  /// No description provided for @errorGroupLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'You can only have {limit, plural, =1{1 active group} other{{limit} active groups}} on the free plan'**
+  String errorGroupLimit(int limit);
+
+  /// No description provided for @errorMaxMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups can have at most {limit, plural, =1{1 member} other{{limit} members}}'**
+  String errorMaxMembers(int limit);
+
+  /// No description provided for @splitDeleteGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this group?'**
+  String get splitDeleteGroupTitle;
+
+  /// No description provided for @splitLeaveGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave this group?'**
+  String get splitLeaveGroupTitle;
+
+  /// No description provided for @splitDeleteGroupMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This deletes “{name}” and its bills for everyone.'**
+  String splitDeleteGroupMessage(String name);
+
+  /// No description provided for @splitLeaveGroupMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You’ll no longer see “{name}” or its bills.'**
+  String splitLeaveGroupMessage(String name);
+
+  /// No description provided for @splitLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get splitLeave;
+
+  /// No description provided for @splitGroupsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load groups: {error}'**
+  String splitGroupsLoadFailed(String error);
+
+  /// No description provided for @splitNoGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'No groups yet'**
+  String get splitNoGroups;
+
+  /// No description provided for @splitMembersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 member} other{{count} members}}'**
+  String splitMembersCount(int count);
+
+  /// No description provided for @splitSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled'**
+  String get splitSettled;
+
+  /// No description provided for @splitOwed.
+  ///
+  /// In en, this message translates to:
+  /// **'Owed {amount}'**
+  String splitOwed(String amount);
+
+  /// No description provided for @splitYouOwe.
+  ///
+  /// In en, this message translates to:
+  /// **'You owe {amount}'**
+  String splitYouOwe(String amount);
+
+  /// No description provided for @guestSplitTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Chip in. Settle up. Stay friends.'**
+  String get guestSplitTagline;
+
+  /// No description provided for @guestSplitDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create groups, split bills, and see who owes who. Sign in to sync it all with your friends.'**
+  String get guestSplitDescription;
+
+  /// No description provided for @guestSplitCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to get started'**
+  String get guestSplitCta;
+
+  /// No description provided for @splitBlockUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Block {username}'**
+  String splitBlockUser(String username);
+
+  /// No description provided for @splitReportUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Report {username}'**
+  String splitReportUser(String username);
+
+  /// No description provided for @splitBlockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Block {username}?'**
+  String splitBlockTitle(String username);
+
+  /// No description provided for @splitBlockMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You won’t see {username}’s messages or activity in shared groups, including bill updates. You can unblock them anytime from Settings.'**
+  String splitBlockMessage(String username);
+
+  /// No description provided for @splitBlockAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Block'**
+  String get splitBlockAction;
+
+  /// No description provided for @splitBlockedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked {username}'**
+  String splitBlockedSnack(String username);
+
+  /// No description provided for @splitGameScoreMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'🎮 I scored {score} in Whack-a-Debt!'**
+  String splitGameScoreMessage(int score);
+
+  /// No description provided for @splitGroupLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load group: {error}'**
+  String splitGroupLoadFailed(String error);
+
+  /// No description provided for @splitGroupNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Group not found'**
+  String get splitGroupNotFound;
+
+  /// No description provided for @splitBillsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load bills: {error}'**
+  String splitBillsLoadFailed(String error);
+
+  /// No description provided for @balanceAllSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'All settled up'**
+  String get balanceAllSettled;
+
+  /// No description provided for @balanceOwedToYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Owed to you'**
+  String get balanceOwedToYou;
+
+  /// No description provided for @balanceYouOwe.
+  ///
+  /// In en, this message translates to:
+  /// **'You owe'**
+  String get balanceYouOwe;
+
+  /// No description provided for @billAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Bill'**
+  String get billAdd;
+
+  /// No description provided for @billLimitReachedPremium.
+  ///
+  /// In en, this message translates to:
+  /// **'This group has reached its limit of {count, plural, =1{1 bill} other{{count} bills}}. Delete a bill to add a new one.'**
+  String billLimitReachedPremium(int count);
+
+  /// No description provided for @billTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {amount}'**
+  String billTotal(String amount);
+
+  /// No description provided for @billPaidByYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid by you'**
+  String get billPaidByYou;
+
+  /// No description provided for @billPaidByName.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid by {name}'**
+  String billPaidByName(String name);
+
+  /// No description provided for @billAllConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'All confirmed'**
+  String get billAllConfirmed;
+
+  /// No description provided for @billDisputedReview.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} disputed — tap to review'**
+  String billDisputedReview(int count);
+
+  /// No description provided for @billWaitingOnYou.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} waiting on you'**
+  String billWaitingOnYou(int count);
+
+  /// No description provided for @billWaitingPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting on payments'**
+  String get billWaitingPayments;
+
+  /// No description provided for @billDisputed.
+  ///
+  /// In en, this message translates to:
+  /// **'Disputed'**
+  String get billDisputed;
+
+  /// No description provided for @billMarkPaidAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark paid again'**
+  String get billMarkPaidAgain;
+
+  /// No description provided for @billWaitingConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting on confirmation'**
+  String get billWaitingConfirmation;
+
+  /// No description provided for @billMarkPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark paid'**
+  String get billMarkPaid;
+
+  /// No description provided for @activityFormerMemberCap.
+  ///
+  /// In en, this message translates to:
+  /// **'A former member'**
+  String get activityFormerMemberCap;
+
+  /// No description provided for @activityFormerMember.
+  ///
+  /// In en, this message translates to:
+  /// **'a former member'**
+  String get activityFormerMember;
+
+  /// No description provided for @activityABill.
+  ///
+  /// In en, this message translates to:
+  /// **'a bill'**
+  String get activityABill;
+
+  /// No description provided for @activitySomeone.
+  ///
+  /// In en, this message translates to:
+  /// **'someone'**
+  String get activitySomeone;
+
+  /// No description provided for @activityFormerBeast.
+  ///
+  /// In en, this message translates to:
+  /// **'Former Beast'**
+  String get activityFormerBeast;
+
+  /// No description provided for @activityBillAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{sender} added “{title}”'**
+  String activityBillAdded(String sender, String title);
+
+  /// No description provided for @activityBillAddedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'{sender} added “{title}” — {amount}'**
+  String activityBillAddedAmount(String sender, String title, String amount);
+
+  /// No description provided for @activityPaymentMarked.
+  ///
+  /// In en, this message translates to:
+  /// **'{sender} marked their share as paid'**
+  String activityPaymentMarked(String sender);
+
+  /// No description provided for @activityPaymentConfirmedTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'{sender} confirmed {target}’s payment'**
+  String activityPaymentConfirmedTarget(String sender, String target);
+
+  /// No description provided for @activityPaymentConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'{sender} confirmed a payment'**
+  String activityPaymentConfirmed(String sender);
+
+  /// No description provided for @activityPaymentDisputedTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'{sender} disputed {target}’s payment'**
+  String activityPaymentDisputedTarget(String sender, String target);
+
+  /// No description provided for @activityPaymentDisputed.
+  ///
+  /// In en, this message translates to:
+  /// **'{sender} disputed a payment'**
+  String activityPaymentDisputed(String sender);
+
+  /// No description provided for @activityMemberAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{sender} added {target} to the group'**
+  String activityMemberAdded(String sender, String target);
+
+  /// No description provided for @activityPoke.
+  ///
+  /// In en, this message translates to:
+  /// **'{article} {character} poked the group!'**
+  String activityPoke(String article, String character);
+
+  /// No description provided for @activityPhotoSent.
+  ///
+  /// In en, this message translates to:
+  /// **'{sender} sent a photo'**
+  String activityPhotoSent(String sender);
+
+  /// No description provided for @activityEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No activity yet'**
+  String get activityEmpty;
+
+  /// No description provided for @photoExpiresIn3Days.
+  ///
+  /// In en, this message translates to:
+  /// **'This photo will expire in 3 days'**
+  String get photoExpiresIn3Days;
+
+  /// No description provided for @photoExpiresInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in {count, plural, =1{1 day} other{{count} days}}'**
+  String photoExpiresInDays(int count);
+
+  /// No description provided for @photoExpiresInHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in {count}h'**
+  String photoExpiresInHours(int count);
+
+  /// No description provided for @photoExpiresInMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in {count}m'**
+  String photoExpiresInMinutes(int count);
+
+  /// No description provided for @photoExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo expired'**
+  String get photoExpired;
+
+  /// No description provided for @linkOpenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open link?'**
+  String get linkOpenTitle;
+
+  /// No description provided for @linkOpenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re about to leave Salapify and open:\n\n{url}'**
+  String linkOpenMessage(String url);
+
+  /// No description provided for @commonOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get commonOpen;
+
+  /// No description provided for @linkOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t open this link.'**
+  String get linkOpenFailed;
+
+  /// No description provided for @chatNotifyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify all members'**
+  String get chatNotifyAll;
+
+  /// No description provided for @chatAddPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get chatAddPhoto;
+
+  /// No description provided for @chatMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Message the group...'**
+  String get chatMessageHint;
+
+  /// No description provided for @chatPokeGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Poke the group'**
+  String get chatPokeGroup;
+
+  /// No description provided for @chatSendMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Send message'**
+  String get chatSendMessage;
+
+  /// No description provided for @reportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report User'**
+  String get reportTitle;
+
+  /// No description provided for @reportReporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Reporting'**
+  String get reportReporting;
+
+  /// No description provided for @reportWhatsGoingOn.
+  ///
+  /// In en, this message translates to:
+  /// **'What’s going on?'**
+  String get reportWhatsGoingOn;
+
+  /// No description provided for @reportBeSpecific.
+  ///
+  /// In en, this message translates to:
+  /// **'Be as specific as possible — include what happened clearly.'**
+  String get reportBeSpecific;
+
+  /// No description provided for @reportHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe what happened...'**
+  String get reportHint;
+
+  /// No description provided for @reportDescribeIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Please describe the issue'**
+  String get reportDescribeIssue;
+
+  /// No description provided for @reportSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Report submitted'**
+  String get reportSubmitted;
+
+  /// No description provided for @reportSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Report'**
+  String get reportSubmit;
+
+  /// No description provided for @billEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Bill'**
+  String get billEdit;
+
+  /// No description provided for @billDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill Details'**
+  String get billDetailsTitle;
+
+  /// No description provided for @billOnlyPayerEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the person who paid can edit this bill.'**
+  String get billOnlyPayerEdit;
+
+  /// No description provided for @billLockedBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Total amount and split are locked — someone already has payment activity on this bill.'**
+  String get billLockedBanner;
+
+  /// No description provided for @billSectionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill details'**
+  String get billSectionDetails;
+
+  /// No description provided for @billTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Dinner @ KFC'**
+  String get billTitleHint;
+
+  /// No description provided for @billTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get billTitleLabel;
+
+  /// No description provided for @billTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a title'**
+  String get billTitleRequired;
+
+  /// No description provided for @billTotalAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total amount'**
+  String get billTotalAmountLabel;
+
+  /// No description provided for @billAmountTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount can’t exceed {amount}'**
+  String billAmountTooLarge(String amount);
+
+  /// No description provided for @billLockedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked — payment activity exists'**
+  String get billLockedNote;
+
+  /// No description provided for @billSectionSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Split'**
+  String get billSectionSplit;
+
+  /// No description provided for @billPaidByLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid by'**
+  String get billPaidByLabel;
+
+  /// No description provided for @billSplitEqually.
+  ///
+  /// In en, this message translates to:
+  /// **'Equally'**
+  String get billSplitEqually;
+
+  /// No description provided for @billSplitCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get billSplitCustom;
+
+  /// No description provided for @billDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Bill'**
+  String get billDelete;
+
+  /// No description provided for @billDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this bill?'**
+  String get billDeleteTitle;
+
+  /// No description provided for @billDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This cannot be undone.'**
+  String get billDeleteMessage;
+
+  /// No description provided for @billDeletedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill deleted. You can add a new one anytime.'**
+  String get billDeletedSnack;
+
+  /// No description provided for @billFormerMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Former member'**
+  String get billFormerMember;
+
+  /// No description provided for @billPaymentStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment status'**
+  String get billPaymentStatus;
+
+  /// No description provided for @billAwaitingReview.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} awaiting review'**
+  String billAwaitingReview(int count);
+
+  /// No description provided for @billStatusUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid'**
+  String get billStatusUnpaid;
+
+  /// No description provided for @billStatusSaysPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Says paid — review'**
+  String get billStatusSaysPaid;
+
+  /// No description provided for @billStatusConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get billStatusConfirmed;
+
+  /// No description provided for @billDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get billDecline;
+
+  /// No description provided for @notificationsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load notifications: {error}'**
+  String notificationsLoadFailed(String error);
+
+  /// No description provided for @notificationsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet'**
+  String get notificationsEmpty;
+
+  /// No description provided for @notificationsEarlier.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier'**
+  String get notificationsEarlier;
+
+  /// No description provided for @notificationsUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} unread'**
+  String notificationsUnread(int count);
+
+  /// No description provided for @notificationsAllCaughtUp.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re all caught up'**
+  String get notificationsAllCaughtUp;
+
+  /// No description provided for @notificationsMarkAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get notificationsMarkAllRead;
+
+  /// No description provided for @notificationDeletedUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted user'**
+  String get notificationDeletedUser;
+
+  /// No description provided for @notificationAddedToGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added you to “{group}”'**
+  String notificationAddedToGroup(String name, String group);
+
+  /// No description provided for @notificationBillAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} added “{title}” in {group}'**
+  String notificationBillAdded(String name, String title, String group);
+
+  /// No description provided for @notificationPaymentMarked.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} marked their share as paid in {group}'**
+  String notificationPaymentMarked(String name, String group);
+
+  /// No description provided for @notificationPaymentConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} confirmed your payment in {group}'**
+  String notificationPaymentConfirmed(String name, String group);
+
+  /// No description provided for @notificationPaymentDisputed.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} disputed your payment in {group}'**
+  String notificationPaymentDisputed(String name, String group);
+
+  /// No description provided for @timeJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get timeJustNow;
+
+  /// No description provided for @timeMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}m ago'**
+  String timeMinutesAgo(int count);
+
+  /// No description provided for @timeHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}h ago'**
+  String timeHoursAgo(int count);
+
+  /// No description provided for @timeDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}d ago'**
+  String timeDaysAgo(int count);
+
+  /// No description provided for @notificationGroupUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This group is no longer available.'**
+  String get notificationGroupUnavailable;
 }
 
 class _AppLocalizationsDelegate

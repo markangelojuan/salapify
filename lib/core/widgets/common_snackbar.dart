@@ -110,7 +110,7 @@ class CommonSnackbar {
 
     // Exceptions not yet migrated to LocalizedException still show their
     // English toString() until we get to them.
-    if (error is Exception) return error.toString();
+    if (error is Exception) return l10n.errorGeneric;
 
     return l10n.errorGeneric;
   }

@@ -594,5 +594,522 @@
         "format": "yMMMM"
       }
     }
-  }
+  },
+  "splitGroupNew": "New Group",
+  "splitGroupEdit": "Edit Group",
+  "splitGroupCreate": "Create Group",
+  "splitGroupNameLabel": "Group name",
+  "splitGroupNameHint": "e.g. Roommates, Baguio Trip",
+  "splitGroupNameRequired": "Enter a group name",
+  "splitAddMembers": "Add members",
+  "splitGroupFull": "Group is full ({count}/{count} members)",
+  "@splitGroupFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "splitNoUserFound": "No user found",
+  "splitSearchByUsername": "Search by username",
+  "splitUnknownUser": "Unknown",
+  "errorBillLimit": "This group has reached its limit of {limit, plural, =1{1 bill} other{{limit} bills}}",
+  "@errorBillLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "errorGroupLimit": "You can only have {limit, plural, =1{1 active group} other{{limit} active groups}} on the free plan",
+  "@errorGroupLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "errorMaxMembers": "Groups can have at most {limit, plural, =1{1 member} other{{limit} members}}",
+  "@errorMaxMembers": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "splitDeleteGroupTitle": "Delete this group?",
+  "splitLeaveGroupTitle": "Leave this group?",
+  "splitDeleteGroupMessage": "This deletes “{name}” and its bills for everyone.",
+  "@splitDeleteGroupMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "splitLeaveGroupMessage": "You’ll no longer see “{name}” or its bills.",
+  "@splitLeaveGroupMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "splitLeave": "Leave",
+  "splitGroupsLoadFailed": "Failed to load groups: {error}",
+  "@splitGroupsLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "splitNoGroups": "No groups yet",
+  "splitMembersCount": "{count, plural, =1{1 member} other{{count} members}}",
+  "@splitMembersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "splitSettled": "Settled",
+  "splitOwed": "Owed {amount}",
+  "@splitOwed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "splitYouOwe": "You owe {amount}",
+  "@splitYouOwe": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guestSplitTagline": "Chip in. Settle up. Stay friends.",
+  "guestSplitDescription": "Create groups, split bills, and see who owes who. Sign in to sync it all with your friends.",
+  "guestSplitCta": "Sign in to get started",
+  "splitBlockUser": "Block {username}",
+  "@splitBlockUser": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "splitReportUser": "Report {username}",
+  "@splitReportUser": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "splitBlockTitle": "Block {username}?",
+  "@splitBlockTitle": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "splitBlockMessage": "You won’t see {username}’s messages or activity in shared groups, including bill updates. You can unblock them anytime from Settings.",
+  "@splitBlockMessage": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "splitBlockAction": "Block",
+  "splitBlockedSnack": "Blocked {username}",
+  "@splitBlockedSnack": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "splitGameScoreMessage": "🎮 I scored {score} in Whack-a-Debt!",
+  "@splitGameScoreMessage": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "splitGroupLoadFailed": "Failed to load group: {error}",
+  "@splitGroupLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "splitGroupNotFound": "Group not found",
+  "splitBillsLoadFailed": "Failed to load bills: {error}",
+  "@splitBillsLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceAllSettled": "All settled up",
+  "balanceOwedToYou": "Owed to you",
+  "balanceYouOwe": "You owe",
+  "billAdd": "Add Bill",
+  "billLimitReachedPremium": "This group has reached its limit of {count, plural, =1{1 bill} other{{count} bills}}. Delete a bill to add a new one.",
+  "@billLimitReachedPremium": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billTotal": "Total {amount}",
+  "@billTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "billPaidByYou": "Paid by you",
+  "billPaidByName": "Paid by {name}",
+  "@billPaidByName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "billAllConfirmed": "All confirmed",
+  "billDisputedReview": "{count} disputed — tap to review",
+  "@billDisputedReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billWaitingOnYou": "{count} waiting on you",
+  "@billWaitingOnYou": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billWaitingPayments": "Waiting on payments",
+  "billDisputed": "Disputed",
+  "billMarkPaidAgain": "Mark paid again",
+  "billWaitingConfirmation": "Waiting on confirmation",
+  "billMarkPaid": "Mark paid",
+  "activityFormerMemberCap": "A former member",
+  "activityFormerMember": "a former member",
+  "activityABill": "a bill",
+  "activitySomeone": "someone",
+  "activityFormerBeast": "Former Beast",
+  "activityBillAdded": "{sender} added “{title}”",
+  "@activityBillAdded": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "activityBillAddedAmount": "{sender} added “{title}” — {amount}",
+  "@activityBillAddedAmount": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPaymentMarked": "{sender} marked their share as paid",
+  "@activityPaymentMarked": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPaymentConfirmedTarget": "{sender} confirmed {target}’s payment",
+  "@activityPaymentConfirmedTarget": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPaymentConfirmed": "{sender} confirmed a payment",
+  "@activityPaymentConfirmed": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPaymentDisputedTarget": "{sender} disputed {target}’s payment",
+  "@activityPaymentDisputedTarget": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPaymentDisputed": "{sender} disputed a payment",
+  "@activityPaymentDisputed": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "activityMemberAdded": "{sender} added {target} to the group",
+  "@activityMemberAdded": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPoke": "{article} {character} poked the group!",
+  "@activityPoke": {
+    "placeholders": {
+      "article": {
+        "type": "String"
+      },
+      "character": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPhotoSent": "{sender} sent a photo",
+  "@activityPhotoSent": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "activityEmpty": "No activity yet",
+  "photoExpiresIn3Days": "This photo will expire in 3 days",
+  "photoExpiresInDays": "Expires in {count, plural, =1{1 day} other{{count} days}}",
+  "@photoExpiresInDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "photoExpiresInHours": "Expires in {count}h",
+  "@photoExpiresInHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "photoExpiresInMinutes": "Expires in {count}m",
+  "@photoExpiresInMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "photoExpired": "Photo expired",
+  "linkOpenTitle": "Open link?",
+  "linkOpenMessage": "You’re about to leave Salapify and open:\n\n{url}",
+  "@linkOpenMessage": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "commonOpen": "Open",
+  "linkOpenFailed": "Couldn’t open this link.",
+  "chatNotifyAll": "Notify all members",
+  "chatAddPhoto": "Add photo",
+  "chatMessageHint": "Message the group...",
+  "chatPokeGroup": "Poke the group",
+  "chatSendMessage": "Send message",
+  "reportTitle": "Report User",
+  "reportReporting": "Reporting",
+  "reportWhatsGoingOn": "What’s going on?",
+  "reportBeSpecific": "Be as specific as possible — include what happened clearly.",
+  "reportHint": "Describe what happened...",
+  "reportDescribeIssue": "Please describe the issue",
+  "reportSubmitted": "Report submitted",
+  "reportSubmit": "Submit Report",
+  "billEdit": "Edit Bill",
+  "billDetailsTitle": "Bill Details",
+  "billOnlyPayerEdit": "Only the person who paid can edit this bill.",
+  "billLockedBanner": "Total amount and split are locked — someone already has payment activity on this bill.",
+  "billSectionDetails": "Bill details",
+  "billTitleHint": "e.g. Dinner @ KFC",
+  "billTitleLabel": "Title",
+  "billTitleRequired": "Enter a title",
+  "billTotalAmountLabel": "Total amount",
+  "billAmountTooLarge": "Amount can’t exceed {amount}",
+  "@billAmountTooLarge": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "billLockedNote": "Locked — payment activity exists",
+  "billSectionSplit": "Split",
+  "billPaidByLabel": "Paid by",
+  "billSplitEqually": "Equally",
+  "billSplitCustom": "Custom",
+  "billDelete": "Delete Bill",
+  "billDeleteTitle": "Delete this bill?",
+  "billDeleteMessage": "This cannot be undone.",
+  "billDeletedSnack": "Bill deleted. You can add a new one anytime.",
+  "billFormerMember": "Former member",
+  "billPaymentStatus": "Payment status",
+  "billAwaitingReview": "{count} awaiting review",
+  "@billAwaitingReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billStatusUnpaid": "Unpaid",
+  "billStatusSaysPaid": "Says paid — review",
+  "billStatusConfirmed": "Confirmed",
+  "billDecline": "Decline",
+  "notificationsLoadFailed": "Failed to load notifications: {error}",
+  "@notificationsLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsEmpty": "No notifications yet",
+  "notificationsEarlier": "Earlier",
+  "notificationsUnread": "{count} unread",
+  "@notificationsUnread": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsAllCaughtUp": "You’re all caught up",
+  "notificationsMarkAllRead": "Mark all read",
+  "notificationDeletedUser": "Deleted user",
+  "notificationAddedToGroup": "{name} added you to “{group}”",
+  "@notificationAddedToGroup": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationBillAdded": "{name} added “{title}” in {group}",
+  "@notificationBillAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPaymentMarked": "{name} marked their share as paid in {group}",
+  "@notificationPaymentMarked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPaymentConfirmed": "{name} confirmed your payment in {group}",
+  "@notificationPaymentConfirmed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPaymentDisputed": "{name} disputed your payment in {group}",
+  "@notificationPaymentDisputed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "timeJustNow": "Just now",
+  "timeMinutesAgo": "{count}m ago",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHoursAgo": "{count}h ago",
+  "@timeHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeDaysAgo": "{count}d ago",
+  "@timeDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationGroupUnavailable": "This group is no longer available."
 }

@@ -5,6 +5,7 @@ import 'package:salapify/features/settings/domain/currency.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_bill.dart';
 import 'package:salapify/features/split_bill/domain/split_balance_calculator.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class BalanceSummaryCard extends ConsumerWidget {
   const BalanceSummaryCard({
@@ -19,7 +20,7 @@ class BalanceSummaryCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (currentUid == null) return const SizedBox.shrink();
-
+    final l10n = AppLocalizations.of(context);
     final currency =
         ref.watch(currencySettingProvider).value ?? AppCurrency.php;
 
@@ -58,7 +59,7 @@ class BalanceSummaryCard extends ConsumerWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'All settled up',
+                  l10n.balanceAllSettled,
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
@@ -73,7 +74,7 @@ class BalanceSummaryCard extends ConsumerWidget {
                 Expanded(
                   child: _BalanceItem(
                     icon: Icons.south_west_rounded,
-                    label: 'Owed to you',
+                    label: l10n.balanceOwedToYou,
                     amount: currency.formatCompactWithSymbol(totalOwedToYou),
                     color: Colors.green[700]!,
                   ),
@@ -86,7 +87,7 @@ class BalanceSummaryCard extends ConsumerWidget {
                 Expanded(
                   child: _BalanceItem(
                     icon: Icons.north_east_rounded,
-                    label: 'You owe',
+                    label: l10n.balanceYouOwe,
                     amount: currency.formatCompactWithSymbol(totalYouOwe),
                     color: Colors.red[600]!,
                   ),

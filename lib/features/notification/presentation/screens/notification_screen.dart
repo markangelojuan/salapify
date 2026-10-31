@@ -9,6 +9,7 @@ import 'package:salapify/features/notification/presentation/controllers/notifica
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 import 'package:salapify/router/routes.dart';
 
 class NotificationScreen extends ConsumerWidget {
@@ -16,6 +17,7 @@ class NotificationScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final notificationsAsync = ref.watch(notificationsProvider);
 
@@ -23,14 +25,14 @@ class NotificationScreen extends ConsumerWidget {
       child: notificationsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) =>
-            Center(child: Text('Failed to load notifications: $err')),
+            Center(child: Text(l10n.notificationsLoadFailed('$err'))),
         data: (items) {
           if (items.isEmpty) {
             return const _EmptyState();
           }
 
           final unreadCount = items.where((n) => !n.read).length;
-          final sections = _groupByDate(items);
+          final sections = _groupByDate(items, l10n);
 
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(notificationsProvider),
@@ -75,7 +77,10 @@ class NotificationScreen extends ConsumerWidget {
     );
   }
 
-  List<_Section> _groupByDate(List<NotificationEntry> items) {
+  List<_Section> _groupByDate(
+    List<NotificationEntry> items,
+    AppLocalizations l10n,
+  ) {
     final now = DateTime.now();
     final today = <NotificationEntry>[];
     final yesterday = <NotificationEntry>[];
@@ -98,9 +103,9 @@ class NotificationScreen extends ConsumerWidget {
     }
 
     return [
-      if (today.isNotEmpty) _Section('Today', today),
-      if (yesterday.isNotEmpty) _Section('Yesterday', yesterday),
-      if (earlier.isNotEmpty) _Section('Earlier', earlier),
+      if (today.isNotEmpty) _Section(l10n.dateToday, today),
+      if (yesterday.isNotEmpty) _Section(l10n.dateYesterday, yesterday),
+      if (earlier.isNotEmpty) _Section(l10n.notificationsEarlier, earlier),
     ];
   }
 }
@@ -120,6 +125,7 @@ class _HeaderCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
 
     return Container(
@@ -157,7 +163,7 @@ class _HeaderCard extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Notifications',
+                  l10n.navNotifications,
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -167,8 +173,8 @@ class _HeaderCard extends ConsumerWidget {
                 const SizedBox(height: 2),
                 Text(
                   unreadCount > 0
-                      ? '$unreadCount unread'
-                      : 'You\'re all caught up',
+                      ? l10n.notificationsUnread(unreadCount)
+                      : l10n.notificationsAllCaughtUp,
                   style: TextStyle(fontSize: 12, color: colors.textSecondary),
                 ),
               ],
@@ -183,9 +189,12 @@ class _HeaderCard extends ConsumerWidget {
                 padding: EdgeInsets.zero,
                 foregroundColor: colors.primary,
               ),
-              child: const Text(
-                'Mark all read',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+              child: Text(
+                l10n.notificationsMarkAllRead,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
               ),
             ),
         ],
@@ -199,6 +208,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
 
     return Padding(
@@ -213,7 +223,7 @@ class _EmptyState extends StatelessWidget {
               height: 180,
             ),
             Text(
-              'No notifications yet',
+              l10n.notificationsEmpty,
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: colors.textSecondary),
@@ -230,11 +240,6 @@ class _NotificationTile extends ConsumerWidget {
 
   final NotificationEntry entry;
 
-  static const _fallbackSenderLabel = 'Deleted user';
-
-  String get _senderDisplayName =>
-      entry.senderName.trim().isEmpty ? _fallbackSenderLabel : entry.senderName;
-
   (IconData, Color Function(AppColorsExt)) get _iconAndColorResolver {
     switch (entry.type) {
       case NotificationType.addedToGroup:
@@ -250,32 +255,39 @@ class _NotificationTile extends ConsumerWidget {
     }
   }
 
-  String get _label {
-    final name = _senderDisplayName;
+  String _senderDisplayName(AppLocalizations l10n) =>
+      entry.senderName.trim().isEmpty
+      ? l10n.notificationDeletedUser
+      : entry.senderName;
+
+  String _label(AppLocalizations l10n) {
+    final name = _senderDisplayName(l10n);
+    final group = entry.groupName;
     switch (entry.type) {
       case NotificationType.addedToGroup:
-        return '$name added you to "${entry.groupName}"';
+        return l10n.notificationAddedToGroup(name, group);
       case NotificationType.billAdded:
-        final title = entry.metadata?['billTitle'] ?? 'a bill';
-        return '$name added "$title" in ${entry.groupName}';
+        final title = '${entry.metadata?['billTitle'] ?? l10n.activityABill}';
+        return l10n.notificationBillAdded(name, title, group);
       case NotificationType.paymentMarked:
-        return '$name marked their share as paid in ${entry.groupName}';
+        return l10n.notificationPaymentMarked(name, group);
       case NotificationType.paymentConfirmed:
-        return '$name confirmed your payment in ${entry.groupName}';
+        return l10n.notificationPaymentConfirmed(name, group);
       case NotificationType.paymentDisputed:
-        return '$name disputed your payment in ${entry.groupName}';
+        return l10n.notificationPaymentDisputed(name, group);
     }
   }
 
-  String _timeAgo(DateTime dt) {
+  String _timeAgo(DateTime dt, AppLocalizations l10n) {
     final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 1) return 'Just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    return '${diff.inDays}d ago';
+    if (diff.inMinutes < 1) return l10n.timeJustNow;
+    if (diff.inMinutes < 60) return l10n.timeMinutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.timeHoursAgo(diff.inHours);
+    return l10n.timeDaysAgo(diff.inDays);
   }
 
   Future<void> _handleTap(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
     ref.read(notificationControllerProvider.notifier).markRead(entry.id);
 
     final currentUser = ref.read(authRepositoryProvider).currentUser;
@@ -297,7 +309,7 @@ class _NotificationTile extends ConsumerWidget {
 
     if (!stillMember) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('This group is no longer available.')),
+        SnackBar(content: Text(l10n.notificationGroupUnavailable)),
       );
       return;
     }
@@ -310,6 +322,7 @@ class _NotificationTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final (icon, resolveColor) = _iconAndColorResolver;
     final color = resolveColor(colors);
@@ -357,7 +370,7 @@ class _NotificationTile extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _label,
+                    _label(l10n),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: entry.read
@@ -368,7 +381,7 @@ class _NotificationTile extends ConsumerWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _timeAgo(entry.createdAt),
+                    _timeAgo(entry.createdAt, l10n),
                     style: TextStyle(fontSize: 11, color: colors.textSecondary),
                   ),
                 ],

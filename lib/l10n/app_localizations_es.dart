@@ -1145,4 +1145,561 @@ class AppLocalizationsEs extends AppLocalizations {
 
     return 'Se añadirá a: $dateString';
   }
+
+  @override
+  String get splitGroupNew => 'Nuevo grupo';
+
+  @override
+  String get splitGroupEdit => 'Editar grupo';
+
+  @override
+  String get splitGroupCreate => 'Crear grupo';
+
+  @override
+  String get splitGroupNameLabel => 'Nombre del grupo';
+
+  @override
+  String get splitGroupNameHint =>
+      'p. ej. Compañeros de piso, Viaje a la playa';
+
+  @override
+  String get splitGroupNameRequired => 'Ingresa un nombre para el grupo';
+
+  @override
+  String get splitAddMembers => 'Añadir miembros';
+
+  @override
+  String splitGroupFull(int count) {
+    return 'El grupo está lleno ($count/$count miembros)';
+  }
+
+  @override
+  String get splitNoUserFound => 'No se encontró ningún usuario';
+
+  @override
+  String get splitSearchByUsername => 'Buscar por nombre de usuario';
+
+  @override
+  String get splitUnknownUser => 'Desconocido';
+
+  @override
+  String errorBillLimit(int limit) {
+    String _temp0 = intl.Intl.pluralLogic(
+      limit,
+      locale: localeName,
+      other: '$limit cuentas',
+      one: '1 cuenta',
+    );
+    return 'Este grupo alcanzó su límite de $_temp0';
+  }
+
+  @override
+  String errorGroupLimit(int limit) {
+    String _temp0 = intl.Intl.pluralLogic(
+      limit,
+      locale: localeName,
+      other: '$limit grupos activos',
+      one: '1 grupo activo',
+    );
+    return 'Solo puedes tener $_temp0 en el plan gratuito';
+  }
+
+  @override
+  String errorMaxMembers(int limit) {
+    String _temp0 = intl.Intl.pluralLogic(
+      limit,
+      locale: localeName,
+      other: '$limit miembros',
+      one: '1 miembro',
+    );
+    return 'Los grupos pueden tener como máximo $_temp0';
+  }
+
+  @override
+  String get splitDeleteGroupTitle => '¿Eliminar este grupo?';
+
+  @override
+  String get splitLeaveGroupTitle => '¿Salir de este grupo?';
+
+  @override
+  String splitDeleteGroupMessage(String name) {
+    return 'Esto elimina “$name” y sus cuentas para todos.';
+  }
+
+  @override
+  String splitLeaveGroupMessage(String name) {
+    return 'Ya no verás “$name” ni sus cuentas.';
+  }
+
+  @override
+  String get splitLeave => 'Salir';
+
+  @override
+  String splitGroupsLoadFailed(String error) {
+    return 'Error al cargar los grupos: $error';
+  }
+
+  @override
+  String get splitNoGroups => 'Aún no hay grupos';
+
+  @override
+  String splitMembersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count miembros',
+      one: '1 miembro',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get splitSettled => 'Saldado';
+
+  @override
+  String splitOwed(String amount) {
+    return 'Te deben $amount';
+  }
+
+  @override
+  String splitYouOwe(String amount) {
+    return 'Debes $amount';
+  }
+
+  @override
+  String get guestSplitTagline => 'Aporta. Salda. Sigan siendo amigos.';
+
+  @override
+  String get guestSplitDescription =>
+      'Crea grupos, divide cuentas y mira quién le debe a quién. Inicia sesión para sincronizarlo todo con tus amigos.';
+
+  @override
+  String get guestSplitCta => 'Inicia sesión para comenzar';
+
+  @override
+  String splitBlockUser(String username) {
+    return 'Bloquear a $username';
+  }
+
+  @override
+  String splitReportUser(String username) {
+    return 'Reportar a $username';
+  }
+
+  @override
+  String splitBlockTitle(String username) {
+    return '¿Bloquear a $username?';
+  }
+
+  @override
+  String splitBlockMessage(String username) {
+    return 'No verás los mensajes ni la actividad de $username en los grupos compartidos, incluidas las actualizaciones de cuentas. Puedes desbloquear a esta persona en cualquier momento desde Ajustes.';
+  }
+
+  @override
+  String get splitBlockAction => 'Bloquear';
+
+  @override
+  String splitBlockedSnack(String username) {
+    return 'Bloqueaste a $username';
+  }
+
+  @override
+  String splitGameScoreMessage(int score) {
+    return '🎮 ¡Obtuve $score puntos en Whack-a-Debt!';
+  }
+
+  @override
+  String splitGroupLoadFailed(String error) {
+    return 'Error al cargar el grupo: $error';
+  }
+
+  @override
+  String get splitGroupNotFound => 'Grupo no encontrado';
+
+  @override
+  String splitBillsLoadFailed(String error) {
+    return 'Error al cargar las cuentas: $error';
+  }
+
+  @override
+  String get balanceAllSettled => 'Todo saldado';
+
+  @override
+  String get balanceOwedToYou => 'Te deben';
+
+  @override
+  String get balanceYouOwe => 'Debes';
+
+  @override
+  String get billAdd => 'Añadir cuenta';
+
+  @override
+  String billLimitReachedPremium(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cuentas',
+      one: '1 cuenta',
+    );
+    return 'Este grupo alcanzó su límite de $_temp0. Elimina una cuenta para añadir otra.';
+  }
+
+  @override
+  String billTotal(String amount) {
+    return 'Total $amount';
+  }
+
+  @override
+  String get billPaidByYou => 'Pagado por ti';
+
+  @override
+  String billPaidByName(String name) {
+    return 'Pagado por $name';
+  }
+
+  @override
+  String get billAllConfirmed => 'Todo confirmado';
+
+  @override
+  String billDisputedReview(int count) {
+    return '$count en disputa — toca para revisar';
+  }
+
+  @override
+  String billWaitingOnYou(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count esperan tu confirmación',
+      one: '1 espera tu confirmación',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get billWaitingPayments => 'Esperando pagos';
+
+  @override
+  String get billDisputed => 'En disputa';
+
+  @override
+  String get billMarkPaidAgain => 'Marcar de nuevo';
+
+  @override
+  String get billWaitingConfirmation => 'Esperando confirmación';
+
+  @override
+  String get billMarkPaid => 'Marcar pagado';
+
+  @override
+  String get activityFormerMemberCap => 'Un exmiembro';
+
+  @override
+  String get activityFormerMember => 'un exmiembro';
+
+  @override
+  String get activityABill => 'una cuenta';
+
+  @override
+  String get activitySomeone => 'alguien';
+
+  @override
+  String get activityFormerBeast => 'Antigua bestia';
+
+  @override
+  String activityBillAdded(String sender, String title) {
+    return '$sender añadió “$title”';
+  }
+
+  @override
+  String activityBillAddedAmount(String sender, String title, String amount) {
+    return '$sender añadió “$title” — $amount';
+  }
+
+  @override
+  String activityPaymentMarked(String sender) {
+    return '$sender marcó su parte como pagada';
+  }
+
+  @override
+  String activityPaymentConfirmedTarget(String sender, String target) {
+    return '$sender confirmó el pago de $target';
+  }
+
+  @override
+  String activityPaymentConfirmed(String sender) {
+    return '$sender confirmó un pago';
+  }
+
+  @override
+  String activityPaymentDisputedTarget(String sender, String target) {
+    return '$sender disputó el pago de $target';
+  }
+
+  @override
+  String activityPaymentDisputed(String sender) {
+    return '$sender disputó un pago';
+  }
+
+  @override
+  String activityMemberAdded(String sender, String target) {
+    return '$sender añadió a $target al grupo';
+  }
+
+  @override
+  String activityPoke(String article, String character) {
+    return '¡$character dio un toque al grupo!';
+  }
+
+  @override
+  String activityPhotoSent(String sender) {
+    return '$sender envió una foto';
+  }
+
+  @override
+  String get activityEmpty => 'Aún no hay actividad';
+
+  @override
+  String get photoExpiresIn3Days => 'Esta foto caducará en 3 días';
+
+  @override
+  String photoExpiresInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count días',
+      one: '1 día',
+    );
+    return 'Caduca en $_temp0';
+  }
+
+  @override
+  String photoExpiresInHours(int count) {
+    return 'Caduca en $count h';
+  }
+
+  @override
+  String photoExpiresInMinutes(int count) {
+    return 'Caduca en $count min';
+  }
+
+  @override
+  String get photoExpired => 'Foto caducada';
+
+  @override
+  String get linkOpenTitle => '¿Abrir enlace?';
+
+  @override
+  String linkOpenMessage(String url) {
+    return 'Estás a punto de salir de Salapify y abrir:\n\n$url';
+  }
+
+  @override
+  String get commonOpen => 'Abrir';
+
+  @override
+  String get linkOpenFailed => 'No se pudo abrir este enlace.';
+
+  @override
+  String get chatNotifyAll => 'Notificar a todos los miembros';
+
+  @override
+  String get chatAddPhoto => 'Añadir foto';
+
+  @override
+  String get chatMessageHint => 'Escribe al grupo...';
+
+  @override
+  String get chatPokeGroup => 'Dar un toque al grupo';
+
+  @override
+  String get chatSendMessage => 'Enviar mensaje';
+
+  @override
+  String get reportTitle => 'Reportar usuario';
+
+  @override
+  String get reportReporting => 'Reportando a';
+
+  @override
+  String get reportWhatsGoingOn => '¿Qué está pasando?';
+
+  @override
+  String get reportBeSpecific =>
+      'Sé lo más específico posible: explica claramente lo que ocurrió.';
+
+  @override
+  String get reportHint => 'Describe lo que ocurrió...';
+
+  @override
+  String get reportDescribeIssue => 'Describe el problema';
+
+  @override
+  String get reportSubmitted => 'Reporte enviado';
+
+  @override
+  String get reportSubmit => 'Enviar reporte';
+
+  @override
+  String get billEdit => 'Editar cuenta';
+
+  @override
+  String get billDetailsTitle => 'Detalles de la cuenta';
+
+  @override
+  String get billOnlyPayerEdit => 'Solo quien pagó puede editar esta cuenta.';
+
+  @override
+  String get billLockedBanner =>
+      'El monto total y la división están bloqueados: alguien ya tiene actividad de pago en esta cuenta.';
+
+  @override
+  String get billSectionDetails => 'Detalles de la cuenta';
+
+  @override
+  String get billTitleHint => 'p. ej. Cena con amigos';
+
+  @override
+  String get billTitleLabel => 'Título';
+
+  @override
+  String get billTitleRequired => 'Ingresa un título';
+
+  @override
+  String get billTotalAmountLabel => 'Monto total';
+
+  @override
+  String billAmountTooLarge(String amount) {
+    return 'El monto no puede superar $amount';
+  }
+
+  @override
+  String get billLockedNote => 'Bloqueado: hay actividad de pago';
+
+  @override
+  String get billSectionSplit => 'División';
+
+  @override
+  String get billPaidByLabel => 'Pagado por';
+
+  @override
+  String get billSplitEqually => 'Por igual';
+
+  @override
+  String get billSplitCustom => 'Personalizada';
+
+  @override
+  String get billDelete => 'Eliminar cuenta';
+
+  @override
+  String get billDeleteTitle => '¿Eliminar esta cuenta?';
+
+  @override
+  String get billDeleteMessage => 'Esta acción no se puede deshacer.';
+
+  @override
+  String get billDeletedSnack =>
+      'Cuenta eliminada. Puedes añadir una nueva cuando quieras.';
+
+  @override
+  String get billFormerMember => 'Exmiembro';
+
+  @override
+  String get billPaymentStatus => 'Estado de los pagos';
+
+  @override
+  String billAwaitingReview(int count) {
+    return '$count por revisar';
+  }
+
+  @override
+  String get billStatusUnpaid => 'Sin pagar';
+
+  @override
+  String get billStatusSaysPaid => 'Dice que pagó — revisar';
+
+  @override
+  String get billStatusConfirmed => 'Confirmado';
+
+  @override
+  String get billDecline => 'Rechazar';
+
+  @override
+  String notificationsLoadFailed(String error) {
+    return 'Error al cargar las notificaciones: $error';
+  }
+
+  @override
+  String get notificationsEmpty => 'Aún no hay notificaciones';
+
+  @override
+  String get notificationsEarlier => 'Anteriores';
+
+  @override
+  String notificationsUnread(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sin leer',
+      one: '1 sin leer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get notificationsAllCaughtUp => 'Estás al día';
+
+  @override
+  String get notificationsMarkAllRead => 'Marcar todo como leído';
+
+  @override
+  String get notificationDeletedUser => 'Usuario eliminado';
+
+  @override
+  String notificationAddedToGroup(String name, String group) {
+    return '$name te añadió a “$group”';
+  }
+
+  @override
+  String notificationBillAdded(String name, String title, String group) {
+    return '$name añadió “$title” en $group';
+  }
+
+  @override
+  String notificationPaymentMarked(String name, String group) {
+    return '$name marcó su parte como pagada en $group';
+  }
+
+  @override
+  String notificationPaymentConfirmed(String name, String group) {
+    return '$name confirmó tu pago en $group';
+  }
+
+  @override
+  String notificationPaymentDisputed(String name, String group) {
+    return '$name disputó tu pago en $group';
+  }
+
+  @override
+  String get timeJustNow => 'Ahora mismo';
+
+  @override
+  String timeMinutesAgo(int count) {
+    return 'hace $count min';
+  }
+
+  @override
+  String timeHoursAgo(int count) {
+    return 'hace $count h';
+  }
+
+  @override
+  String timeDaysAgo(int count) {
+    return 'hace $count d';
+  }
+
+  @override
+  String get notificationGroupUnavailable =>
+      'Este grupo ya no está disponible.';
 }
