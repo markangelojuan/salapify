@@ -10,6 +10,7 @@ import 'package:salapify/core/localization/app_languages.dart';
 import 'package:salapify/core/localization/locale_controller.dart';
 import 'package:salapify/features/settings/domain/settings_warning.dart';
 import 'package:salapify/features/settings/presentation/widgets/settings_warning_text.dart';
+import 'package:salapify/core/localization/locale_text.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:go_router/go_router.dart';
 
@@ -434,7 +435,7 @@ class _SectionLabel extends StatelessWidget {
           Icon(icon, size: 15, color: AppColors.primary),
           const SizedBox(width: 6),
           Text(
-            title.toUpperCase(),
+            title.toUpperCaseL(context),
             style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 12,

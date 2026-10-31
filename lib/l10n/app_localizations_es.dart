@@ -1702,4 +1702,261 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get notificationGroupUnavailable =>
       'Este grupo ya no está disponible.';
+
+  @override
+  String get gameTitle => 'Whack-a-Debt';
+
+  @override
+  String get gameTimeLabel => 'Tiempo';
+
+  @override
+  String get gameScoreLabel => 'Puntos';
+
+  @override
+  String gameSecondsShort(int seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String gameHint(int penalty) {
+    return 'Toca a tus amigos. ¡Evita los rinocerontes (-$penalty)!';
+  }
+
+  @override
+  String get gameReady => '¿Listo?';
+
+  @override
+  String gameYouHaveSeconds(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: '$seconds segundos',
+      one: '1 segundo',
+    );
+    return 'Tienes $_temp0.';
+  }
+
+  @override
+  String get gameWhackBeasts => 'Golpea a las bestias';
+
+  @override
+  String get gameWhackBeastsDesc => '+1 punto por cada golpe';
+
+  @override
+  String get gameAvoidRhino => '¡Evita al rinoceronte negro!';
+
+  @override
+  String gameAvoidRhinoDesc(int penalty) {
+    String _temp0 = intl.Intl.pluralLogic(
+      penalty,
+      locale: localeName,
+      other: '$penalty puntos',
+      one: '1 punto',
+    );
+    return '-$_temp0. ¡Evítalo a toda costa!';
+  }
+
+  @override
+  String get gameStart => 'Empezar';
+
+  @override
+  String get gameTimesUp => '¡Se acabó el tiempo!';
+
+  @override
+  String get gameCountingScore => 'Contando tus puntos...';
+
+  @override
+  String get gameResultTitle => 'Tu resultado';
+
+  @override
+  String get gameYourScore => 'TUS PUNTOS';
+
+  @override
+  String get gameMessageWarmingUp => '¡Apenas calentando!';
+
+  @override
+  String get gameMessageNice => '¡Buenos golpes!';
+
+  @override
+  String get gameMessageGreat => '¡Eres un gran golpeador!';
+
+  @override
+  String get gameMessageSuperstar => '¡Superestrella del golpe!';
+
+  @override
+  String get gamePlayAgain => 'Jugar de nuevo';
+
+  @override
+  String get helpTitle => 'Ayuda y preguntas frecuentes';
+
+  @override
+  String get helpSearchHint => 'Busca un tema...';
+
+  @override
+  String helpNoResults(String query) {
+    return 'Sin resultados para “$query”';
+  }
+
+  @override
+  String get faqSectionStarted => 'Primeros pasos';
+
+  @override
+  String get faqSectionBudgeting => 'Presupuesto';
+
+  @override
+  String get faqSectionTransactions => 'Transacciones e ingresos';
+
+  @override
+  String get faqSectionSplit => 'Dividir cuentas';
+
+  @override
+  String get faqSectionPeriods => 'Periodos y ajustes';
+
+  @override
+  String get faqSectionNotifications => 'Notificaciones';
+
+  @override
+  String get faqStartedQ1 => '¿Qué hace Salapify?';
+
+  @override
+  String get faqStartedA1 =>
+      'Salapify combina el control de presupuesto con la división de cuentas. Usa la pestaña Presupuesto para repartir tu dinero en categorías, la pestaña Transacciones para registrar tus ingresos y gastos, y la pestaña Dividir cuentas para saldar gastos compartidos con amigos u otros usuarios, todo en un solo lugar.';
+
+  @override
+  String get faqBudgetQ1 => '¿Cómo creo una categoría de presupuesto?';
+
+  @override
+  String get faqBudgetA1 =>
+      'Toca el botón + en la pestaña Presupuesto. Escribe el nombre de la categoría, como Internet o Supermercado, y luego define su asignación. Elige si es Fijo o Variable y con qué frecuencia se repite. Completa los demás campos y guarda tu categoría.';
+
+  @override
+  String get faqBudgetQ2 => '¿Cuál es la diferencia entre Fijo y Variable?';
+
+  @override
+  String get faqBudgetA2 =>
+      'Fijo es para costos predecibles, como el Internet, donde defines un monto exacto. Variable es para gastos que cambian, como el supermercado, donde defines un tope objetivo en lugar de un monto exacto.';
+
+  @override
+  String get faqBudgetQ3 =>
+      '¿Qué pasa cuando marco una categoría como completada?';
+
+  @override
+  String get faqBudgetA3 =>
+      'Al marcar una categoría como completada, se registra automáticamente como una transacción del periodo actual. Además, la categoría se marca como terminada y pasa al final de la lista.';
+
+  @override
+  String get faqBudgetQ4 =>
+      '¿Por qué algunas categorías se ven atenuadas en mi pestaña Presupuesto?';
+
+  @override
+  String get faqBudgetA4 =>
+      'Las categorías atenuadas pertenecen a la otra mitad del periodo cuando usas el presupuesto quincenal. Volverán a verse con normalidad automáticamente cuando comience su mitad del periodo.';
+
+  @override
+  String get faqTxQ1 => '¿Cómo añado una transacción o un ingreso?';
+
+  @override
+  String get faqTxA1 =>
+      'En la pestaña Transacciones, toca + para añadir un gasto o un ingreso. Para un ingreso, elige si es de Una sola vez o Recurrente. Los ingresos recurrentes se añaden automáticamente al inicio de cada nuevo periodo.';
+
+  @override
+  String get faqTxQ2 => '¿Cómo afectan las transacciones a mi presupuesto?';
+
+  @override
+  String get faqTxA2 =>
+      'Al registrar una transacción, la asignas a una categoría de presupuesto. El monto se descuenta automáticamente de la asignación de esa categoría, así tu pestaña Presupuesto siempre muestra lo que te queda por gastar.';
+
+  @override
+  String get faqTxQ3 => '¿Cómo elimino un ingreso o un gasto?';
+
+  @override
+  String get faqTxA3 =>
+      'Ve a la pestaña Transacciones y desliza hacia la izquierda el ingreso o gasto que quieras eliminar. Confirma la eliminación si se te pide.';
+
+  @override
+  String get faqTxQ4 =>
+      '¿Por qué no veo las transacciones del periodo anterior?';
+
+  @override
+  String get faqTxA4 =>
+      'Las pestañas Presupuesto y Transacciones solo muestran los totales del periodo actual, según el periodo de presupuesto que definiste en Ajustes. Así los números se centran en lo que todavía puedes controlar.';
+
+  @override
+  String get faqSplitQ1 => '¿Cómo divido una cuenta con mis amigos?';
+
+  @override
+  String get faqSplitA1 =>
+      'Crea un grupo y añade miembros por su nombre de usuario. Dentro del grupo, crea una cuenta (p. ej. “Cena con amigos”), ingresa el monto que pagaste y divídela por igual o con partes personalizadas para cada miembro.';
+
+  @override
+  String get faqSplitQ2 => '¿Cómo elimino un grupo de Dividir cuentas?';
+
+  @override
+  String get faqSplitA2 =>
+      'Si creaste el grupo, desliza hacia la izquierda sobre él para eliminarlo. Al eliminar un grupo, también se borra toda la actividad de sus cuentas compartidas.';
+
+  @override
+  String get faqSplitQ3 => '¿Cómo salgo de un grupo de Dividir cuentas?';
+
+  @override
+  String get faqSplitA3 =>
+      'Si eres miembro de un grupo, desliza hacia la izquierda sobre él y elige Salir. Así sales del grupo sin eliminarlo para los demás.';
+
+  @override
+  String get faqSplitQ4 => '¿Puedo compartir recibos o chatear con mi grupo?';
+
+  @override
+  String get faqSplitA4 =>
+      'Sí. Cada grupo tiene una sección de Actividad donde puedes enviar mensajes a los miembros y compartir fotos, como recibos, junto al historial de cuentas.';
+
+  @override
+  String get faqSplitQ5 => '¿Dividir cuentas afecta mi presupuesto personal?';
+
+  @override
+  String get faqSplitA5 =>
+      'No. Dividir cuentas está separado de tus pestañas Presupuesto y Transacciones. Si quieres que una cuenta saldada cuente en tus gastos, regístrala manualmente como una transacción.';
+
+  @override
+  String get faqSplitQ6 => '¿Cómo reporto o bloqueo a alguien de un grupo?';
+
+  @override
+  String get faqSplitA6 =>
+      'En la pestaña Actividad del grupo, mantén presionado el avatar de un miembro junto a su mensaje para abrir un menú con las opciones Reportar y Bloquear. Al bloquear, se ocultan sus mensajes y su actividad, y puedes deshacerlo cuando quieras desde Ajustes.';
+
+  @override
+  String get faqPeriodQ1 => '¿Cuál es la diferencia entre Mensual y Quincenal?';
+
+  @override
+  String get faqPeriodA1 =>
+      'Mensual reinicia tu presupuesto el día 1 de cada mes. Quincenal divide el mes en dos mitades: tú eliges el día en que termina la primera mitad y el resto del mes pasa a ser la segunda.';
+
+  @override
+  String get faqPeriodQ2 =>
+      '¿Qué pasa con mis categorías si cambio el periodo?';
+
+  @override
+  String get faqPeriodA2 =>
+      'Las categorías existentes se convierten para ajustarse al nuevo periodo y conservan sus montos. Las categorías de una mitad específica pasarán a contar para el mes completo (o viceversa), así que revísalas después para detectar duplicados.';
+
+  @override
+  String get faqPeriodQ3 =>
+      '¿Cómo funciona la recurrencia con el presupuesto quincenal?';
+
+  @override
+  String get faqPeriodA3 =>
+      'Una categoría recurrente se repite en cada mitad a la que la hayas asignado. Si cambias a Mensual, el mismo elemento simplemente se repite una vez al mes.';
+
+  @override
+  String get faqNotifQ1 => '¿Qué aparece en la pestaña Notificaciones?';
+
+  @override
+  String get faqNotifA1 =>
+      'Verás novedades sobre la actividad de Dividir cuentas, además de avisos cuando quien pagó disputa o confirma una de tus partes.';
+
+  @override
+  String get faqNotifQ2 => '¿Puedo desactivar las notificaciones?';
+
+  @override
+  String get faqNotifA2 =>
+      'Sí. Ve a los Ajustes de tu dispositivo > Aplicaciones > Salapify > Notificaciones, donde puedes desactivar las alertas por completo o elegir qué tipos de alertas quieres recibir.';
 }

@@ -6,10 +6,13 @@ class AppLanguage {
   final String nativeName;
 }
 
-/// Add new languages here (plus their ARB file) as you support them.
+/// Add new languages here (plus their ARB file)
 const supportedLanguages = [
   AppLanguage(Locale('en'), 'English'),
   AppLanguage(Locale('es'), 'Español'),
+  AppLanguage(Locale('th'), 'ไทย'),
+  AppLanguage(Locale('zh'), '繁體中文'),
+  AppLanguage(Locale('tr'), 'Türkçe'),
 ];
 
 /// Returns the native name for [locale], or null for system default.

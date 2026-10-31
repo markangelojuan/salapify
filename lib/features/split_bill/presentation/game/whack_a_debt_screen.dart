@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/authentication/domain/entities/avatar_option.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 import 'game_assets.dart';
 import 'game_audio.dart';
@@ -38,7 +39,7 @@ class _WhackADebtScreenState extends State<WhackADebtScreen>
   static const _totalSeconds = 30;
   static const _holeCount = 9;
   static const _hitLingerMs = 250;
-  static const _tallyMs = 6000; 
+  static const _tallyMs = 6000;
   static const _firstSpawnDelayMs = 400;
   static const _enemyChance = 0.25;
   static const _enemyPenalty = 2;
@@ -99,7 +100,6 @@ class _WhackADebtScreenState extends State<WhackADebtScreen>
     super.dispose();
   }
 
-
   /// Resumes whichever track belongs to the current phase (no-op if muted).
   void _resumeAudioForPhase() {
     if (_phase == _Phase.playing) {
@@ -122,7 +122,6 @@ class _WhackADebtScreenState extends State<WhackADebtScreen>
     setState(() => _audio.setMuted(!_audio.muted));
     if (!_audio.muted) _resumeAudioForPhase();
   }
-
 
   void _clearHoles() {
     for (var i = 0; i < _holeCount; i++) {
@@ -217,14 +216,14 @@ class _WhackADebtScreenState extends State<WhackADebtScreen>
         .clamp(0, _totalSeconds);
   }
 
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Whack-a-Debt'),
+        title: Text(l10n.gameTitle),
         actions: [
           IconButton(
             icon: Icon(
@@ -244,8 +243,14 @@ class _WhackADebtScreenState extends State<WhackADebtScreen>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      GameStat(label: 'Time', value: '$_secondsLeft s'),
-                      GameStat(label: 'Score', value: _phase == _Phase.tallying ? '--' : '$_score',),
+                      GameStat(
+                        label: l10n.gameTimeLabel,
+                        value: l10n.gameSecondsShort(_secondsLeft),
+                      ),
+                      GameStat(
+                        label: l10n.gameScoreLabel,
+                        value: _phase == _Phase.tallying ? '--' : '$_score',
+                      ),
                     ],
                   ),
                 ),
@@ -286,7 +291,7 @@ class _WhackADebtScreenState extends State<WhackADebtScreen>
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
-                    'Tap your friends. Avoid the rhinos (-$_enemyPenalty)!',
+                    l10n.gameHint(_enemyPenalty),
                     style: TextStyle(color: colors.textSecondary, fontSize: 12),
                   ),
                 ),
@@ -366,20 +371,21 @@ class _WhackADebtScreenState extends State<WhackADebtScreen>
       maxWidth: _phase == _Phase.done ? _resultMaxWidth : _overlayMaxWidth,
       child: switch (_phase) {
         _Phase.ready => ReadyCard(
-            totalSeconds: _totalSeconds,
-            sampleAvatarPath: widget.avatarIds.isNotEmpty
-                ? avatarById(widget.avatarIds.first)?.assetPath
-                : null,
-            onStart: _start,
-          ),
+          totalSeconds: _totalSeconds,
+          enemyPenalty: _enemyPenalty,
+          sampleAvatarPath: widget.avatarIds.isNotEmpty
+              ? avatarById(widget.avatarIds.first)?.assetPath
+              : null,
+          onStart: _start,
+        ),
         _Phase.tallying => const TallyCard(
-            duration: Duration(milliseconds: _tallyMs),
-          ),
+          duration: Duration(milliseconds: _tallyMs),
+        ),
         _ => ResultCard(
-            score: _score,
-            onPlayAgain: _start,
-            onDone: () => Navigator.of(context).pop(_score),
-          ),
+          score: _score,
+          onPlayAgain: _start,
+          onDone: () => Navigator.of(context).pop(_score),
+        ),
       },
     );
   }

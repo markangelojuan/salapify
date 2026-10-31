@@ -1111,5 +1111,110 @@
       }
     }
   },
-  "notificationGroupUnavailable": "This group is no longer available."
+  "notificationGroupUnavailable": "This group is no longer available.",
+  "gameTitle": "Whack-a-Debt",
+  "gameTimeLabel": "Time",
+  "gameScoreLabel": "Score",
+  "gameSecondsShort": "{seconds} s",
+  "@gameSecondsShort": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "gameHint": "Tap your friends. Avoid the rhinos (-{penalty})!",
+  "@gameHint": {
+    "placeholders": {
+      "penalty": {
+        "type": "int"
+      }
+    }
+  },
+  "gameReady": "Ready?",
+  "gameYouHaveSeconds": "You have {seconds, plural, =1{1 second} other{{seconds} seconds}}.",
+  "@gameYouHaveSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "gameWhackBeasts": "Whack the beasts",
+  "gameWhackBeastsDesc": "+1 point for every hit",
+  "gameAvoidRhino": "Avoid the black rhino!",
+  "gameAvoidRhinoDesc": "-{penalty, plural, =1{1 point} other{{penalty} points}}. Avoid it at all cost!",
+  "@gameAvoidRhinoDesc": {
+    "placeholders": {
+      "penalty": {
+        "type": "int"
+      }
+    }
+  },
+  "gameStart": "Start",
+  "gameTimesUp": "Time’s up!",
+  "gameCountingScore": "Counting your score...",
+  "gameResultTitle": "Your result",
+  "gameYourScore": "YOUR SCORE",
+  "gameMessageWarmingUp": "Just warming up!",
+  "gameMessageNice": "Nice whacking!",
+  "gameMessageGreat": "You’re a great whacker!",
+  "gameMessageSuperstar": "Whack superstar!",
+  "gamePlayAgain": "Play again",
+  "helpTitle": "Help & FAQ",
+  "helpSearchHint": "Search for a topic...",
+  "helpNoResults": "No results for “{query}”",
+  "@helpNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "faqSectionStarted": "Getting Started",
+  "faqSectionBudgeting": "Budgeting",
+  "faqSectionTransactions": "Transactions & Income",
+  "faqSectionSplit": "Split Bills",
+  "faqSectionPeriods": "Periods & Settings",
+  "faqSectionNotifications": "Notifications",
+  "faqStartedQ1": "What does Salapify do?",
+  "faqStartedA1": "Salapify combines budget tracking with bill splitting. Use the Budget tab to allocate money into categories, the Transactions tab to log your income and spending, and the Split Bills tab to settle shared expenses with friends or other users, all in one place.",
+  "faqBudgetQ1": "How do I create a budget category?",
+  "faqBudgetA1": "Tap the + button on the Budget tab. Enter a category name, such as Internet Bill or Groceries, then set its allocation. Choose whether it’s Fixed or Variable, and set how often it repeats. Fill in the remaining fields, then save your category.",
+  "faqBudgetQ2": "What’s the difference between Fixed and Variable?",
+  "faqBudgetA2": "Fixed is for predictable costs, like an Internet Bill, where you set one exact amount. Variable is for spending that changes, like Groceries, where you set a target ceiling instead of an exact amount.",
+  "faqBudgetQ3": "What happens when I check off a category as completed?",
+  "faqBudgetA3": "Marking a category as complete automatically logs it as a transaction for the current period. The category is also marked as done and moved to the bottom of the list.",
+  "faqBudgetQ4": "Why are some categories dimmed on my Budget tab?",
+  "faqBudgetA4": "Dimmed categories belong to the other half of the period when you use bi-monthly budgeting. They’ll come back into focus automatically when their half of the period begins.",
+  "faqTxQ1": "How do I add a transaction or income?",
+  "faqTxA1": "From the Transactions tab, tap + to add an expense or income entry. For income, choose whether it’s One-time or Recurring. Recurring entries are added automatically at the start of each new period.",
+  "faqTxQ2": "How do transactions affect my budget?",
+  "faqTxA2": "When you log a transaction, you assign it to a budget category. The amount is automatically deducted from that category’s allocation, so your Budget tab always shows what’s left to spend.",
+  "faqTxQ3": "How do I delete an income or expense?",
+  "faqTxA3": "Go to the Transactions tab and swipe left on the income or expense you want to remove. Confirm the deletion if you are prompted.",
+  "faqTxQ4": "Why don’t I see last period’s transactions?",
+  "faqTxA4": "The Budget and Transactions tabs only show totals for the current period, based on the budgeting period you set in Settings. This keeps the numbers focused on what you can still act on.",
+  "faqSplitQ1": "How do I split a bill with friends?",
+  "faqSplitA1": "Create a group and add members by their usernames. Inside the group, create a bill (e.g. “Dinner @ KFC”), enter the amount you paid, and split it equally or with custom shares for each member.",
+  "faqSplitQ2": "How do I delete a Split Bills group?",
+  "faqSplitA2": "If you created the group, swipe left on it to delete it. Deleting a group also removes all of its shared bill activity.",
+  "faqSplitQ3": "How do I leave a Split Bills group?",
+  "faqSplitA3": "If you’re a member of a group, swipe left on it and choose Leave. This removes you from the group without deleting it for everyone else.",
+  "faqSplitQ4": "Can I share receipts or chat with my group?",
+  "faqSplitA4": "Yes. Every group has an Activity section where you can message members and share photos, such as receipts, alongside the bill history.",
+  "faqSplitQ5": "Do Split Bills affect my personal budget?",
+  "faqSplitA5": "No. Split Bills is kept separate from your Budget and Transactions tabs. If you want a settled bill to count toward your spending, log it manually as a transaction.",
+  "faqSplitQ6": "How do I report or block someone in a group?",
+  "faqSplitA6": "In the group’s Activity tab, press and hold a member’s avatar next to their message to open a menu with Report and Block options. Blocking hides their messages and activity, and you can undo it anytime from Settings.",
+  "faqPeriodQ1": "What’s the difference between Monthly and Bi-Monthly?",
+  "faqPeriodA1": "Monthly resets your budget on the 1st of every month. Bi-Monthly splits the month into two halves: you choose the day the first half ends, and the rest of the month becomes the second half.",
+  "faqPeriodQ2": "What happens to my categories if I change the period?",
+  "faqPeriodA2": "Existing categories are converted to match the new period and keep their amounts. Categories tied to a specific half will now count toward the full month (or vice versa), so review them afterward to check for duplicates.",
+  "faqPeriodQ3": "How does recurrence work with bi-monthly budgeting?",
+  "faqPeriodA3": "A recurring category repeats in every half you’ve assigned it to. If you switch to Monthly, the same item simply repeats once a month instead.",
+  "faqNotifQ1": "What shows up in the Notifications tab?",
+  "faqNotifA1": "You’ll see updates on Split Bills activity, as well as alerts when a payer disputes or confirms one of your shares.",
+  "faqNotifQ2": "Can I turn off notifications?",
+  "faqNotifA2": "Yes. Go to your device Settings > Apps > Salapify > Notifications, where you can turn off alerts entirely or choose which types of alerts you want to receive."
 }

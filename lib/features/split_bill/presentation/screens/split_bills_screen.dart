@@ -15,6 +15,7 @@ import 'package:salapify/features/settings/presentation/controllers/settings_con
 import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/l10n/app_localizations.dart';
+import 'package:salapify/core/localization/locale_text.dart';
 import 'package:salapify/router/routes.dart';
 
 class SplitBillsScreen extends ConsumerWidget {
@@ -212,7 +213,7 @@ class _GroupRow extends ConsumerWidget {
                         backgroundColor: colors.primary.withValues(alpha: 0.15),
                         child: Text(
                           group.name.isNotEmpty
-                              ? group.name[0].toUpperCase()
+                              ? group.name[0].toUpperCaseL(context)
                               : '?',
                           style: TextStyle(
                             color: colors.primary,

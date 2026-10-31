@@ -9,6 +9,7 @@ import 'package:salapify/features/notification/presentation/controllers/notifica
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
+import 'package:salapify/core/localization/locale_text.dart';
 import 'package:salapify/l10n/app_localizations.dart';
 import 'package:salapify/router/routes.dart';
 
@@ -49,7 +50,7 @@ class NotificationScreen extends ConsumerWidget {
                     padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
                     sliver: SliverToBoxAdapter(
                       child: Text(
-                        section.label.toUpperCase(),
+                        section.label.toUpperCaseL(context),
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,

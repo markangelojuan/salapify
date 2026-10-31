@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/core/localization/locale_text.dart';
 import 'package:salapify/features/budget/domain/entities/budget_category_type.dart';
 import 'package:salapify/features/budget/domain/entities/budget_filter.dart';
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
@@ -211,7 +212,7 @@ class _FilterGroupLabel extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Text(
-        text.toUpperCase(),
+        text.toUpperCaseL(context),
         style: TextStyle(
           fontWeight: FontWeight.w700,
           fontSize: 11,

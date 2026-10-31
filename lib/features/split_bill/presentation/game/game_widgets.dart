@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 import 'game_assets.dart';
 
@@ -7,13 +8,12 @@ AppColorsExt _colorsOf(BuildContext context) =>
     Theme.of(context).extension<AppColorsExt>()!;
 
 ButtonStyle _pillFilled(AppColorsExt colors) => FilledButton.styleFrom(
-      backgroundColor: colors.textPrimary,
-      foregroundColor: colors.background,
-      minimumSize: const Size.fromHeight(54),
-      shape: const StadiumBorder(),
-      textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
-    );
-
+  backgroundColor: colors.textPrimary,
+  foregroundColor: colors.background,
+  minimumSize: const Size.fromHeight(54),
+  shape: const StadiumBorder(),
+  textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+);
 
 class GameStat extends StatelessWidget {
   const GameStat({super.key, required this.label, required this.value});
@@ -25,7 +25,10 @@ class GameStat extends StatelessWidget {
     final colors = _colorsOf(context);
     return Column(
       children: [
-        Text(label, style: TextStyle(fontSize: 14, color: colors.textSecondary)),
+        Text(
+          label,
+          style: TextStyle(fontSize: 14, color: colors.textSecondary),
+        ),
         Text(
           value,
           style: TextStyle(
@@ -149,7 +152,6 @@ class InstructionRow extends StatelessWidget {
   }
 }
 
-
 /// Dimmed backdrop + pop-in card. Re-runs the pop-in whenever [phaseKey]
 /// changes, so pass the current phase. Use [maxWidth] to widen the card
 /// (e.g. for the result modal).
@@ -213,6 +215,7 @@ class ReadyCard extends StatelessWidget {
   const ReadyCard({
     super.key,
     required this.totalSeconds,
+    required this.enemyPenalty,
     required this.sampleAvatarPath,
     required this.onStart,
   });
@@ -220,15 +223,17 @@ class ReadyCard extends StatelessWidget {
   final int totalSeconds;
   final String? sampleAvatarPath;
   final VoidCallback onStart;
+  final int enemyPenalty;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = _colorsOf(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'Ready?',
+          l10n.gameReady,
           style: TextStyle(
             fontSize: 30,
             fontWeight: FontWeight.w800,
@@ -237,14 +242,14 @@ class ReadyCard extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          'You have $totalSeconds seconds.',
+          l10n.gameYouHaveSeconds(totalSeconds),
           style: TextStyle(color: colors.textSecondary, fontSize: 15),
         ),
         const SizedBox(height: 24),
         InstructionRow(
           leading: CircleSprite(assetPath: sampleAvatarPath, diameter: 48),
-          title: 'Whack the beasts',
-          subtitle: '+1 point for every hit',
+          title: l10n.gameWhackBeasts,
+          subtitle: l10n.gameWhackBeastsDesc,
           accent: colors.primary,
         ),
         const SizedBox(height: 12),
@@ -253,15 +258,15 @@ class ReadyCard extends StatelessWidget {
             assetPath: GameAssets.rhino,
             diameter: 48,
           ),
-          title: 'Avoid the black rhino!',
-          subtitle: '-2 points. Avoid it at all cost!',
+          title: l10n.gameAvoidRhino,
+          subtitle: l10n.gameAvoidRhinoDesc(enemyPenalty),
           accent: colors.error,
         ),
         const SizedBox(height: 28),
         FilledButton(
           onPressed: onStart,
           style: _pillFilled(colors),
-          child: const Text('Start'),
+          child: Text(l10n.gameStart),
         ),
       ],
     );
@@ -276,6 +281,7 @@ class TallyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = _colorsOf(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -283,7 +289,7 @@ class TallyCard extends StatelessWidget {
         const Text('⏰', style: TextStyle(fontSize: 44)),
         const SizedBox(height: 8),
         Text(
-          'Time\'s up!',
+          l10n.gameTimesUp,
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w800,
@@ -307,7 +313,7 @@ class TallyCard extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Text(
-          'Counting your score...',
+          l10n.gameCountingScore,
           style: TextStyle(color: colors.textSecondary, fontSize: 15),
         ),
         const SizedBox(height: 12),
@@ -328,16 +334,17 @@ class ResultCard extends StatelessWidget {
   final VoidCallback onPlayAgain;
   final VoidCallback onDone;
 
-  String get _message => score < 8
-    ? 'Just warming up!'
-    : score < 18
-        ? 'Nice whacking!'
-        : score < 30
-            ? 'You\'re a great whacker!'
-            : 'Whack superstar!';
+  String _message(AppLocalizations l10n) => score < 8
+      ? l10n.gameMessageWarmingUp
+      : score < 18
+      ? l10n.gameMessageNice
+      : score < 30
+      ? l10n.gameMessageGreat
+      : l10n.gameMessageSuperstar;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = _colorsOf(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -345,7 +352,7 @@ class ResultCard extends StatelessWidget {
         const Text('🏆', style: TextStyle(fontSize: 44)),
         const SizedBox(height: 8),
         Text(
-          'Your result',
+          l10n.gameResultTitle,
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w800,
@@ -364,7 +371,7 @@ class ResultCard extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                'YOUR SCORE',
+                l10n.gameYourScore,
                 style: TextStyle(
                   fontSize: 12,
                   letterSpacing: 1.5,
@@ -384,7 +391,7 @@ class ResultCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                _message,
+                _message(l10n),
                 style: TextStyle(color: colors.textSecondary, fontSize: 15),
               ),
             ],
@@ -394,7 +401,7 @@ class ResultCard extends StatelessWidget {
         FilledButton(
           onPressed: onPlayAgain,
           style: _pillFilled(colors),
-          child: const Text('Play again'),
+          child: Text(l10n.gamePlayAgain),
         ),
         const SizedBox(height: 10),
         OutlinedButton(
@@ -409,7 +416,7 @@ class ResultCard extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          child: const Text('Done'),
+          child: Text(l10n.commonDone),
         ),
       ],
     );

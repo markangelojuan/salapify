@@ -7,6 +7,9 @@ import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
+import 'app_localizations_th.dart';
+import 'app_localizations_tr.dart';
+import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -96,6 +99,9 @@ abstract class AppLocalizations {
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
     Locale('es'),
+    Locale('th'),
+    Locale('tr'),
+    Locale('zh'),
   ];
 
   /// Title of the settings screen
@@ -2893,6 +2899,426 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This group is no longer available.'**
   String get notificationGroupUnavailable;
+
+  /// No description provided for @gameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Whack-a-Debt'**
+  String get gameTitle;
+
+  /// No description provided for @gameTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get gameTimeLabel;
+
+  /// No description provided for @gameScoreLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Score'**
+  String get gameScoreLabel;
+
+  /// No description provided for @gameSecondsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds} s'**
+  String gameSecondsShort(int seconds);
+
+  /// No description provided for @gameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap your friends. Avoid the rhinos (-{penalty})!'**
+  String gameHint(int penalty);
+
+  /// No description provided for @gameReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready?'**
+  String get gameReady;
+
+  /// No description provided for @gameYouHaveSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'You have {seconds, plural, =1{1 second} other{{seconds} seconds}}.'**
+  String gameYouHaveSeconds(int seconds);
+
+  /// No description provided for @gameWhackBeasts.
+  ///
+  /// In en, this message translates to:
+  /// **'Whack the beasts'**
+  String get gameWhackBeasts;
+
+  /// No description provided for @gameWhackBeastsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'+1 point for every hit'**
+  String get gameWhackBeastsDesc;
+
+  /// No description provided for @gameAvoidRhino.
+  ///
+  /// In en, this message translates to:
+  /// **'Avoid the black rhino!'**
+  String get gameAvoidRhino;
+
+  /// No description provided for @gameAvoidRhinoDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'-{penalty, plural, =1{1 point} other{{penalty} points}}. Avoid it at all cost!'**
+  String gameAvoidRhinoDesc(int penalty);
+
+  /// No description provided for @gameStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get gameStart;
+
+  /// No description provided for @gameTimesUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Time’s up!'**
+  String get gameTimesUp;
+
+  /// No description provided for @gameCountingScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Counting your score...'**
+  String get gameCountingScore;
+
+  /// No description provided for @gameResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your result'**
+  String get gameResultTitle;
+
+  /// No description provided for @gameYourScore.
+  ///
+  /// In en, this message translates to:
+  /// **'YOUR SCORE'**
+  String get gameYourScore;
+
+  /// No description provided for @gameMessageWarmingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Just warming up!'**
+  String get gameMessageWarmingUp;
+
+  /// No description provided for @gameMessageNice.
+  ///
+  /// In en, this message translates to:
+  /// **'Nice whacking!'**
+  String get gameMessageNice;
+
+  /// No description provided for @gameMessageGreat.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re a great whacker!'**
+  String get gameMessageGreat;
+
+  /// No description provided for @gameMessageSuperstar.
+  ///
+  /// In en, this message translates to:
+  /// **'Whack superstar!'**
+  String get gameMessageSuperstar;
+
+  /// No description provided for @gamePlayAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Play again'**
+  String get gamePlayAgain;
+
+  /// No description provided for @helpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help & FAQ'**
+  String get helpTitle;
+
+  /// No description provided for @helpSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a topic...'**
+  String get helpSearchHint;
+
+  /// No description provided for @helpNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results for “{query}”'**
+  String helpNoResults(String query);
+
+  /// No description provided for @faqSectionStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting Started'**
+  String get faqSectionStarted;
+
+  /// No description provided for @faqSectionBudgeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgeting'**
+  String get faqSectionBudgeting;
+
+  /// No description provided for @faqSectionTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions & Income'**
+  String get faqSectionTransactions;
+
+  /// No description provided for @faqSectionSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Split Bills'**
+  String get faqSectionSplit;
+
+  /// No description provided for @faqSectionPeriods.
+  ///
+  /// In en, this message translates to:
+  /// **'Periods & Settings'**
+  String get faqSectionPeriods;
+
+  /// No description provided for @faqSectionNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get faqSectionNotifications;
+
+  /// No description provided for @faqStartedQ1.
+  ///
+  /// In en, this message translates to:
+  /// **'What does Salapify do?'**
+  String get faqStartedQ1;
+
+  /// No description provided for @faqStartedA1.
+  ///
+  /// In en, this message translates to:
+  /// **'Salapify combines budget tracking with bill splitting. Use the Budget tab to allocate money into categories, the Transactions tab to log your income and spending, and the Split Bills tab to settle shared expenses with friends or other users, all in one place.'**
+  String get faqStartedA1;
+
+  /// No description provided for @faqBudgetQ1.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I create a budget category?'**
+  String get faqBudgetQ1;
+
+  /// No description provided for @faqBudgetA1.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the + button on the Budget tab. Enter a category name, such as Internet Bill or Groceries, then set its allocation. Choose whether it’s Fixed or Variable, and set how often it repeats. Fill in the remaining fields, then save your category.'**
+  String get faqBudgetA1;
+
+  /// No description provided for @faqBudgetQ2.
+  ///
+  /// In en, this message translates to:
+  /// **'What’s the difference between Fixed and Variable?'**
+  String get faqBudgetQ2;
+
+  /// No description provided for @faqBudgetA2.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed is for predictable costs, like an Internet Bill, where you set one exact amount. Variable is for spending that changes, like Groceries, where you set a target ceiling instead of an exact amount.'**
+  String get faqBudgetA2;
+
+  /// No description provided for @faqBudgetQ3.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens when I check off a category as completed?'**
+  String get faqBudgetQ3;
+
+  /// No description provided for @faqBudgetA3.
+  ///
+  /// In en, this message translates to:
+  /// **'Marking a category as complete automatically logs it as a transaction for the current period. The category is also marked as done and moved to the bottom of the list.'**
+  String get faqBudgetA3;
+
+  /// No description provided for @faqBudgetQ4.
+  ///
+  /// In en, this message translates to:
+  /// **'Why are some categories dimmed on my Budget tab?'**
+  String get faqBudgetQ4;
+
+  /// No description provided for @faqBudgetA4.
+  ///
+  /// In en, this message translates to:
+  /// **'Dimmed categories belong to the other half of the period when you use bi-monthly budgeting. They’ll come back into focus automatically when their half of the period begins.'**
+  String get faqBudgetA4;
+
+  /// No description provided for @faqTxQ1.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I add a transaction or income?'**
+  String get faqTxQ1;
+
+  /// No description provided for @faqTxA1.
+  ///
+  /// In en, this message translates to:
+  /// **'From the Transactions tab, tap + to add an expense or income entry. For income, choose whether it’s One-time or Recurring. Recurring entries are added automatically at the start of each new period.'**
+  String get faqTxA1;
+
+  /// No description provided for @faqTxQ2.
+  ///
+  /// In en, this message translates to:
+  /// **'How do transactions affect my budget?'**
+  String get faqTxQ2;
+
+  /// No description provided for @faqTxA2.
+  ///
+  /// In en, this message translates to:
+  /// **'When you log a transaction, you assign it to a budget category. The amount is automatically deducted from that category’s allocation, so your Budget tab always shows what’s left to spend.'**
+  String get faqTxA2;
+
+  /// No description provided for @faqTxQ3.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I delete an income or expense?'**
+  String get faqTxQ3;
+
+  /// No description provided for @faqTxA3.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the Transactions tab and swipe left on the income or expense you want to remove. Confirm the deletion if you are prompted.'**
+  String get faqTxA3;
+
+  /// No description provided for @faqTxQ4.
+  ///
+  /// In en, this message translates to:
+  /// **'Why don’t I see last period’s transactions?'**
+  String get faqTxQ4;
+
+  /// No description provided for @faqTxA4.
+  ///
+  /// In en, this message translates to:
+  /// **'The Budget and Transactions tabs only show totals for the current period, based on the budgeting period you set in Settings. This keeps the numbers focused on what you can still act on.'**
+  String get faqTxA4;
+
+  /// No description provided for @faqSplitQ1.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I split a bill with friends?'**
+  String get faqSplitQ1;
+
+  /// No description provided for @faqSplitA1.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a group and add members by their usernames. Inside the group, create a bill (e.g. “Dinner @ KFC”), enter the amount you paid, and split it equally or with custom shares for each member.'**
+  String get faqSplitA1;
+
+  /// No description provided for @faqSplitQ2.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I delete a Split Bills group?'**
+  String get faqSplitQ2;
+
+  /// No description provided for @faqSplitA2.
+  ///
+  /// In en, this message translates to:
+  /// **'If you created the group, swipe left on it to delete it. Deleting a group also removes all of its shared bill activity.'**
+  String get faqSplitA2;
+
+  /// No description provided for @faqSplitQ3.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I leave a Split Bills group?'**
+  String get faqSplitQ3;
+
+  /// No description provided for @faqSplitA3.
+  ///
+  /// In en, this message translates to:
+  /// **'If you’re a member of a group, swipe left on it and choose Leave. This removes you from the group without deleting it for everyone else.'**
+  String get faqSplitA3;
+
+  /// No description provided for @faqSplitQ4.
+  ///
+  /// In en, this message translates to:
+  /// **'Can I share receipts or chat with my group?'**
+  String get faqSplitQ4;
+
+  /// No description provided for @faqSplitA4.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes. Every group has an Activity section where you can message members and share photos, such as receipts, alongside the bill history.'**
+  String get faqSplitA4;
+
+  /// No description provided for @faqSplitQ5.
+  ///
+  /// In en, this message translates to:
+  /// **'Do Split Bills affect my personal budget?'**
+  String get faqSplitQ5;
+
+  /// No description provided for @faqSplitA5.
+  ///
+  /// In en, this message translates to:
+  /// **'No. Split Bills is kept separate from your Budget and Transactions tabs. If you want a settled bill to count toward your spending, log it manually as a transaction.'**
+  String get faqSplitA5;
+
+  /// No description provided for @faqSplitQ6.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I report or block someone in a group?'**
+  String get faqSplitQ6;
+
+  /// No description provided for @faqSplitA6.
+  ///
+  /// In en, this message translates to:
+  /// **'In the group’s Activity tab, press and hold a member’s avatar next to their message to open a menu with Report and Block options. Blocking hides their messages and activity, and you can undo it anytime from Settings.'**
+  String get faqSplitA6;
+
+  /// No description provided for @faqPeriodQ1.
+  ///
+  /// In en, this message translates to:
+  /// **'What’s the difference between Monthly and Bi-Monthly?'**
+  String get faqPeriodQ1;
+
+  /// No description provided for @faqPeriodA1.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly resets your budget on the 1st of every month. Bi-Monthly splits the month into two halves: you choose the day the first half ends, and the rest of the month becomes the second half.'**
+  String get faqPeriodA1;
+
+  /// No description provided for @faqPeriodQ2.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens to my categories if I change the period?'**
+  String get faqPeriodQ2;
+
+  /// No description provided for @faqPeriodA2.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing categories are converted to match the new period and keep their amounts. Categories tied to a specific half will now count toward the full month (or vice versa), so review them afterward to check for duplicates.'**
+  String get faqPeriodA2;
+
+  /// No description provided for @faqPeriodQ3.
+  ///
+  /// In en, this message translates to:
+  /// **'How does recurrence work with bi-monthly budgeting?'**
+  String get faqPeriodQ3;
+
+  /// No description provided for @faqPeriodA3.
+  ///
+  /// In en, this message translates to:
+  /// **'A recurring category repeats in every half you’ve assigned it to. If you switch to Monthly, the same item simply repeats once a month instead.'**
+  String get faqPeriodA3;
+
+  /// No description provided for @faqNotifQ1.
+  ///
+  /// In en, this message translates to:
+  /// **'What shows up in the Notifications tab?'**
+  String get faqNotifQ1;
+
+  /// No description provided for @faqNotifA1.
+  ///
+  /// In en, this message translates to:
+  /// **'You’ll see updates on Split Bills activity, as well as alerts when a payer disputes or confirms one of your shares.'**
+  String get faqNotifA1;
+
+  /// No description provided for @faqNotifQ2.
+  ///
+  /// In en, this message translates to:
+  /// **'Can I turn off notifications?'**
+  String get faqNotifQ2;
+
+  /// No description provided for @faqNotifA2.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes. Go to your device Settings > Apps > Salapify > Notifications, where you can turn off alerts entirely or choose which types of alerts you want to receive.'**
+  String get faqNotifA2;
 }
 
 class _AppLocalizationsDelegate
@@ -2906,7 +3332,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'es'].contains(locale.languageCode);
+      <String>['en', 'es', 'th', 'tr', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -2919,6 +3345,12 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsEn();
     case 'es':
       return AppLocalizationsEs();
+    case 'th':
+      return AppLocalizationsTh();
+    case 'tr':
+      return AppLocalizationsTr();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(

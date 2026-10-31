@@ -1683,4 +1683,260 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get notificationGroupUnavailable =>
       'This group is no longer available.';
+
+  @override
+  String get gameTitle => 'Whack-a-Debt';
+
+  @override
+  String get gameTimeLabel => 'Time';
+
+  @override
+  String get gameScoreLabel => 'Score';
+
+  @override
+  String gameSecondsShort(int seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String gameHint(int penalty) {
+    return 'Tap your friends. Avoid the rhinos (-$penalty)!';
+  }
+
+  @override
+  String get gameReady => 'Ready?';
+
+  @override
+  String gameYouHaveSeconds(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: '$seconds seconds',
+      one: '1 second',
+    );
+    return 'You have $_temp0.';
+  }
+
+  @override
+  String get gameWhackBeasts => 'Whack the beasts';
+
+  @override
+  String get gameWhackBeastsDesc => '+1 point for every hit';
+
+  @override
+  String get gameAvoidRhino => 'Avoid the black rhino!';
+
+  @override
+  String gameAvoidRhinoDesc(int penalty) {
+    String _temp0 = intl.Intl.pluralLogic(
+      penalty,
+      locale: localeName,
+      other: '$penalty points',
+      one: '1 point',
+    );
+    return '-$_temp0. Avoid it at all cost!';
+  }
+
+  @override
+  String get gameStart => 'Start';
+
+  @override
+  String get gameTimesUp => 'Time’s up!';
+
+  @override
+  String get gameCountingScore => 'Counting your score...';
+
+  @override
+  String get gameResultTitle => 'Your result';
+
+  @override
+  String get gameYourScore => 'YOUR SCORE';
+
+  @override
+  String get gameMessageWarmingUp => 'Just warming up!';
+
+  @override
+  String get gameMessageNice => 'Nice whacking!';
+
+  @override
+  String get gameMessageGreat => 'You’re a great whacker!';
+
+  @override
+  String get gameMessageSuperstar => 'Whack superstar!';
+
+  @override
+  String get gamePlayAgain => 'Play again';
+
+  @override
+  String get helpTitle => 'Help & FAQ';
+
+  @override
+  String get helpSearchHint => 'Search for a topic...';
+
+  @override
+  String helpNoResults(String query) {
+    return 'No results for “$query”';
+  }
+
+  @override
+  String get faqSectionStarted => 'Getting Started';
+
+  @override
+  String get faqSectionBudgeting => 'Budgeting';
+
+  @override
+  String get faqSectionTransactions => 'Transactions & Income';
+
+  @override
+  String get faqSectionSplit => 'Split Bills';
+
+  @override
+  String get faqSectionPeriods => 'Periods & Settings';
+
+  @override
+  String get faqSectionNotifications => 'Notifications';
+
+  @override
+  String get faqStartedQ1 => 'What does Salapify do?';
+
+  @override
+  String get faqStartedA1 =>
+      'Salapify combines budget tracking with bill splitting. Use the Budget tab to allocate money into categories, the Transactions tab to log your income and spending, and the Split Bills tab to settle shared expenses with friends or other users, all in one place.';
+
+  @override
+  String get faqBudgetQ1 => 'How do I create a budget category?';
+
+  @override
+  String get faqBudgetA1 =>
+      'Tap the + button on the Budget tab. Enter a category name, such as Internet Bill or Groceries, then set its allocation. Choose whether it’s Fixed or Variable, and set how often it repeats. Fill in the remaining fields, then save your category.';
+
+  @override
+  String get faqBudgetQ2 => 'What’s the difference between Fixed and Variable?';
+
+  @override
+  String get faqBudgetA2 =>
+      'Fixed is for predictable costs, like an Internet Bill, where you set one exact amount. Variable is for spending that changes, like Groceries, where you set a target ceiling instead of an exact amount.';
+
+  @override
+  String get faqBudgetQ3 =>
+      'What happens when I check off a category as completed?';
+
+  @override
+  String get faqBudgetA3 =>
+      'Marking a category as complete automatically logs it as a transaction for the current period. The category is also marked as done and moved to the bottom of the list.';
+
+  @override
+  String get faqBudgetQ4 => 'Why are some categories dimmed on my Budget tab?';
+
+  @override
+  String get faqBudgetA4 =>
+      'Dimmed categories belong to the other half of the period when you use bi-monthly budgeting. They’ll come back into focus automatically when their half of the period begins.';
+
+  @override
+  String get faqTxQ1 => 'How do I add a transaction or income?';
+
+  @override
+  String get faqTxA1 =>
+      'From the Transactions tab, tap + to add an expense or income entry. For income, choose whether it’s One-time or Recurring. Recurring entries are added automatically at the start of each new period.';
+
+  @override
+  String get faqTxQ2 => 'How do transactions affect my budget?';
+
+  @override
+  String get faqTxA2 =>
+      'When you log a transaction, you assign it to a budget category. The amount is automatically deducted from that category’s allocation, so your Budget tab always shows what’s left to spend.';
+
+  @override
+  String get faqTxQ3 => 'How do I delete an income or expense?';
+
+  @override
+  String get faqTxA3 =>
+      'Go to the Transactions tab and swipe left on the income or expense you want to remove. Confirm the deletion if you are prompted.';
+
+  @override
+  String get faqTxQ4 => 'Why don’t I see last period’s transactions?';
+
+  @override
+  String get faqTxA4 =>
+      'The Budget and Transactions tabs only show totals for the current period, based on the budgeting period you set in Settings. This keeps the numbers focused on what you can still act on.';
+
+  @override
+  String get faqSplitQ1 => 'How do I split a bill with friends?';
+
+  @override
+  String get faqSplitA1 =>
+      'Create a group and add members by their usernames. Inside the group, create a bill (e.g. “Dinner @ KFC”), enter the amount you paid, and split it equally or with custom shares for each member.';
+
+  @override
+  String get faqSplitQ2 => 'How do I delete a Split Bills group?';
+
+  @override
+  String get faqSplitA2 =>
+      'If you created the group, swipe left on it to delete it. Deleting a group also removes all of its shared bill activity.';
+
+  @override
+  String get faqSplitQ3 => 'How do I leave a Split Bills group?';
+
+  @override
+  String get faqSplitA3 =>
+      'If you’re a member of a group, swipe left on it and choose Leave. This removes you from the group without deleting it for everyone else.';
+
+  @override
+  String get faqSplitQ4 => 'Can I share receipts or chat with my group?';
+
+  @override
+  String get faqSplitA4 =>
+      'Yes. Every group has an Activity section where you can message members and share photos, such as receipts, alongside the bill history.';
+
+  @override
+  String get faqSplitQ5 => 'Do Split Bills affect my personal budget?';
+
+  @override
+  String get faqSplitA5 =>
+      'No. Split Bills is kept separate from your Budget and Transactions tabs. If you want a settled bill to count toward your spending, log it manually as a transaction.';
+
+  @override
+  String get faqSplitQ6 => 'How do I report or block someone in a group?';
+
+  @override
+  String get faqSplitA6 =>
+      'In the group’s Activity tab, press and hold a member’s avatar next to their message to open a menu with Report and Block options. Blocking hides their messages and activity, and you can undo it anytime from Settings.';
+
+  @override
+  String get faqPeriodQ1 =>
+      'What’s the difference between Monthly and Bi-Monthly?';
+
+  @override
+  String get faqPeriodA1 =>
+      'Monthly resets your budget on the 1st of every month. Bi-Monthly splits the month into two halves: you choose the day the first half ends, and the rest of the month becomes the second half.';
+
+  @override
+  String get faqPeriodQ2 =>
+      'What happens to my categories if I change the period?';
+
+  @override
+  String get faqPeriodA2 =>
+      'Existing categories are converted to match the new period and keep their amounts. Categories tied to a specific half will now count toward the full month (or vice versa), so review them afterward to check for duplicates.';
+
+  @override
+  String get faqPeriodQ3 =>
+      'How does recurrence work with bi-monthly budgeting?';
+
+  @override
+  String get faqPeriodA3 =>
+      'A recurring category repeats in every half you’ve assigned it to. If you switch to Monthly, the same item simply repeats once a month instead.';
+
+  @override
+  String get faqNotifQ1 => 'What shows up in the Notifications tab?';
+
+  @override
+  String get faqNotifA1 =>
+      'You’ll see updates on Split Bills activity, as well as alerts when a payer disputes or confirms one of your shares.';
+
+  @override
+  String get faqNotifQ2 => 'Can I turn off notifications?';
+
+  @override
+  String get faqNotifA2 =>
+      'Yes. Go to your device Settings > Apps > Salapify > Notifications, where you can turn off alerts entirely or choose which types of alerts you want to receive.';
 }
