@@ -25,6 +25,7 @@ import 'core/lifecycle/period_reset_lifecycle_observer.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:salapify/core/localization/language_prompt_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +42,7 @@ void main() async {
   } catch (_) {
     // Falls back to UTC if the device timezone can't be read.
   }
-  
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await GoogleSignIn.instance.initialize(
@@ -54,20 +55,22 @@ void main() async {
   final initialThemeMode = savedTheme == 'dark'
       ? ThemeMode.dark
       : ThemeMode.light;
-  final initialLocale = LocaleController.parse(prefs.getString(LocaleController.prefsKey));
+  final initialLocale = LocaleController.parse(
+    prefs.getString(LocaleController.prefsKey),
+  );
 
   runApp(
     ProviderScope(
-    overrides: [
-      themeControllerProvider.overrideWith(
-        () => ThemeController(initialThemeMode),
-      ),
-      localeControllerProvider.overrideWith(
-        () => LocaleController(initialLocale),
-      ),
-    ],
-    child: const MyApp(),
-  ),
+      overrides: [
+        themeControllerProvider.overrideWith(
+          () => ThemeController(initialThemeMode),
+        ),
+        localeControllerProvider.overrideWith(
+          () => LocaleController(initialLocale),
+        ),
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 
@@ -115,35 +118,35 @@ class _MyAppState extends ConsumerState<MyApp> {
     if (uid == null) return; // guest mode, nothing to sync
 
     try {
-  await Future.wait([
-    () async {
-      final syncService = ref.read(budgetSyncServiceProvider);
-      await syncService.pullRemoteCategories(uid);
-      await syncService.pushUnsyncedCategories(uid);
-    }().catchError((e) {
-      if (mounted) {
-        _logIfRealError(e, context: 'startupSync: budget pull/push');
-      }
-    }),
-    () async {
-      final settingsService = ref.read(settingsSyncServiceProvider);
-      await settingsService.pullRemoteSettings(uid);
-      await settingsService.retryPendingSettingsSync(uid);
-    }().catchError((e) {
-      if (mounted) {
-        _logIfRealError(e, context: 'startupSync: settings pull/retry');
-      }
-    }),
-    () async {
-      final entitlementService = ref.read(entitlementSyncServiceProvider);
-      await entitlementService.pullRemoteEntitlement(uid);
-    }().catchError((e) {
-      if (mounted) {
-        _logIfRealError(e, context: 'startupSync: entitlement pull');
-      }
-    }),
-  ]);
-} finally {
+      await Future.wait([
+        () async {
+          final syncService = ref.read(budgetSyncServiceProvider);
+          await syncService.pullRemoteCategories(uid);
+          await syncService.pushUnsyncedCategories(uid);
+        }().catchError((e) {
+          if (mounted) {
+            _logIfRealError(e, context: 'startupSync: budget pull/push');
+          }
+        }),
+        () async {
+          final settingsService = ref.read(settingsSyncServiceProvider);
+          await settingsService.pullRemoteSettings(uid);
+          await settingsService.retryPendingSettingsSync(uid);
+        }().catchError((e) {
+          if (mounted) {
+            _logIfRealError(e, context: 'startupSync: settings pull/retry');
+          }
+        }),
+        () async {
+          final entitlementService = ref.read(entitlementSyncServiceProvider);
+          await entitlementService.pullRemoteEntitlement(uid);
+        }().catchError((e) {
+          if (mounted) {
+            _logIfRealError(e, context: 'startupSync: entitlement pull');
+          }
+        }),
+      ]);
+    } finally {
       if (mounted) {
         ref.invalidate(budgetingPeriodSettingProvider);
         ref.invalidate(firstHalfEndDaySettingProvider);
@@ -179,10 +182,13 @@ class _MyAppState extends ConsumerState<MyApp> {
         themeMode: ref.watch(themeControllerProvider),
         builder: (context, child) {
           final colors = Theme.of(context).extension<AppColorsExt>()!;
-          return GlobalLoadingOverlay(
-            child: Container(
-              decoration: BoxDecoration(gradient: colors.backgroundGradient),
-              child: child,
+          return LanguagePromptGate(
+            navigatorKey: rootNavigatorKey,
+            child: GlobalLoadingOverlay(
+              child: Container(
+                decoration: BoxDecoration(gradient: colors.backgroundGradient),
+                child: child,
+              ),
             ),
           );
         },

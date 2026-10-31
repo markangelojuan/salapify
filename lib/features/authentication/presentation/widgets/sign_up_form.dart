@@ -318,11 +318,12 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                   const SizedBox(height: 20),
 
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Checkbox(
                         value: _isChecked,
                         visualDensity: VisualDensity.compact,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         onChanged: (value) {
                           // Update the actual form state.
                           setState(() {
@@ -334,8 +335,12 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
                         },
                       ),
                       Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 6),
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            setState(() => _isChecked = !_isChecked);
+                            setDialogState(() {});
+                          },
                           child: Text(l10n.authAgreeTerms),
                         ),
                       ),

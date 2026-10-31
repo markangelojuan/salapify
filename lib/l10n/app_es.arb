@@ -535,5 +535,6 @@
   "faqNotifQ1": "¿Qué aparece en la pestaña Notificaciones?",
   "faqNotifA1": "Verás novedades sobre la actividad de Dividir cuentas, además de avisos cuando quien pagó disputa o confirma una de tus partes.",
   "faqNotifQ2": "¿Puedo desactivar las notificaciones?",
-  "faqNotifA2": "Sí. Ve a los Ajustes de tu dispositivo > Aplicaciones > Salapify > Notificaciones, donde puedes desactivar las alertas por completo o elegir qué tipos de alertas quieres recibir."
+  "faqNotifA2": "Sí. Ve a los Ajustes de tu dispositivo > Aplicaciones > Salapify > Notificaciones, donde puedes desactivar las alertas por completo o elegir qué tipos de alertas quieres recibir.",
+  "languageChangeLaterHint": "Puedes cambiarlo en cualquier momento en Ajustes."
 }

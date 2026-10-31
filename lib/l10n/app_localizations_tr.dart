@@ -1944,4 +1944,8 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get faqNotifA2 =>
       'Evet. Cihazının Ayarlar > Uygulamalar > Salapify > Bildirimler bölümüne git; buradan bildirimleri tamamen kapatabilir veya hangi tür uyarıları almak istediğini seçebilirsin.';
+
+  @override
+  String get languageChangeLaterHint =>
+      'Bunu istediğiniz zaman Ayarlar\'dan değiştirebilirsiniz.';
 }

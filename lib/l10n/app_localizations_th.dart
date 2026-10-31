@@ -1929,4 +1929,8 @@ class AppLocalizationsTh extends AppLocalizations {
   @override
   String get faqNotifA2 =>
       'ได้ ไปที่การตั้งค่าอุปกรณ์ > แอป > Salapify > การแจ้งเตือน ซึ่งคุณปิดการแจ้งเตือนทั้งหมด หรือเลือกประเภทการแจ้งเตือนที่ต้องการรับได้';
+
+  @override
+  String get languageChangeLaterHint =>
+      'คุณสามารถเปลี่ยนได้ทุกเมื่อในการตั้งค่า';
 }

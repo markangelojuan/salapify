@@ -11,6 +11,7 @@ import 'package:salapify/core/localization/locale_controller.dart';
 import 'package:salapify/features/settings/domain/settings_warning.dart';
 import 'package:salapify/features/settings/presentation/widgets/settings_warning_text.dart';
 import 'package:salapify/core/localization/locale_text.dart';
+import 'package:salapify/core/widgets/language_picker_sheet.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:go_router/go_router.dart';
 
@@ -67,7 +68,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _openLanguagePicker(
+    Future<void> _openLanguagePicker(
     BuildContext context,
     WidgetRef ref,
     Locale? selected,
@@ -76,7 +77,7 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => _LanguagePickerSheet(
+      builder: (ctx) => LanguagePickerSheet(
         selected: selected,
         onSelect: (l) {
           ref.read(localeControllerProvider.notifier).set(l);
@@ -861,93 +862,6 @@ class _CurrencyPickerSheet extends StatelessWidget {
                 },
               ),
             ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LanguagePickerSheet extends StatelessWidget {
-  const _LanguagePickerSheet({required this.selected, required this.onSelect});
-
-  final Locale? selected;
-  final ValueChanged<Locale?> onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context);
-
-    final options = <(Locale?, String)>[
-      (null, l10n.languageSystemDefault),
-      for (final l in supportedLanguages) (l.locale, l.nativeName),
-    ];
-
-    return SafeArea(
-      child: Container(
-        margin: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 10),
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: colorScheme.onSurface.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  l10n.languageChoose,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 17,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-              ),
-            ),
-            for (final (locale, label) in options)
-              InkWell(
-                onTap: () => onSelect(locale),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 14,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          label,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15,
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
-                      ),
-                      if (locale == selected)
-                        const Icon(
-                          Icons.check_rounded,
-                          color: AppColors.primary,
-                          size: 20,
-                        ),
-                    ],
-                  ),
-                ),
-              ),
             const SizedBox(height: 8),
           ],
         ),

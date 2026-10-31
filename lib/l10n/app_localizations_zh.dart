@@ -1876,4 +1876,7 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get faqNotifA2 =>
       '可以。前往裝置的「設定」>「應用程式」> Salapify >「通知」，你可以完全關閉通知，或選擇想接收的通知類型。';
+
+  @override
+  String get languageChangeLaterHint => '你隨時可以在「設定」中變更。';
 }

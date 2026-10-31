@@ -1939,4 +1939,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get faqNotifA2 =>
       'Yes. Go to your device Settings > Apps > Salapify > Notifications, where you can turn off alerts entirely or choose which types of alerts you want to receive.';
+
+  @override
+  String get languageChangeLaterHint =>
+      'You can change this anytime in Settings.';
 }

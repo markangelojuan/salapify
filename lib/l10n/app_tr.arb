@@ -535,5 +535,6 @@
   "faqNotifQ1": "Bildirimler sekmesinde neler görünür?",
   "faqNotifA1": "Hesabı Böl etkinliklerine dair güncellemeleri ve ödeyen kişi paylarından birine itiraz ettiğinde ya da onayladığında gelen uyarıları görürsün.",
   "faqNotifQ2": "Bildirimleri kapatabilir miyim?",
-  "faqNotifA2": "Evet. Cihazının Ayarlar > Uygulamalar > Salapify > Bildirimler bölümüne git; buradan bildirimleri tamamen kapatabilir veya hangi tür uyarıları almak istediğini seçebilirsin."
+  "faqNotifA2": "Evet. Cihazının Ayarlar > Uygulamalar > Salapify > Bildirimler bölümüne git; buradan bildirimleri tamamen kapatabilir veya hangi tür uyarıları almak istediğini seçebilirsin.",
+  "languageChangeLaterHint": "Bunu istediğiniz zaman Ayarlar'dan değiştirebilirsiniz."
 }

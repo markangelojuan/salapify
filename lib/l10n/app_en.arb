@@ -1216,5 +1216,9 @@
   "faqNotifQ1": "What shows up in the Notifications tab?",
   "faqNotifA1": "You’ll see updates on Split Bills activity, as well as alerts when a payer disputes or confirms one of your shares.",
   "faqNotifQ2": "Can I turn off notifications?",
-  "faqNotifA2": "Yes. Go to your device Settings > Apps > Salapify > Notifications, where you can turn off alerts entirely or choose which types of alerts you want to receive."
+  "faqNotifA2": "Yes. Go to your device Settings > Apps > Salapify > Notifications, where you can turn off alerts entirely or choose which types of alerts you want to receive.",
+  "languageChangeLaterHint": "You can change this anytime in Settings.",
+  "@languageChangeLaterHint": {
+    "description": "Hint shown under the title of the first-launch language picker"
+  }
 }
