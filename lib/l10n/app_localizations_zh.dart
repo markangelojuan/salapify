@@ -906,6 +906,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get categoryNameRequired => '請輸入名稱';
 
   @override
+  String get budgetEditCategory => '編輯類別';
+
+  @override
+  String get budgetLogTransaction => '記錄交易';
+
+  @override
   String amountLabelWithSymbol(String symbol) {
     return '金額（$symbol）';
   }

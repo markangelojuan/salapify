@@ -277,6 +277,8 @@
   "categoryNameLabel": "分類名稱",
   "categoryNameHint": "例如：餐費、網路費",
   "categoryNameRequired": "請輸入名稱",
+  "budgetEditCategory": "編輯類別",
+  "budgetLogTransaction": "記錄交易",
   "amountLabelWithSymbol": "金額（{symbol}）",
   "amountRequired": "請輸入金額",
   "amountInvalid": "請輸入有效的金額",

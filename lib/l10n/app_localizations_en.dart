@@ -948,6 +948,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryNameRequired => 'Name is required';
 
   @override
+  String get budgetEditCategory => 'Edit Category';
+
+  @override
+  String get budgetLogTransaction => 'Log Transaction';
+
+  @override
   String amountLabelWithSymbol(String symbol) {
     return 'Amount ($symbol)';
   }

@@ -1766,6 +1766,18 @@ abstract class AppLocalizations {
   /// **'Name is required'**
   String get categoryNameRequired;
 
+  /// No description provided for @budgetEditCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Category'**
+  String get budgetEditCategory;
+
+  /// No description provided for @budgetLogTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Log Transaction'**
+  String get budgetLogTransaction;
+
   /// No description provided for @amountLabelWithSymbol.
   ///
   /// In en, this message translates to:

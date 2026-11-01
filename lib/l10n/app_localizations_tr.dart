@@ -723,7 +723,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get navSplitBill => 'Hesabı Böl';
 
   @override
-  String get navNotifications => 'Bildirimler';
+  String get navNotifications => 'Bildirim';
 
   @override
   String get tourMenuTitle => 'Daha Fazla Seçenek';
@@ -952,6 +952,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get categoryNameRequired => 'Ad gerekli';
+
+  @override
+  String get budgetEditCategory => 'Kategoriyi düzenle';
+
+  @override
+  String get budgetLogTransaction => 'İşlem ekle';
 
   @override
   String amountLabelWithSymbol(String symbol) {

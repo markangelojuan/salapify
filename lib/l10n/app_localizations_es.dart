@@ -725,7 +725,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get navSplitBill => 'Dividir cuentas';
 
   @override
-  String get navNotifications => 'Notificaciones';
+  String get navNotifications => 'Alertas';
 
   @override
   String get tourMenuTitle => 'Más opciones';
@@ -953,6 +953,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get categoryNameRequired => 'El nombre es obligatorio';
+
+  @override
+  String get budgetEditCategory => 'Editar categoría';
+
+  @override
+  String get budgetLogTransaction => 'Registrar transacción';
 
   @override
   String amountLabelWithSymbol(String symbol) {

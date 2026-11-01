@@ -942,6 +942,12 @@ class AppLocalizationsTh extends AppLocalizations {
   String get categoryNameRequired => 'กรุณากรอกชื่อ';
 
   @override
+  String get budgetEditCategory => 'แก้ไขหมวดหมู่';
+
+  @override
+  String get budgetLogTransaction => 'บันทึกรายการ';
+
+  @override
   String amountLabelWithSymbol(String symbol) {
     return 'จำนวนเงิน ($symbol)';
   }

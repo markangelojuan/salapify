@@ -277,6 +277,8 @@
   "categoryNameLabel": "ชื่อหมวดหมู่",
   "categoryNameHint": "เช่น ของใช้ในบ้าน ค่าอินเทอร์เน็ต",
   "categoryNameRequired": "กรุณากรอกชื่อ",
+  "budgetEditCategory": "แก้ไขหมวดหมู่",
+  "budgetLogTransaction": "บันทึกรายการ",
   "amountLabelWithSymbol": "จำนวนเงิน ({symbol})",
   "amountRequired": "กรุณากรอกจำนวนเงิน",
   "amountInvalid": "กรอกจำนวนเงินที่ถูกต้อง",

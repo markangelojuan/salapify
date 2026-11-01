@@ -215,8 +215,12 @@ GoRouter goRouter(Ref ref) {
         name: AppRoutes.expenseForm.name,
         builder: (ctx, state) {
           final existingTransaction = state.extra as TransactionEntry?;
+          final initialCategoryId = state.uri.queryParameters['categoryId'];
           return _withGradientBackground(
-            ExpenseFormScreen(existingTransaction: existingTransaction),
+            ExpenseFormScreen(
+              existingTransaction: existingTransaction,
+              initialCategoryId: initialCategoryId,
+            ),
           );
         },
       ),

@@ -15,6 +15,7 @@ import 'package:salapify/features/settings/presentation/controllers/settings_con
 import 'package:salapify/features/transaction/domain/transaction_totals_calculator.dart';
 import 'package:salapify/features/transaction/presentation/controllers/transaction_controller.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/features/budget/presentation/widgets/category_action_sheet.dart';
 import 'package:salapify/l10n/app_localizations.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:lottie/lottie.dart';
@@ -454,10 +455,26 @@ class _ReorderableCategoryGrid extends ConsumerWidget {
             opacity: dimmed ? 0.5 : 1.0,
             child: CategoryCard(
               category: category,
-              onTap: () => context.pushNamed(
-                AppRoutes.categoryForm.name,
-                extra: category,
-              ),
+              onTap: () async {
+                final action = await showCategoryActionSheet(
+                  context,
+                  category: category,
+                );
+                if (action == null || !context.mounted) return;
+
+                switch (action) {
+                  case CategoryAction.edit:
+                    context.pushNamed(
+                      AppRoutes.categoryForm.name,
+                      extra: category,
+                    );
+                  case CategoryAction.logTransaction:
+                    context.pushNamed(
+                      AppRoutes.expenseForm.name,
+                      queryParameters: {'categoryId': category.id},
+                    );
+                }
+              },
               onToggleComplete: (value) => ref
                   .read(budgetActionsProvider.notifier)
                   .setCompleted(category, value),

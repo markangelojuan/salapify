@@ -479,6 +479,10 @@
   "categoryNameLabel": "Category Name",
   "categoryNameHint": "e.g. Groceries, Internet Bill",
   "categoryNameRequired": "Name is required",
+  "budgetEditCategory": "Edit Category",
+  "@budgetEditCategory": {},
+  "budgetLogTransaction": "Log Transaction",
+  "@budgetLogTransaction": {},
   "amountLabelWithSymbol": "Amount ({symbol})",
   "@amountLabelWithSymbol": {
     "placeholders": {

@@ -18,10 +18,17 @@ import 'package:salapify/features/settings/domain/currency.dart';
 import 'package:salapify/l10n/app_localizations.dart';
 
 class ExpenseFormScreen extends ConsumerStatefulWidget {
-  const ExpenseFormScreen({super.key, this.existingTransaction});
+  const ExpenseFormScreen({
+    super.key,
+    this.existingTransaction,
+    this.initialCategoryId,
+  });
 
   /// Null = add mode. Non-null = edit mode.
   final TransactionEntry? existingTransaction;
+
+  /// Pre-selects a category in add mode (e.g. from the budget screen).
+  final String? initialCategoryId;
 
   bool get isEditing => existingTransaction != null;
 
@@ -49,7 +56,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       text: existing != null ? currency.formatForInput(existing.amount) : '',
     );
     _noteController = TextEditingController(text: existing?.note ?? '');
-    _selectedCategoryId = existing?.categoryId;
+    _selectedCategoryId = existing?.categoryId ?? widget.initialCategoryId;
     _date = existing?.date ?? DateTime.now();
   }
 
