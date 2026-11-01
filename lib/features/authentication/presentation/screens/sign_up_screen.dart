@@ -5,12 +5,14 @@ import 'package:salapify/features/authentication/presentation/widgets/animated_g
 import 'package:salapify/features/authentication/presentation/widgets/sign_up_form.dart';
 import '../widgets/background_decoration.dart';
 import '../widgets/auth_header.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final lightTheme = Theme.of(
       context,
     ).copyWith(brightness: Brightness.light, extensions: [AppColorsExt.light]);
@@ -46,7 +48,7 @@ class SignUpScreen extends StatelessWidget {
                                   title: const AnimatedGreeting(
                                     mode: GreetingMode.welcome,
                                   ),
-                                  subtitle: "Create an account to get started",
+                                  subtitle: l10n.authSignUpSubtitle,
                                 ),
                               )
                               .animate()

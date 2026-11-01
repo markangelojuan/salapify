@@ -10,6 +10,7 @@ import 'package:salapify/features/settings/presentation/controllers/settings_con
 import 'package:salapify/features/settings/presentation/widgets/currency_option_tile.dart';
 import 'package:salapify/features/settings/presentation/widgets/day_selector.dart';
 import 'package:salapify/features/settings/presentation/widgets/selectable_option_tile.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 /// Shown once, right after the avatar picker, for brand-new accounts.
 /// The router forces users here until `preferencesCompleted` is true.
@@ -69,11 +70,7 @@ class _PreferencesSetupScreenState
     if (ref.read(preferencesControllerProvider).isLoading) return;
     await ref
         .read(preferencesControllerProvider.notifier)
-        .complete(
-          period: _period,
-          firstHalfEndDay: _day,
-          currency: _currency,
-        );
+        .complete(period: _period, firstHalfEndDay: _day, currency: _currency);
     // No navigation here: the router redirects to /home once
     // currentAppUserProvider reports preferencesCompleted == true.
   }
@@ -85,6 +82,7 @@ class _PreferencesSetupScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final saveState = ref.watch(preferencesControllerProvider);
 
@@ -114,10 +112,8 @@ class _PreferencesSetupScreenState
                   children: [
                     _StepPage(
                       icon: Icons.calendar_today_rounded,
-                      title: 'How do you budget?',
-                      description:
-                          'Your budget period decides when your category '
-                          'budgets reset.',
+                      title: l10n.prefsBudgetTitle,
+                      description: l10n.prefsBudgetDescription,
                       colors: colors,
                       child: _PeriodStep(
                         period: _period,
@@ -128,10 +124,8 @@ class _PreferencesSetupScreenState
                     ),
                     _StepPage(
                       icon: Icons.payments_rounded,
-                      title: 'Pick your currency',
-                      description:
-                          'This is the symbol shown across your budgets and '
-                          'transactions.',
+                      title: l10n.prefsCurrencyTitle,
+                      description: l10n.prefsCurrencyDescription,
                       colors: colors,
                       child: _CardContainer(
                         child: Column(
@@ -154,7 +148,9 @@ class _PreferencesSetupScreenState
                 child: Column(
                   children: [
                     CommonButton(
-                      label: _isLastStep ? 'Get started' : 'Next',
+                      label: _isLastStep
+                          ? l10n.prefsGetStarted
+                          : l10n.commonNext,
                       btnColor: colors.textPrimary,
                       labelColor: colors.background,
                       onPressed: _onPrimaryPressed,
@@ -170,7 +166,7 @@ class _PreferencesSetupScreenState
                                 ? null
                                 : () => _goToStep(_step - 1),
                             child: Text(
-                              'Back',
+                              l10n.commonBack,
                               style: TextStyle(color: colors.textSecondary),
                             ),
                           ),
@@ -179,14 +175,14 @@ class _PreferencesSetupScreenState
                               ? null
                               : _onSkipPressed,
                           child: Text(
-                            'Use defaults',
+                            l10n.prefsUseDefaults,
                             style: TextStyle(color: colors.textSecondary),
                           ),
                         ),
                       ],
                     ),
                     Text(
-                      'You can change these anytime in Settings',
+                      l10n.prefsChangeLater,
                       style: TextStyle(
                         fontSize: 12,
                         color: colors.textSecondary,
@@ -311,13 +307,14 @@ class _PeriodStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     return _CardContainer(
       child: Column(
         children: [
           SelectableOptionTile(
-            label: 'Monthly',
-            subtitle: 'One budget for the whole month',
+            label: l10n.budgetingPeriodMonthly,
+            subtitle: l10n.prefsMonthlyDesc,
             selected: period == BudgetingPeriod.monthly,
             onTap: () => onPeriodChanged(BudgetingPeriod.monthly),
           ),
@@ -328,8 +325,8 @@ class _PeriodStep extends StatelessWidget {
             color: colorScheme.outlineVariant.withValues(alpha: 0.4),
           ),
           SelectableOptionTile(
-            label: 'Twice a month',
-            subtitle: 'Split into two halves, great if you get paid twice',
+            label: l10n.prefsTwiceMonthly,
+            subtitle: l10n.prefsTwiceMonthlyDesc,
             selected: period == BudgetingPeriod.biMonthly,
             onTap: () => onPeriodChanged(BudgetingPeriod.biMonthly),
           ),
@@ -354,7 +351,7 @@ class _PeriodStep extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(4, 0, 4, 2),
                           child: Text(
-                            'First half ends on',
+                            l10n.settingsFirstHalfEndsOn,
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
@@ -367,8 +364,7 @@ class _PeriodStep extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
                           child: Text(
-                            'Day $day means the first half runs from the 1st '
-                            'to the ${_ordinal(day)}.',
+                            l10n.prefsFirstHalfRange(day),
                             style: TextStyle(
                               fontSize: 12,
                               color: colorScheme.onSurface.withValues(
@@ -386,20 +382,6 @@ class _PeriodStep extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  static String _ordinal(int n) {
-    if (n >= 11 && n <= 13) return '${n}th';
-    switch (n % 10) {
-      case 1:
-        return '${n}st';
-      case 2:
-        return '${n}nd';
-      case 3:
-        return '${n}rd';
-      default:
-        return '${n}th';
-    }
   }
 }
 

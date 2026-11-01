@@ -4,6 +4,7 @@ import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
 import 'package:salapify/features/split_bill/domain/utils/mention_utils.dart';
 import 'package:salapify/features/split_bill/presentation/widgets/member_avatar.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class MessageInput extends StatefulWidget {
   const MessageInput({
@@ -114,6 +115,7 @@ class _MessageInputState extends State<MessageInput> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final matches = _matches;
 
@@ -153,14 +155,9 @@ class _MessageInputState extends State<MessageInput> {
                               color: colors.primary,
                             ),
                           )
-                        : MemberAvatar(
-                            avatarId: e.value.avatarId,
-                            radius: 14,
-                          ),
+                        : MemberAvatar(avatarId: e.value.avatarId, radius: 14),
                     title: Text(e.value.username),
-                    subtitle: isEveryone
-                        ? const Text('Notify all members')
-                        : null,
+                    subtitle: isEveryone ? Text(l10n.chatNotifyAll) : null,
                     onTap: () => _pick(e.key, e.value.username),
                   );
                 },
@@ -176,7 +173,7 @@ class _MessageInputState extends State<MessageInput> {
                   Icons.add_photo_alternate_rounded,
                   color: colors.primary,
                 ),
-                tooltip: 'Add photo',
+                tooltip: l10n.chatAddPhoto,
                 onPressed: widget.onAddPhoto,
               ),
               Expanded(
@@ -187,7 +184,7 @@ class _MessageInputState extends State<MessageInput> {
                       : null,
                   style: TextStyle(fontSize: 14, color: colors.textPrimary),
                   decoration: InputDecoration(
-                    hintText: 'Message the group...',
+                    hintText: l10n.chatMessageHint,
                     hintStyle: TextStyle(
                       color: colors.textSecondary,
                       fontSize: 14,
@@ -221,14 +218,14 @@ class _MessageInputState extends State<MessageInput> {
                   backgroundColor: Colors.transparent,
                 ),
                 icon: Icon(Icons.back_hand_rounded, color: colors.primary),
-                tooltip: 'Poke the group',
+                tooltip: l10n.chatPokeGroup,
                 onPressed: widget.onPoke,
               ),
               const SizedBox(width: 4),
               IconButton.filled(
                 style: IconButton.styleFrom(backgroundColor: colors.primary),
                 icon: Icon(Icons.send_rounded, color: colors.onPrimary),
-                tooltip: 'Send message',
+                tooltip: l10n.chatSendMessage,
                 onPressed: widget.onSend,
               ),
             ],

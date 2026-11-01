@@ -31,6 +31,8 @@ import 'package:salapify/features/authentication/presentation/controllers/auth_c
 
 part 'routes.g.dart';
 
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
 Widget _withGradientBackground(Widget child) {
   return Builder(
     builder: (context) {
@@ -81,6 +83,7 @@ GoRouter goRouter(Ref ref) {
   ref.onDispose(refreshNotifier.dispose);
 
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: "/home",
     debugLogDiagnostics: true,
     redirect: (ctx, state) {

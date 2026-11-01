@@ -9,6 +9,7 @@ import 'package:salapify/features/authentication/presentation/controllers/auth_c
 import 'package:salapify/router/routes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salapify/features/authentication/presentation/controllers/guest_controller.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class SignInForm extends ConsumerStatefulWidget {
   const SignInForm({super.key});
@@ -71,6 +72,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
         data: capturedTheme,
         child: StatefulBuilder(
           builder: (sheetCtx, setSheetState) {
+            final l10n = AppLocalizations.of(sheetCtx);
             Future<void> submit() async {
               if (!dialogFormKey.currentState!.validate()) return;
 
@@ -120,7 +122,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        "Reset your password",
+                        l10n.authResetPasswordTitle,
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 17,
@@ -130,14 +132,14 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                       const SizedBox(height: 12),
                       if (emailSent) ...[
                         Text(
-                          "If an account exists for that email, a reset link is on its way. Check your inbox (and spam folder).",
+                          l10n.authResetLinkSent,
                           style: TextStyle(color: colors.textPrimary),
                         ),
                         const SizedBox(height: 20),
                         SizedBox(
                           width: double.infinity,
                           child: CommonButton(
-                            label: "Done",
+                            label: l10n.commonDone,
                             btnColor: colors.textPrimary,
                             labelColor: colors.background,
                             onPressed: () => Navigator.pop(sheetCtx),
@@ -150,25 +152,25 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Enter your email address and we'll send you a link to reset your password.",
+                                l10n.authResetPasswordPrompt,
                                 style: TextStyle(color: colors.textPrimary),
                               ),
                               const SizedBox(height: 16),
                               CommonTextField(
                                 controller: resetEmailController,
                                 icon: Icons.mail_outline_rounded,
-                                hint: "Enter your email",
-                                label: "Email Address",
+                                hint: l10n.authEmailHint,
+                                label: l10n.authEmailLabel,
                                 textInputAction: TextInputAction.next,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return "Email is required";
+                                    return l10n.authEmailRequired;
                                   }
                                   final emailRegex = RegExp(
                                     r'^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}$',
                                   );
                                   if (!emailRegex.hasMatch(value.trim())) {
-                                    return "Enter a valid email";
+                                    return l10n.authEmailInvalid;
                                   }
                                   return null;
                                 },
@@ -192,13 +194,13 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                                     borderRadius: BorderRadius.circular(14),
                                   ),
                                 ),
-                                child: const Text("Cancel"),
+                                child: Text(l10n.commonCancel),
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: CommonButton(
-                                label: "Send link",
+                                label: l10n.authSendLink,
                                 btnColor: colors.textPrimary,
                                 labelColor: colors.background,
                                 isLoading: isSending,
@@ -221,6 +223,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final authState = ref.watch(authControllerProvider);
     final isEmailSignInLoading = authState.isLoading && !_isGoogleLoading;
@@ -239,16 +242,16 @@ class _SignInFormState extends ConsumerState<SignInForm> {
           CommonTextField(
                 controller: _emailController,
                 icon: Icons.mail_outline_rounded,
-                hint: "Enter your email",
-                label: "Email Address",
+                hint: l10n.authEmailHint,
+                label: l10n.authEmailLabel,
                 textInputAction: TextInputAction.next,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Email is required";
+                    return l10n.authEmailRequired;
                   }
                   final emailRegex = RegExp(r'^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}$');
                   if (!emailRegex.hasMatch(value.trim())) {
-                    return "Enter a valid email";
+                    return l10n.authEmailInvalid;
                   }
                   return null;
                 },
@@ -266,20 +269,20 @@ class _SignInFormState extends ConsumerState<SignInForm> {
           CommonTextField(
                 controller: _passwordController,
                 icon: Icons.lock_open_rounded,
-                hint: "Enter your password",
+                hint: l10n.authPasswordHint,
                 maxCharacters: 128,
                 textInputAction: TextInputAction.done,
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).unfocus();
                 },
-                label: "Password",
+                label: l10n.authPasswordLabel,
                 isPassword: true,
                 isPasswordVisible: _isPasswordVisible,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Password is required";
+                    return l10n.authPasswordRequired;
                   }
-                  if (value.length < 3) return "Invalid password";
+                  if (value.length < 3) return l10n.authPasswordInvalid;
                   return null;
                 },
                 suffix: IconButton(
@@ -315,7 +318,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                 foregroundColor: colors.textPrimary,
               ),
               child: Text(
-                "Forgot password?",
+                l10n.authForgotPassword,
                 style: TextStyle(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.w600,
@@ -327,7 +330,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
           const SizedBox(height: 20),
 
           CommonButton(
-                label: "Sign In",
+                label: l10n.authSignIn,
                 btnColor: colors.textPrimary,
                 labelColor: colors.background,
                 isLoading: isEmailSignInLoading,
@@ -350,7 +353,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Text(
-                  "Or continue with",
+                  l10n.authOrContinueWith,
                   style: TextStyle(color: colors.textSecondary, fontSize: 13),
                 ),
               ),
@@ -379,7 +382,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                           width: 20,
                         ),
                   label: Text(
-                    "Continue with Google",
+                    l10n.authContinueWithGoogle,
                     style: TextStyle(
                       color: colors.textPrimary,
                       fontWeight: FontWeight.w600,
@@ -413,7 +416,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(
-                  "Not part of the club yet? ",
+                  '${l10n.authNotMemberYet} ',
                   style: TextStyle(color: colors.textPrimary),
                 ),
                 TextButton(
@@ -424,10 +427,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     foregroundColor: colors.textPrimary,
                   ),
-                  child: const Text(
-                    "Sign Up",
-                    style: TextStyle(fontWeight: FontWeight.w700),
-                  ),
+                  child: Text(l10n.authSignUp, style: const TextStyle(fontWeight: FontWeight.w700))
                 ),
               ],
             ),
@@ -441,7 +441,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
                 context.go('/home');
               },
               child: Text(
-                "Continue as guest",
+                l10n.authContinueAsGuest,
                 style: TextStyle(color: colors.textSecondary, fontSize: 13),
               ),
             ),

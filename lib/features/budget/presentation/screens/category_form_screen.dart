@@ -16,6 +16,7 @@ import 'package:salapify/features/budget/presentation/constants/category_icons.d
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class CategoryFormScreen extends ConsumerStatefulWidget {
   const CategoryFormScreen({super.key, this.existingCategory});
@@ -39,9 +40,6 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   BudgetPeriod? _period;
   late String _iconKey;
 
-  static const String _fixedHint = 'Same amount each time.';
-  static const String _variableHint = 'Amount may change each time.';
-
   static const int _maxIntegerDigits = 12;
   static const double _maxAmount = 999999999999.99;
 
@@ -52,8 +50,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
     final globalPeriod =
         ref.read(budgetingPeriodSettingProvider).value ??
         BudgetingPeriod.monthly;
-    final currency =
-        ref.read(currencySettingProvider).value ?? AppCurrency.php;
+    final currency = ref.read(currencySettingProvider).value ?? AppCurrency.php;
 
     _nameController.text = existing?.name ?? '';
     _amountController.text = existing != null
@@ -117,9 +114,10 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   }
 
   Future<void> _confirmDelete() async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await CommonConfirmationDialog.confirmDelete(
       context,
-      title: 'Delete Category',
+      title: l10n.categoryDelete,
       itemName: widget.existingCategory!.name,
     );
     if (!confirmed || !mounted) return;
@@ -137,6 +135,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final globalPeriod =
         ref.watch(budgetingPeriodSettingProvider).value ??
@@ -147,7 +146,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isEditing ? 'Edit Category' : 'Add Category'),
+        title: Text(widget.isEditing ? l10n.categoryEdit : l10n.categoryAdd),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -162,11 +161,11 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                   icon: Icons.label_outline_rounded,
                   textInputAction: TextInputAction.done,
                   maxCharacters: 50,
-                  hint: 'e.g. Groceries, Internet Bill',
-                  label: 'Category Name',
+                  hint: l10n.categoryNameHint,
+                  label: l10n.categoryNameLabel,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Name is required';
+                      return l10n.categoryNameRequired;
                     }
                     return null;
                   },
@@ -177,7 +176,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                   icon: Icons.attach_money_rounded,
                   prefixText: currency.symbol,
                   hint: currency.amountHint,
-                  label: 'Amount (${currency.symbol})',
+                  label: l10n.amountLabelWithSymbol(currency.symbol),
                   keyboardType: TextInputType.numberWithOptions(
                     decimal: currency.decimalDigits > 0,
                   ),
@@ -189,14 +188,14 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                   ],
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Amount is required';
+                      return l10n.amountRequired;
                     }
                     final parsed = double.tryParse(value.trim());
                     if (parsed == null || parsed <= 0) {
-                      return 'Enter a valid amount';
+                      return l10n.amountInvalid;
                     }
                     if (parsed > _maxAmount) {
-                      return 'Amount is too large';
+                      return l10n.amountTooLarge;
                     }
                     return null;
                   },
@@ -205,14 +204,14 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                 _buildTypeLabel(colors),
                 const SizedBox(height: 8),
                 SegmentedButton<BudgetCategoryType>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: BudgetCategoryType.fixed,
-                      label: Text('Fixed'),
+                      label: Text(l10n.budgetTypeFixed),
                     ),
                     ButtonSegment(
                       value: BudgetCategoryType.variable,
-                      label: Text('Variable'),
+                      label: Text(l10n.budgetTypeVariable),
                     ),
                   ],
                   selected: {_type},
@@ -220,16 +219,24 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                       setState(() => _type = selection.first),
                 ),
                 const SizedBox(height: 18),
-                Text('Repeat', style: TextStyle(color: colors.textPrimary)),
+                Text(
+                  l10n.categoryRepeat,
+                  style: TextStyle(color: colors.textPrimary),
+                ),
                 const SizedBox(height: 8),
                 _buildFrequencyOptions(globalPeriod),
                 const SizedBox(height: 18),
-                Text('Icon', style: TextStyle(color: colors.textPrimary)),
+                Text(
+                  l10n.categoryIcon,
+                  style: TextStyle(color: colors.textPrimary),
+                ),
                 const SizedBox(height: 8),
                 _buildIconPicker(colors),
                 const SizedBox(height: 28),
                 CommonButton(
-                  label: widget.isEditing ? 'Save Changes' : 'Add Category',
+                  label: widget.isEditing
+                      ? l10n.commonSaveChanges
+                      : l10n.categoryAdd,
                   btnColor: colors.textPrimary,
                   labelColor: colors.background,
                   isLoading: actionsState.isLoading,
@@ -238,7 +245,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                 if (widget.isEditing) ...[
                   const SizedBox(height: 12),
                   CommonButton(
-                    label: "Delete Category",
+                    label: l10n.categoryDelete,
                     btnColor: colors.surface,
                     labelColor: colors.error,
                     onPressed: _confirmDelete,
@@ -253,11 +260,16 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   }
 
   Widget _buildTypeLabel(AppColorsExt colors) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       children: [
-        Text('Type', style: TextStyle(color: colors.textPrimary)),
+        Text(
+          l10n.categoryTypeLabel,
+          style: TextStyle(color: colors.textPrimary),
+        ),
         Tooltip(
-          message: 'Fixed: $_fixedHint\nVariable: $_variableHint',
+          message:
+              '${l10n.categoryFixedTooltip}\n${l10n.categoryVariableTooltip}',
           triggerMode: TooltipTriggerMode.tap,
           showDuration: const Duration(seconds: 6),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -293,14 +305,18 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   }
 
   Widget _buildFrequencyOptions(BudgetingPeriod globalPeriod) {
+    final l10n = AppLocalizations.of(context);
     if (globalPeriod == BudgetingPeriod.monthly) {
       return SegmentedButton<BudgetFrequency>(
-        segments: const [
+        segments: [
           ButtonSegment(
             value: BudgetFrequency.monthly,
-            label: Text('Every month'),
+            label: Text(l10n.categoryEveryMonth),
           ),
-          ButtonSegment(value: BudgetFrequency.once, label: Text('Once')),
+          ButtonSegment(
+            value: BudgetFrequency.once,
+            label: Text(l10n.categoryOnce),
+          ),
         ],
         selected: {_frequency},
         onSelectionChanged: (selection) =>
@@ -313,12 +329,15 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SegmentedButton<BudgetFrequency>(
-          segments: const [
+          segments: [
             ButtonSegment(
               value: BudgetFrequency.biMonthly,
-              label: Text('Every period'),
+              label: Text(l10n.categoryEveryPeriod),
             ),
-            ButtonSegment(value: BudgetFrequency.once, label: Text('Once')),
+            ButtonSegment(
+              value: BudgetFrequency.once,
+              label: Text(l10n.categoryOnce),
+            ),
           ],
           selected: {_frequency},
           onSelectionChanged: (selection) => setState(() {
@@ -333,18 +352,18 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
         if (_frequency == BudgetFrequency.biMonthly) ...[
           const SizedBox(height: 12),
           SegmentedButton<BudgetPeriod>(
-            segments: const [
+            segments: [
               ButtonSegment(
                 value: BudgetPeriod.both,
-                label: Text('Both halves'),
+                label: Text(l10n.categoryBothHalves),
               ),
               ButtonSegment(
                 value: BudgetPeriod.firstHalf,
-                label: Text('First half'),
+                label: Text(l10n.categoryFirstHalf),
               ),
               ButtonSegment(
                 value: BudgetPeriod.secondHalf,
-                label: Text('Second half'),
+                label: Text(l10n.categorySecondHalf),
               ),
             ],
             selected: {_period ?? BudgetPeriod.both},

@@ -5,6 +5,7 @@ import 'package:salapify/features/authentication/data/repositories/auth_reposito
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
 import 'package:salapify/features/split_bill/presentation/widgets/member_avatar.dart';
 import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class BlockedUsersScreen extends ConsumerWidget {
   const BlockedUsersScreen({super.key});
@@ -17,12 +18,15 @@ class BlockedUsersScreen extends ConsumerWidget {
     final currentUid = ref.read(currentUserProvider)?.uid;
     if (currentUid == null) return;
 
+    final l10n = AppLocalizations.of(context);
+
     final confirmed = await CommonConfirmationDialog.show(
       context,
-      title: 'Unblock ${user.username}?',
-      message: 'They will be able to interact with you again.',
-      confirmLabel: 'Unblock',
+      title: l10n.unblockTitle(user.username),
+      message: l10n.unblockMessage,
+      confirmLabel: l10n.unblockAction,
     );
+
     if (!confirmed) return;
 
     try {
@@ -30,7 +34,7 @@ class BlockedUsersScreen extends ConsumerWidget {
           .read(userRepositoryProvider)
           .unblockUser(blockerId: currentUid, blockedId: user.uid);
       if (context.mounted) {
-        CommonSnackbar.showSuccess(context, 'Unblocked ${user.username}');
+        CommonSnackbar.showSuccess(context, l10n.unblockedSnack(user.username));
       }
     } catch (e) {
       if (context.mounted) CommonSnackbar.showError(context, e);
@@ -39,20 +43,21 @@ class BlockedUsersScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final blockedAsync = ref.watch(blockedUsersInfoProvider);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: AppBar(title: const Text('Blocked Users')),
+      appBar: AppBar(title: Text(l10n.blockedUsersTitle)),
       body: blockedAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Failed to load: $err')),
+        error: (err, _) => Center(child: Text(l10n.commonLoadFailed('$err'))),
         data: (blocked) {
           if (blocked.isEmpty) {
             return Center(
               child: Text(
-                'No blocked users',
+                l10n.blockedUsersEmpty,
                 style: TextStyle(
                   color: colorScheme.onSurface.withValues(alpha: 0.55),
                 ),
@@ -90,7 +95,7 @@ class BlockedUsersScreen extends ConsumerWidget {
                     ),
                     TextButton(
                       onPressed: () => _unblock(context, ref, user),
-                      child: const Text('Unblock'),
+                      child: Text(l10n.unblockAction),
                     ),
                   ],
                 ),

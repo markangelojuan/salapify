@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/authentication/presentation/controllers/guest_controller.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class GuestSplitBillPromo extends ConsumerWidget {
   const GuestSplitBillPromo({super.key});
@@ -36,6 +37,7 @@ class GuestSplitBillPromo extends ConsumerWidget {
     WidgetRef ref,
     AppColorsExt colors,
   ) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, _topPadding, 28, _navClearance),
       child: Center(
@@ -60,7 +62,7 @@ class GuestSplitBillPromo extends ConsumerWidget {
                     curve: Curves.easeOut,
                   ),
               const SizedBox(height: 4),
-              ..._textAndCta(ref, colors, landscape: false),
+              ..._textAndCta(ref, colors, l10n, landscape: false),
             ],
           ),
         ),
@@ -74,6 +76,7 @@ class GuestSplitBillPromo extends ConsumerWidget {
     AppColorsExt colors,
     BoxConstraints constraints,
   ) {
+    final l10n = AppLocalizations.of(context);
     final isTablet = constraints.maxWidth > 700;
     final heroHeight = (constraints.maxHeight * 0.7).clamp(
       180.0,
@@ -108,7 +111,7 @@ class GuestSplitBillPromo extends ConsumerWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _textAndCta(ref, colors, landscape: true),
+                    children: _textAndCta(ref, colors, l10n, landscape: true),
                   ),
                 ),
               ),
@@ -120,16 +123,17 @@ class GuestSplitBillPromo extends ConsumerWidget {
   }
 
   List<Widget> _textAndCta(
-    WidgetRef ref,
-    AppColorsExt colors, {
-    required bool landscape,
-  }) {
+  WidgetRef ref,
+  AppColorsExt colors,
+  AppLocalizations l10n, {
+  required bool landscape,
+}) {
     return [
       FittedBox(
             fit: BoxFit.scaleDown,
             alignment: landscape ? Alignment.centerLeft : Alignment.center,
             child: Text(
-              'Chip in. Settle up. Stay friends.',
+              l10n.guestSplitTagline,
               maxLines: 1,
               textAlign: landscape ? TextAlign.start : TextAlign.center,
               style: TextStyle(
@@ -145,8 +149,7 @@ class GuestSplitBillPromo extends ConsumerWidget {
           .slideY(begin: 0.15, end: 0, curve: Curves.easeOut),
       SizedBox(height: landscape ? 8 : 10),
       Text(
-        'Create groups, split bills, and see who owes who. '
-        'Sign in to sync it all with your friends.',
+        l10n.guestSplitDescription,
         textAlign: landscape ? TextAlign.start : TextAlign.center,
         style: TextStyle(
           fontSize: 14,
@@ -161,7 +164,7 @@ class GuestSplitBillPromo extends ConsumerWidget {
         },
         iconAlignment: IconAlignment.end,
         icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-        label: const Text('Sign in to get started'),
+        label: Text(l10n.guestSplitCta),
         style: TextButton.styleFrom(
           foregroundColor: colors.primary,
           backgroundColor: colors.primary.withValues(alpha: 0.12),

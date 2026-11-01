@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/l10n/app_localizations.dart';
+import 'package:salapify/core/localization/locale_text.dart';
 
 class FaqEntry {
   const FaqEntry({required this.question, required this.answer});
@@ -19,198 +21,70 @@ class FaqSection {
   final List<FaqEntry> entries;
 }
 
-const List<FaqSection> kSalapifyFaqs = [
+List<FaqSection> buildSalapifyFaqs(AppLocalizations l10n) => [
   FaqSection(
     icon: Icons.rocket_launch_rounded,
-    title: 'Getting Started',
+    title: l10n.faqSectionStarted,
     entries: [
-      FaqEntry(
-        question: 'What does Salapify do?',
-        answer:
-            'Salapify combines budget tracking with bill splitting. Use the '
-            'Budget tab to allocate money into categories, the Transactions '
-            'tab to log your income and spending, and the Split Bills tab to '
-            'settle shared expenses with friends or other users, all in one '
-            'place.',
-      ),
+      FaqEntry(question: l10n.faqStartedQ1, answer: l10n.faqStartedA1),
     ],
   ),
   FaqSection(
     icon: Icons.pie_chart_rounded,
-    title: 'Budgeting',
+    title: l10n.faqSectionBudgeting,
     entries: [
-      FaqEntry(
-        question: 'How do I create a budget category?',
-        answer:
-            'Tap the + button on the Budget tab. Enter a category name, such '
-            'as Internet Bill or Groceries, then set its allocation. Choose '
-            'whether it\'s Fixed or Variable, and set how often it repeats. '
-            'Fill in the remaining fields, then save your category.',
-      ),
-      FaqEntry(
-        question: 'What\'s the difference between Fixed and Variable?',
-        answer:
-            'Fixed is for predictable costs, like an Internet Bill, where you '
-            'set one exact amount. Variable is for spending that changes, '
-            'like Groceries, where you set a target ceiling instead of an '
-            'exact amount.',
-      ),
-      FaqEntry(
-        question: 'What happens when I check off a category as completed?',
-        answer:
-            'Marking a category as complete automatically logs it as a '
-            'transaction for the current period. The category is also marked '
-            'as done and moved to the bottom of the list.',
-      ),
-      FaqEntry(
-        question: 'Why are some categories dimmed on my Budget tab?',
-        answer:
-            'Dimmed categories belong to the other half of the period when '
-            'you use bi-monthly budgeting. They\'ll come back into focus '
-            'automatically when their half of the period begins.',
-      ),
+      FaqEntry(question: l10n.faqBudgetQ1, answer: l10n.faqBudgetA1),
+      FaqEntry(question: l10n.faqBudgetQ2, answer: l10n.faqBudgetA2),
+      FaqEntry(question: l10n.faqBudgetQ3, answer: l10n.faqBudgetA3),
+      FaqEntry(question: l10n.faqBudgetQ4, answer: l10n.faqBudgetA4),
     ],
   ),
   FaqSection(
     icon: Icons.receipt_long_rounded,
-    title: 'Transactions & Income',
+    title: l10n.faqSectionTransactions,
     entries: [
-      FaqEntry(
-        question: 'How do I add a transaction or income?',
-        answer:
-            'From the Transactions tab, tap + to add an expense or income entry. '
-            'For income, choose whether it\'s One-time or Recurring. Recurring entries are '
-            'added automatically at the start of each new period.',
-      ),
-      FaqEntry(
-        question: 'How do transactions affect my budget?',
-        answer:
-            'When you log a transaction, you assign it to a budget '
-            'category. The amount is automatically deducted from that '
-            'category\'s allocation, so your Budget tab always shows '
-            'what\'s left to spend.',
-      ),
-      FaqEntry(
-        question: 'How do I delete an income or expense?',
-        answer:
-            'Go to the Transactions tab and swipe left on the income or '
-            'expense you want to remove. Confirm the deletion if you are '
-            'prompted.',
-      ),
-      FaqEntry(
-        question: 'Why don\'t I see last period\'s transactions?',
-        answer:
-            'The Budget and Transactions tabs only show totals for the '
-            'current period, based on the budgeting period you set in '
-            'Settings. This keeps the numbers focused on what you can '
-            'still act on.',
-      ),
+      FaqEntry(question: l10n.faqTxQ1, answer: l10n.faqTxA1),
+      FaqEntry(question: l10n.faqTxQ2, answer: l10n.faqTxA2),
+      FaqEntry(question: l10n.faqTxQ3, answer: l10n.faqTxA3),
+      FaqEntry(question: l10n.faqTxQ4, answer: l10n.faqTxA4),
     ],
   ),
   FaqSection(
     icon: Icons.groups_rounded,
-    title: 'Split Bills',
+    title: l10n.faqSectionSplit,
     entries: [
-      FaqEntry(
-        question: 'How do I split a bill with friends?',
-        answer:
-            'Create a group and add members by their usernames. Inside the '
-            'group, create a bill (e.g. "Dinner @ KFC"), enter the amount '
-            'you paid, and split it equally or with custom shares for each '
-            'member.',
-      ),
-      FaqEntry(
-        question: 'How do I delete a Split Bills group?',
-        answer:
-            'If you created the group, swipe left on it to delete it. '
-            'Deleting a group also removes all of its shared bill '
-            'activity.',
-      ),
-      FaqEntry(
-        question: 'How do I leave a Split Bills group?',
-        answer:
-            'If you\'re a member of a group, swipe left on it and choose '
-            'Leave. This removes you from the group without deleting it for '
-            'everyone else.',
-      ),
-      FaqEntry(
-        question: 'Can I share receipts or chat with my group?',
-        answer:
-            'Yes. Every group has an Activity section where you can message '
-            'members and share photos, such as receipts, alongside the bill '
-            'history.',
-      ),
-      FaqEntry(
-        question: 'Do Split Bills affect my personal budget?',
-        answer:
-            'No. Split Bills is kept separate from your Budget and '
-            'Transactions tabs. If you want a settled bill to count toward '
-            'your spending, log it manually as a transaction.',
-      ),
-      FaqEntry(
-        question: 'How do I report or block someone in a group?',
-        answer:
-            'In the group\'s Activity tab, press and hold a member\'s '
-            'avatar next to their message to open a menu with Report and '
-            'Block options. Blocking hides their messages and activity, and '
-            'you can undo it anytime from Settings.',
-      ),
+      FaqEntry(question: l10n.faqSplitQ1, answer: l10n.faqSplitA1),
+      FaqEntry(question: l10n.faqSplitQ2, answer: l10n.faqSplitA2),
+      FaqEntry(question: l10n.faqSplitQ3, answer: l10n.faqSplitA3),
+      FaqEntry(question: l10n.faqSplitQ4, answer: l10n.faqSplitA4),
+      FaqEntry(question: l10n.faqSplitQ5, answer: l10n.faqSplitA5),
+      FaqEntry(question: l10n.faqSplitQ6, answer: l10n.faqSplitA6),
     ],
   ),
   FaqSection(
     icon: Icons.event_repeat_rounded,
-    title: 'Periods & Settings',
+    title: l10n.faqSectionPeriods,
     entries: [
-      FaqEntry(
-        question: 'What\'s the difference between Monthly and Bi-Monthly?',
-        answer:
-            'Monthly resets your budget on the 1st of every month. '
-            'Bi-Monthly splits the month into two halves: you choose the '
-            'day the first half ends, and the rest of the month becomes '
-            'the second half.',
-      ),
-      FaqEntry(
-        question: 'What happens to my categories if I change the period?',
-        answer:
-            'Existing categories are converted to match the new period and '
-            'keep their amounts. Categories tied to a specific half will '
-            'now count toward the full month (or vice versa), so review '
-            'them afterward to check for duplicates.',
-      ),
-      FaqEntry(
-        question: 'How does recurrence work with bi-monthly budgeting?',
-        answer:
-            'A recurring category repeats in every half you\'ve assigned '
-            'it to. If you switch to Monthly, the same item simply repeats '
-            'once a month instead.',
-      ),
+      FaqEntry(question: l10n.faqPeriodQ1, answer: l10n.faqPeriodA1),
+      FaqEntry(question: l10n.faqPeriodQ2, answer: l10n.faqPeriodA2),
+      FaqEntry(question: l10n.faqPeriodQ3, answer: l10n.faqPeriodA3),
     ],
   ),
   FaqSection(
     icon: Icons.notifications_active_rounded,
-    title: 'Notifications',
+    title: l10n.faqSectionNotifications,
     entries: [
-      FaqEntry(
-        question: 'What shows up in the Notifications tab?',
-        answer:
-            'You\'ll see updates on Split Bills activity, as well as '
-            'alerts when a payer disputes or confirms one of your shares.',
-      ),
-      FaqEntry(
-        question: 'Can I turn off notifications?',
-        answer:
-            'Yes. Go to your device Settings > Apps > Salapify > '
-            'Notifications, where you can turn off alerts entirely or '
-            'choose which types of alerts you want to receive.',
-      ),
+      FaqEntry(question: l10n.faqNotifQ1, answer: l10n.faqNotifA1),
+      FaqEntry(question: l10n.faqNotifQ2, answer: l10n.faqNotifA2),
     ],
   ),
 ];
 
 class HelpScreen extends StatefulWidget {
-  const HelpScreen({super.key, this.sections = kSalapifyFaqs});
+  const HelpScreen({super.key, this.sections});
 
-  final List<FaqSection> sections;
+  /// Optional override (e.g. for tests). Defaults to the localized FAQs.
+  final List<FaqSection>? sections;
 
   @override
   State<HelpScreen> createState() => _HelpScreenState();
@@ -226,12 +100,12 @@ class _HelpScreenState extends State<HelpScreen> {
     super.dispose();
   }
 
-  List<FaqSection> get _filtered {
-    if (_query.trim().isEmpty) return widget.sections;
+  List<FaqSection> _filtered(List<FaqSection> all) {
+    if (_query.trim().isEmpty) return all;
 
     final q = _query.toLowerCase();
 
-    return widget.sections
+    return all
         .map((s) {
           final matches = s.entries
               .where(
@@ -249,12 +123,14 @@ class _HelpScreenState extends State<HelpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final sections = _filtered;
+    final all = widget.sections ?? buildSalapifyFaqs(l10n);
+    final sections = _filtered(all);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: AppBar(title: const Text('Help & FAQ')),
+      appBar: AppBar(title: Text(l10n.helpTitle)),
       body: ListView(
         padding: const EdgeInsets.only(top: 8, bottom: 32),
         children: [
@@ -291,6 +167,7 @@ class _SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
@@ -310,7 +187,7 @@ class _SearchField extends StatelessWidget {
         onChanged: onChanged,
         style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
         decoration: InputDecoration(
-          hintText: 'Search for a topic...',
+          hintText: l10n.helpSearchHint,
           hintStyle: TextStyle(
             color: colorScheme.onSurface.withValues(alpha: 0.45),
             fontSize: 14,
@@ -356,7 +233,7 @@ class _SectionLabel extends StatelessWidget {
           Icon(icon, size: 15, color: AppColors.primary),
           const SizedBox(width: 6),
           Text(
-            title.toUpperCase(),
+            title.toUpperCaseL(context),
             style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 12,
@@ -493,6 +370,7 @@ class _NoResults extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Padding(
@@ -508,7 +386,7 @@ class _NoResults extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'No results for "$query"',
+              l10n.helpNoResults(query),
               style: TextStyle(
                 fontSize: 13,
                 color: colorScheme.onSurface.withValues(alpha: 0.5),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 /// Modern pill-style TabBar — rounded track with a sliding filled
 /// indicator, matching the pill/chip language used across Budget and
@@ -11,6 +12,7 @@ class TransactionTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
@@ -45,9 +47,9 @@ class TransactionTabBar extends StatelessWidget {
           fontWeight: FontWeight.w600,
           fontSize: 13,
         ),
-        tabs: const [
-          Tab(text: 'Expenses'),
-          Tab(text: 'Income'),
+        tabs: [
+          Tab(text: l10n.transactionTabExpenses),
+          Tab(text: l10n.transactionTabIncome),
         ],
       ),
     );

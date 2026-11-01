@@ -3,6 +3,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:salapify/features/shell/presentation/screens/home_screen.dart';
 import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
+import 'package:flutter/widgets.dart';
+import 'package:salapify/l10n/app_localizations.dart';
+import 'package:salapify/core/localization/locale_controller.dart';
+import 'package:salapify/core/localization/l10n_lookup.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:salapify/router/routes.dart';
 import 'dart:async';
@@ -28,6 +32,8 @@ class PushNotificationService {
   int _generation = 0;
 
   bool _localInitialized = false;
+
+  AppLocalizations _l10n() => currentL10n(_ref);
 
   static const _channel = AndroidNotificationChannel(
     'default_channel',
@@ -91,7 +97,7 @@ class PushNotificationService {
       await _userRepository.saveFcmToken(uid, token);
       if (gen != _generation) return;
       _savedToken = token;
-
+      unawaited(saveLanguageForUser(uid));
       await _onTokenSub?.cancel();
       if (gen != _generation) return;
       _onTokenSub = _messaging.onTokenRefresh.listen((t) async {
@@ -229,18 +235,28 @@ class PushNotificationService {
     _localInitialized = true;
   }
 
+  /// Stores the effective app language on the user doc so the Cloud Function
+  /// can write push text in it. Never throws.
+  Future<void> saveLanguageForUser(String uid) async {
+    try {
+      await _userRepository.saveLanguage(uid, _l10n().localeName);
+    } catch (_) {}
+  }
+
   Future<void> scheduleMonthlyReminders() async {
+    await ensureLocalNotificationsInitialized();
+    final l10n = _l10n();
     await _scheduleMonthly(
       id: 1001,
       day: 1,
-      title: 'New month, fresh budget 📊',
-      body: 'Update your budget and log any pending transactions.',
+      title: l10n.reminderMonthStartTitle,
+      body: l10n.reminderMonthStartBody,
     );
     await _scheduleMonthly(
       id: 1002,
       day: 15,
-      title: 'Midmonth check-in 💸',
-      body: "Don't forget to log your recent expenses.",
+      title: l10n.reminderMidMonthTitle,
+      body: l10n.reminderMidMonthBody,
     );
   }
 

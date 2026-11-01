@@ -13,7 +13,7 @@ part of 'settings_controller.dart';
 final settingsSyncWarningProvider = SettingsSyncWarningProvider._();
 
 final class SettingsSyncWarningProvider
-    extends $NotifierProvider<SettingsSyncWarning, String?> {
+    extends $NotifierProvider<SettingsSyncWarning, SettingsWarning?> {
   SettingsSyncWarningProvider._()
     : super(
         from: null,
@@ -33,28 +33,28 @@ final class SettingsSyncWarningProvider
   SettingsSyncWarning create() => SettingsSyncWarning();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(String? value) {
+  Override overrideWithValue(SettingsWarning? value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<String?>(value),
+      providerOverride: $SyncValueProvider<SettingsWarning?>(value),
     );
   }
 }
 
 String _$settingsSyncWarningHash() =>
-    r'1c535575e6f13ed247605f703ed58eb8e4a05fbd';
+    r'd388ea78db878bbb4f5818de12dd3fa8890b847d';
 
-abstract class _$SettingsSyncWarning extends $Notifier<String?> {
-  String? build();
+abstract class _$SettingsSyncWarning extends $Notifier<SettingsWarning?> {
+  SettingsWarning? build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<String?, String?>;
+    final ref = this.ref as $Ref<SettingsWarning?, SettingsWarning?>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<String?, String?>,
-              String?,
+              AnyNotifier<SettingsWarning?, SettingsWarning?>,
+              SettingsWarning?,
               Object?,
               Object?
             >;
@@ -87,7 +87,7 @@ final class BudgetingPeriodSettingProvider
 }
 
 String _$budgetingPeriodSettingHash() =>
-    r'3508fe003dd84b310ead2e5b93f65e596b2de51f';
+    r'457d863e96c28583360eff78ad754e25118de0a9';
 
 abstract class _$BudgetingPeriodSetting
     extends $AsyncNotifier<BudgetingPeriod> {
@@ -133,7 +133,7 @@ final class FirstHalfEndDaySettingProvider
 }
 
 String _$firstHalfEndDaySettingHash() =>
-    r'dc2b2a49391a55dba544407e76d35165f18e196f';
+    r'b0699a8fa80ca09bf76ce6d1a65371d7e5496ed3';
 
 abstract class _$FirstHalfEndDaySetting extends $AsyncNotifier<int> {
   FutureOr<int> build();
@@ -177,7 +177,7 @@ final class CurrencySettingProvider
   CurrencySetting create() => CurrencySetting();
 }
 
-String _$currencySettingHash() => r'8533d95fb58d773afa6ca5a03c1e6e528a8725b3';
+String _$currencySettingHash() => r'c91b389af48677ea055084963a03607d04138958';
 
 abstract class _$CurrencySetting extends $AsyncNotifier<AppCurrency> {
   FutureOr<AppCurrency> build();
@@ -223,7 +223,7 @@ final class ReminderNotificationsSettingProvider
 }
 
 String _$reminderNotificationsSettingHash() =>
-    r'1124f36f1cf941710da4b396c8801623021534e2';
+    r'f30a5ce76d301ebb30c751d9c95c5c5c0c8c3f02';
 
 abstract class _$ReminderNotificationsSetting extends $AsyncNotifier<bool> {
   FutureOr<bool> build();

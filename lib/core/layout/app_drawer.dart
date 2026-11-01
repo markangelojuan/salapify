@@ -8,12 +8,14 @@ import 'package:salapify/features/authentication/presentation/controllers/auth_c
 import 'package:salapify/features/authentication/presentation/controllers/guest_controller.dart';
 import 'package:salapify/features/authentication/domain/entities/avatar_option.dart';
 import 'package:salapify/features/premium/data/repositories/entitlement_repository.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final userAsync = ref.watch(currentAppUserProvider);
     final user = userAsync.value;
     final isGuest = ref.watch(guestModeProvider);
@@ -30,10 +32,10 @@ class AppDrawer extends ConsumerWidget {
       child: Column(
         children: [
           _DrawerHeader(
-            username: isGuest ? 'Guest' : (user?.username ?? 'User'),
-            subtitle: isGuest
-                ? 'Sign in to save your data'
-                : (user?.email ?? ''),
+            username: isGuest
+                ? l10n.drawerGuest
+                : (user?.username ?? l10n.accountUserFallback),
+            subtitle: isGuest ? l10n.drawerGuestSubtitle : (user?.email ?? ''),
             avatarId: isGuest ? null : user?.avatarId,
             isPremium: isPremium,
             onTap: isGuest ? goToSignIn : null,
@@ -49,7 +51,7 @@ class AppDrawer extends ConsumerWidget {
                   if (!isGuest)
                     _DrawerItem(
                       icon: Icons.person_outline_rounded,
-                      title: 'Account',
+                      title: l10n.drawerAccount,
                       onTap: () {
                         Navigator.pop(context);
                         context.push('/account');
@@ -57,7 +59,7 @@ class AppDrawer extends ConsumerWidget {
                     ),
                   _DrawerItem(
                     icon: Icons.dark_mode_outlined,
-                    title: 'Dark Mode',
+                    title: l10n.drawerDarkMode,
                     trailing: Switch(
                       value: themeMode == ThemeMode.dark,
                       onChanged: (_) {
@@ -67,7 +69,7 @@ class AppDrawer extends ConsumerWidget {
                   ),
                   _DrawerItem(
                     icon: Icons.settings_outlined,
-                    title: 'Settings',
+                    title: l10n.settingsTitle,
                     onTap: () {
                       Navigator.pop(context);
                       context.push('/settings');
@@ -75,7 +77,7 @@ class AppDrawer extends ConsumerWidget {
                   ),
                   _DrawerItem(
                     icon: Icons.help_outline_rounded,
-                    title: 'Help / FAQ',
+                    title: l10n.drawerHelp,
                     onTap: () {
                       Navigator.pop(context);
                       context.push('/help');
@@ -86,7 +88,7 @@ class AppDrawer extends ConsumerWidget {
                   const SizedBox(height: 8),
                   _DrawerItem(
                     icon: isGuest ? Icons.login_rounded : Icons.logout_rounded,
-                    title: isGuest ? 'Sign In' : 'Logout',
+                    title: isGuest ? l10n.authSignIn : l10n.drawerLogout,
                     destructive: !isGuest,
                     onTap: () {
                       if (isGuest) {
@@ -195,10 +197,7 @@ class _DrawerHeader extends StatelessWidget {
                     ),
                   ),
                   if (onTap != null)
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: AppColors.primary,
-                    ),
+                    Icon(Icons.chevron_right_rounded, color: AppColors.primary),
                 ],
               ),
             ),

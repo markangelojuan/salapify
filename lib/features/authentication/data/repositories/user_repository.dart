@@ -94,6 +94,10 @@ class UserRepository {
     await _users.doc(uid).update({'avatarId': avatarId});
   }
 
+  Future<void> saveLanguage(String uid, String languageCode) async {
+    await _users.doc(uid).update({'languageCode': languageCode});
+  }
+
   Future<String> generateUniqueUsername({required String base}) async {
     final sanitized = base.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
     final fallback = sanitized.isEmpty ? 'user' : sanitized;

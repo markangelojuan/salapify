@@ -4,6 +4,8 @@ import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/core/widgets/common_button.dart';
 import 'package:salapify/features/premium/domain/entities/premium_limit.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/l10n/app_localizations.dart';
+import 'package:salapify/features/premium/presentation/widgets/premium_limit_text.dart';
 import 'package:salapify/features/premium/data/services/purchase_service.dart'
     show PurchaseOutcome;
 
@@ -18,7 +20,7 @@ Future<void> showPremiumUpsellSheet(
   Future<PurchaseOutcome> Function()? onUnlock,
   Future<PurchaseOutcome> Function()? onRestore,
   String priceLabel = '₱39',
-  String benefit = 'One-time Premium unlock',
+  String? benefit,
 }) {
   return showModalBottomSheet<void>(
     context: context,
@@ -50,7 +52,7 @@ class _PremiumUpsellSheet extends StatefulWidget {
   final Future<PurchaseOutcome> Function()? onUnlock;
   final Future<PurchaseOutcome> Function()? onRestore;
   final String priceLabel;
-  final String benefit;
+  final String? benefit;
 
   @override
   State<_PremiumUpsellSheet> createState() => _PremiumUpsellSheetState();
@@ -72,38 +74,23 @@ class _PremiumUpsellSheetState extends State<_PremiumUpsellSheet> {
     try {
       final outcome = await action();
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       switch (outcome) {
         case PurchaseOutcome.granted:
           Navigator.of(context).pop();
         case PurchaseOutcome.alreadyClaimedElsewhere:
-          CommonSnackbar.showError(
-            context,
-            'This purchase is linked to a different account. '
-            'Sign in with that account to restore it.',
-          );
+          CommonSnackbar.showError(context, l10n.premiumErrorOtherAccount);
         case PurchaseOutcome.nothingToRestore:
-          CommonSnackbar.showWarning(
-            context,
-            'No previous purchase found to restore.',
-          );
+          CommonSnackbar.showWarning(context, l10n.premiumNothingToRestore);
         case PurchaseOutcome.cancelled:
           // User backed out of the Play sheet — no message needed.
           break;
         case PurchaseOutcome.notSignedIn:
-          CommonSnackbar.showWarning(
-            context,
-            'Please sign in first to unlock premium.',
-          );
+          CommonSnackbar.showWarning(context, l10n.premiumSignInFirst);
         case PurchaseOutcome.notAvailable:
-          CommonSnackbar.showError(
-            context,
-            'Billing is unavailable right now. Please try again later.',
-          );
+          CommonSnackbar.showError(context, l10n.premiumBillingUnavailable);
         case PurchaseOutcome.transientFailure:
-          CommonSnackbar.showWarning(
-            context,
-            "Purchase didn't go through. Please try again.",
-          );
+          CommonSnackbar.showWarning(context, l10n.premiumPurchaseFailed);
       }
     } catch (e) {
       if (!mounted) return;
@@ -115,6 +102,8 @@ class _PremiumUpsellSheetState extends State<_PremiumUpsellSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final benefit = widget.benefit ?? l10n.premiumUpsellBenefit;
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
 
@@ -153,7 +142,7 @@ class _PremiumUpsellSheetState extends State<_PremiumUpsellSheet> {
 
                   // Headline: the reason the sheet appeared
                   Text(
-                    widget.limit.message,
+                    widget.limit.localizedMessage(l10n),
                     textAlign: TextAlign.center,
                     style: _font(
                       TextStyle(
@@ -183,7 +172,7 @@ class _PremiumUpsellSheetState extends State<_PremiumUpsellSheet> {
                   ),
                   const SizedBox(height: 6),
 
-                  if (widget.benefit.isNotEmpty) ...[
+                  if (benefit.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     Row(
                       mainAxisSize: MainAxisSize.min,
@@ -196,7 +185,7 @@ class _PremiumUpsellSheetState extends State<_PremiumUpsellSheet> {
                         const SizedBox(width: 8),
                         Flexible(
                           child: Text(
-                            widget.benefit,
+                            benefit,
                             style: _font(
                               TextStyle(
                                 fontSize: 14,
@@ -213,7 +202,7 @@ class _PremiumUpsellSheetState extends State<_PremiumUpsellSheet> {
                   const SizedBox(height: 24),
 
                   CommonButton(
-                    label: 'Buy — ${widget.priceLabel}',
+                    label: l10n.premiumBuyWithPrice(widget.priceLabel),
                     btnColor: colors.textPrimary,
                     labelColor: colors.background,
                     isLoading: _busy,
@@ -221,7 +210,7 @@ class _PremiumUpsellSheetState extends State<_PremiumUpsellSheet> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Support the app with a one-time purchase.',
+                    l10n.premiumUpsellSupport,
                     textAlign: TextAlign.center,
                     style: _font(
                       TextStyle(fontSize: 12, color: colors.textSecondary),
@@ -239,7 +228,7 @@ class _PremiumUpsellSheetState extends State<_PremiumUpsellSheet> {
                             ? null
                             : () => Navigator.of(context).pop(),
                         child: Text(
-                          'Close',
+                          l10n.commonClose,
                           style: _font(TextStyle(color: colors.textSecondary)),
                         ),
                       ),
@@ -249,7 +238,7 @@ class _PremiumUpsellSheetState extends State<_PremiumUpsellSheet> {
                               ? null
                               : () => _run(widget.onRestore!),
                           child: Text(
-                            'Restore purchase',
+                            l10n.premiumRestorePurchase,
                             style: _font(
                               TextStyle(
                                 fontSize: 13,
@@ -279,6 +268,8 @@ class _PremiumPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -295,7 +286,7 @@ class _PremiumPill extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(
-            'Be premium',
+            l10n.premiumHeaderBadge,
             style: _font(
               TextStyle(
                 fontSize: 13,

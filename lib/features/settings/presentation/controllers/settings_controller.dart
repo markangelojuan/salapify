@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:salapify/core/localization/l10n_lookup.dart';
 import 'package:salapify/core/services/connectivity_service.dart';
 import 'package:salapify/core/widgets/global_loading.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
@@ -10,6 +11,7 @@ import 'package:salapify/features/settings/data/services/settings_sync_service.d
 import 'package:salapify/features/settings/domain/budgeting_period.dart';
 import 'package:salapify/features/settings/domain/period_key.dart';
 import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/features/settings/domain/settings_warning.dart';
 import 'package:salapify/core/services/push_notification_service.dart';
 
 part 'settings_controller.g.dart';
@@ -17,16 +19,15 @@ part 'settings_controller.g.dart';
 @Riverpod(keepAlive: true)
 class SettingsSyncWarning extends _$SettingsSyncWarning {
   @override
-  String? build() => null;
+  SettingsWarning? build() => null;
 
-  void set(String? message) => state = message;
+  void set(SettingsWarning? warning) => state = warning;
 }
 
 @Riverpod(keepAlive: true)
 class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
   @override
   Future<BudgetingPeriod> build() {
-
     final uid = ref.watch(currentUserProvider)?.uid;
     return ref.watch(settingsRepositoryProvider).getLocalBudgetingPeriod(uid);
   }
@@ -48,7 +49,7 @@ class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
       // Firestore push further down stays outside it, so a slow network can
       // never keep the whole app frozen.
       await ref.read(globalLoadingProvider.notifier).run(
-        'Converting your categories…',
+        currentL10n(ref).settingsConvertingCategories,
         () async {
           await ref
               .read(budgetActionsProvider.notifier)
@@ -78,11 +79,7 @@ class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
             .read(settingsSyncServiceProvider)
             .pushBudgetingPeriod(uid, period);
       } catch (e) {
-        _warnIfRealError(
-          e,
-          fallback:
-              "Budgeting period saved on this device, but couldn't sync to your account.",
-        );
+        _warnIfRealError(e, warning: SettingsWarning.periodSyncFailed);
       }
     } catch (e, st) {
       // ignore: invalid_use_of_internal_member
@@ -90,10 +87,10 @@ class BudgetingPeriodSetting extends _$BudgetingPeriodSetting {
     }
   }
 
-  void _warnIfRealError(Object e, {required String fallback}) {
+  void _warnIfRealError(Object e, {required SettingsWarning warning}) {
     if (!_isOnline || e is TimeoutException) return;
     // Online but still failed - a real error
-    ref.read(settingsSyncWarningProvider.notifier).set(fallback);
+    ref.read(settingsSyncWarningProvider.notifier).set(warning);
   }
 }
 
@@ -126,17 +123,13 @@ class FirstHalfEndDaySetting extends _$FirstHalfEndDaySetting {
     try {
       await ref.read(settingsSyncServiceProvider).pushFirstHalfEndDay(uid, day);
     } catch (e) {
-      _warnIfRealError(
-        e,
-        fallback:
-            "Setting saved on this device, but couldn't sync to your account.",
-      );
+      _warnIfRealError(e, warning: SettingsWarning.genericSyncFailed);
     }
   }
 
-  void _warnIfRealError(Object e, {required String fallback}) {
+  void _warnIfRealError(Object e, {required SettingsWarning warning}) {
     if (!_isOnline || e is TimeoutException) return;
-    ref.read(settingsSyncWarningProvider.notifier).set(fallback);
+    ref.read(settingsSyncWarningProvider.notifier).set(warning);
   }
 }
 
@@ -168,17 +161,13 @@ class CurrencySetting extends _$CurrencySetting {
     try {
       await ref.read(settingsSyncServiceProvider).pushCurrency(uid, currency);
     } catch (e) {
-      _warnIfRealError(
-        e,
-        fallback:
-            "Currency saved on this device, but couldn't sync to your account.",
-      );
+      _warnIfRealError(e, warning: SettingsWarning.currencySyncFailed);
     }
   }
 
-  void _warnIfRealError(Object e, {required String fallback}) {
+  void _warnIfRealError(Object e, {required SettingsWarning warning}) {
     if (!_isOnline || e is TimeoutException) return;
-    ref.read(settingsSyncWarningProvider.notifier).set(fallback);
+    ref.read(settingsSyncWarningProvider.notifier).set(warning);
   }
 }
 
@@ -199,10 +188,9 @@ class ReminderNotificationsSetting extends _$ReminderNotificationsSetting {
         // Leave the switch as it was; don't persist "enabled" if the
         // user denied the OS prompt.
         state = previous;
-        ref.read(settingsSyncWarningProvider.notifier).set(
-          'Notifications are turned off for Salapify. '
-          'Enable them in your phone settings to get reminders.',
-        );
+        ref
+            .read(settingsSyncWarningProvider.notifier)
+            .set(SettingsWarning.notificationsDisabled);
         return;
       }
     }

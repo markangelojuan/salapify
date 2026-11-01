@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:salapify/core/theme/app_colors.dart';
 import 'package:salapify/features/transaction/domain/entities/income_period.dart';
 import 'package:salapify/features/transaction/domain/entities/income_source.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class RecurringIncomeRow extends StatelessWidget {
   const RecurringIncomeRow({
@@ -15,33 +16,20 @@ class RecurringIncomeRow extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onDelete;
 
-  String get _frequencyLabel {
-    if (!source.isRecurring) return 'One-time';
+  String _frequencyLabel(AppLocalizations l10n) {
+    if (!source.isRecurring) return l10n.budgetFreqOnce;
     final now = DateTime.now();
     final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-    final effectiveDay = (source.recurringDay ?? 1).clamp(1, daysInMonth);
-    final isClamped = effectiveDay != source.recurringDay;
-    return isClamped
-        ? 'Every month on day ${source.recurringDay} (${_ordinal(effectiveDay)} this month)'
-        : 'Every month on day ${source.recurringDay}';
-  }
-
-  String _ordinal(int day) {
-    if (day >= 11 && day <= 13) return '${day}th';
-    switch (day % 10) {
-      case 1:
-        return '${day}st';
-      case 2:
-        return '${day}nd';
-      case 3:
-        return '${day}rd';
-      default:
-        return '${day}th';
-    }
+    final day = source.recurringDay ?? 1;
+    final effectiveDay = day.clamp(1, daysInMonth);
+    return effectiveDay != day
+        ? l10n.incomeEveryMonthOnDayClamped(day, effectiveDay)
+        : l10n.incomeEveryMonthOnDay(day);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
 
     return Dismissible(
@@ -89,7 +77,7 @@ class RecurringIncomeRow extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      _frequencyLabel,
+                      _frequencyLabel(l10n),
                       style: TextStyle(
                         fontSize: 12,
                         color: colors.textSecondary,

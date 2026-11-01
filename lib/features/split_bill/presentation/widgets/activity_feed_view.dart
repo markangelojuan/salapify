@@ -9,6 +9,8 @@ import 'package:salapify/features/split_bill/domain/utils/mention_utils.dart';
 import 'package:salapify/features/split_bill/presentation/widgets/member_avatar.dart';
 import 'package:salapify/features/authentication/domain/entities/avatar_option.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:salapify/l10n/app_localizations.dart';
+import 'package:salapify/features/authentication/presentation/widgets/avatar_name_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ActivityFeedView extends StatelessWidget {
@@ -36,55 +38,62 @@ class ActivityFeedView extends StatelessWidget {
   final void Function(Offset position, String userId, String username)
   onAvatarLongPress;
 
-  String _senderName(ActivityEntry entry) =>
-      names[entry.senderId] ?? 'A former member';
+  String _senderName(ActivityEntry entry, AppLocalizations l10n) =>
+      names[entry.senderId] ?? l10n.activityFormerMemberCap;
 
-  String? _targetName(String? targetId) =>
-      targetId != null ? (names[targetId] ?? 'a former member') : null;
+  String? _targetName(String? targetId, AppLocalizations l10n) =>
+      targetId != null ? (names[targetId] ?? l10n.activityFormerMember) : null;
 
-  String _label(ActivityEntry entry) {
-    final senderName = _senderName(entry);
+  String _label(ActivityEntry entry, AppLocalizations l10n) {
+    final senderName = _senderName(entry, l10n);
     switch (entry.type) {
       case ActivityType.message:
         return entry.text ?? '';
       case ActivityType.billAdded:
-        final title = entry.metadata?['billTitle'] ?? 'a bill';
+        final title = '${entry.metadata?['billTitle'] ?? l10n.activityABill}';
         final amount = entry.metadata?['amount'];
         final amountValue = amount is num
             ? amount
             : num.tryParse(amount?.toString() ?? '');
-        return '$senderName added "$title"'
-            '${amountValue != null ? ' — ${currency.format(amountValue)}' : ''}';
+        return amountValue != null
+            ? l10n.activityBillAddedAmount(
+                senderName,
+                title,
+                currency.format(amountValue),
+              )
+            : l10n.activityBillAdded(senderName, title);
       case ActivityType.paymentMarked:
-        return '$senderName marked their share as paid';
+        return l10n.activityPaymentMarked(senderName);
       case ActivityType.paymentConfirmed:
         {
           final targetId = entry.metadata?['targetUserId'] as String?;
-          final targetName = _targetName(targetId);
+          final targetName = _targetName(targetId, l10n);
           return targetName != null
-              ? '$senderName confirmed $targetName\'s payment'
-              : '$senderName confirmed a payment';
+              ? l10n.activityPaymentConfirmedTarget(senderName, targetName)
+              : l10n.activityPaymentConfirmed(senderName);
         }
       case ActivityType.paymentDisputed:
         {
           final targetId = entry.metadata?['targetUserId'] as String?;
-          final targetName = _targetName(targetId);
+          final targetName = _targetName(targetId, l10n);
           return targetName != null
-              ? '$senderName disputed $targetName\'s payment'
-              : '$senderName disputed a payment';
+              ? l10n.activityPaymentDisputedTarget(senderName, targetName)
+              : l10n.activityPaymentDisputed(senderName);
         }
       case ActivityType.memberAdded:
         final targetId = entry.metadata?['targetUserId'] as String?;
-        final targetName = _targetName(targetId) ?? 'someone';
-        return '$senderName added $targetName to the group';
+        final targetName = _targetName(targetId, l10n) ?? l10n.activitySomeone;
+        return l10n.activityMemberAdded(senderName, targetName);
       case ActivityType.poke:
         final character =
-            avatarById(members[entry.senderId]?.avatarId)?.name ??
-            'Former Beast';
+            avatarById(
+              members[entry.senderId]?.avatarId,
+            )?.localizedName(l10n) ??
+            l10n.activityFormerBeast;
         final article = 'AEIOU'.contains(character[0]) ? 'An' : 'A';
-        return '$article $character poked the group!';
+        return l10n.activityPoke(article, character);
       case ActivityType.photo:
-        return '$senderName sent a photo';
+        return l10n.activityPhotoSent(senderName);
     }
   }
 
@@ -126,18 +135,18 @@ class ActivityFeedView extends StatelessWidget {
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
-  String _dayLabel(DateTime date) {
+  String _dayLabel(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
     final target = DateTime(date.year, date.month, date.day);
 
-    if (target == today) return 'Today';
-    if (target == yesterday) return 'Yesterday';
+    if (target == today) return l10n.dateToday;
+    if (target == yesterday) return l10n.dateYesterday;
     // Only show year if it's not the current year.
-    return DateFormat(
-      target.year == now.year ? 'MMM d' : 'MMM d, yyyy',
-    ).format(target);
+    return target.year == now.year
+        ? l10n.dateMonthDay(target)
+        : l10n.dateMonthDayYear(target);
   }
 
   List<Object> _buildDisplayItems(List<ActivityEntry> source) {
@@ -155,6 +164,7 @@ class ActivityFeedView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final visibleActivity = activity
         .where((e) => !blockedUserIds.contains(e.senderId))
@@ -163,7 +173,7 @@ class ActivityFeedView extends StatelessWidget {
     if (visibleActivity.isEmpty) {
       return Center(
         child: Text(
-          'No activity yet',
+          l10n.activityEmpty,
           style: TextStyle(fontSize: 12, color: colors.textSecondary),
         ),
       );
@@ -193,7 +203,7 @@ class ActivityFeedView extends StatelessWidget {
         final item = displayItems[index];
 
         if (item is DateTime) {
-          return _DayDivider(label: _dayLabel(item));
+          return _DayDivider(label: _dayLabel(item, l10n));
         }
 
         final entry = item as ActivityEntry;
@@ -208,13 +218,13 @@ class ActivityFeedView extends StatelessWidget {
             child: Center(
               child: _SystemActivityPill(
                 type: entry.type,
-                label: _label(entry),
+                label: _label(entry, l10n),
               ),
             ),
           );
         }
 
-        final senderName = _senderName(entry);
+        final senderName = _senderName(entry, l10n);
         final isCurrentMember = members.containsKey(entry.senderId);
 
         return Padding(
@@ -418,20 +428,18 @@ class _ActivityPhoto extends StatelessWidget {
   bool get _isExpired =>
       expiresAt != null && DateTime.now().isAfter(expiresAt!);
 
-  String _expiryLabel() {
+  String _expiryLabel(AppLocalizations l10n) {
     final exp = expiresAt;
-    if (exp == null) return 'This photo will expire in 3 days';
+    if (exp == null) return l10n.photoExpiresIn3Days;
     final mins = exp.difference(DateTime.now()).inMinutes;
-    if (mins >= 1440) {
-      final days = (mins / 1440).ceil();
-      return 'Expires in $days day${days == 1 ? '' : 's'}';
-    }
-    if (mins >= 60) return 'Expires in ${mins ~/ 60}h';
-    return 'Expires in ${mins < 1 ? 1 : mins}m';
+    if (mins >= 1440) return l10n.photoExpiresInDays((mins / 1440).ceil());
+    if (mins >= 60) return l10n.photoExpiresInHours(mins ~/ 60);
+    return l10n.photoExpiresInMinutes(mins < 1 ? 1 : mins);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
 
     // Optimistic placeholder — shown immediately on send, before the
@@ -472,7 +480,7 @@ class _ActivityPhoto extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
         ),
         child: Text(
-          'Photo expired',
+          l10n.photoExpired,
           style: TextStyle(color: colors.textSecondary, fontSize: 13),
         ),
       );
@@ -510,7 +518,7 @@ class _ActivityPhoto extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 4),
               color: Colors.black.withValues(alpha: 0.45),
               child: Text(
-                _expiryLabel(),
+                _expiryLabel(l10n),
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white, fontSize: 10),
               ),
@@ -611,14 +619,15 @@ class _MessageRichTextState extends State<_MessageRichText> {
     final go = await showDialog<bool>(
       context: context,
       builder: (ctx) {
+        final l10n = AppLocalizations.of(ctx);
         final c = Theme.of(ctx).extension<AppColorsExt>()!;
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: const Text('Open link?'),
+          title: Text(l10n.linkOpenTitle),
           content: Text(
-            'You\'re about to leave Salapify and open:\n\n$uri',
+            l10n.linkOpenMessage('$uri'),
             maxLines: 6,
             overflow: TextOverflow.ellipsis,
           ),
@@ -631,7 +640,7 @@ class _MessageRichTextState extends State<_MessageRichText> {
                 side: BorderSide(color: c.border),
                 shape: const StadiumBorder(),
               ),
-              child: const Text('Cancel'),
+              child: Text(l10n.commonCancel),
             ),
             OutlinedButton(
               onPressed: () => Navigator.pop(ctx, true),
@@ -640,7 +649,7 @@ class _MessageRichTextState extends State<_MessageRichText> {
                 side: BorderSide(color: c.primary),
                 shape: const StadiumBorder(),
               ),
-              child: const Text('Open'),
+              child: Text(l10n.commonOpen),
             ),
           ],
         );
@@ -659,9 +668,9 @@ class _MessageRichTextState extends State<_MessageRichText> {
 
   void _showOpenError() {
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Couldn\'t open this link.')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context).linkOpenFailed)),
+    );
   }
 
   void _addPlain(List<InlineSpan> spans, String segment) {

@@ -17,6 +17,7 @@ import 'package:salapify/features/split_bill/presentation/screens/bill_form_scre
 import 'package:salapify/features/premium/presentation/widgets/premium_upsell_sheet.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:salapify/features/premium/data/services/purchase_service.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class BillsCarousel extends ConsumerWidget {
   const BillsCarousel({
@@ -90,6 +91,7 @@ class _AddBillCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final creatorIsPremiumAsync = ref.watch(
       isGroupCreatorPremiumProvider(group.createdBy),
@@ -113,9 +115,9 @@ class _AddBillCard extends ConsumerWidget {
                   if (isPremium) {
                     CommonSnackbar.showWarning(
                       context,
-                      'This group has reached its limit of '
-                      '${SplitBillLimits.premiumMaxBillsPerGroup} bills. '
-                      'Delete a bill to add a new one.',
+                      l10n.billLimitReachedPremium(
+                        SplitBillLimits.premiumMaxBillsPerGroup,
+                      ),
                     );
                   } else {
                     _showPremiumUpsell(context, ref);
@@ -147,7 +149,7 @@ class _AddBillCard extends ConsumerWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Add Bill',
+                    l10n.billAdd,
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
@@ -179,6 +181,7 @@ class _BillCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final currency =
         ref.watch(currencySettingProvider).value ?? AppCurrency.php;
@@ -244,7 +247,9 @@ class _BillCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Total ${currency.formatCompactWithSymbol(bill.totalAmount)}',
+                  l10n.billTotal(
+                    currency.formatCompactWithSymbol(bill.totalAmount),
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -255,7 +260,9 @@ class _BillCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Paid by ${isPayer ? "you" : (names[bill.paidBy] ?? '...')}',
+                  isPayer
+                      ? l10n.billPaidByYou
+                      : l10n.billPaidByName(names[bill.paidBy] ?? '...'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontSize: 11, color: colors.textSecondary),
@@ -274,6 +281,7 @@ class _BillCard extends ConsumerWidget {
   }
 
   Widget _buildPayerStatusRow(BuildContext context, AppColorsExt colors) {
+    final l10n = AppLocalizations.of(context);
     final total = bill.shares.length;
     final confirmed = bill.shares
         .where((s) => s.status == PaymentStatus.confirmed)
@@ -293,16 +301,16 @@ class _BillCard extends ConsumerWidget {
     );
 
     if (confirmed == total) {
-      return label('All confirmed', colors.primary);
+      return label(l10n.billAllConfirmed, colors.primary);
     }
     if (disputed > 0) {
-      return label('$disputed disputed — tap to review', colors.error);
+      return label(l10n.billDisputedReview(disputed), colors.error);
     }
     if (pendingConfirmation > 0) {
-      return label('$pendingConfirmation waiting on you', colors.warning);
+      return label(l10n.billWaitingOnYou(pendingConfirmation), colors.warning);
     }
     return Text(
-      'Waiting on payments',
+      l10n.billWaitingPayments,
       style: TextStyle(fontSize: 11, color: colors.textSecondary),
     );
   }
@@ -313,20 +321,21 @@ class _BillCard extends ConsumerWidget {
     BillShare share,
     AppColorsExt colors,
   ) {
+    final l10n = AppLocalizations.of(context);
     final currency =
         ref.watch(currencySettingProvider).value ?? AppCurrency.php;
     final status = share.status;
     final amount = share.amountOwed;
 
     if (status == PaymentStatus.confirmed) {
-      return _StatusPill(label: 'Settled', color: colors.primary);
+      return _StatusPill(label: l10n.splitSettled, color: colors.primary);
     }
     if (status == PaymentStatus.disputed) {
       return Row(
         children: [
           Expanded(
             child: Text(
-              'Disputed',
+              l10n.billDisputed,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -352,9 +361,9 @@ class _BillCard extends ConsumerWidget {
                   status: PaymentStatus.markedPaid,
                   payerId: bill.paidBy,
                 ),
-            child: const Text(
-              'Mark paid again',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            child: Text(
+              l10n.billMarkPaidAgain,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -362,7 +371,7 @@ class _BillCard extends ConsumerWidget {
     }
     if (status == PaymentStatus.markedPaid) {
       return Text(
-        'Waiting on confirmation',
+        l10n.billWaitingConfirmation,
         style: TextStyle(fontSize: 11, color: colors.textSecondary),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -374,7 +383,9 @@ class _BillCard extends ConsumerWidget {
       children: [
         Expanded(
           child: Text(
-            'You owe ${currency.formatCompactWithSymbol(amount, threshold: 10000)}',
+            l10n.splitYouOwe(
+              currency.formatCompactWithSymbol(amount, threshold: 10000),
+            ),
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 12,
@@ -400,9 +411,9 @@ class _BillCard extends ConsumerWidget {
                 status: PaymentStatus.markedPaid,
                 payerId: bill.paidBy,
               ),
-          child: const Text(
-            'Mark paid',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          child: Text(
+            l10n.billMarkPaid,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),
         ),
       ],

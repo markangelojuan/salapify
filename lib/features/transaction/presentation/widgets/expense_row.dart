@@ -6,6 +6,7 @@ import 'package:salapify/features/budget/presentation/constants/category_icons.d
 import 'package:salapify/features/settings/domain/currency.dart';
 import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:salapify/features/transaction/domain/entities/transaction_entry.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class ExpenseRow extends ConsumerWidget {
   const ExpenseRow({
@@ -27,9 +28,19 @@ class ExpenseRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final currency =
         ref.watch(currencySettingProvider).value ?? AppCurrency.php;
+
+    // Auto-generated notes are stored in English (see budget_controller's
+    // setCompleted), so swap in the localized text at display time. A note
+    // the user has edited is shown exactly as typed.
+    final note = transaction.note;
+    final displayNote =
+        (transaction.isAutoFilled && note == 'Remaining budget (auto)')
+        ? l10n.transactionAutoNote
+        : note;
 
     return Dismissible(
       key: ValueKey(transaction.id),
@@ -81,18 +92,17 @@ class ExpenseRow extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      category?.name ?? 'Deleted category',
+                      category?.name ?? l10n.transactionDeletedCategory,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                         color: colors.textPrimary,
                       ),
                     ),
-                    if (transaction.note != null &&
-                        transaction.note!.isNotEmpty) ...[
+                    if (displayNote != null && displayNote.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       _TruncatedNote(
-                        text: transaction.note!,
+                        text: displayNote,
                         style: TextStyle(
                           fontSize: 12,
                           color: colors.textSecondary,

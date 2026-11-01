@@ -12,6 +12,7 @@ import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
 import 'package:salapify/features/split_bill/presentation/controllers/split_bill_controller.dart';
 import 'package:salapify/features/split_bill/presentation/widgets/member_avatar.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_bill_limits.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class GroupFormScreen extends ConsumerStatefulWidget {
   const GroupFormScreen({super.key, this.existingGroup});
@@ -60,15 +61,17 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
 
     try {
       final entries = await Future.wait(
-        otherIds.map((id) async {
-          final username = await userRepo.getUsername(id);
-          return MapEntry(id, username ?? 'Unknown');
-        }),
+        otherIds.map(
+          (id) async => MapEntry(id, await userRepo.getUsername(id)),
+        ),
       );
 
       if (!mounted) return;
+      final unknown = AppLocalizations.of(context).splitUnknownUser;
       setState(() {
-        _selectedMembers.addEntries(entries);
+        _selectedMembers.addEntries(
+          entries.map((e) => MapEntry(e.key, e.value ?? unknown)),
+        );
         _isLoadingMembers = false;
       });
     } catch (e) {
@@ -181,11 +184,12 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     ref.watch(blockedAndBlockingIdsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(_isEditing ? 'Edit Group' : 'New Group')),
+      appBar: AppBar(title: Text(_isEditing ? l10n.splitGroupEdit : l10n.splitGroupNew)),
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -197,20 +201,20 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
                 icon: Icons.groups_rounded,
                 textInputAction: TextInputAction.done,
                 maxCharacters: 55,
-                hint: 'e.g. Roommates, Baguio Trip',
-                label: 'Group name',
+                hint: l10n.splitGroupNameHint,
+                label: l10n.splitGroupNameLabel,
                 validator: (value) => (value == null || value.trim().isEmpty)
-                    ? 'Enter a group name'
+                    ? l10n.splitGroupNameRequired
                     : null,
               ),
               const SizedBox(height: 18),
-              Text('Add members', style: TextStyle(color: colors.textPrimary)),
+              Text(l10n.splitAddMembers, style: TextStyle(color: colors.textPrimary)),
               const SizedBox(height: 8),
               if (_atMemberLimit)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Text(
-                    'Group is full (${SplitBillLimits.maxGroupMembers}/${SplitBillLimits.maxGroupMembers} members)',
+                    l10n.splitGroupFull(SplitBillLimits.maxGroupMembers),
                     style: TextStyle(fontSize: 13, color: colors.textSecondary),
                   ),
                 )
@@ -246,7 +250,7 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'No user found',
+                                l10n.splitNoUserFound,
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: colors.textSecondary,
@@ -311,7 +315,7 @@ class _GroupFormScreenState extends ConsumerState<GroupFormScreen> {
               ],
               const SizedBox(height: 28),
               CommonButton(
-                label: _isEditing ? 'Save Changes' : 'Create Group',
+                label: _isEditing ? l10n.commonSaveChanges : l10n.splitGroupCreate,
                 btnColor: colors.textPrimary,
                 labelColor: colors.background,
                 isLoading: _isSaving,
@@ -341,6 +345,7 @@ class _MemberSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
 
     return Container(
@@ -359,7 +364,7 @@ class _MemberSearchField extends StatelessWidget {
             horizontal: 14,
             vertical: 14,
           ),
-          hintText: 'Search by username',
+          hintText: l10n.splitSearchByUsername,
           hintStyle: TextStyle(color: colors.textSecondary, fontSize: 14),
           prefixIcon: Icon(
             Icons.search_rounded,

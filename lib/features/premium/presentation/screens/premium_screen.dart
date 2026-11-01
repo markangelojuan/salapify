@@ -8,6 +8,7 @@ import 'package:salapify/features/budget/domain/entities/budget_limits.dart';
 import 'package:salapify/features/premium/data/repositories/entitlement_repository.dart';
 import 'package:salapify/features/premium/data/services/purchase_service.dart';
 import 'package:salapify/features/split_bill/domain/entities/split_bill_limits.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 TextStyle _font(TextStyle style) =>
     GoogleFonts.plusJakartaSans(textStyle: style);
@@ -42,38 +43,23 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
     try {
       final outcome = await action();
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       switch (outcome) {
         case PurchaseOutcome.granted:
           CommonSnackbar.showSuccess(context, successMessage);
         case PurchaseOutcome.alreadyClaimedElsewhere:
-          CommonSnackbar.showError(
-            context,
-            'This purchase is linked to a different account. '
-            'Sign in with that account to restore it.',
-          );
+          CommonSnackbar.showError(context, l10n.premiumErrorOtherAccount);
         case PurchaseOutcome.nothingToRestore:
-          CommonSnackbar.showWarning(
-            context,
-            'No previous purchase found to restore.',
-          );
+          CommonSnackbar.showWarning(context, l10n.premiumNothingToRestore);
         case PurchaseOutcome.cancelled:
           // User backed out of the Play sheet — no message needed.
           break;
         case PurchaseOutcome.notSignedIn:
-          CommonSnackbar.showWarning(
-            context,
-            'Please sign in first to unlock premium.',
-          );
+          CommonSnackbar.showWarning(context, l10n.premiumSignInFirst);
         case PurchaseOutcome.notAvailable:
-          CommonSnackbar.showError(
-            context,
-            'Billing is unavailable right now. Please try again later.',
-          );
+          CommonSnackbar.showError(context, l10n.premiumBillingUnavailable);
         case PurchaseOutcome.transientFailure:
-          CommonSnackbar.showWarning(
-            context,
-            "Purchase didn't go through. Please try again.",
-          );
+          CommonSnackbar.showWarning(context, l10n.premiumPurchaseFailed);
       }
     } catch (e) {
       if (!mounted) return;
@@ -85,6 +71,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final isPremium = ref.watch(isPremiumProvider).value ?? false;
     final purchaseService = ref.read(purchaseServiceProvider);
@@ -95,7 +82,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          'Premium',
+          l10n.accountPremium,
           style: _font(
             TextStyle(fontWeight: FontWeight.w700, color: colors.textPrimary),
           ),
@@ -115,7 +102,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                     _Header(colors: colors, isPremium: isPremium),
                     const SizedBox(height: 28),
                     Text(
-                      'What you get',
+                      l10n.premiumWhatYouGet,
                       style: _font(
                         TextStyle(
                           fontSize: 15,
@@ -130,36 +117,42 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                       items: [
                         _FeatureItem(
                           icon: Icons.account_balance_wallet_outlined,
-                          title:
-                              '${BudgetLimits.premiumMaxActiveCategories} active budget categories',
-                          subtitle:
-                              'Free plan: up to ${BudgetLimits.freeMaxActiveCategories} active',
+                          title: l10n.premiumFeatureCategories(
+                            BudgetLimits.premiumMaxActiveCategories,
+                          ),
+                          subtitle: l10n.premiumFeatureCategoriesFree(
+                            BudgetLimits.freeMaxActiveCategories,
+                          ),
                         ),
                         _FeatureItem(
                           icon: Icons.groups_outlined,
-                          title:
-                              '${SplitBillLimits.premiumMaxActiveGroups} active groups',
-                          subtitle:
-                              'Free plan: up to ${SplitBillLimits.freeMaxActiveGroups} active',
+                          title: l10n.premiumFeatureGroups(
+                            SplitBillLimits.premiumMaxActiveGroups,
+                          ),
+                          subtitle: l10n.premiumFeatureGroupsFree(
+                            SplitBillLimits.freeMaxActiveGroups,
+                          ),
                         ),
                         _FeatureItem(
                           icon: Icons.receipt_long_outlined,
-                          title:
-                              '${SplitBillLimits.premiumMaxBillsPerGroup} active bills per group',
-                          subtitle:
-                              'Free plan: up to ${SplitBillLimits.freeMaxBillsPerGroup} per group',
+                          title: l10n.premiumFeatureBills(
+                            SplitBillLimits.premiumMaxBillsPerGroup,
+                          ),
+                          subtitle: l10n.premiumFeatureBillsFree(
+                            SplitBillLimits.freeMaxBillsPerGroup,
+                          ),
                         ),
                         _FeatureItem(
                           icon: Icons.face_rounded,
-                          title: 'More beasts unlocked',
-                          subtitle: 'Extra avatars to personalize your profile',
+                          title: l10n.premiumFeatureAvatars,
+                          subtitle: l10n.premiumFeatureAvatarsDesc,
                         ),
                       ],
                     ),
                     const SizedBox(height: 28),
                     if (!isPremium) ...[
                       Text(
-                        'Pricing',
+                        l10n.premiumPricing,
                         style: _font(
                           TextStyle(
                             fontSize: 15,
@@ -175,7 +168,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                         busy: _busy,
                         onRestore: () => _run(
                           purchaseService.restorePurchases,
-                          successMessage: 'Purchase restored — enjoy!',
+                          successMessage: l10n.premiumRestored,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -188,12 +181,15 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                             color: colors.textSecondary,
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            'Secure one-time payment via App Store',
-                            style: _font(
-                              TextStyle(
-                                fontSize: 12,
-                                color: colors.textSecondary,
+                          Flexible(
+                            child: Text(
+                              l10n.premiumSecurePayment,
+                              textAlign: TextAlign.center,
+                              style: _font(
+                                TextStyle(
+                                  fontSize: 12,
+                                  color: colors.textSecondary,
+                                ),
                               ),
                             ),
                           ),
@@ -212,7 +208,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                 busy: _busy,
                 onUnlock: () => _run(
                   purchaseService.buyPremium,
-                  successMessage: "You're premium now — enjoy!",
+                  successMessage: l10n.premiumUnlocked,
                 ),
               ),
           ],
@@ -230,6 +226,7 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -254,7 +251,9 @@ class _Header extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                isPremium ? 'You are premium' : 'Be premium',
+                isPremium
+                    ? l10n.premiumHeaderActiveBadge
+                    : l10n.premiumHeaderBadge,
                 style: _font(
                   TextStyle(
                     fontSize: 13,
@@ -268,9 +267,7 @@ class _Header extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         Text(
-          isPremium
-              ? 'Every limit is removed on this account.'
-              : 'Remove every free-plan limit',
+          isPremium ? l10n.premiumHeadlineActive : l10n.premiumHeadline,
           style: _font(
             TextStyle(
               fontSize: 26,
@@ -283,9 +280,7 @@ class _Header extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          isPremium
-              ? 'Thanks for helping us maintain Salapify.'
-              : 'One-time payment. No subscription, ever.',
+          isPremium ? l10n.premiumSubActive : l10n.premiumSub,
           style: _font(TextStyle(fontSize: 13, color: colors.textSecondary)),
         ),
       ],
@@ -391,6 +386,7 @@ class _PriceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -422,7 +418,7 @@ class _PriceCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
-              'BEST VALUE — PAY ONCE',
+              l10n.premiumBestValue,
               style: _font(
                 TextStyle(
                   fontSize: 10,
@@ -470,14 +466,14 @@ class _PriceCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'one-time fee',
+            l10n.premiumOneTimeFee,
             style: _font(TextStyle(fontSize: 12, color: colors.textSecondary)),
           ),
           const SizedBox(height: 12),
           TextButton(
             onPressed: busy ? null : onRestore,
             child: Text(
-              'Restore purchase',
+              l10n.premiumRestorePurchase,
               style: _font(
                 TextStyle(
                   fontSize: 13,
@@ -499,6 +495,7 @@ class _PremiumActiveCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -512,7 +509,7 @@ class _PremiumActiveCard extends StatelessWidget {
           Icon(Icons.verified_rounded, size: 32, color: colors.primary),
           const SizedBox(height: 10),
           Text(
-            'Premium is active on this account',
+            l10n.premiumActiveOnAccount,
             textAlign: TextAlign.center,
             style: _font(
               TextStyle(
@@ -545,6 +542,7 @@ class _StickyCta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: EdgeInsets.fromLTRB(
         20,
@@ -560,7 +558,9 @@ class _StickyCta extends StatelessWidget {
         future: priceFuture,
         builder: (context, snapshot) {
           final price = snapshot.data;
-          final label = price == null ? 'Go Premium' : 'Buy — $price';
+          final label = price == null
+              ? l10n.premiumGo
+              : l10n.premiumBuyWithPrice(price);
           return CommonButton(
             label: label,
             btnColor: colors.textPrimary,

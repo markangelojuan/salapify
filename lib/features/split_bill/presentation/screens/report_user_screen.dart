@@ -5,6 +5,7 @@ import 'package:salapify/core/widgets/common_button.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 import 'package:salapify/features/split_bill/data/repositories/report_repository.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class ReportArgs {
   const ReportArgs({
@@ -39,9 +40,10 @@ class _ReportUserScreenState extends ConsumerState<ReportUserScreen> {
   }
 
   Future<void> _submit() async {
+    final l10n = AppLocalizations.of(context);
     setState(() {
       _noteError = _noteController.text.trim().isEmpty
-          ? 'Please describe the issue'
+          ? l10n.reportDescribeIssue
           : null;
     });
     if (_noteError != null) return;
@@ -51,7 +53,9 @@ class _ReportUserScreenState extends ConsumerState<ReportUserScreen> {
 
     setState(() => _isSubmitting = true);
     try {
-      await ref.read(reportRepositoryProvider).submitReport(
+      await ref
+          .read(reportRepositoryProvider)
+          .submitReport(
             reporterId: currentUid,
             reportedUserId: widget.args.reportedUserId,
             reportedUsername: widget.args.reportedUsername,
@@ -59,7 +63,7 @@ class _ReportUserScreenState extends ConsumerState<ReportUserScreen> {
             note: _noteController.text.trim(),
           );
       if (!mounted) return;
-      CommonSnackbar.showSuccess(context, 'Report submitted');
+      CommonSnackbar.showSuccess(context, l10n.reportSubmitted);
       Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
@@ -71,22 +75,20 @@ class _ReportUserScreenState extends ConsumerState<ReportUserScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Report User')),
+      appBar: AppBar(title: Text(l10n.reportTitle)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text('Reporting', style: TextStyle(color: colors.textPrimary)),
+            Text(l10n.reportReporting, style: TextStyle(color: colors.textPrimary)),
             const SizedBox(height: 8),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 14,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
               decoration: BoxDecoration(
                 color: colors.primary.withValues(alpha: 0.05),
                 border: Border.all(
@@ -114,12 +116,12 @@ class _ReportUserScreenState extends ConsumerState<ReportUserScreen> {
             ),
             const SizedBox(height: 18),
             Text(
-              'What\'s going on?',
+              l10n.reportWhatsGoingOn,
               style: TextStyle(color: colors.textPrimary),
             ),
             const SizedBox(height: 4),
             Text(
-              'Be as specific as possible — include what happened clearly.',
+              l10n.reportBeSpecific,
               style: TextStyle(fontSize: 12, color: colors.textSecondary),
             ),
             const SizedBox(height: 8),
@@ -141,7 +143,7 @@ class _ReportUserScreenState extends ConsumerState<ReportUserScreen> {
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.all(14),
-                  hintText: 'Describe what happened...',
+                  hintText: l10n.reportHint,
                   hintStyle: TextStyle(color: colors.textSecondary),
                   counterText: '',
                 ),
@@ -162,7 +164,7 @@ class _ReportUserScreenState extends ConsumerState<ReportUserScreen> {
             ],
             const SizedBox(height: 28),
             CommonButton(
-              label: 'Submit Report',
+              label: l10n.reportSubmit,
               btnColor: colors.textPrimary,
               labelColor: colors.background,
               isLoading: _isSubmitting,

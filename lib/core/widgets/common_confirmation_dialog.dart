@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 
 class CommonConfirmationDialog extends StatelessWidget {
   const CommonConfirmationDialog({
     super.key,
     required this.title,
     required this.message,
-    this.confirmLabel = 'Confirm',
-    this.cancelLabel = 'Cancel',
+    this.confirmLabel,
+    this.cancelLabel,
     this.isDestructive = false,
   });
 
   final String title;
   final String message;
-  final String confirmLabel;
-  final String cancelLabel;
+  final String? confirmLabel;
+  final String? cancelLabel;
 
   /// When true, tints the confirm action with the app's error color —
   /// use for deletes and other irreversible actions.
@@ -24,8 +25,8 @@ class CommonConfirmationDialog extends StatelessWidget {
     BuildContext context, {
     required String title,
     required String message,
-    String confirmLabel = 'Confirm',
-    String cancelLabel = 'Cancel',
+    String? confirmLabel,
+    String? cancelLabel,
     bool isDestructive = false,
   }) async {
     final result = await showDialog<bool>(
@@ -47,18 +48,19 @@ class CommonConfirmationDialog extends StatelessWidget {
     required String itemName,
     String? title,
   }) {
+    final l10n = AppLocalizations.of(context);
     return show(
       context,
-      title: title ?? 'Delete',
-      message:
-          'Are you sure you want to delete "$itemName"? This cannot be undone.',
-      confirmLabel: 'Delete',
+      title: title ?? l10n.commonDelete,
+      message: l10n.confirmDeleteMessage(itemName),
+      confirmLabel: l10n.commonDelete,
       isDestructive: true,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
     final confirmColor = isDestructive ? colors.error : colors.primary;
 
@@ -69,13 +71,13 @@ class CommonConfirmationDialog extends StatelessWidget {
       actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       actions: [
         _PillButton(
-          label: cancelLabel,
+          label: cancelLabel ?? l10n.commonCancel,
           color: colors.textPrimary,
           borderColor: colors.border,
           onPressed: () => Navigator.pop(context, false),
         ),
         _PillButton(
-          label: confirmLabel,
+          label: confirmLabel ?? l10n.commonConfirm,
           color: confirmColor,
           borderColor: confirmColor,
           onPressed: () => Navigator.pop(context, true),

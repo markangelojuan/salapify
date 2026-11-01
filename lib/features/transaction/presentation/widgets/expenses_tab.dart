@@ -9,39 +9,25 @@ import 'package:salapify/features/transaction/presentation/controllers/transacti
 import 'package:salapify/features/transaction/presentation/widgets/expense_row.dart';
 import 'package:salapify/core/widgets/common_snackbar.dart';
 import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
+import 'package:salapify/l10n/app_localizations.dart';
 import 'package:salapify/router/routes.dart';
 import 'package:lottie/lottie.dart';
 
 class ExpensesTab extends ConsumerWidget {
   const ExpensesTab({super.key});
 
-  String _dateLabel(DateTime date) {
+  String _dateLabel(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final target = DateTime(date.year, date.month, date.day);
     final diff = today.difference(target).inDays;
 
-    if (diff == 0) return 'Today';
-    if (diff == 1) return 'Yesterday';
+    if (diff == 0) return l10n.dateToday;
+    if (diff == 1) return l10n.dateYesterday;
 
-    const monthNames = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    final sameYear = date.year == now.year;
-    return sameYear
-        ? '${monthNames[date.month - 1]} ${date.day}'
-        : '${monthNames[date.month - 1]} ${date.day}, ${date.year}';
+    return date.year == now.year
+        ? l10n.dateMonthDay(date)
+        : l10n.dateMonthDayYear(date);
   }
 
   Map<String, List<TransactionEntry>> _groupByDate(
@@ -60,10 +46,11 @@ class ExpensesTab extends ConsumerWidget {
     WidgetRef ref,
     String id,
   ) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await CommonConfirmationDialog.show(
       context,
-      title: 'Delete this expense?',
-      message: 'It will no longer count toward your spending totals.',
+      title: l10n.expensesDeleteTitle,
+      message: l10n.expensesDeleteMessage,
       isDestructive: true,
     );
     if (confirmed) {
@@ -73,6 +60,7 @@ class ExpensesTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).extension<AppColorsExt>()!;
 
     ref.listen<AsyncValue<void>>(transactionActionsProvider, (previous, next) {
@@ -85,7 +73,7 @@ class ExpensesTab extends ConsumerWidget {
 
     return transactionsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => Center(child: Text('Failed to load expenses: $err')),
+      error: (err, _) => Center(child: Text(l10n.expensesLoadFailed('$err'))),
       data: (transactions) {
         if (transactions.isEmpty) {
           return Padding(
@@ -100,7 +88,7 @@ class ExpensesTab extends ConsumerWidget {
                     height: 180,
                   ),
                   Text(
-                    'No expenses yet',
+                    l10n.expensesEmpty,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: colors.textSecondary,
                     ),
@@ -129,7 +117,7 @@ class ExpensesTab extends ConsumerWidget {
             final key = sortedKeys[index];
             final dayTransactions = grouped[key]!
               ..sort((a, b) => b.date.compareTo(a.date));
-            final label = _dateLabel(dayTransactions.first.date);
+            final label = _dateLabel(dayTransactions.first.date, l10n);
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
