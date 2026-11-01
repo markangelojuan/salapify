@@ -43,6 +43,120 @@ function mentionsEveryone(activity) {
   return mentionedIds(activity).includes(EVERYONE_ID);
 }
 
+// ---------------------------------------------------------------------------
+// Push text, per language
+// ---------------------------------------------------------------------------
+
+// Keys must match the base `languageCode` the app stores on users/{uid}
+// (en, es, th, zh, tr). Anything else falls back to English.
+const MESSAGES = {
+  en: {
+    someone: "Someone",
+    aBill: "a bill",
+    mentionedEveryone: (s, p) => `${s} mentioned everyone: ${p}`,
+    mentionedYou: (s, p) => `${s} mentioned you: ${p}`,
+    billAdded: (s, t) => `${s} added "${t}"`,
+    addedToGroup: (s) => `${s} added you to the group`,
+    paymentMarked: (s) => `${s} marked their share as paid`,
+    paymentConfirmed: (s) => `${s} confirmed your payment`,
+    paymentDisputed: (s) => `${s} disputed your payment`,
+  },
+  es: {
+    someone: "Alguien",
+    aBill: "una cuenta",
+    mentionedEveryone: (s, p) => `${s} mencionó a todos: ${p}`,
+    mentionedYou: (s, p) => `${s} te mencionó: ${p}`,
+    billAdded: (s, t) => `${s} añadió "${t}"`,
+    addedToGroup: (s) => `${s} te añadió al grupo`,
+    paymentMarked: (s) => `${s} marcó su parte como pagada`,
+    paymentConfirmed: (s) => `${s} confirmó tu pago`,
+    paymentDisputed: (s) => `${s} disputó tu pago`,
+  },
+  th: {
+    someone: "ใครบางคน",
+    aBill: "บิล",
+    mentionedEveryone: (s, p) => `${s} กล่าวถึงทุกคน: ${p}`,
+    mentionedYou: (s, p) => `${s} กล่าวถึงคุณ: ${p}`,
+    billAdded: (s, t) => `${s} เพิ่ม "${t}"`,
+    addedToGroup: (s) => `${s} เพิ่มคุณเข้ากลุ่ม`,
+    paymentMarked: (s) => `${s} ทำเครื่องหมายว่าจ่ายส่วนของตนแล้ว`,
+    paymentConfirmed: (s) => `${s} ยืนยันการชำระเงินของคุณ`,
+    paymentDisputed: (s) => `${s} โต้แย้งการชำระเงินของคุณ`,
+  },
+  zh: {
+    someone: "某人",
+    aBill: "一筆帳單",
+    mentionedEveryone: (s, p) => `${s} 提到了所有人：${p}`,
+    mentionedYou: (s, p) => `${s} 提到了你：${p}`,
+    billAdded: (s, t) => `${s} 新增了「${t}」`,
+    addedToGroup: (s) => `${s} 將你加入群組`,
+    paymentMarked: (s) => `${s} 已將自己的份額標記為已付款`,
+    paymentConfirmed: (s) => `${s} 確認了你的付款`,
+    paymentDisputed: (s) => `${s} 對你的付款提出異議`,
+  },
+  tr: {
+    someone: "Biri",
+    aBill: "bir hesap",
+    mentionedEveryone: (s, p) => `${s} herkesi etiketledi: ${p}`,
+    mentionedYou: (s, p) => `${s} seni etiketledi: ${p}`,
+    billAdded: (s, t) => `${s} "${t}" ekledi`,
+    addedToGroup: (s) => `${s} seni gruba ekledi`,
+    paymentMarked: (s) => `${s} payını ödenmiş olarak işaretledi`,
+    paymentConfirmed: (s) => `${s} ödemeni onayladı`,
+    paymentDisputed: (s) => `${s} ödemene itiraz etti`,
+  },
+};
+
+/** "es", "es-MX", "zh_Hant_TW" -> "es" / "zh". Unknown or missing -> "en". */
+function resolveLang(code) {
+  const base = String(code || "").toLowerCase().split(/[-_]/)[0];
+  return MESSAGES[base] ? base : "en";
+}
+
+/** Language-independent type stored on the in-app notification doc. */
+function notificationType(activity) {
+  switch (activity.type) {
+    case "message":
+      return "mention";
+    case "billAdded":
+      return "billAdded";
+    case "memberAdded":
+      return "addedToGroup";
+    case "paymentMarked":
+      return "paymentMarked";
+    case "paymentConfirmed":
+      return "paymentConfirmed";
+    case "paymentDisputed":
+      return "paymentDisputed";
+    default:
+      return null;
+  }
+}
+
+function buildBody(activity, senderName, lang) {
+  const t = MESSAGES[lang] || MESSAGES.en;
+  switch (activity.type) {
+    case "message": {
+      const preview = (activity.text || "").slice(0, 80);
+      return mentionsEveryone(activity)
+        ? t.mentionedEveryone(senderName, preview)
+        : t.mentionedYou(senderName, preview);
+    }
+    case "billAdded":
+      return t.billAdded(senderName, activity.metadata?.billTitle || t.aBill);
+    case "memberAdded":
+      return t.addedToGroup(senderName);
+    case "paymentMarked":
+      return t.paymentMarked(senderName);
+    case "paymentConfirmed":
+      return t.paymentConfirmed(senderName);
+    case "paymentDisputed":
+      return t.paymentDisputed(senderName);
+    default:
+      return "";
+  }
+}
+
 exports.onActivityCreated = onDocumentCreated(
   "splitGroups/{groupId}/activity/{activityId}",
   async (event) => {
@@ -66,15 +180,17 @@ exports.onActivityCreated = onDocumentCreated(
     const recipientIds = resolveRecipients(activity, group);
     if (recipientIds.length === 0) return;
 
-    const senderDoc = await db.collection("users").doc(activity.senderId).get();
-    const senderName = senderDoc.data()?.username || "Someone";
+    const type = notificationType(activity);
+    if (!type) return;
 
-    const notif = buildNotification(activity, senderName, group.name);
-    if (!notif.notificationType) return;
+    const senderDoc = await db.collection("users").doc(activity.senderId).get();
+    const username = senderDoc.data()?.username;
 
     const createdAt = activity.createdAt || admin.firestore.Timestamp.now();
 
-    const tokens = [];
+    // Tokens grouped by the recipient's language, so each group gets the
+    // push text in its own language.
+    const tokensByLang = {};
     await Promise.all(
       recipientIds.map(async (uid) => {
         const userDoc = await db.collection("users").doc(uid).get();
@@ -89,21 +205,24 @@ exports.onActivityCreated = onDocumentCreated(
         if (isBlockedPair) return; // skip: no notification doc, no push
 
         const userTokens = userData?.fcmTokens || [];
-        tokens.push(...userTokens);
+        const lang = resolveLang(userData?.languageCode);
+        (tokensByLang[lang] = tokensByLang[lang] || []).push(...userTokens);
 
         // Mentions are push-only
-        if (notif.notificationType === "mention") return;
+        if (type === "mention") return;
 
         await db
           .collection("notifications")
           .doc(uid)
           .collection("items")
           .add({
-            type: notif.notificationType,
+            type,
             groupId,
             groupName: group.name,
             senderId: activity.senderId,
-            senderName,
+            // Empty when the sender no longer exists: the app then shows its
+            // own translated "Deleted user" label instead of English text.
+            senderName: username || "Someone",
             read: false,
             createdAt,
             metadata: activity.metadata || null,
@@ -111,15 +230,22 @@ exports.onActivityCreated = onDocumentCreated(
       })
     );
 
-    if (tokens.length === 0) return;
+    await Promise.all(
+      Object.entries(tokensByLang).map(([lang, tokens]) => {
+        if (tokens.length === 0) return Promise.resolve();
+        const t = MESSAGES[lang];
+        return messaging.sendEachForMulticast({
+          tokens,
+          notification: {
+            title: group.name,
+            body: buildBody(activity, username || t.someone, lang),
+          },
 
-    await messaging.sendEachForMulticast({
-      tokens,
-      notification: { title: notif.title, body: notif.body },
-      
-      android: { notification: { channelId: "default_channel" } },
-      data: { groupId, type: activity.type || "" },
-    });
+          android: { notification: { channelId: "default_channel" } },
+          data: { groupId, type: activity.type || "" },
+        });
+      })
+    );
   }
 );
 
@@ -200,55 +326,6 @@ function resolveRecipients(activity, group) {
     }
     default:
       return [];
-  }
-}
-
-function buildNotification(activity, senderName, groupName) {
-  switch (activity.type) {
-    case "message": {
-      const preview = (activity.text || "").slice(0, 80);
-      return {
-        notificationType: "mention",
-        title: groupName,
-        body: mentionsEveryone(activity)
-          ? `${senderName} mentioned everyone: ${preview}`
-          : `${senderName} mentioned you: ${preview}`,
-      };
-    }
-    case "billAdded": {
-      const billTitle = activity.metadata?.billTitle || "a bill";
-      return {
-        notificationType: "billAdded",
-        title: groupName,
-        body: `${senderName} added "${billTitle}"`,
-      };
-    }
-    case "memberAdded":
-      return {
-        notificationType: "addedToGroup",
-        title: groupName,
-        body: `${senderName} added you to the group`,
-      };
-    case "paymentMarked":
-      return {
-        notificationType: "paymentMarked",
-        title: groupName,
-        body: `${senderName} marked their share as paid`,
-      };
-    case "paymentConfirmed":
-      return {
-        notificationType: "paymentConfirmed",
-        title: groupName,
-        body: `${senderName} confirmed your payment`,
-      };
-    case "paymentDisputed":
-      return {
-        notificationType: "paymentDisputed",
-        title: groupName,
-        body: `${senderName} disputed your payment`,
-      };
-    default:
-      return { notificationType: null, title: null, body: null };
   }
 }
 

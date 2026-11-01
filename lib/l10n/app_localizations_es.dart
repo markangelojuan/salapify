@@ -385,7 +385,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get avatarProsperousPanda => 'Panda próspero';
 
   @override
-  String get avatarFrugalShark => 'Tiburón frugal';
+  String get avatarFrugalShark => 'Tiburón austero';
 
   @override
   String get avatarOpulentWalrus => 'Morsa opulenta';

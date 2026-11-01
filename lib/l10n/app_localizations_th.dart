@@ -363,7 +363,7 @@ class AppLocalizationsTh extends AppLocalizations {
   String get avatarLuxuriousDog => 'หมาหรูหรา';
 
   @override
-  String get avatarSavvyMonkey => 'ลิงช่างคิด';
+  String get avatarSavvyMonkey => 'ลิงหัวไว';
 
   @override
   String get avatarGreedyCat => 'แมวละโมบ';
@@ -381,10 +381,10 @@ class AppLocalizationsTh extends AppLocalizations {
   String get avatarProsperousPanda => 'แพนด้ามั่งคั่ง';
 
   @override
-  String get avatarFrugalShark => 'ฉลามสุดประหยัด';
+  String get avatarFrugalShark => 'ฉลามมัธยัสถ์';
 
   @override
-  String get avatarOpulentWalrus => 'วอลรัสสุดหรู';
+  String get avatarOpulentWalrus => 'วอลรัสอลังการ';
 
   @override
   String get avatarBrokeEagle => 'อินทรีหมดตัว';

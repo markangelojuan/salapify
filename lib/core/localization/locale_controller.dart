@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:salapify/core/services/push_notification_service.dart';
 import 'package:salapify/features/settings/data/repositories/settings_repository.dart';
+import 'dart:async';
+import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
 
 /// Null state = follow the device language (falls back to English if the
 /// device language isn't supported).
@@ -24,6 +26,7 @@ class LocaleController extends Notifier<Locale?> {
     } else {
       await prefs.setString(prefsKey, encode(locale));
     }
+    _syncLanguageToServer();
     await _rescheduleReminders();
   }
 
@@ -62,6 +65,14 @@ class LocaleController extends Notifier<Locale?> {
     } catch (_) {
       // Non-critical: reminders get rescheduled on next app start anyway.
     }
+  }
+
+  void _syncLanguageToServer() {
+    final uid = ref.read(currentUserProvider)?.uid;
+    if (uid == null) return; // guest: nothing to sync
+    unawaited(
+      ref.read(pushNotificationServiceProvider).saveLanguageForUser(uid),
+    );
   }
 }
 

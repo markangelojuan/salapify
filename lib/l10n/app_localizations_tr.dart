@@ -377,7 +377,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get avatarStingyTurtle => 'Cimri Kaplumbağa';
 
   @override
-  String get avatarCovetousSnake => 'Hırslı Yılan';
+  String get avatarCovetousSnake => 'Tamahkâr Yılan';
 
   @override
   String get avatarProsperousPanda => 'Varlıklı Panda';

@@ -33,16 +33,7 @@ class PushNotificationService {
 
   bool _localInitialized = false;
 
-  AppLocalizations _l10n() {
-    final saved = _ref.read(localeControllerProvider);
-    final locale =
-        saved ??
-        basicLocaleListResolution(
-          WidgetsBinding.instance.platformDispatcher.locales,
-          AppLocalizations.supportedLocales,
-        );
-    return currentL10n(_ref);
-  }
+  AppLocalizations _l10n() => currentL10n(_ref);
 
   static const _channel = AndroidNotificationChannel(
     'default_channel',
@@ -106,7 +97,7 @@ class PushNotificationService {
       await _userRepository.saveFcmToken(uid, token);
       if (gen != _generation) return;
       _savedToken = token;
-
+      unawaited(saveLanguageForUser(uid));
       await _onTokenSub?.cancel();
       if (gen != _generation) return;
       _onTokenSub = _messaging.onTokenRefresh.listen((t) async {
@@ -242,6 +233,14 @@ class PushNotificationService {
     if (_localInitialized) return;
     await _setupLocalNotifications();
     _localInitialized = true;
+  }
+
+  /// Stores the effective app language on the user doc so the Cloud Function
+  /// can write push text in it. Never throws.
+  Future<void> saveLanguageForUser(String uid) async {
+    try {
+      await _userRepository.saveLanguage(uid, _l10n().localeName);
+    } catch (_) {}
   }
 
   Future<void> scheduleMonthlyReminders() async {

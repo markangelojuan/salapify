@@ -366,10 +366,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get avatarProsperousPanda => '富足熊貓';
 
   @override
-  String get avatarFrugalShark => '精打細算鯊魚';
+  String get avatarFrugalShark => '省錢鯊魚';
 
   @override
-  String get avatarOpulentWalrus => '豪奢海象';
+  String get avatarOpulentWalrus => '闊綽海象';
 
   @override
   String get avatarBrokeEagle => '破產老鷹';
