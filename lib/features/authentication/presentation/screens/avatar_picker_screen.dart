@@ -1,0 +1,267 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
+import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/core/widgets/common_button.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/features/authentication/domain/entities/avatar_option.dart';
+import 'package:salapify/features/authentication/presentation/controllers/avatar_controller.dart';
+import 'package:salapify/features/authentication/presentation/controllers/app_user_controller.dart';
+import 'package:salapify/features/premium/data/repositories/entitlement_repository.dart';
+import 'package:salapify/l10n/app_localizations.dart';
+import 'package:salapify/features/authentication/presentation/widgets/avatar_name_text.dart';
+
+class AvatarPickerScreen extends ConsumerStatefulWidget {
+  const AvatarPickerScreen({super.key});
+
+  @override
+  ConsumerState<AvatarPickerScreen> createState() => _AvatarPickerScreenState();
+}
+
+class _AvatarPickerScreenState extends ConsumerState<AvatarPickerScreen> {
+  late final PageController _pageController;
+  int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    final currentId = ref.read(currentAppUserProvider).value?.avatarId;
+    // Hidden avatars (e.g. the developer one) aren't in this list, so
+    // indexWhere returns -1 and we fall back to the first avatar.
+    final index = kSelectableAvatars.indexWhere((a) => a.id == currentId);
+    _selectedIndex = index >= 0 ? index : 0;
+    _pageController = PageController(
+      viewportFraction: 0.42,
+      initialPage: _selectedIndex,
+    );
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _confirm() async {
+    // Guard against double-tap while a save is already in flight.
+    if (ref.read(avatarControllerProvider).isLoading) return;
+
+    final avatar = kSelectableAvatars[_selectedIndex];
+    final isPremium = ref.read(isPremiumProvider).value ?? false;
+    if (avatar.isPremiumOnly && !isPremium) return;
+
+    await ref.read(avatarControllerProvider.notifier).selectAvatar(avatar.id);
+
+    if (!mounted) return;
+    final hasError = ref.read(avatarControllerProvider).hasError;
+    if (hasError) return;
+
+    if (context.canPop()) {
+      // Opened from Account screen ("Change") — go back to it.
+      context.pop();
+    } else {
+      // Reached via onboarding redirect (no screen to pop to) — go home.
+      context.go('/home');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final avatarState = ref.watch(avatarControllerProvider);
+    final isPremium = ref.watch(isPremiumProvider).value ?? false;
+
+    ref.listen<AsyncValue<void>>(avatarControllerProvider, (previous, next) {
+      next.whenOrNull(error: (e, _) => CommonSnackbar.showError(context, e));
+    });
+
+    final selected = kSelectableAvatars[_selectedIndex];
+    final isLocked = selected.isPremiumOnly && !isPremium;
+
+    final canGoBack = context.canPop();
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: canGoBack
+          ? AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back_rounded, color: colors.textPrimary),
+                onPressed: () => context.pop(),
+              ),
+            )
+          : null,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 130,
+                        child: Lottie.asset('assets/lottie/curious.json'),
+                      ),
+                      Text(
+                        l10n.avatarPickerTitle,
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(color: colors.textPrimary),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.avatarPickerSubtitle,
+                        style: TextStyle(color: colors.textSecondary),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        height: 220,
+                        child: PageView.builder(
+                          controller: _pageController,
+                          itemCount: kSelectableAvatars.length,
+                          onPageChanged: (i) =>
+                              setState(() => _selectedIndex = i),
+                          itemBuilder: (context, index) {
+                            final option = kSelectableAvatars[index];
+                            return AnimatedBuilder(
+                              animation: _pageController,
+                              builder: (context, child) {
+                                double scale = 1.0;
+                                if (_pageController.position.haveDimensions) {
+                                  final page =
+                                      _pageController.page ?? index.toDouble();
+                                  final diff = (page - index).abs();
+                                  scale = (1 - (diff * 0.35)).clamp(0.65, 1.0);
+                                }
+                                return Center(
+                                  child: Transform.scale(
+                                    scale: scale,
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: _AvatarCircle(
+                                avatar: option,
+                                isSelected: index == _selectedIndex,
+                                isLocked: option.isPremiumOnly && !isPremium,
+                                colors: colors,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 250),
+                        child: Text(
+                          selected.localizedName(l10n),
+                          key: ValueKey(selected.id),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: colors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      // Spacer() only works with bounded/definite-height
+                      // parents. Inside a scroll view the Column gets
+                      // unbounded height, so we use a flexible min gap
+                      // instead — it still pushes the button down on tall
+                      // screens without throwing on short ones.
+                      const SizedBox(height: 24),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 28,
+                          vertical: 20,
+                        ),
+                        child: CommonButton(
+                          label: l10n.commonConfirm,
+                          btnColor: colors.textPrimary,
+                          labelColor: colors.background,
+                          onPressed: isLocked ? null : _confirm,
+                          isLoading: avatarState.isLoading,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _AvatarCircle extends StatelessWidget {
+  const _AvatarCircle({
+    required this.avatar,
+    required this.isSelected,
+    required this.isLocked,
+    required this.colors,
+  });
+  final AvatarOption avatar;
+  final bool isSelected;
+  final bool isLocked;
+  final AppColorsExt colors;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 140,
+      height: 140,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: isSelected ? colors.primary : Colors.transparent,
+          width: 3,
+        ),
+        boxShadow: isSelected
+            ? [
+                BoxShadow(
+                  color: colors.primary.withValues(alpha: 0.3),
+                  blurRadius: 16,
+                  spreadRadius: 2,
+                ),
+              ]
+            : [],
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned.fill(
+            child: ClipOval(
+              child: Opacity(
+                opacity: isLocked ? 0.45 : 1,
+                child: Image.asset(avatar.assetPath, fit: BoxFit.cover),
+              ),
+            ),
+          ),
+          if (isLocked)
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.black.withValues(alpha: 0.55),
+              ),
+              child: const Icon(
+                Icons.lock_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}

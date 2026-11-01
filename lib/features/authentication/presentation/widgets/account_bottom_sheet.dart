@@ -1,0 +1,616 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/core/widgets/common_button.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/features/authentication/domain/exceptions/auth_exceptions.dart';
+import 'package:salapify/features/authentication/presentation/controllers/auth_controller.dart';
+import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
+import 'package:salapify/l10n/app_localizations.dart';
+import 'package:salapify/router/routes.dart';
+
+Future<void> showEditUsernameSheet(
+  BuildContext context,
+  String currentUsername,
+) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (ctx) => _EditUsernameSheet(currentUsername: currentUsername),
+  );
+}
+
+Future<void> showChangePasswordSheet(BuildContext context) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (ctx) => const _ChangePasswordSheet(),
+  );
+}
+
+Future<void> showDeleteAccountSheet(BuildContext context) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    isDismissible: false,
+    enableDrag: false,
+    backgroundColor: Colors.transparent,
+    builder: (ctx) => const _DeleteAccountSheet(),
+  );
+}
+
+class _AccountBottomSheetScaffold extends StatelessWidget {
+  const _AccountBottomSheetScaffold({
+    required this.title,
+    required this.colors,
+    required this.child,
+    required this.actions,
+  });
+
+  final String title;
+  final AppColorsExt colors;
+  final Widget child;
+
+  /// Buttons in priority order, top to bottom. Rendered full width.
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Container(
+          margin: const EdgeInsets.all(12),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.75,
+          ),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.center,
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: colorScheme.onSurface.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 17,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+                  child: child,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var i = 0; i < actions.length; i++) ...[
+                      if (i > 0) const SizedBox(height: 10),
+                      actions[i],
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Secondary outlined action button (Cancel / Back). CommonButton has no
+/// outlined variant, so this stays as a local helper.
+Widget _secondaryButton({
+  required VoidCallback? onPressed,
+  required Widget child,
+}) {
+  return OutlinedButton(
+    style: OutlinedButton.styleFrom(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    ),
+    onPressed: onPressed,
+    child: child,
+  );
+}
+
+enum _DeleteStep { confirmWord, reauth }
+
+class _DeleteAccountSheet extends ConsumerStatefulWidget {
+  const _DeleteAccountSheet();
+
+  @override
+  ConsumerState<_DeleteAccountSheet> createState() =>
+      _DeleteAccountSheetState();
+}
+
+class _DeleteAccountSheetState extends ConsumerState<_DeleteAccountSheet> {
+  String get _confirmWord =>
+    AppLocalizations.of(context).accountDeleteConfirmPhrase;
+
+  final _wordController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  _DeleteStep _step = _DeleteStep.confirmWord;
+  bool _canProceed = false;
+  bool _isBusy = false;
+  String? _errorText;
+
+  @override
+  void initState() {
+    super.initState();
+    _wordController.addListener(() {
+      setState(() {
+        _canProceed =
+            _wordController.text.trim().toLowerCase() ==
+            _confirmWord.toLowerCase();
+      });
+    });
+    // Rebuilds so the delete button's empty-password guard reflects typing.
+    _passwordController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _wordController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  String? get _providerId =>
+      ref.read(authRepositoryProvider).currentUserProviderId;
+
+  bool get _isGoogle => _providerId == 'google.com';
+
+  bool get _canSubmitReauth =>
+      !_isBusy && (_isGoogle || _passwordController.text.trim().isNotEmpty);
+
+  Future<void> _handleFinalDelete() async {
+    setState(() {
+      _isBusy = true;
+      _errorText = null;
+    });
+
+    final controller = ref.read(authControllerProvider.notifier);
+
+    if (_isGoogle) {
+      await controller.deleteAccountWithGoogle();
+    } else {
+      await controller.deleteAccountWithPassword(_passwordController.text);
+    }
+
+    final state = ref.read(authControllerProvider);
+    if (!mounted) return;
+
+    state.whenOrNull(
+      error: (error, _) {
+        if (error is ReauthCancelledException) {
+          // User backed out of the Google picker — just reset, no message,
+          // sheet stays open so they can try again.
+          setState(() => _isBusy = false);
+          return;
+        }
+        if (error is WrongPasswordException) {
+          setState(() {
+            _isBusy = false;
+           _errorText = AppLocalizations.of(context).accountIncorrectPasswordRetry;
+          });
+          return;
+        }
+        // Everything else (offline timeout, unexpected errors) — surface it
+        // the same way every other screen does, so it isn't missed and gets
+        // the correct message instead of a generic fallback.
+        setState(() => _isBusy = false);
+        CommonSnackbar.showError(context, error);
+      },
+      data: (_) {
+        if (!mounted) return;
+        Navigator.of(context, rootNavigator: true).pop();
+        context.goNamed(AppRoutes.signIn.name);
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final isGoogle = _isGoogle;
+
+    return PopScope(
+      canPop: !_isBusy,
+      child: _AccountBottomSheetScaffold(
+        title: l10n.accountDeleteAccount,
+        colors: colors,
+        child: _step == _DeleteStep.confirmWord
+            ? _buildConfirmWordStep(colors)
+            : _buildReauthStep(colors, isGoogle),
+        actions: _step == _DeleteStep.confirmWord
+            ? [
+                CommonButton(
+                  label: l10n.commonContinue,
+                  btnColor: Colors.red,
+                  labelColor: Colors.white,
+                  onPressed: _canProceed
+                      ? () => setState(() => _step = _DeleteStep.reauth)
+                      : null,
+                ),
+                _secondaryButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(l10n.commonCancel),
+                ),
+              ]
+            : [
+                CommonButton(
+                  label: isGoogle ? l10n.accountVerifyWithGoogle : l10n.accountDeletePermanently,
+                  btnColor: Colors.red,
+                  labelColor: Colors.white,
+                  isLoading: _isBusy,
+                  onPressed: _canSubmitReauth ? _handleFinalDelete : null,
+                ),
+                _secondaryButton(
+                  onPressed: _isBusy
+                      ? null
+                      : () => setState(() => _step = _DeleteStep.confirmWord),
+                  child: Text(l10n.commonBack),
+                ),
+              ],
+      ),
+    );
+  }
+
+  Widget _buildConfirmWordStep(AppColorsExt colors) {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.accountDeleteWarning,
+          style: TextStyle(color: colors.textSecondary, fontSize: 13),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          l10n.accountDeleteTypePhrase(_confirmWord),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: colors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _wordController,
+          autofocus: true,
+          decoration: InputDecoration(hintText: _confirmWord, border: const OutlineInputBorder())
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReauthStep(AppColorsExt colors, bool isGoogle) {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          isGoogle
+              ? l10n.accountDeleteReauthGoogle
+              : l10n.accountDeleteReauthPassword,
+          style: TextStyle(color: colors.textSecondary, fontSize: 13),
+        ),
+        if (!isGoogle) ...[
+          const SizedBox(height: 12),
+          TextField(
+            controller: _passwordController,
+            obscureText: true,
+            autofocus: true,
+            enabled: !_isBusy,
+            decoration: InputDecoration(
+              labelText: l10n.authPasswordLabel,
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ],
+        if (_errorText != null) ...[
+          const SizedBox(height: 8),
+          Text(_errorText!, style: const TextStyle(color: Colors.red)),
+        ],
+      ],
+    );
+  }
+}
+
+class _EditUsernameSheet extends ConsumerStatefulWidget {
+  const _EditUsernameSheet({required this.currentUsername});
+  final String currentUsername;
+
+  @override
+  ConsumerState<_EditUsernameSheet> createState() => _EditUsernameSheetState();
+}
+
+class _EditUsernameSheetState extends ConsumerState<_EditUsernameSheet> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _controller;
+  String? _usernameError;
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.currentUsername);
+    _controller.addListener(() {
+      if (_usernameError != null) setState(() => _usernameError = null);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  String? _validateUsername(String? value) {
+    final l10n = AppLocalizations.of(context);
+    if (value == null || value.isEmpty) return l10n.authUsernameRequired;
+    if (value != value.trim()) return l10n.authUsernameNoSpaces;
+    if (!RegExp(r'^[a-zA-Z]').hasMatch(value)) {
+      return l10n.authUsernameStartLetter;
+    }
+    if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) {
+      return l10n.authUsernameAllowedChars;
+    }
+    final letterCount = RegExp(r'[a-zA-Z]').allMatches(value).length;
+    if (letterCount < 3) return l10n.authUsernameMinLetters;
+    final digitCount = RegExp(r'[0-9]').allMatches(value).length;
+    if (digitCount > 3) return l10n.authUsernameMaxNumbers;
+    if (_usernameError != null) return _usernameError;
+    return null;
+  }
+
+  Future<void> _handleSave() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final newUsername = _controller.text.trim();
+    if (newUsername == widget.currentUsername) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    await ref.read(authControllerProvider.notifier).updateUsername(newUsername);
+
+    if (!mounted) return;
+
+    final state = ref.read(authControllerProvider);
+    state.whenOrNull(
+      error: (error, _) {
+        setState(() => _isSubmitting = false);
+        if (error is UsernameTakenException) {
+          setState(() {
+            _usernameError = AppLocalizations.of(context).errorUsernameTaken;
+          });
+          _formKey.currentState!.validate();
+        } else {
+          CommonSnackbar.showError(context, error);
+        }
+      },
+      data: (_) {
+        if (!mounted) return;
+        CommonSnackbar.showSuccess(context, AppLocalizations.of(context).accountUsernameUpdated);
+        Navigator.of(context).pop();
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
+    return PopScope(
+      canPop: !_isSubmitting,
+      child: _AccountBottomSheetScaffold(
+        title: l10n.accountChangeUsername,
+        colors: colors,
+        child: Form(
+          key: _formKey,
+          child: TextFormField(
+            controller: _controller,
+            autofocus: true,
+            enabled: !_isSubmitting,
+            maxLength: 20,
+            decoration: InputDecoration(
+              labelText: l10n.authUsernameLabel,
+              border: OutlineInputBorder(),
+            ),
+            validator: _validateUsername,
+          ),
+        ),
+        actions: [
+          CommonButton(
+            label: l10n.commonSave,
+            btnColor: colors.textPrimary,
+            labelColor: colors.background,
+            isLoading: _isSubmitting,
+            onPressed: _handleSave,
+          ),
+          _secondaryButton(
+            onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+            child: Text(l10n.commonCancel),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChangePasswordSheet extends ConsumerStatefulWidget {
+  const _ChangePasswordSheet();
+
+  @override
+  ConsumerState<_ChangePasswordSheet> createState() =>
+      _ChangePasswordSheetState();
+}
+
+class _ChangePasswordSheetState extends ConsumerState<_ChangePasswordSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _currentController = TextEditingController();
+  final _newController = TextEditingController();
+  final _confirmController = TextEditingController();
+  String? _currentError;
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentController.addListener(() {
+      if (_currentError != null) setState(() => _currentError = null);
+    });
+  }
+
+  @override
+  void dispose() {
+    _currentController.dispose();
+    _newController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSave() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isSubmitting = true);
+
+    await ref
+        .read(authControllerProvider.notifier)
+        .changePassword(
+          currentPassword: _currentController.text,
+          newPassword: _newController.text,
+        );
+    if (!mounted) return;
+
+    ref
+        .read(authControllerProvider)
+        .whenOrNull(
+          error: (error, _) {
+            setState(() => _isSubmitting = false);
+            if (error is WrongPasswordException) {
+              setState(() => _currentError = AppLocalizations.of(context).accountIncorrectPassword);
+              _formKey.currentState!.validate();
+            } else {
+              CommonSnackbar.showError(context, error);
+            }
+          },
+          data: (_) {
+            CommonSnackbar.showSuccess(context, AppLocalizations.of(context).accountPasswordUpdated);
+            Navigator.of(context).pop();
+          },
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
+    return PopScope(
+      canPop: !_isSubmitting,
+      child: _AccountBottomSheetScaffold(
+        title: l10n.accountChangePassword,
+        colors: colors,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _currentController,
+                obscureText: true,
+                autofocus: true,
+                enabled: !_isSubmitting,
+                decoration: InputDecoration(
+                  labelText: l10n.accountCurrentPassword,
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) {
+                  if (v == null || v.isEmpty) return l10n.commonRequired;
+                  return _currentError;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _newController,
+                obscureText: true,
+                enabled: !_isSubmitting,
+                decoration: InputDecoration(
+                  labelText: l10n.accountNewPassword,
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) {
+                  if (v == null || v.length < 6) return l10n.authPasswordMinLength;
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _confirmController,
+                obscureText: true,
+                enabled: !_isSubmitting,
+                decoration: InputDecoration(
+                  labelText: l10n.accountConfirmNewPassword,
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) =>
+                    v != _newController.text ? l10n.authPasswordsMismatch : null,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          CommonButton(
+            label: l10n.accountUpdatePassword,
+            btnColor: colors.textPrimary,
+            labelColor: colors.background,
+            isLoading: _isSubmitting,
+            onPressed: _handleSave,
+          ),
+          _secondaryButton(
+            onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+            child: Text(l10n.commonCancel),
+          ),
+        ],
+      ),
+    );
+  }
+}

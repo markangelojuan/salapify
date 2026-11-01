@@ -1,0 +1,91 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
+import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/features/transaction/presentation/controllers/income_source_controller.dart';
+import 'package:salapify/router/routes.dart';
+import 'package:salapify/features/transaction/presentation/widgets/recurring_income_row.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
+import 'package:salapify/l10n/app_localizations.dart';
+
+class IncomeTab extends ConsumerWidget {
+  const IncomeTab({super.key});
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    String id,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await CommonConfirmationDialog.show(
+      context,
+      title: l10n.incomeDeleteTitle,
+      message: l10n.incomeDeleteMessage,
+      confirmLabel: l10n.commonDelete,
+      isDestructive: true,
+    );
+    if (confirmed) {
+      await ref.read(incomeSourceActionsProvider.notifier).deleteSource(id);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
+    ref.listen<AsyncValue<void>>(incomeSourceActionsProvider, (previous, next) {
+      if (next.hasError) {
+        CommonSnackbar.showError(context, next.error!);
+      }
+    });
+    final sourcesAsync = ref.watch(incomeSourcesProvider);
+
+    return sourcesAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, _) => Center(child: Text(l10n.incomeLoadFailed('$err'))),
+      data: (sources) {
+        if (sources.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Lottie.asset(
+                    'assets/lottie/sleeping_squirrel.json',
+                    width: 180,
+                    height: 180,
+                  ),
+                  Text(
+                    l10n.incomeEmpty,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+          children: [
+            const SizedBox(height: 10),
+            ...sources.map(
+              (source) => RecurringIncomeRow(
+                source: source,
+                onTap: () =>
+                    context.pushNamed(AppRoutes.incomeForm.name, extra: source),
+                onDelete: () => _confirmDelete(context, ref, source.id),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}

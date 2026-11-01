@@ -1,0 +1,348 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:uuid/uuid.dart';
+import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/core/utils/amount_input_formatter.dart';
+import 'package:salapify/core/widgets/common_button.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/core/widgets/common_text_field.dart';
+import 'package:salapify/features/budget/domain/entities/budget_category.dart';
+import 'package:salapify/features/budget/presentation/constants/category_icons.dart';
+import 'package:salapify/features/budget/presentation/controllers/budget_controller.dart';
+import 'package:salapify/features/settings/domain/budgeting_period.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/features/transaction/domain/entities/transaction_entry.dart';
+import 'package:salapify/features/transaction/presentation/controllers/transaction_controller.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/l10n/app_localizations.dart';
+
+class ExpenseFormScreen extends ConsumerStatefulWidget {
+  const ExpenseFormScreen({
+    super.key,
+    this.existingTransaction,
+    this.initialCategoryId,
+  });
+
+  /// Null = add mode. Non-null = edit mode.
+  final TransactionEntry? existingTransaction;
+
+  /// Pre-selects a category in add mode (e.g. from the budget screen).
+  final String? initialCategoryId;
+
+  bool get isEditing => existingTransaction != null;
+
+  @override
+  ConsumerState<ExpenseFormScreen> createState() => _ExpenseFormScreenState();
+}
+
+class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _amountController;
+  late final TextEditingController _noteController;
+
+  String? _selectedCategoryId;
+  late DateTime _date;
+
+  static const int _maxIntegerDigits = 12;
+  static const double _maxAmount = 999999999999.99;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existingTransaction;
+    final currency = ref.read(currencySettingProvider).value ?? AppCurrency.php;
+    _amountController = TextEditingController(
+      text: existing != null ? currency.formatForInput(existing.amount) : '',
+    );
+    _noteController = TextEditingController(text: existing?.note ?? '');
+    _selectedCategoryId = existing?.categoryId ?? widget.initialCategoryId;
+    _date = existing?.date ?? DateTime.now();
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) setState(() => _date = picked);
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_selectedCategoryId == null) {
+      CommonSnackbar.showError(
+        context,
+        AppLocalizations.of(context).expenseSelectCategory,
+      );
+      return;
+    }
+
+    final amount = double.parse(_amountController.text.trim());
+    final note = _noteController.text.trim();
+    final actions = ref.read(transactionActionsProvider.notifier);
+
+    if (widget.isEditing) {
+      final updated = widget.existingTransaction!.copyWith(
+        categoryId: _selectedCategoryId!,
+        amount: amount,
+        note: note.isEmpty ? null : note,
+        date: _date,
+      );
+      await actions.updateTransaction(updated);
+    } else {
+      final newTransaction = TransactionEntry(
+        id: const Uuid().v4(),
+        categoryId: _selectedCategoryId!,
+        amount: amount,
+        note: note.isEmpty ? null : note,
+        date: _date,
+        createdAt: DateTime.now(),
+      );
+      await actions.addTransaction(newTransaction);
+    }
+
+    if (!mounted) return;
+
+    final state = ref.read(transactionActionsProvider);
+    if (state.hasError) {
+      CommonSnackbar.showError(context, state.error!);
+    } else {
+      context.pop();
+    }
+  }
+
+  List<BudgetCategory> _visibleCategories(List<BudgetCategory> all) {
+    final globalPeriod =
+        ref.watch(budgetingPeriodSettingProvider).value ??
+        BudgetingPeriod.monthly;
+    final firstHalfEndDay =
+        ref.watch(firstHalfEndDaySettingProvider).value ?? 15;
+    final now = DateTime.now();
+
+    final active =
+        all
+            .where(
+              (c) =>
+                  !c.isDeleted &&
+                  c.isActiveFor(
+                    globalPeriod: globalPeriod,
+                    firstHalfEndDay: firstHalfEndDay,
+                    now: now,
+                  ),
+            )
+            .toList()
+          ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+
+    return active;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final categoriesAsync = ref.watch(budgetCategoriesProvider);
+    final actionsState = ref.watch(transactionActionsProvider);
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.isEditing ? l10n.expenseEdit : l10n.expenseAdd),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CommonTextField(
+                  controller: _amountController,
+                  icon: Icons.attach_money_rounded,
+                  prefixText: currency.symbol,
+                  hint: currency.amountHint,
+                  label: l10n.amountLabel,
+                  keyboardType: TextInputType.numberWithOptions(
+                    decimal: currency.decimalDigits > 0,
+                  ),
+                  inputFormatters: [
+                    AmountInputFormatter(
+                      maxIntegerDigits: _maxIntegerDigits,
+                      maxDecimalDigits: currency.decimalDigits,
+                    ),
+                  ],
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return l10n.amountRequired;
+                    }
+                    final parsed = double.tryParse(value.trim());
+                    if (parsed == null || parsed <= 0) {
+                      return l10n.amountInvalid;
+                    }
+                    if (parsed > _maxAmount) {
+                      return l10n.amountTooLarge;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  l10n.expenseCategory,
+                  style: TextStyle(color: colors.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                categoriesAsync.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Text(l10n.budgetLoadFailed('$e')),
+                  data: (categories) => _CategoryPicker(
+                    categories: _visibleCategories(categories),
+                    selectedId: _selectedCategoryId,
+                    onSelected: (id) =>
+                        setState(() => _selectedCategoryId = id),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  l10n.expenseDate,
+                  style: TextStyle(color: colors.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: _pickDate,
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.primary.withValues(alpha: 0.05),
+                      border: Border.all(
+                        color: colors.primary.withValues(alpha: 0.15),
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today_rounded,
+                          size: 18,
+                          color: colors.primary,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          '${_date.year}-${_date.month.toString().padLeft(2, '0')}-${_date.day.toString().padLeft(2, '0')}',
+                          style: TextStyle(color: colors.textPrimary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                CommonTextField(
+                  controller: _noteController,
+                  icon: Icons.notes_rounded,
+                  textInputAction: TextInputAction.done,
+                  maxCharacters: 150,
+                  hint: l10n.expenseNoteHint,
+                  label: l10n.expenseNoteLabel,
+                ),
+                const SizedBox(height: 28),
+                CommonButton(
+                  label: widget.isEditing
+                      ? l10n.commonSaveChanges
+                      : l10n.expenseAdd,
+                  btnColor: colors.textPrimary,
+                  labelColor: colors.background,
+                  isLoading: actionsState.isLoading,
+                  onPressed: _submit,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Horizontally scrollable chip picker for selecting a category, reusing
+/// existing category icons/names rather than re-listing everything as a
+/// plain dropdown.
+class _CategoryPicker extends StatelessWidget {
+  const _CategoryPicker({
+    required this.categories,
+    required this.selectedId,
+    required this.onSelected,
+  });
+
+  final List<BudgetCategory> categories;
+  final String? selectedId;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
+    if (categories.isEmpty) {
+      return Text(
+        l10n.expenseNoCategories,
+        style: TextStyle(color: colors.textSecondary),
+      );
+    }
+
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: categories.map((category) {
+        final selected = category.id == selectedId;
+        return GestureDetector(
+          onTap: () => onSelected(category.id),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: selected
+                  ? colors.primary
+                  : colors.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  CategoryIcons.iconFor(category.iconName),
+                  size: 16,
+                  color: selected ? colors.onPrimary : colors.primary,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  category.name,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: selected ? colors.onPrimary : colors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}

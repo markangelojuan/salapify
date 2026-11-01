@@ -1,0 +1,1 @@
+enum BudgetingPeriod { monthly, biMonthly }

@@ -1,0 +1,430 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
+import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
+import 'package:salapify/features/split_bill/domain/entities/activity_entry.dart';
+import 'package:salapify/features/split_bill/presentation/controllers/split_bill_controller.dart';
+import 'package:salapify/features/split_bill/presentation/widgets/activity_feed_view.dart';
+import 'package:salapify/features/split_bill/presentation/widgets/balance_summary_card.dart';
+import 'package:salapify/features/split_bill/presentation/widgets/bills_carousel.dart';
+import 'package:salapify/features/split_bill/presentation/widgets/message_input.dart';
+import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
+import 'package:salapify/features/split_bill/domain/utils/mention_utils.dart';
+import 'package:salapify/features/split_bill/domain/utils/link_utils.dart';
+import 'package:salapify/features/split_bill/presentation/screens/report_user_screen.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:salapify/router/routes.dart';
+import 'package:salapify/features/split_bill/presentation/game/whack_a_debt_screen.dart';
+import 'package:salapify/l10n/app_localizations.dart';
+
+class SplitGroupDetailScreen extends ConsumerStatefulWidget {
+  const SplitGroupDetailScreen({super.key, required this.groupId});
+
+  final String groupId;
+
+  @override
+  ConsumerState<SplitGroupDetailScreen> createState() =>
+      _SplitGroupDetailScreenState();
+}
+
+class _SplitGroupDetailScreenState
+    extends ConsumerState<SplitGroupDetailScreen> {
+  final _messageController = TextEditingController();
+  final _activityScrollController = ScrollController();
+  final _picked = <String, String>{};
+
+  @override
+  void initState() {
+    super.initState();
+    // Clear this user's unread badge for the group now that they're
+    // viewing it. Doesn't affect the controller's `state`
+    ref
+        .read(splitBillControllerProvider.notifier)
+        .markGroupRead(widget.groupId);
+    _activityScrollController.addListener(_onActivityScroll);
+  }
+
+  void _onActivityScroll() {
+    if (!_activityScrollController.hasClients) return;
+    final pos = _activityScrollController.position;
+    // reverse:true list -> scrolling toward maxScrollExtent means the
+    // user is scrolling up toward older messages.
+    if (pos.pixels >= pos.maxScrollExtent - 200) {
+      ref.read(activityFeedProvider(widget.groupId).notifier).loadMore();
+    }
+  }
+
+  @override
+  void dispose() {
+    _activityScrollController.removeListener(_onActivityScroll);
+    _activityScrollController.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _sendMessage() async {
+    final raw = _messageController.text.trim();
+    if (raw.isEmpty) return;
+
+    final mentions = MentionUtils.resolve(raw, _picked);
+    final protected = [...mentions, ...LinkUtils.ranges(raw)]
+      ..sort((a, b) => (a['start'] as int).compareTo(b['start'] as int));
+    final text = MentionUtils.maskOutside(raw, protected);
+
+    _messageController.clear();
+    await ref
+        .read(splitBillControllerProvider.notifier)
+        .sendMessage(groupId: widget.groupId, text: text, mentions: mentions);
+
+    final error = ref.read(splitBillControllerProvider).error;
+    if (error != null && mounted) {
+      _messageController.text = raw;
+    } else {
+      _picked.clear();
+    }
+  }
+
+  Future<void> _sendPoke() async {
+    await ref
+        .read(splitBillControllerProvider.notifier)
+        .pokeGroup(widget.groupId);
+  }
+
+  Future<void> _pickAndSendPhoto() async {
+    final picker = ImagePicker();
+    final xfile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+      maxWidth: 1600,
+    );
+    if (xfile == null || !mounted) return;
+
+    await ref
+        .read(splitBillControllerProvider.notifier)
+        .sendPhoto(groupId: widget.groupId, file: File(xfile.path));
+  }
+
+  Future<void> _showMemberOptions(
+    BuildContext context,
+    WidgetRef ref,
+    Offset position,
+    String userId,
+    String username,
+  ) async {
+    final currentUid = ref.read(currentUserProvider)?.uid;
+    if (currentUid == null) return;
+    final l10n = AppLocalizations.of(context);
+
+    final selected = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        position.dx,
+        position.dy,
+        position.dx,
+        position.dy,
+      ),
+      items: [
+        PopupMenuItem(
+          value: 'block',
+          child: Row(
+            children: [
+              const Icon(Icons.block_rounded, size: 18),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  l10n.splitBlockUser(username),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
+                ),
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'report',
+          child: Row(
+            children: [
+              const Icon(Icons.flag_outlined, size: 18),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  l10n.splitReportUser(username),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    if (selected == 'report') {
+      if (!context.mounted) return;
+      context.pushNamed(
+        AppRoutes.report.name,
+        extra: ReportArgs(
+          groupId: widget.groupId,
+          reportedUserId: userId,
+          reportedUsername: username,
+        ),
+      );
+      return;
+    }
+
+    if (selected != 'block' || !context.mounted) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        final dialogColors = Theme.of(ctx).extension<AppColorsExt>()!;
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(l10n.splitBlockTitle(username)),
+          content: Text(l10n.splitBlockMessage(username)),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                foregroundColor: dialogColors.textPrimary,
+                side: BorderSide(color: dialogColors.border),
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 10,
+                ),
+              ),
+              child: Text(l10n.commonCancel),
+            ),
+            OutlinedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                foregroundColor: dialogColors.error,
+                side: BorderSide(color: dialogColors.error),
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 10,
+                ),
+              ),
+              child: Text(l10n.splitBlockAction),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await ref
+          .read(userRepositoryProvider)
+          .blockUser(blockerId: currentUid, blockedId: userId);
+      if (context.mounted) {
+        CommonSnackbar.showWarning(context, l10n.splitBlockedSnack(username));
+      }
+    } catch (e) {
+      if (context.mounted) CommonSnackbar.showError(context, e);
+    }
+  }
+
+  Future<void> _openGame() async {
+    final members = ref.read(groupMembersProvider(widget.groupId)).value ?? {};
+    final score = await Navigator.of(context).push<int>(
+      MaterialPageRoute(
+        builder: (_) => withGradientBackground(
+          WhackADebtScreen(
+            avatarIds: members.values
+                .map((m) => m.avatarId)
+                .whereType<String>()
+                .toList(),
+          ),
+        ),
+      ),
+    );
+
+    if (score == null || score <= 0 || !mounted) return;
+    final l10n = AppLocalizations.of(context);
+
+    await ref
+        .read(splitBillControllerProvider.notifier)
+        .sendMessage(
+          groupId: widget.groupId,
+          text: l10n.splitGameScoreMessage(score),
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    ref.listen<AsyncValue<List<ActivityEntry>>>(
+      activityFeedProvider(widget.groupId),
+      (previous, next) {
+        // Only react to genuinely new data, not loading/error transitions
+        // or the initial subscription itself (initState already covers that).
+        if (previous == null || !next.hasValue) return;
+        if (identical(previous.value, next.value)) return;
+        ref
+            .read(splitBillControllerProvider.notifier)
+            .markGroupRead(widget.groupId);
+      },
+    );
+    ref.listen<AsyncValue<void>>(splitBillControllerProvider, (previous, next) {
+      if (next.hasError) {
+        CommonSnackbar.showError(context, next.error!);
+      }
+    });
+    final groupAsync = ref.watch(splitGroupProvider(widget.groupId));
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
+    final currencyFormat = NumberFormat.currency(
+      symbol: currency.symbol,
+      decimalDigits: currency.decimalDigits,
+    );
+
+    return groupAsync.when(
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (err, _) => Scaffold(
+        appBar: AppBar(),
+        body: Center(child: Text(l10n.splitGroupLoadFailed('$err'))),
+      ),
+      data: (group) {
+        if (group == null) {
+          return Scaffold(
+            appBar: AppBar(),
+            body: Center(child: Text(l10n.splitGroupNotFound)),
+          );
+        }
+        return _buildScaffold(context, group, currencyFormat);
+      },
+    );
+  }
+
+  Widget _buildScaffold(
+    BuildContext context,
+    SplitGroup group,
+    NumberFormat currencyFormat,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    final billsAsync = ref.watch(splitBillsProvider(group.id));
+    final activityAsync = ref.watch(activityFeedProvider(group.id));
+    final loadingMore = ref.watch(activityLoadingMoreProvider(group.id));
+    final membersAsync = ref.watch(groupMembersProvider(group.id));
+    final currentUid = ref.watch(currentUserProvider)?.uid;
+    final blockedIds =
+        ref.watch(blockedUserIdsProvider).value ?? const <String>[];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(group.name),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.sports_esports_rounded),
+            onPressed: _openGame,
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: billsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, _) => Center(child: Text(l10n.splitBillsLoadFailed('$err'))),
+          data: (bills) {
+            final membersReady = membersAsync.hasValue || membersAsync.hasError;
+            if (!membersReady) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final members = membersAsync.value ?? {};
+            final names = {
+              for (final e in members.entries) e.key: e.value.username,
+            };
+
+            final candidates = {
+              for (final e in members.entries)
+                if (e.key != currentUid && !blockedIds.contains(e.key))
+                  e.key: e.value,
+            };
+
+            return Column(
+              children: [
+                Flexible(
+                  flex: 0,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        BalanceSummaryCard(
+                          bills: bills,
+                          currentUid: currentUid,
+                        ),
+                        const SizedBox(height: 12),
+                        BillsCarousel(
+                          bills: bills,
+                          group: group,
+                          currentUid: currentUid,
+                          names: names,
+                        ),
+                        Divider(
+                          height: 24,
+                          color: AppColors.border.withValues(alpha: 0.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: activityAsync.when(
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (err, _) => Center(child: Text(l10n.commonLoadFailed('$err'))),
+                    data: (activity) => ActivityFeedView(
+                      activity: activity,
+                      currentUid: currentUid,
+                      names: names,
+                      members: members,
+                      scrollController: _activityScrollController,
+                      loadingMore: loadingMore,
+                      currency: currencyFormat,
+                      blockedUserIds: blockedIds.toSet(),
+                      onAvatarLongPress: (position, userId, username) =>
+                          _showMemberOptions(
+                            context,
+                            ref,
+                            position,
+                            userId,
+                            username,
+                          ),
+                    ),
+                  ),
+                ),
+                MessageInput(
+                  controller: _messageController,
+                  onSend: _sendMessage,
+                  onPoke: _sendPoke,
+                  onAddPhoto: _pickAndSendPhoto,
+                  maxCharacters: 1000,
+                  mentionCandidates: candidates,
+                  onMentionPicked: (id, name) => _picked[id] = name,
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}

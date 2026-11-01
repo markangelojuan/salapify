@@ -1,0 +1,397 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
+import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
+import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
+import 'package:salapify/features/split_bill/domain/entities/split_bill.dart';
+import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
+import 'package:salapify/features/split_bill/domain/split_balance_calculator.dart';
+import 'package:salapify/features/split_bill/presentation/controllers/split_bill_controller.dart';
+import 'package:salapify/features/split_bill/presentation/widgets/guest_split_bills_promo.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/l10n/app_localizations.dart';
+import 'package:salapify/core/localization/locale_text.dart';
+import 'package:salapify/router/routes.dart';
+
+class SplitBillsScreen extends ConsumerWidget {
+  const SplitBillsScreen({super.key});
+
+  Future<void> _confirmLeaveOrDelete(
+    BuildContext context,
+    WidgetRef ref,
+    SplitGroup group,
+    bool isCreator,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await CommonConfirmationDialog.show(
+      context,
+      title: isCreator ? l10n.splitDeleteGroupTitle : l10n.splitLeaveGroupTitle,
+      message: isCreator
+          ? l10n.splitDeleteGroupMessage(group.name)
+          : l10n.splitLeaveGroupMessage(group.name),
+      confirmLabel: isCreator ? l10n.commonDelete : l10n.splitLeave,
+      isDestructive: true,
+    );
+    if (!confirmed) return;
+
+    final notifier = ref.read(splitBillControllerProvider.notifier);
+    if (isCreator) {
+      await notifier.deleteGroup(group.id);
+    } else {
+      await notifier.leaveGroup(group.id);
+    }
+
+    final error = ref.read(splitBillControllerProvider).error;
+    if (error != null && context.mounted) {
+      CommonSnackbar.showError(context, error);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final currentUid = ref.watch(currentUserProvider)?.uid;
+
+    if (currentUid == null) return const GuestSplitBillPromo();
+
+    ref.listen<AsyncValue<void>>(splitBillControllerProvider, (previous, next) {
+      if (next.hasError) {
+        CommonSnackbar.showError(context, next.error!);
+      }
+    });
+    final groupsAsync = ref.watch(splitGroupsProvider);
+
+    return SafeArea(
+      child: groupsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, _) =>
+            Center(child: Text(l10n.splitGroupsLoadFailed('$err'))),
+        data: (groups) {
+          if (groups.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.only(top: 40),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Lottie.asset(
+                      'assets/lottie/sleeping_squirrel.json',
+                      width: 180,
+                      height: 180,
+                    ),
+                    Text(
+                      l10n.splitNoGroups,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+            itemCount: groups.length,
+            itemBuilder: (context, index) {
+              final group = groups[index];
+              final isCreator = group.createdBy == currentUid;
+              final unreadCount = currentUid != null
+                  ? (group.unreadCounts[currentUid] ?? 0)
+                  : 0;
+              return _GroupRow(
+                group: group,
+                isCreator: isCreator,
+                currentUid: currentUid,
+                unreadCount: unreadCount,
+                onTap: () => context.pushNamed(
+                  AppRoutes.splitGroupDetail.name,
+                  pathParameters: {'groupId': group.id},
+                ),
+                onEdit: () =>
+                    context.pushNamed(AppRoutes.groupForm.name, extra: group),
+                onDismiss: () =>
+                    _confirmLeaveOrDelete(context, ref, group, isCreator),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _GroupRow extends ConsumerWidget {
+  const _GroupRow({
+    required this.group,
+    required this.isCreator,
+    required this.currentUid,
+    required this.unreadCount,
+    required this.onTap,
+    required this.onEdit,
+    required this.onDismiss,
+  });
+
+  final SplitGroup group;
+  final bool isCreator;
+  final String? currentUid;
+  final int unreadCount;
+  final VoidCallback onTap;
+  final VoidCallback onEdit;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final billsAsync = ref.watch(splitBillsProvider(group.id));
+    final hasUnread = unreadCount > 0;
+
+    return Dismissible(
+      key: ValueKey(group.id),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (_) async {
+        onDismiss();
+        return false; // repository stream removes it from the list
+      },
+      background: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        alignment: Alignment.centerRight,
+        decoration: BoxDecoration(
+          color: colors.error.withValues(alpha: 0.9),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Icon(
+          isCreator ? Icons.delete_outline_rounded : Icons.logout_rounded,
+          color: colors.onPrimary,
+        ),
+      ),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: hasUnread
+                ? [
+                    colors.primary.withValues(alpha: 0.10),
+                    colors.primary.withValues(alpha: 0.02),
+                  ]
+                : [
+                    colors.primary.withValues(alpha: 0.04),
+                    colors.primary.withValues(alpha: 0.0),
+                  ],
+          ),
+          border: Border.all(
+            color: hasUnread
+                ? colors.primary.withValues(alpha: 0.25)
+                : colors.border,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: colors.primary.withValues(alpha: 0.15),
+                        child: Text(
+                          group.name.isNotEmpty
+                              ? group.name[0].toUpperCaseL(context)
+                              : '?',
+                          style: TextStyle(
+                            color: colors.primary,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                      if (hasUnread)
+                        Positioned(
+                          right: -2,
+                          top: -2,
+                          child: _UnreadBadge(count: unreadCount),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          group.name,
+                          style: TextStyle(
+                            fontWeight: hasUnread
+                                ? FontWeight.w800
+                                : FontWeight.w600,
+                            fontSize: 14,
+                            color: colors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 6),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            _Pill(
+                              label: l10n.splitMembersCount(
+                                group.memberIds.length,
+                              ),
+                              color: colors.primary,
+                            ),
+                            if (billsAsync.hasValue && currentUid != null)
+                              _BalancePill(
+                                bills: billsAsync.value!,
+                                currentUid: currentUid!,
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (isCreator)
+                    IconButton(
+                      icon: Icon(
+                        Icons.edit_outlined,
+                        size: 20,
+                        color: colors.textSecondary,
+                      ),
+                      onPressed: onEdit,
+                    )
+                  else
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: colors.textSecondary,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _UnreadBadge extends StatelessWidget {
+  const _UnreadBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final label = count > 9 ? '9+' : '$count';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+      constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: colors.error,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colors.background, width: 1.5),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: colors.onPrimary,
+        ),
+      ),
+    );
+  }
+}
+
+/// Neutral info pill (member count), matching the app's chip language.
+class _Pill extends StatelessWidget {
+  const _Pill({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+}
+
+/// Balance-state pill for a single group — mirrors the color language of
+/// SplitGroupDetailScreen's _BalanceSummary (green = owed to you, red = you
+/// owe) so the list and detail screens read as the same system.
+class _BalancePill extends ConsumerWidget {
+  const _BalancePill({required this.bills, required this.currentUid});
+
+  final List<SplitBill> bills;
+  final String currentUid;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
+
+    final balances = SplitBalanceCalculator.forUser(bills, currentUid);
+    final youOwe = balances.youOwe.fold<double>(0, (a, b) => a + b.amount);
+    final owedToYou = balances.owedToYou.fold<double>(
+      0,
+      (a, b) => a + b.amount,
+    );
+
+    // Round to the currency's decimals so floating-point leftovers
+    // (e.g. 0.0000001) still count as "Settled".
+    final net = double.parse(
+      (owedToYou - youOwe).toStringAsFixed(currency.decimalDigits),
+    );
+
+    if (net == 0) {
+      return _Pill(label: l10n.splitSettled, color: colors.primary);
+    }
+
+    final isPositive = net > 0;
+    final amountText = '${currency.symbol}${currency.formatAmount(net.abs())}';
+    final label = isPositive
+        ? l10n.splitOwed(amountText)
+        : l10n.splitYouOwe(amountText);
+    return _Pill(
+      label: label,
+      color: isPositive ? colors.primary : colors.error,
+    );
+  }
+}

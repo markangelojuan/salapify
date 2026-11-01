@@ -1,0 +1,376 @@
+import 'dart:async';
+
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:salapify/core/database/app_database.dart';
+import 'package:salapify/core/services/connectivity_service.dart';
+import 'package:salapify/core/services/initial_sync_status.dart';
+import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
+import 'package:salapify/features/budget/data/repositories/budget_repository.dart';
+import 'package:salapify/features/budget/data/services/budget_sync_service.dart';
+import 'package:salapify/features/budget/domain/entities/budget_category.dart';
+import 'package:salapify/features/budget/domain/entities/budget_limits.dart';
+import 'package:salapify/features/budget/domain/exceptions/category_limit_exceeded_exception.dart';
+import 'package:salapify/features/settings/domain/budgeting_period.dart';
+import 'package:salapify/features/settings/domain/period_key.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/features/settings/data/repositories/settings_repository.dart';
+import 'package:salapify/features/transaction/data/repositories/transaction_repository.dart';
+import 'package:salapify/features/transaction/data/services/transaction_sync_service.dart';
+import 'package:salapify/features/transaction/domain/entities/transaction_entry.dart';
+import 'package:salapify/features/transaction/domain/transaction_totals_calculator.dart';
+import 'package:salapify/features/transaction/presentation/controllers/transaction_controller.dart';
+import 'package:salapify/features/premium/data/repositories/entitlement_repository.dart';
+
+part 'budget_controller.g.dart';
+
+@Riverpod(keepAlive: true)
+Stream<List<BudgetCategory>> budgetCategories(Ref ref) {
+  final repository = ref.watch(budgetRepositoryProvider);
+  return repository.watchCategories();
+}
+
+@riverpod
+Stream<bool> hasUnsyncedCategories(Ref ref) {
+  final repository = ref.watch(budgetRepositoryProvider);
+  return repository.watchHasUnsynced();
+}
+
+@Riverpod(keepAlive: true)
+class PeriodResetGuard extends _$PeriodResetGuard {
+  @override
+  Future<void> build() async {
+    final globalPeriod = await ref.watch(budgetingPeriodSettingProvider.future);
+    final firstHalfEndDay = await ref.watch(
+      firstHalfEndDaySettingProvider.future,
+    );
+    final settingsRepo = ref.read(settingsRepositoryProvider);
+    final uid = ref.read(currentUserProvider)?.uid;
+
+    final currentKey = computeCurrentPeriodKey(
+      globalPeriod: globalPeriod,
+      firstHalfEndDay: firstHalfEndDay,
+      now: DateTime.now(),
+    );
+
+    final lastKey = await settingsRepo.getLastResetPeriodKey(uid);
+
+    // No key yet for this identity — either a fresh install, or the first
+    // time this account/guest scope has been seen on this device. We have
+    // no way to know whether a real period rollover happened, and synced
+    // category data already reflects the correct state, so just seed the
+    // marker without running the destructive reset side effects.
+    if (lastKey == null) {
+      await settingsRepo.setLastResetPeriodKey(currentKey, uid);
+      return;
+    }
+
+    if (lastKey != currentKey) {
+      await ref.read(budgetRepositoryProvider).resetAllCompleted();
+      await settingsRepo.setLastResetPeriodKey(currentKey, uid);
+    }
+  }
+}
+
+@Riverpod(keepAlive: true)
+class BudgetActions extends _$BudgetActions {
+  @override
+  FutureOr<void> build() {
+    return null;
+  }
+
+  bool get _isOnline => ref.read(isOnlineProvider).value ?? true;
+
+  Future<void> _syncIfSignedIn(BudgetCategory category) async {
+    final uid = ref.read(currentUserProvider)?.uid;
+    if (uid == null) return; // guest — local only, nothing to sync
+    if (!_isOnline) return; // offline — SyncTrigger picks it up on reconnect
+
+    try {
+      await ref.read(budgetSyncServiceProvider).pushCategory(uid, category);
+    } catch (e) {
+      _logIfRealError(e, context: 'syncIfSignedIn');
+    }
+  }
+
+  void _logIfRealError(Object e, {required String context}) {
+    final isOnline = ref.read(isOnlineProvider).value ?? true;
+    if (!isOnline) {
+      return; // expected — offline, will retry via pushUnsyncedCategories
+    }
+    // FirebaseCrashlytics.instance.recordError(e, StackTrace.current, reason: context);
+  }
+
+  Future<void> addCategory(BudgetCategory category) async {
+    final result = await AsyncValue.guard(() async {
+      final isPremium =
+          (await ref.read(entitlementRepositoryProvider).watch().first)
+              .isPremium;
+      final limit = BudgetLimits.maxActiveCategoriesFor(isPremium: isPremium);
+      final currentCount = await ref
+          .read(budgetRepositoryProvider)
+          .countActive();
+
+      if (currentCount >= limit) {
+        throw CategoryLimitExceededException(limit);
+      }
+
+      await ref.read(budgetRepositoryProvider).addCategory(category);
+      await _syncIfSignedIn(category);
+    });
+    state = result;
+  }
+
+  Future<void> updateCategory(BudgetCategory category) async {
+    final result = await AsyncValue.guard(() async {
+      final updated = category.copyWith(updatedAt: DateTime.now());
+      await ref.read(budgetRepositoryProvider).updateCategory(updated);
+      await _syncIfSignedIn(updated);
+    });
+    state = result;
+  }
+
+  Future<void> deleteCategory(BudgetCategory category) async {
+    final result = await AsyncValue.guard(() async {
+      await ref.read(appDatabaseProvider).transaction(() async {
+        await ref
+            .read(transactionRepositoryProvider)
+            .softDeleteByCategoryId(category.id);
+        await ref.read(budgetRepositoryProvider).deleteCategory(category.id);
+      });
+
+      final deleted = category.copyWith(
+        isDeleted: true,
+        updatedAt: DateTime.now(),
+      );
+      await _syncIfSignedIn(deleted); // already guarded above
+
+      final uid = ref.read(currentUserProvider)?.uid;
+      if (uid != null && _isOnline) {
+        try {
+          await ref
+              .read(transactionSyncServiceProvider)
+              .pushUnsyncedTransactions(uid);
+        } catch (e) {
+          _logIfRealError(e, context: 'deleteCategory.pushTransactions');
+        }
+      }
+    });
+    state = result;
+  }
+
+  Future<void> setCompleted(BudgetCategory category, bool isCompleted) async {
+    final result = await AsyncValue.guard(() async {
+      final globalPeriod =
+          ref.read(budgetingPeriodSettingProvider).value ??
+          BudgetingPeriod.monthly;
+      final firstHalfEndDay =
+          ref.read(firstHalfEndDaySettingProvider).value ?? 15;
+      final now = DateTime.now();
+      final periodKey = computeCurrentPeriodKey(
+        globalPeriod: globalPeriod,
+        firstHalfEndDay: firstHalfEndDay,
+        now: now,
+      );
+      final autoFillId = '$kAutoFillPrefix${category.id}_$periodKey';
+      final transactionRepo = ref.read(transactionRepositoryProvider);
+
+      var skipped = false;
+      await ref.read(appDatabaseProvider).transaction(() async {
+        // Category may have been wiped (sign-out), deleted, or replaced by a
+        // sync while a stale guard loop was still running.
+        final stillExists = await ref
+            .read(budgetRepositoryProvider)
+            .existsActive(category.id);
+        if (!stillExists) {
+          skipped = true;
+          return;
+        }
+
+        await ref
+            .read(budgetRepositoryProvider)
+            .setCompleted(category.id, isCompleted);
+
+        if (isCompleted) {
+          final transactions = ref.read(transactionsProvider).value ?? [];
+          final alreadySpent =
+              TransactionTotalsCalculator.totalSpentForCategory(
+                transactions: transactions,
+                categoryId: category.id,
+                globalPeriod: globalPeriod,
+                firstHalfEndDay: firstHalfEndDay,
+                excludeTransactionId: autoFillId,
+              );
+          final remaining = (category.amount - alreadySpent).clamp(
+            0,
+            double.infinity,
+          );
+
+          if (remaining > 0) {
+            await transactionRepo.upsertTransaction(
+              TransactionEntry(
+                id: autoFillId,
+                categoryId: category.id,
+                amount: remaining.toDouble(),
+                note: 'Remaining budget (auto)',
+                date: now,
+                createdAt: now,
+                updatedAt: now,
+              ),
+            );
+          }
+        } else {
+          await transactionRepo.deleteTransaction(autoFillId);
+        }
+      });
+
+      if (skipped) return;
+
+      final uid = ref.read(currentUserProvider)?.uid;
+      if (uid == null || !_isOnline) return;
+      try {
+        await ref.read(budgetSyncServiceProvider).pushUnsyncedCategories(uid);
+        await ref
+            .read(transactionSyncServiceProvider)
+            .pushUnsyncedTransactions(uid);
+      } catch (e) {
+        _logIfRealError(e, context: 'setCompleted');
+      }
+    });
+    state = result;
+  }
+
+  Future<void> reorderCategories(List<String> orderedIdsInGroup) async {
+    final result = await AsyncValue.guard(() async {
+      await ref
+          .read(budgetRepositoryProvider)
+          .reorderCategories(orderedIdsInGroup);
+
+      final uid = ref.read(currentUserProvider)?.uid;
+      if (uid == null || !_isOnline) return;
+      try {
+        await ref.read(budgetSyncServiceProvider).pushUnsyncedCategories(uid);
+      } catch (e) {
+        _logIfRealError(e, context: 'reorderCategories');
+      }
+    });
+    state = result;
+  }
+
+  /// Bulk-converts all active categories to match a new global budgeting
+  /// period. Called from BudgetingPeriodSetting.set() before the period
+  /// setting itself is persisted, so category data and period setting never
+  /// briefly disagree from the UI's perspective.
+  ///
+  /// Only the local (Drift) conversion is awaited. The converted rows are
+  /// flagged unsynced by the repository and pushed to Firestore in the
+  /// background, so a slow network can't hold up the caller.
+  ///
+  /// Rethrows on failure. AsyncValue.guard swallows errors into `state`, and
+  /// without the rethrow the caller would go on to persist the new period on
+  /// top of categories that failed to convert.
+  Future<void> convertCategoriesForPeriodChange(
+    BudgetingPeriod newPeriod,
+  ) async {
+    state = const AsyncLoading();
+    final result = await AsyncValue.guard(() async {
+      await ref
+          .read(budgetRepositoryProvider)
+          .convertCategoriesToPeriod(newPeriod);
+    });
+    state = result;
+
+    final error = result.error;
+    if (error != null) {
+      Error.throwWithStackTrace(error, result.stackTrace ?? StackTrace.current);
+    }
+
+    final uid = ref.read(currentUserProvider)?.uid;
+    if (uid == null || !_isOnline) return;
+    unawaited(_pushUnsyncedCategoriesInBackground(uid));
+  }
+
+  Future<void> _pushUnsyncedCategoriesInBackground(String uid) async {
+    try {
+      await ref.read(budgetSyncServiceProvider).pushUnsyncedCategories(uid);
+    } catch (e) {
+      _logIfRealError(e, context: 'convertCategoriesForPeriodChange');
+    }
+  }
+}
+
+/// Keeps `isCompleted` in sync with actual spend
+@Riverpod(keepAlive: true)
+class BudgetCompletionGuard extends _$BudgetCompletionGuard {
+  @override
+  Future<void> build() async {
+    var disposed = false;
+    ref.onDispose(() => disposed = true);
+    final syncing = ref.watch(initialSyncStatusProvider);
+    if (syncing) return; // initial pull in progress, judge once it's done
+
+    await ref.watch(periodResetGuardProvider.future);
+    final categories = await ref.watch(budgetCategoriesProvider.future);
+    final transactions = await ref.watch(transactionsProvider.future);
+    final globalPeriod = await ref.watch(budgetingPeriodSettingProvider.future);
+    final firstHalfEndDay = await ref.watch(
+      firstHalfEndDaySettingProvider.future,
+    );
+    final now = DateTime.now();
+
+    for (final category in categories) {
+      if (disposed) return;
+      if (category.isDeleted || category.amount <= 0) continue;
+      if (!category.isActiveFor(
+        globalPeriod: globalPeriod,
+        firstHalfEndDay: firstHalfEndDay,
+        now: now,
+      )) {
+        continue;
+      }
+
+      final totalSpent = TransactionTotalsCalculator.totalSpentForCategory(
+        transactions: transactions,
+        categoryId: category.id,
+        globalPeriod: globalPeriod,
+        firstHalfEndDay: firstHalfEndDay,
+      );
+      final shouldBeCompleted = totalSpent >= category.amount;
+
+      if (shouldBeCompleted != category.isCompleted) {
+        final stillExists = await ref
+            .read(budgetRepositoryProvider)
+            .existsActive(category.id);
+        if (!stillExists || disposed) continue;
+
+        ref
+            .read(budgetCompletionEventProvider.notifier)
+            .emit(
+              BudgetCompletionEvent(
+                categoryName: category.name,
+                isCompleted: shouldBeCompleted,
+              ),
+            );
+        await ref
+            .read(budgetActionsProvider.notifier)
+            .setCompleted(category, shouldBeCompleted);
+      }
+    }
+  }
+}
+
+class BudgetCompletionEvent {
+  const BudgetCompletionEvent({
+    required this.categoryName,
+    required this.isCompleted,
+  });
+  final String categoryName;
+  final bool isCompleted;
+}
+
+@riverpod
+class BudgetCompletionEventNotifier extends _$BudgetCompletionEventNotifier {
+  @override
+  BudgetCompletionEvent? build() => null;
+
+  void emit(BudgetCompletionEvent event) => state = event;
+}

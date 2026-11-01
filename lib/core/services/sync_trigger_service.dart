@@ -1,0 +1,155 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:salapify/core/services/connectivity_service.dart';
+import 'package:salapify/core/services/initial_sync_status.dart';
+import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
+import 'package:salapify/features/authentication/domain/entities/app_user.dart';
+import 'package:salapify/features/budget/data/services/budget_sync_service.dart';
+import 'package:salapify/features/premium/data/services/entitlement_sync_service.dart';
+import 'package:salapify/features/settings/data/services/settings_sync_service.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/features/transaction/data/services/income_source_sync_service.dart';
+import 'package:salapify/features/transaction/data/services/transaction_sync_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+part 'sync_trigger_service.g.dart';
+
+@Riverpod(keepAlive: true)
+class SyncTrigger extends _$SyncTrigger {
+  bool _wasOnline = true;
+  String? _previousUid;
+
+  @override
+  void build() {
+    _previousUid = FirebaseAuth.instance.currentUser?.uid;
+    ref.listen<AsyncValue<bool>>(isOnlineProvider, (previous, next) {
+      final isOnlineNow = next.value ?? false;
+      if (isOnlineNow && !_wasOnline) {
+        _triggerSync();
+      }
+      _wasOnline = isOnlineNow;
+    });
+
+    // Auth trigger — guest -> signed-in (covers signup AND login on a fresh/guest session)
+    ref.listen<AsyncValue<AppUser?>>(authStateChangesProvider, (
+      previous,
+      next,
+    ) {
+      final newUid = next.value?.uid;
+
+      if (_previousUid == null && newUid != null) {
+        _onSignedIn(newUid);
+      }
+      _previousUid = newUid;
+    });
+  }
+
+  // Wraps the initial sync so guards that compare categories against
+  // transactions (BudgetCompletionGuard) pause until everything is pulled.
+  Future<void> _onSignedIn(String uid) async {
+    final status = ref.read(initialSyncStatusProvider.notifier);
+    status.set(true); // set synchronously, before any await
+    try {
+      await _runInitialSync(uid);
+    } finally {
+      status.set(false); // always released, even if a pull throws or times out
+    }
+  }
+
+  // Fires once per guest -> signed-in transition. Pushes any local guest
+  // data up first, then pulls whatever's already on the account
+  Future<void> _runInitialSync(String uid) async {
+    try {
+      final syncService = ref.read(budgetSyncServiceProvider);
+      await syncService.migrateGuestDataToAccount(uid);
+      await syncService.pullRemoteCategories(uid);
+    } catch (e) {
+      _logIfRealError(e, context: 'onSignedIn: budget migrate/pull');
+    }
+
+    try {
+      final transactionSyncService = ref.read(transactionSyncServiceProvider);
+      await transactionSyncService.migrateGuestDataToAccount(uid);
+      await transactionSyncService.pullRemoteTransactions(uid);
+    } catch (e) {
+      _logIfRealError(e, context: 'onSignedIn: transaction migrate/pull');
+    }
+
+    try {
+      final incomeSourceSyncService = ref.read(incomeSourceSyncServiceProvider);
+      await incomeSourceSyncService.migrateGuestDataToAccount(uid);
+      await incomeSourceSyncService.pullRemoteSources(uid);
+    } catch (e) {
+      _logIfRealError(e, context: 'onSignedIn: income source migrate/pull');
+    }
+
+    try {
+      // Merges this device's guest-scoped settings with whatever the
+      // account already has on Firestore: remote wins if the account has a
+      // value, otherwise the guest's local value is pushed up. Replaces the
+      // old pullRemoteSettings + retryPendingSettingsSync pairing, which
+      // never actually pushed guest-set values because retry only re-sends
+      // settings that were previously marked as failed — a guest never
+      // marks anything as failed, since it never attempts a push at all.
+      final settingsService = ref.read(settingsSyncServiceProvider);
+      await settingsService.mergeSettingsOnSignIn(uid);
+      ref.invalidate(budgetingPeriodSettingProvider);
+      ref.invalidate(firstHalfEndDaySettingProvider);
+      ref.invalidate(currencySettingProvider);
+    } catch (e) {
+      _logIfRealError(e, context: 'onSignedIn: settings merge');
+    }
+
+    try {
+      await ref.read(entitlementSyncServiceProvider).pullRemoteEntitlement(uid);
+    } catch (e) {
+      _logIfRealError(e, context: 'onSignedIn: entitlement pull');
+    }
+  }
+
+  Future<void> _triggerSync() async {
+    final uid = ref.read(currentUserProvider)?.uid;
+    if (uid == null) return;
+
+    try {
+      final syncService = ref.read(budgetSyncServiceProvider);
+      await syncService.pullRemoteCategories(uid);
+      await syncService.pushUnsyncedCategories(uid);
+    } catch (e) {
+      _logIfRealError(e, context: 'triggerSync: budget pull/push');
+    }
+
+    try {
+      final transactionSyncService = ref.read(transactionSyncServiceProvider);
+      await transactionSyncService.pullRemoteTransactions(uid);
+      await transactionSyncService.pushUnsyncedTransactions(uid);
+    } catch (e) {
+      _logIfRealError(e, context: 'triggerSync: transaction pull/push');
+    }
+
+    try {
+      final incomeSourceSyncService = ref.read(incomeSourceSyncServiceProvider);
+      await incomeSourceSyncService.pullRemoteSources(uid);
+      await incomeSourceSyncService.pushUnsyncedSources(uid);
+    } catch (e) {
+      _logIfRealError(e, context: 'triggerSync: income source pull/push');
+    }
+
+    try {
+      await ref.read(settingsSyncServiceProvider).retryPendingSettingsSync(uid);
+    } catch (e) {
+      _logIfRealError(e, context: 'triggerSync: retryPendingSettingsSync');
+    }
+
+    try {
+      await ref.read(entitlementSyncServiceProvider).pullRemoteEntitlement(uid);
+    } catch (e) {
+      _logIfRealError(e, context: 'triggerSync: entitlement pull');
+    }
+  }
+
+  void _logIfRealError(Object e, {required String context}) {
+    final isOnline = ref.read(isOnlineProvider).value ?? true;
+    if (!isOnline) return; // expected — offline, will retry later
+    // FirebaseCrashlytics.instance.recordError(e, StackTrace.current, reason: context);
+  }
+}

@@ -1,0 +1,337 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:salapify/features/transaction/domain/entities/income_period.dart';
+import 'package:uuid/uuid.dart';
+import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/core/utils/amount_input_formatter.dart';
+import 'package:salapify/core/widgets/common_button.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/core/widgets/common_text_field.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/features/transaction/domain/entities/income_source.dart';
+import 'package:salapify/features/transaction/presentation/controllers/income_source_controller.dart';
+import 'package:salapify/l10n/app_localizations.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
+
+class IncomeFormScreen extends ConsumerStatefulWidget {
+  const IncomeFormScreen({super.key, this.existingSource});
+
+  final IncomeSource? existingSource;
+
+  bool get isEditing => existingSource != null;
+
+  @override
+  ConsumerState<IncomeFormScreen> createState() => _IncomeFormScreenState();
+}
+
+class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _sourceController;
+  late final TextEditingController _amountController;
+
+  late bool _isRecurring;
+  int? _recurringDay;
+  late IncomePeriod _period;
+  late DateTime _date;
+
+  static const int _maxIntegerDigits = 12;
+  static const double _maxAmount = 999999999999.99;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existingSource;
+    final currency = ref.read(currencySettingProvider).value ?? AppCurrency.php;
+    _sourceController = TextEditingController(text: existing?.source ?? '');
+    _amountController = TextEditingController(
+      text: existing != null ? currency.formatForInput(existing.amount) : '',
+    );
+    _isRecurring = existing?.isRecurring ?? false;
+    _recurringDay = existing?.recurringDay ?? DateTime.now().day;
+    _period = existing?.period ?? IncomePeriod.both;
+    _date = existing?.date ?? DateTime.now();
+  }
+
+  @override
+  void dispose() {
+    _sourceController.dispose();
+    _amountController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickRecurringDay() async {
+    final now = DateTime.now();
+    final daysInCurrentMonth = DateTime(now.year, now.month + 1, 0).day;
+    final initialDay = (_recurringDay ?? now.day).clamp(1, daysInCurrentMonth);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(now.year, now.month, initialDay),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) setState(() => _recurringDay = picked.day);
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate:
+          _date.isBefore(DateTime(now.year, now.month, 1)) || _date.isAfter(now)
+          ? now
+          : _date,
+      firstDate: DateTime(now.year, now.month, 1),
+      lastDate: now,
+    );
+    if (picked != null) setState(() => _date = picked);
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final amount = double.parse(_amountController.text.trim());
+    final actions = ref.read(incomeSourceActionsProvider.notifier);
+
+    if (widget.isEditing) {
+      final updated = widget.existingSource!.copyWith(
+        source: _sourceController.text.trim(),
+        amount: amount,
+        isRecurring: _isRecurring,
+        recurringDay: _isRecurring ? _recurringDay : null,
+        clearRecurringDay: !_isRecurring,
+        period:
+            IncomePeriod.both, // always — no half-specific option in this form
+        date: _date,
+      );
+      await actions.updateSource(updated);
+    } else {
+      final newSource = IncomeSource(
+        id: const Uuid().v4(),
+        source: _sourceController.text.trim(),
+        amount: amount,
+        isRecurring: _isRecurring,
+        recurringDay: _isRecurring ? _recurringDay : null,
+        period: IncomePeriod.both,
+        date: _isRecurring ? DateTime.now() : _date,
+        createdAt: DateTime.now(),
+      );
+      await actions.addSource(newSource);
+    }
+
+    if (!mounted) return;
+
+    final state = ref.read(incomeSourceActionsProvider);
+    if (state.hasError) {
+      CommonSnackbar.showError(context, state.error!);
+    } else {
+      context.pop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final actionsState = ref.watch(incomeSourceActionsProvider);
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.isEditing ? l10n.incomeEdit : l10n.incomeAdd),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CommonTextField(
+                  controller: _sourceController,
+                  icon: Icons.badge_outlined,
+                  textInputAction: TextInputAction.done,
+                  maxCharacters: 50,
+                  hint: l10n.incomeSourceHint,
+                  label: l10n.incomeSourceLabel,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return l10n.incomeSourceRequired;
+                    }
+                    if (value.trim().length > 50) {
+                      return l10n.incomeSourceTooLong;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 18),
+                CommonTextField(
+                  controller: _amountController,
+                  icon: Icons.attach_money_rounded,
+                  prefixText: currency.symbol,
+                  hint: currency.amountHint,
+                  label: l10n.amountLabel,
+                  keyboardType: TextInputType.numberWithOptions(
+                    decimal: currency.decimalDigits > 0,
+                  ),
+                  inputFormatters: [
+                    AmountInputFormatter(
+                      maxIntegerDigits: _maxIntegerDigits,
+                      maxDecimalDigits: currency.decimalDigits,
+                    ),
+                  ],
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return l10n.amountRequired;
+                    }
+                    final parsed = double.tryParse(value.trim());
+                    if (parsed == null || parsed <= 0) {
+                      return l10n.amountInvalid;
+                    }
+                    if (parsed > _maxAmount) {
+                      return l10n.amountTooLarge;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  l10n.categoryTypeLabel,
+                  style: TextStyle(color: colors.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                SegmentedButton<bool>(
+                  segments: [
+                    ButtonSegment(
+                      value: false,
+                      label: Text(l10n.budgetFreqOnce),
+                    ),
+                    ButtonSegment(
+                      value: true,
+                      label: Text(l10n.budgetFreqRecurring),
+                    ),
+                  ],
+                  selected: {_isRecurring},
+                  onSelectionChanged: (selection) =>
+                      setState(() => _isRecurring = selection.first),
+                ),
+                const SizedBox(height: 18),
+                if (_isRecurring) ...[
+                  Text(
+                    l10n.incomeDepositDay,
+                    style: TextStyle(color: colors.textPrimary),
+                  ),
+                  const SizedBox(height: 8),
+                  _DateField(
+                    icon: Icons.event_repeat_rounded,
+                    label: l10n.incomeEveryMonthOnDay(
+                      _recurringDay ?? DateTime.now().day,
+                    ),
+                    onTap: _pickRecurringDay,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    l10n.incomeCountedEveryPeriod,
+                    style: TextStyle(fontSize: 12, color: colors.textSecondary),
+                  ),
+                ] else ...[
+                  Text(
+                    l10n.expenseDate,
+                    style: TextStyle(color: colors.textPrimary),
+                  ),
+                  const SizedBox(height: 8),
+                  _DateField(
+                    icon: Icons.calendar_today_rounded,
+                    label:
+                        '${_date.year}-${_date.month.toString().padLeft(2, '0')}-${_date.day.toString().padLeft(2, '0')}',
+                    onTap: _pickDate,
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: colors.primary.withValues(alpha: 0.05),
+                      border: Border.all(
+                        color: colors.primary.withValues(alpha: 0.15),
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline_rounded,
+                          size: 18,
+                          color: colors.primary,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            l10n.incomeAddedTo(DateTime.now()),
+                            style: TextStyle(color: colors.textPrimary),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 28),
+                CommonButton(
+                  label: widget.isEditing
+                      ? l10n.commonSaveChanges
+                      : l10n.incomeAdd,
+                  btnColor: colors.textPrimary,
+                  labelColor: colors.background,
+                  isLoading: actionsState.isLoading,
+                  onPressed: _submit,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Shared pill-bordered date/day field, matching ExpenseFormScreen's date
+/// picker styling (primary-tinted fill + border, radius 14).
+class _DateField extends StatelessWidget {
+  const _DateField({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: colors.primary.withValues(alpha: 0.05),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.15)),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: colors.primary),
+            const SizedBox(width: 10),
+            Text(label, style: TextStyle(color: colors.textPrimary)),
+          ],
+        ),
+      ),
+    );
+  }
+}

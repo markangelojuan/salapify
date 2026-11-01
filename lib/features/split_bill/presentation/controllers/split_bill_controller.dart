@@ -1,0 +1,368 @@
+import 'dart:async';
+
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:salapify/core/extensions/network_timeout.dart';
+import 'package:salapify/features/authentication/data/repositories/auth_repository.dart';
+import 'package:salapify/features/authentication/data/repositories/user_repository.dart';
+import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
+import 'package:salapify/features/split_bill/domain/entities/activity_entry.dart';
+import 'package:salapify/features/split_bill/domain/entities/payment_status.dart';
+import 'package:salapify/features/split_bill/domain/entities/split_bill.dart';
+import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
+import 'package:salapify/features/split_bill/domain/entities/split_bill_limits.dart';
+import 'package:salapify/features/split_bill/domain/exceptions/group_limit_exceeded_exception.dart';
+import 'package:salapify/features/premium/data/repositories/entitlement_repository.dart';
+
+import 'dart:io';
+
+part 'split_bill_controller.g.dart';
+
+@Riverpod(keepAlive: true)
+class SplitBillController extends _$SplitBillController {
+  final _inFlightShares = <String>{};
+
+  @override
+  FutureOr<void> build() {
+    return null;
+  }
+
+  Future<void> createGroup({
+    required String name,
+    required List<String> memberIds,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final currentUser = ref.read(authRepositoryProvider).currentUser;
+      if (currentUser == null) throw StateError('Not signed in');
+
+      final allMembers = {currentUser.uid, ...memberIds};
+      if (allMembers.length > SplitBillLimits.maxGroupMembers) {
+        throw MaxGroupMembersExceededException(SplitBillLimits.maxGroupMembers);
+      }
+
+      final isPremium =
+          (await ref
+                  .read(entitlementRepositoryProvider)
+                  .watch()
+                  .first
+                  .withNetworkTimeout())
+              .isPremium;
+      final limit = SplitBillLimits.maxActiveGroupsFor(isPremium: isPremium);
+      final ownedCount = await ref
+          .read(splitBillRepositoryProvider)
+          .countOwnedGroupsForUser(currentUser.uid)
+          .withNetworkTimeout();
+
+      if (ownedCount >= limit) {
+        throw GroupLimitExceededException(limit);
+      }
+
+      final now = DateTime.now();
+      final group = SplitGroup(
+        id: '',
+        name: name,
+        memberIds: allMembers.toList(),
+        createdBy: currentUser.uid,
+        createdAt: now,
+        lastActivityAt: now,
+      );
+
+      await ref
+          .read(splitBillRepositoryProvider)
+          .createGroup(group)
+          .withNetworkTimeout();
+    });
+  }
+
+  /// Full replace of name + membership, used by the group edit form.
+  /// [memberIds] should be the complete desired list, including the creator.
+  Future<void> updateGroupDetails({
+    required String groupId,
+    required String name,
+    required List<String> memberIds,
+  }) async {
+    final uniqueMembers = memberIds.toSet();
+    if (uniqueMembers.length > SplitBillLimits.maxGroupMembers) {
+      state = AsyncError(
+        MaxGroupMembersExceededException(SplitBillLimits.maxGroupMembers),
+        StackTrace.current,
+      );
+      return;
+    }
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(splitBillRepositoryProvider)
+          .updateGroupDetails(
+            groupId: groupId,
+            name: name,
+            memberIds: uniqueMembers.toList(),
+          )
+          .withNetworkTimeout();
+    });
+  }
+
+  /// Removes the current user from the group. Anyone can call this,
+  /// including the creator (the group persists for remaining members).
+  Future<void> leaveGroup(String groupId) async {
+    final currentUser = ref.read(authRepositoryProvider).currentUser;
+    if (currentUser == null) return;
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(splitBillRepositoryProvider)
+          .removeMember(groupId, currentUser.uid)
+          .withNetworkTimeout();
+    });
+  }
+
+  /// Fully deletes the group. Intended for the creator only — enforce that
+  /// in the UI before calling this.
+  Future<void> deleteGroup(String groupId) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(splitBillRepositoryProvider)
+          .deleteGroup(groupId)
+          .withNetworkTimeout();
+    });
+  }
+
+  Future<void> markGroupRead(String groupId) async {
+    final currentUser = ref.read(authRepositoryProvider).currentUser;
+    if (currentUser == null) return;
+
+    try {
+      await ref
+          .read(splitBillRepositoryProvider)
+          .markGroupRead(groupId, currentUser.uid)
+          .withNetworkTimeout();
+    } catch (_) {
+      // Non-critical — failing to clear a read receipt shouldn't surface
+      // an error to the user. Timeout is still applied so this doesn't
+      // dangle indefinitely as an unresolved Future while offline.
+    }
+  }
+
+  final _inFlightBills = <String>{};
+
+  Future<void> createBill(SplitBill bill) async {
+    if (!_inFlightBills.add(bill.id)) return; // this bill is already saving
+
+    try {
+      state = const AsyncLoading();
+      state = await AsyncValue.guard(() async {
+        final repo = ref.read(splitBillRepositoryProvider);
+
+        final group = await repo.getGroup(bill.groupId).withNetworkTimeout();
+        if (group == null) throw StateError('Group not found');
+
+        final creatorIsPremium = await ref
+            .read(userRepositoryProvider)
+            .isPremiumUser(group.createdBy)
+            .withNetworkTimeout();
+        final limit = SplitBillLimits.maxBillsPerGroupFor(
+          isPremium: creatorIsPremium,
+        );
+
+        await repo
+            .createBillWithActivity(
+              bill,
+              ActivityEntry(
+                id: '',
+                groupId: bill.groupId,
+                senderId: bill.paidBy,
+                type: ActivityType.billAdded,
+                createdAt: DateTime.now(),
+                metadata: {'billTitle': bill.title, 'amount': bill.totalAmount},
+              ),
+              billLimit: limit,
+            )
+            .withNetworkTimeout();
+
+        ref.invalidate(splitGroupProvider(bill.groupId));
+      });
+    } finally {
+      _inFlightBills.remove(bill.id);
+    }
+  }
+
+  /// Full edit of an existing bill. Enforce "only the creator can edit" in
+  /// the UI — this method doesn't re-check `paidBy` itself.
+  Future<void> updateBill(SplitBill bill) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(splitBillRepositoryProvider)
+          .updateBill(bill)
+          .withNetworkTimeout();
+    });
+  }
+
+  Future<void> deleteBill({
+    required String groupId,
+    required String billId,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(splitBillRepositoryProvider);
+
+      final group = await repo.getGroup(groupId).withNetworkTimeout();
+      if (group == null) throw StateError('Group not found');
+
+      final creatorIsPremium = await ref
+          .read(userRepositoryProvider)
+          .isPremiumUser(group.createdBy)
+          .withNetworkTimeout();
+
+      await repo
+          .deleteBill(groupId, billId, decrementCount: creatorIsPremium)
+          .withNetworkTimeout();
+
+      ref.invalidate(splitGroupProvider(groupId));
+    });
+  }
+
+  Future<void> sendMessage({
+    required String groupId,
+    required String text,
+    List<Map<String, dynamic>> mentions = const [],
+  }) async {
+    final currentUser = ref.read(authRepositoryProvider).currentUser;
+    if (currentUser == null) return;
+
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(splitBillRepositoryProvider)
+          .addActivity(
+            ActivityEntry(
+              id: '',
+              groupId: groupId,
+              senderId: currentUser.uid,
+              type: ActivityType.message,
+              createdAt: DateTime.now(),
+              text: text,
+              metadata: mentions.isEmpty ? null : {'mentions': mentions},
+            ),
+          )
+          .withNetworkTimeout();
+    });
+  }
+
+  Future<void> updateShareStatus({
+    required String groupId,
+    required String billId,
+    required String userId,
+    required PaymentStatus status,
+    required String payerId,
+    String? actorId,
+  }) async {
+    final key = '$billId:$userId';
+    if (!_inFlightShares.add(key))
+      return; // same share already updating, ignore
+
+    try {
+      state = const AsyncLoading();
+      state = await AsyncValue.guard(() async {
+        final repo = ref.read(splitBillRepositoryProvider);
+        await repo
+            .updateShareStatus(
+              groupId: groupId,
+              billId: billId,
+              userId: userId,
+              status: status,
+            )
+            .withNetworkTimeout();
+
+        final activityType = switch (status) {
+          PaymentStatus.markedPaid => ActivityType.paymentMarked,
+          PaymentStatus.confirmed => ActivityType.paymentConfirmed,
+          PaymentStatus.disputed => ActivityType.paymentDisputed,
+          PaymentStatus.unpaid => null,
+        };
+        if (activityType == null) return;
+
+        await repo
+            .addActivity(
+              ActivityEntry(
+                id: '',
+                groupId: groupId,
+                senderId: actorId ?? userId,
+                type: activityType,
+                createdAt: DateTime.now(),
+                metadata: switch (status) {
+                  PaymentStatus.markedPaid => {'payerId': payerId},
+                  PaymentStatus.confirmed ||
+                  PaymentStatus.disputed => {'targetUserId': userId},
+                  PaymentStatus.unpaid => null,
+                },
+              ),
+            )
+            .withNetworkTimeout();
+      });
+    } finally {
+      _inFlightShares.remove(key);
+    }
+  }
+
+  Future<void> pokeGroup(String groupId) async {
+    final currentUser = ref.read(authRepositoryProvider).currentUser;
+    if (currentUser == null) return;
+
+    state = await AsyncValue.guard(() async {
+      await ref
+          .read(splitBillRepositoryProvider)
+          .addActivity(
+            ActivityEntry(
+              id: '',
+              groupId: groupId,
+              senderId: currentUser.uid,
+              type: ActivityType.poke,
+              createdAt: DateTime.now(),
+            ),
+          )
+          .withNetworkTimeout();
+    });
+  }
+
+  Future<void> sendPhoto({required String groupId, required File file}) async {
+    final currentUser = ref.read(authRepositoryProvider).currentUser;
+    if (currentUser == null) return;
+
+    final feed = ref.read(activityFeedProvider(groupId).notifier);
+    final tempId = feed.addOptimisticPhoto(senderId: currentUser.uid);
+
+    state = await AsyncValue.guard(() async {
+      try {
+        final repo = ref.read(splitBillRepositoryProvider);
+
+        final url = await repo
+            .uploadActivityPhoto(groupId: groupId, file: file)
+            .withNetworkTimeout(const Duration(seconds: 30));
+        await repo
+            .addActivity(
+              ActivityEntry(
+                id: '',
+                groupId: groupId,
+                senderId: currentUser.uid,
+                type: ActivityType.photo,
+                createdAt: DateTime.now(),
+                metadata: {
+                  'photoUrl': url,
+                  'expiresAt': DateTime.now()
+                      .add(const Duration(days: 3))
+                      .toIso8601String(),
+                },
+              ),
+            )
+            .withNetworkTimeout();
+        feed.resolvePending(tempId);
+      } catch (e) {
+        feed.markPendingFailed(tempId);
+        rethrow;
+      }
+    });
+  }
+}

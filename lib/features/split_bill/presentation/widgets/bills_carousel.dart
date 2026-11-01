@@ -1,0 +1,452 @@
+import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/features/split_bill/data/providers/split_bill_providers.dart';
+import 'package:salapify/features/split_bill/domain/entities/bill_share.dart';
+import 'package:salapify/features/split_bill/domain/entities/payment_status.dart';
+import 'package:salapify/features/split_bill/domain/entities/split_bill.dart';
+import 'package:salapify/features/split_bill/domain/entities/split_bill_limits.dart';
+import 'package:salapify/features/split_bill/domain/entities/split_group.dart';
+import 'package:salapify/features/split_bill/presentation/controllers/split_bill_controller.dart';
+import 'package:salapify/features/split_bill/presentation/screens/bill_form_screen.dart';
+import 'package:salapify/features/premium/presentation/widgets/premium_upsell_sheet.dart';
+import 'package:salapify/router/routes.dart';
+import 'package:salapify/features/premium/data/services/purchase_service.dart';
+import 'package:salapify/l10n/app_localizations.dart';
+
+class BillsCarousel extends ConsumerWidget {
+  const BillsCarousel({
+    super.key,
+    required this.bills,
+    required this.group,
+    required this.currentUid,
+    required this.names,
+  });
+
+  final List<SplitBill> bills;
+  final SplitGroup group;
+  final String? currentUid;
+  final Map<String, String> names;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SizedBox(
+      height: 170,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        itemCount: bills.length + 1,
+        itemBuilder: (context, index) {
+          if (index == bills.length) {
+            return _AddBillCard(group: group);
+          }
+          final bill = bills[index];
+          return _BillCard(
+            bill: bill,
+            group: group,
+            currentUid: currentUid,
+            names: names,
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _AddBillCard extends ConsumerWidget {
+  const _AddBillCard({required this.group});
+
+  final SplitGroup group;
+
+  Future<void> _showPremiumUpsell(BuildContext context, WidgetRef ref) async {
+    final purchaseService = ref.read(purchaseServiceProvider);
+    final price = await purchaseService.premiumPriceLabel() ?? '₱39';
+    if (!context.mounted) return;
+
+    await showPremiumUpsellSheet(
+      context,
+      limit: PremiumLimit.bills,
+      priceLabel: price,
+      onUnlock: () async {
+        final outcome = await purchaseService.buyPremium();
+        if (outcome == PurchaseOutcome.granted) {
+          ref.invalidate(isGroupCreatorPremiumProvider(group.createdBy));
+        }
+        return outcome;
+      },
+      onRestore: () async {
+        final outcome = await purchaseService.restorePurchases();
+        if (outcome == PurchaseOutcome.granted) {
+          ref.invalidate(isGroupCreatorPremiumProvider(group.createdBy));
+        }
+        return outcome;
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final creatorIsPremiumAsync = ref.watch(
+      isGroupCreatorPremiumProvider(group.createdBy),
+    );
+    final isPremium = creatorIsPremiumAsync.value ?? false;
+    final limit = SplitBillLimits.maxBillsPerGroupFor(isPremium: isPremium);
+    final atLimit = group.billsCreatedCount >= limit;
+
+    return Container(
+      width: 140,
+      margin: const EdgeInsets.only(right: 12),
+      child: Material(
+        color: atLimit
+            ? colors.textSecondary.withValues(alpha: 0.06)
+            : colors.primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: atLimit
+              ? () {
+                  if (isPremium) {
+                    CommonSnackbar.showWarning(
+                      context,
+                      l10n.billLimitReachedPremium(
+                        SplitBillLimits.premiumMaxBillsPerGroup,
+                      ),
+                    );
+                  } else {
+                    _showPremiumUpsell(context, ref);
+                  }
+                }
+              : () => context.pushNamed(
+                  AppRoutes.billForm.name,
+                  extra: BillFormArgs(group: group),
+                ),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: atLimit
+                    ? colors.textSecondary.withValues(alpha: 0.2)
+                    : colors.primary.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    atLimit
+                        ? Icons.lock_outline_rounded
+                        : Icons.add_circle_outline_rounded,
+                    size: 28,
+                    color: atLimit ? colors.textSecondary : colors.primary,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    l10n.billAdd,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      color: atLimit ? colors.textSecondary : colors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BillCard extends ConsumerWidget {
+  const _BillCard({
+    required this.bill,
+    required this.group,
+    required this.currentUid,
+    required this.names,
+  });
+
+  final SplitBill bill;
+  final SplitGroup group;
+  final String? currentUid;
+  final Map<String, String> names;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
+    final isPayer = bill.paidBy == currentUid;
+    final myShare = bill.shares.firstWhereOrNull((s) => s.userId == currentUid);
+
+    return Container(
+      width: 220,
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: colors.surface,
+        border: Border.all(color: colors.primary.withValues(alpha: 0.10)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.4
+                  : 0.08,
+            ),
+            blurRadius: 4,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: () => context.pushNamed(
+            AppRoutes.billForm.name,
+            extra: BillFormArgs(group: group, existingBill: bill),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundColor: colors.primary.withValues(alpha: 0.15),
+                      child: Icon(
+                        Icons.receipt_long_rounded,
+                        size: 16,
+                        color: colors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        bill.title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: colors.textPrimary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.billTotal(
+                    currency.formatCompactWithSymbol(bill.totalAmount),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: colors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  isPayer
+                      ? l10n.billPaidByYou
+                      : l10n.billPaidByName(names[bill.paidBy] ?? '...'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11, color: colors.textSecondary),
+                ),
+                const Spacer(),
+                if (isPayer)
+                  _buildPayerStatusRow(context, colors)
+                else if (myShare != null)
+                  _buildOwerRow(context, ref, myShare, colors),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPayerStatusRow(BuildContext context, AppColorsExt colors) {
+    final l10n = AppLocalizations.of(context);
+    final total = bill.shares.length;
+    final confirmed = bill.shares
+        .where((s) => s.status == PaymentStatus.confirmed)
+        .length;
+    final disputed = bill.shares
+        .where((s) => s.status == PaymentStatus.disputed)
+        .length;
+    final pendingConfirmation = bill.shares
+        .where((s) => s.status == PaymentStatus.markedPaid)
+        .length;
+
+    Widget label(String text, Color color) => Text(
+      text,
+      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+
+    if (confirmed == total) {
+      return label(l10n.billAllConfirmed, colors.primary);
+    }
+    if (disputed > 0) {
+      return label(l10n.billDisputedReview(disputed), colors.error);
+    }
+    if (pendingConfirmation > 0) {
+      return label(l10n.billWaitingOnYou(pendingConfirmation), colors.warning);
+    }
+    return Text(
+      l10n.billWaitingPayments,
+      style: TextStyle(fontSize: 11, color: colors.textSecondary),
+    );
+  }
+
+  Widget _buildOwerRow(
+    BuildContext context,
+    WidgetRef ref,
+    BillShare share,
+    AppColorsExt colors,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
+    final status = share.status;
+    final amount = share.amountOwed;
+
+    if (status == PaymentStatus.confirmed) {
+      return _StatusPill(label: l10n.splitSettled, color: colors.primary);
+    }
+    if (status == PaymentStatus.disputed) {
+      return Row(
+        children: [
+          Expanded(
+            child: Text(
+              l10n.billDisputed,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: colors.error,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 1),
+              minimumSize: const Size(0, 0),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              foregroundColor: colors.primary,
+            ),
+            onPressed: () => ref
+                .read(splitBillControllerProvider.notifier)
+                .updateShareStatus(
+                  groupId: bill.groupId,
+                  billId: bill.id,
+                  userId: currentUid!,
+                  status: PaymentStatus.markedPaid,
+                  payerId: bill.paidBy,
+                ),
+            child: Text(
+              l10n.billMarkPaidAgain,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      );
+    }
+    if (status == PaymentStatus.markedPaid) {
+      return Text(
+        l10n.billWaitingConfirmation,
+        style: TextStyle(fontSize: 11, color: colors.textSecondary),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+
+    // unpaid
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            l10n.splitYouOwe(
+              currency.formatCompactWithSymbol(amount, threshold: 10000),
+            ),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+              color: colors.textPrimary,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        TextButton(
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 1),
+            minimumSize: const Size(0, 0),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            foregroundColor: colors.primary,
+          ),
+          onPressed: () => ref
+              .read(splitBillControllerProvider.notifier)
+              .updateShareStatus(
+                groupId: bill.groupId,
+                billId: bill.id,
+                userId: currentUid!,
+                status: PaymentStatus.markedPaid,
+                payerId: bill.paidBy,
+              ),
+          child: Text(
+            l10n.billMarkPaid,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Small status pill matching the app's chip language (_TypeChip,
+/// category picker chips) instead of bare colored text.
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+}

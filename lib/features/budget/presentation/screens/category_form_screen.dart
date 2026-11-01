@@ -1,0 +1,400 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:uuid/uuid.dart';
+import 'package:salapify/core/theme/app_colors.dart';
+import 'package:salapify/core/utils/amount_input_formatter.dart';
+import 'package:salapify/core/widgets/common_button.dart';
+import 'package:salapify/core/widgets/common_snackbar.dart';
+import 'package:salapify/core/widgets/common_text_field.dart';
+import 'package:salapify/core/widgets/common_confirmation_dialog.dart';
+import 'package:salapify/features/budget/domain/entities/budget_category.dart';
+import 'package:salapify/features/budget/domain/entities/budget_category_type.dart';
+import 'package:salapify/features/budget/domain/entities/budget_frequency.dart';
+import 'package:salapify/features/budget/presentation/controllers/budget_controller.dart';
+import 'package:salapify/features/budget/presentation/constants/category_icons.dart';
+import 'package:salapify/features/settings/domain/budgeting_period.dart';
+import 'package:salapify/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:salapify/features/settings/domain/currency.dart';
+import 'package:salapify/l10n/app_localizations.dart';
+
+class CategoryFormScreen extends ConsumerStatefulWidget {
+  const CategoryFormScreen({super.key, this.existingCategory});
+
+  /// Null = add mode. Non-null = edit mode.
+  final BudgetCategory? existingCategory;
+
+  bool get isEditing => existingCategory != null;
+
+  @override
+  ConsumerState<CategoryFormScreen> createState() => _CategoryFormScreenState();
+}
+
+class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _amountController = TextEditingController();
+
+  late BudgetCategoryType _type;
+  late BudgetFrequency _frequency;
+  BudgetPeriod? _period;
+  late String _iconKey;
+
+  static const int _maxIntegerDigits = 12;
+  static const double _maxAmount = 999999999999.99;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existingCategory;
+    final globalPeriod =
+        ref.read(budgetingPeriodSettingProvider).value ??
+        BudgetingPeriod.monthly;
+    final currency = ref.read(currencySettingProvider).value ?? AppCurrency.php;
+
+    _nameController.text = existing?.name ?? '';
+    _amountController.text = existing != null
+        ? currency.formatForInput(existing.amount)
+        : '';
+    _type = existing?.type ?? BudgetCategoryType.variable;
+    _frequency =
+        existing?.frequency ??
+        (globalPeriod == BudgetingPeriod.biMonthly
+            ? BudgetFrequency.biMonthly
+            : BudgetFrequency.monthly);
+    _period =
+        existing?.period ??
+        (globalPeriod == BudgetingPeriod.biMonthly ? BudgetPeriod.both : null);
+    _iconKey = existing?.iconName ?? CategoryIcons.keys.first;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _amountController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (!_formKey.currentState!.validate()) return;
+
+    final globalPeriod =
+        ref.read(budgetingPeriodSettingProvider).value ??
+        BudgetingPeriod.monthly;
+    final now = DateTime.now();
+
+    final category = BudgetCategory(
+      id: widget.existingCategory?.id ?? const Uuid().v4(),
+      name: _nameController.text.trim(),
+      type: _type,
+      amount: double.parse(_amountController.text.trim()),
+      frequency: _frequency,
+      period: globalPeriod == BudgetingPeriod.biMonthly ? _period : null,
+      iconName: _iconKey,
+      sortOrder: widget.existingCategory?.sortOrder ?? 0,
+      isCompleted: widget.existingCategory?.isCompleted ?? false,
+      createdAt: widget.existingCategory?.createdAt ?? now,
+      updatedAt: widget.isEditing ? now : null,
+    );
+
+    final actions = ref.read(budgetActionsProvider.notifier);
+    final future = widget.isEditing
+        ? actions.updateCategory(category)
+        : actions.addCategory(category);
+
+    future.then((_) {
+      final state = ref.read(budgetActionsProvider);
+      if (!context.mounted) return;
+      if (state.hasError) {
+        CommonSnackbar.showError(context, state.error!);
+      } else {
+        context.pop();
+      }
+    });
+  }
+
+  Future<void> _confirmDelete() async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await CommonConfirmationDialog.confirmDelete(
+      context,
+      title: l10n.categoryDelete,
+      itemName: widget.existingCategory!.name,
+    );
+    if (!confirmed || !mounted) return;
+
+    final actions = ref.read(budgetActionsProvider.notifier);
+    await actions.deleteCategory(widget.existingCategory!);
+
+    final state = ref.read(budgetActionsProvider);
+    if (state.hasError) {
+      if (mounted) CommonSnackbar.showError(context, state.error!);
+    } else if (mounted) {
+      context.pop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).extension<AppColorsExt>()!;
+    final globalPeriod =
+        ref.watch(budgetingPeriodSettingProvider).value ??
+        BudgetingPeriod.monthly;
+    final actionsState = ref.watch(budgetActionsProvider);
+    final currency =
+        ref.watch(currencySettingProvider).value ?? AppCurrency.php;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.isEditing ? l10n.categoryEdit : l10n.categoryAdd),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CommonTextField(
+                  controller: _nameController,
+                  icon: Icons.label_outline_rounded,
+                  textInputAction: TextInputAction.done,
+                  maxCharacters: 50,
+                  hint: l10n.categoryNameHint,
+                  label: l10n.categoryNameLabel,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return l10n.categoryNameRequired;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 18),
+                CommonTextField(
+                  controller: _amountController,
+                  icon: Icons.attach_money_rounded,
+                  prefixText: currency.symbol,
+                  hint: currency.amountHint,
+                  label: l10n.amountLabelWithSymbol(currency.symbol),
+                  keyboardType: TextInputType.numberWithOptions(
+                    decimal: currency.decimalDigits > 0,
+                  ),
+                  inputFormatters: [
+                    AmountInputFormatter(
+                      maxIntegerDigits: _maxIntegerDigits,
+                      maxDecimalDigits: currency.decimalDigits,
+                    ),
+                  ],
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return l10n.amountRequired;
+                    }
+                    final parsed = double.tryParse(value.trim());
+                    if (parsed == null || parsed <= 0) {
+                      return l10n.amountInvalid;
+                    }
+                    if (parsed > _maxAmount) {
+                      return l10n.amountTooLarge;
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 18),
+                _buildTypeLabel(colors),
+                const SizedBox(height: 8),
+                SegmentedButton<BudgetCategoryType>(
+                  segments: [
+                    ButtonSegment(
+                      value: BudgetCategoryType.fixed,
+                      label: Text(l10n.budgetTypeFixed),
+                    ),
+                    ButtonSegment(
+                      value: BudgetCategoryType.variable,
+                      label: Text(l10n.budgetTypeVariable),
+                    ),
+                  ],
+                  selected: {_type},
+                  onSelectionChanged: (selection) =>
+                      setState(() => _type = selection.first),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  l10n.categoryRepeat,
+                  style: TextStyle(color: colors.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                _buildFrequencyOptions(globalPeriod),
+                const SizedBox(height: 18),
+                Text(
+                  l10n.categoryIcon,
+                  style: TextStyle(color: colors.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                _buildIconPicker(colors),
+                const SizedBox(height: 28),
+                CommonButton(
+                  label: widget.isEditing
+                      ? l10n.commonSaveChanges
+                      : l10n.categoryAdd,
+                  btnColor: colors.textPrimary,
+                  labelColor: colors.background,
+                  isLoading: actionsState.isLoading,
+                  onPressed: _submit,
+                ),
+                if (widget.isEditing) ...[
+                  const SizedBox(height: 12),
+                  CommonButton(
+                    label: l10n.categoryDelete,
+                    btnColor: colors.surface,
+                    labelColor: colors.error,
+                    onPressed: _confirmDelete,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTypeLabel(AppColorsExt colors) {
+    final l10n = AppLocalizations.of(context);
+    return Row(
+      children: [
+        Text(
+          l10n.categoryTypeLabel,
+          style: TextStyle(color: colors.textPrimary),
+        ),
+        Tooltip(
+          message:
+              '${l10n.categoryFixedTooltip}\n${l10n.categoryVariableTooltip}',
+          triggerMode: TooltipTriggerMode.tap,
+          showDuration: const Duration(seconds: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: colors.textPrimary,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: colors.textPrimary.withValues(alpha: 0.25),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          textStyle: TextStyle(
+            color: colors.background,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            height: 1.4,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(2, 4, 4, 4),
+            child: Icon(
+              Icons.info_outline_rounded,
+              size: 18,
+              color: colors.textPrimary.withValues(alpha: 0.6),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFrequencyOptions(BudgetingPeriod globalPeriod) {
+    final l10n = AppLocalizations.of(context);
+    if (globalPeriod == BudgetingPeriod.monthly) {
+      return SegmentedButton<BudgetFrequency>(
+        segments: [
+          ButtonSegment(
+            value: BudgetFrequency.monthly,
+            label: Text(l10n.categoryEveryMonth),
+          ),
+          ButtonSegment(
+            value: BudgetFrequency.once,
+            label: Text(l10n.categoryOnce),
+          ),
+        ],
+        selected: {_frequency},
+        onSelectionChanged: (selection) =>
+            setState(() => _frequency = selection.first),
+      );
+    }
+
+    // biMonthly global setting
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SegmentedButton<BudgetFrequency>(
+          segments: [
+            ButtonSegment(
+              value: BudgetFrequency.biMonthly,
+              label: Text(l10n.categoryEveryPeriod),
+            ),
+            ButtonSegment(
+              value: BudgetFrequency.once,
+              label: Text(l10n.categoryOnce),
+            ),
+          ],
+          selected: {_frequency},
+          onSelectionChanged: (selection) => setState(() {
+            _frequency = selection.first;
+            if (_frequency == BudgetFrequency.once) {
+              _period = null;
+            } else {
+              _period ??= BudgetPeriod.both;
+            }
+          }),
+        ),
+        if (_frequency == BudgetFrequency.biMonthly) ...[
+          const SizedBox(height: 12),
+          SegmentedButton<BudgetPeriod>(
+            segments: [
+              ButtonSegment(
+                value: BudgetPeriod.both,
+                label: Text(l10n.categoryBothHalves),
+              ),
+              ButtonSegment(
+                value: BudgetPeriod.firstHalf,
+                label: Text(l10n.categoryFirstHalf),
+              ),
+              ButtonSegment(
+                value: BudgetPeriod.secondHalf,
+                label: Text(l10n.categorySecondHalf),
+              ),
+            ],
+            selected: {_period ?? BudgetPeriod.both},
+            onSelectionChanged: (selection) =>
+                setState(() => _period = selection.first),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildIconPicker(AppColorsExt colors) {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: CategoryIcons.keys.map((key) {
+        final selected = key == _iconKey;
+        return GestureDetector(
+          onTap: () => setState(() => _iconKey = key),
+          child: CircleAvatar(
+            radius: 22,
+            backgroundColor: selected
+                ? colors.primary
+                : colors.primary.withValues(alpha: 0.1),
+            child: Icon(
+              CategoryIcons.iconFor(key),
+              color: selected ? AppColors.white : colors.primary,
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}

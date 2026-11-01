@@ -1,0 +1,1228 @@
+{
+  "@@locale": "en",
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Title of the settings screen"
+  },
+  "settingsLanguage": "Language",
+  "@settingsLanguage": {
+    "description": "Section label for the language setting"
+  },
+  "languageSystemDefault": "System default",
+  "@languageSystemDefault": {
+    "description": "Option to follow the device language"
+  },
+  "languageChoose": "Choose Language",
+  "@languageChoose": {
+    "description": "Title of the language picker sheet"
+  },
+  "settingsBudgetingPeriod": "Budgeting Period",
+  "budgetingPeriodMonthly": "Monthly",
+  "budgetingPeriodMonthlyDesc": "Track budgets once per month",
+  "budgetingPeriodBiMonthly": "Bi-Monthly",
+  "budgetingPeriodBiMonthlyDesc": "Split the month into two halves",
+  "settingsFirstHalfEndsOn": "First half ends on",
+  "settingsCurrency": "Currency",
+  "settingsReminders": "Reminders",
+  "settingsAppReminders": "App reminders",
+  "settingsAppRemindersDesc": "Nudge occasionally to update your budget",
+  "settingsPrivacy": "Privacy",
+  "settingsBlockedUsers": "Blocked users",
+  "changePeriodTitle": "Change Budgeting Period",
+  "changePeriodMessage": "Existing categories will be converted to match the new period (amounts stay the same). Categories set for a specific half will now count toward the full month, or vice versa — you may want to review and consolidate any duplicates afterward. Continue?",
+  "commonCancel": "Cancel",
+  "commonContinue": "Continue",
+  "settingsLoadFailed": "Failed to load settings: {error}",
+  "@settingsLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyTapToChange": "Tap to change",
+  "currencyChoose": "Choose Currency",
+  "reminderMonthStartTitle": "New month, fresh budget 📊",
+  "reminderMonthStartBody": "Update your budget and log any pending transactions.",
+  "reminderMidMonthTitle": "Midmonth check-in 💸",
+  "reminderMidMonthBody": "Don't forget to log your recent expenses.",
+  "settingsSyncFailedPeriod": "Budgeting period saved on this device, but couldn't sync to your account.",
+  "settingsSyncFailedGeneric": "Setting saved on this device, but couldn't sync to your account.",
+  "settingsSyncFailedCurrency": "Currency saved on this device, but couldn't sync to your account.",
+  "settingsNotificationsDisabled": "Notifications are turned off for Salapify. Enable them in your phone settings to get reminders.",
+  "settingsConvertingCategories": "Converting your categories…",
+  "errorUserNotFound": "Hmm… we couldn't find that account.",
+  "errorInvalidCredential": "Those login details don't look right.",
+  "errorEmailInUse": "This email is already part of the club.",
+  "errorNetwork": "Please check your connection and try again.",
+  "errorTooManyRequests": "Too many attempts. Give it a minute before trying again.",
+  "errorUserDisabled": "This account is currently taking a vacation.",
+  "errorWeakPassword": "That password is too easy to guess. Try a longer one.",
+  "errorRequiresRecentLogin": "For your security, please sign out and back in, then try again.",
+  "errorOffline": "You're offline. Check your connection and try again.",
+  "errorGeneric": "A tiny hiccup! Try again?",
+  "errorUsernameTaken": "Username is already taken",
+  "errorEmailRegistered": "Email is already registered",
+  "errorWrongPassword": "That password doesn't look right",
+  "errorReauthCancelled": "Confirmation was cancelled",
+  "errorAccountDisabled": "This account has been disabled",
+  "authSignInSubtitle": "Enter your credentials to access your account",
+  "authEmailLabel": "Email Address",
+  "authEmailHint": "Enter your email",
+  "authEmailRequired": "Email is required",
+  "authEmailInvalid": "Enter a valid email",
+  "authPasswordLabel": "Password",
+  "authPasswordHint": "Enter your password",
+  "authPasswordRequired": "Password is required",
+  "authPasswordInvalid": "Invalid password",
+  "authForgotPassword": "Forgot password?",
+  "authSignIn": "Sign In",
+  "authSignUp": "Sign Up",
+  "authOrContinueWith": "Or continue with",
+  "authContinueWithGoogle": "Continue with Google",
+  "authNotMemberYet": "Not part of the club yet?",
+  "authContinueAsGuest": "Continue as guest",
+  "authResetPasswordTitle": "Reset your password",
+  "authResetPasswordPrompt": "Enter your email address and we'll send you a link to reset your password.",
+  "authResetLinkSent": "If an account exists for that email, a reset link is on its way. Check your inbox (and spam folder).",
+  "authSendLink": "Send link",
+  "commonDone": "Done",
+  "authSignUpSubtitle": "Create an account to get started",
+  "authUsernameLabel": "Username",
+  "authUsernameHint": "Enter your preferred username",
+  "authUsernameRequired": "Username is required",
+  "authUsernameNoSpaces": "No leading or trailing spaces",
+  "authUsernameStartLetter": "Must start with a letter",
+  "authUsernameAllowedChars": "Only letters, numbers, and underscores allowed",
+  "authUsernameMinLetters": "Minimum 3 letters",
+  "authUsernameMaxNumbers": "Maximum 3 numbers",
+  "authPasswordPinLabel": "Password / PIN",
+  "authPasswordPinHint": "Enter your password / PIN",
+  "authPasswordMinLength": "Minimum 6 characters",
+  "authConfirmPasswordLabel": "Confirm Password / PIN",
+  "authConfirmPasswordHint": "Re-enter your password / PIN",
+  "authConfirmPasswordRequired": "Please confirm your password",
+  "authPasswordsMismatch": "Passwords do not match",
+  "authAgreeTerms": "I agree to the Terms of Service and Privacy Policy",
+  "termsDialogTitle": "Terms & Privacy",
+  "termsServiceHeading": "Terms of Service",
+  "termsServiceBody": "By using Salapify, you agree to use the app responsibly and provide accurate information. You are responsible for your account and the information you enter.",
+  "termsPrivacyHeading": "Privacy Policy",
+  "termsPrivacyBody": "Salapify collects information needed to provide your account, budgeting, expense tracking, groups, and bill-splitting features. We do not connect to your bank accounts or financial accounts, and we do not sell your personal information.",
+  "termsSharedHeading": "Shared Information",
+  "termsSharedBody": "When you join groups or split bills, relevant information such as your username, bills, and shares may be visible to other members of those groups.",
+  "termsImportantHeading": "Important",
+  "termsImportantBody": "Salapify is a budgeting and organization tool, not a bank, payment service, or financial adviser.",
+  "commonClose": "Close",
+  "verifyEmailTitle": "Verify your email",
+  "verifyEmailSentGeneric": "We’ve sent you a verification link.",
+  "verifyEmailSentTo": "We’ve sent a verification link to {email}.",
+  "@verifyEmailSentTo": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyEmailInstructions": "Click the link in that email, then tap the button below.",
+  "verifyEmailIVerified": "I’ve verified",
+  "verifyEmailResend": "Resend email",
+  "verifyEmailResendIn": "Resend in {seconds}s",
+  "@verifyEmailResendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "verifyEmailResent": "Verification email sent.",
+  "verifyEmailNotYet": "Not verified yet — check your inbox (and spam).",
+  "commonSignOut": "Sign out",
+  "avatarPickerTitle": "Which little money beast are you?",
+  "avatarPickerSubtitle": "You can change this anytime",
+  "commonConfirm": "Confirm",
+  "avatarLuxuriousDog": "Luxurious Dog",
+  "avatarSavvyMonkey": "Savvy Monkey",
+  "avatarGreedyCat": "Greedy Cat",
+  "avatarThriftyPig": "Thrifty Pig",
+  "avatarStingyTurtle": "Stingy Turtle",
+  "avatarCovetousSnake": "Covetous Snake",
+  "avatarProsperousPanda": "Prosperous Panda",
+  "avatarFrugalShark": "Frugal Shark",
+  "avatarOpulentWalrus": "Opulent Walrus",
+  "avatarBrokeEagle": "Broke Eagle",
+  "accountAvatarNotSelected": "Not selected",
+  "prefsBudgetTitle": "How do you budget?",
+  "prefsBudgetDescription": "Your budget period decides when your category budgets reset.",
+  "prefsMonthlyDesc": "One budget for the whole month",
+  "prefsTwiceMonthly": "Twice a month",
+  "prefsTwiceMonthlyDesc": "Split into two halves, great if you get paid twice",
+  "prefsFirstHalfRange": "The first half runs from day 1 to day {day}.",
+  "@prefsFirstHalfRange": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "prefsCurrencyTitle": "Pick your currency",
+  "prefsCurrencyDescription": "This is the symbol shown across your budgets and transactions.",
+  "prefsGetStarted": "Get started",
+  "prefsUseDefaults": "Use defaults",
+  "prefsChangeLater": "You can change these anytime in Settings",
+  "commonNext": "Next",
+  "commonBack": "Back",
+  "commonChange": "Change",
+  "accountUserFallback": "User",
+  "accountProfileInfo": "Profile info",
+  "accountEmail": "Email",
+  "accountSignInMethod": "Sign-in method",
+  "accountAvatar": "Avatar",
+  "accountMembership": "Membership",
+  "accountDangerZone": "Danger zone",
+  "accountDeleteAccount": "Delete account",
+  "accountDeleteAccountDesc": "Permanently remove your account and all data",
+  "accountPremium": "Premium",
+  "accountSeeWhatsInside": "See what’s inside",
+  "accountPremiumDesc": "Higher limits unlocked on this account",
+  "accountFreeDesc": "Lift category, group and bill limits",
+  "commonSave": "Save",
+  "commonRequired": "Required",
+  "accountDeleteConfirmPhrase": "Save small sums, see savings soar",
+  "accountDeleteWarning": "This action is permanent and cannot be undone. All your data, transactions, and settings will be permanently deleted.",
+  "accountDeleteTypePhrase": "Type “{phrase}” to confirm",
+  "@accountDeleteTypePhrase": {
+    "placeholders": {
+      "phrase": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDeleteReauthGoogle": "For your security, please confirm your identity with Google before we delete your account.",
+  "accountDeleteReauthPassword": "For your security, please enter your password to confirm.",
+  "accountVerifyWithGoogle": "Verify with Google",
+  "accountDeletePermanently": "Delete permanently",
+  "accountIncorrectPasswordRetry": "Incorrect password. Please try again.",
+  "accountChangeUsername": "Change username",
+  "accountUsernameUpdated": "Username updated",
+  "accountChangePassword": "Change password",
+  "accountCurrentPassword": "Current password / PIN",
+  "accountNewPassword": "New password / PIN",
+  "accountConfirmNewPassword": "Confirm new password / PIN",
+  "accountIncorrectPassword": "Incorrect password",
+  "accountPasswordUpdated": "Password updated",
+  "accountUpdatePassword": "Update password",
+  "premiumHeaderBadge": "Be premium",
+  "premiumHeaderActiveBadge": "You are premium",
+  "premiumHeadline": "Remove every free-plan limit",
+  "premiumHeadlineActive": "Every limit is removed on this account.",
+  "premiumSub": "One-time payment. No subscription, ever.",
+  "premiumSubActive": "Thanks for helping us maintain Salapify.",
+  "premiumWhatYouGet": "What you get",
+  "premiumFeatureCategories": "{count} active budget categories",
+  "@premiumFeatureCategories": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "premiumFeatureCategoriesFree": "Free plan: up to {count} active",
+  "@premiumFeatureCategoriesFree": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "premiumFeatureGroups": "{count} active groups",
+  "@premiumFeatureGroups": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "premiumFeatureGroupsFree": "Free plan: up to {count} active",
+  "@premiumFeatureGroupsFree": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "premiumFeatureBills": "{count} active bills per group",
+  "@premiumFeatureBills": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "premiumFeatureBillsFree": "Free plan: up to {count} per group",
+  "@premiumFeatureBillsFree": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "premiumFeatureAvatars": "More beasts unlocked",
+  "premiumFeatureAvatarsDesc": "Extra avatars to personalize your profile",
+  "premiumPricing": "Pricing",
+  "premiumBestValue": "BEST VALUE — PAY ONCE",
+  "premiumOneTimeFee": "one-time fee",
+  "premiumRestorePurchase": "Restore purchase",
+  "premiumSecurePayment": "Secure one-time payment via App Store",
+  "premiumActiveOnAccount": "Premium is active on this account",
+  "premiumGo": "Go Premium",
+  "premiumBuyWithPrice": "Buy — {price}",
+  "@premiumBuyWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "premiumRestored": "Purchase restored — enjoy!",
+  "premiumUnlocked": "You’re premium now — enjoy!",
+  "premiumErrorOtherAccount": "This purchase is linked to a different account. Sign in with that account to restore it.",
+  "premiumNothingToRestore": "No previous purchase found to restore.",
+  "premiumSignInFirst": "Please sign in first to unlock premium.",
+  "premiumBillingUnavailable": "Billing is unavailable right now. Please try again later.",
+  "premiumPurchaseFailed": "Purchase didn’t go through. Please try again.",
+  "premiumLimitCategories": "Your budget is growing! You’ve filled every free category.",
+  "premiumLimitGroups": "Your free group is all booked. Only one active at a time.",
+  "premiumLimitBills": "Your bills are multiplying! The free slots are all used up.",
+  "premiumUpsellBenefit": "One-time Premium unlock",
+  "premiumUpsellSupport": "Support the app with a one-time purchase.",
+  "blockedUsersTitle": "Blocked Users",
+  "blockedUsersEmpty": "No blocked users",
+  "unblockTitle": "Unblock {username}?",
+  "@unblockTitle": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "unblockMessage": "They will be able to interact with you again.",
+  "unblockAction": "Unblock",
+  "unblockedSnack": "Unblocked {username}",
+  "@unblockedSnack": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "commonLoadFailed": "Failed to load: {error}",
+  "@commonLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "commonDelete": "Delete",
+  "confirmDeleteMessage": "Are you sure you want to delete “{itemName}”? This cannot be undone.",
+  "@confirmDeleteMessage": {
+    "placeholders": {
+      "itemName": {
+        "type": "String"
+      }
+    }
+  },
+  "navBudget": "Budget",
+  "navTransactions": "Transactions",
+  "navSplitBill": "Split Bill",
+  "navNotifications": "Notifications",
+  "tourMenuTitle": "More Options",
+  "tourMenuDesc": "Manage your account, budget period,\nother settings, and get help.",
+  "tourFabTitle": "Quick Add",
+  "tourFabDesc": "Tap + to quickly add a category,\ntransaction, or split-bill group.",
+  "tourBudgetTitle": "Plan Your Budget",
+  "tourBudgetDesc": "Set spending limits per category\nand see how much you have left.",
+  "tourTransactionsTitle": "Track Your Expenses",
+  "tourTransactionsDesc": "Track your income and expenses.\nUse + to add a transaction.",
+  "tourSplitTitle": "Split Bills Easily",
+  "tourSplitDesc": "Create a group, add bills,\nand chat with everyone.",
+  "tourSplitDescGuest": "Split expenses with friends.\nSign in to unlock this feature.",
+  "limitReachedCategories": "You’ve reached the limit of {count} active categories. Delete one to add a new one.",
+  "@limitReachedCategories": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "limitReachedGroups": "You’ve reached the limit of {count} groups. Delete a group to create a new one.",
+  "@limitReachedGroups": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "drawerGuest": "Guest",
+  "drawerGuestSubtitle": "Sign in to save your data",
+  "drawerAccount": "Account",
+  "drawerDarkMode": "Dark Mode",
+  "drawerHelp": "Help / FAQ",
+  "drawerLogout": "Logout",
+  "budgetAllocations": "ALLOCATIONS",
+  "budgetNoCategories": "No categories yet",
+  "budgetFilter": "Filter",
+  "budgetFiltersCount": "Filters ({count})",
+  "@budgetFiltersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetClearFiltersToReorder": "Clear filters to reorder categories",
+  "budgetNoMatch": "No categories match your filters",
+  "budgetClearFilters": "Clear filters",
+  "budgetLoadFailed": "Failed to load categories: {error}",
+  "@budgetLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetAutoCompleted": "{name} auto-completed — spending reached the budget.",
+  "@budgetAutoCompleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetFilterTitle": "Filter Categories",
+  "commonClearAll": "Clear all",
+  "budgetFilterStatus": "Status",
+  "budgetFilterAll": "All",
+  "budgetFilterPending": "Pending",
+  "budgetFilterCompleted": "Completed",
+  "budgetFilterType": "Type",
+  "budgetTypeFixed": "Fixed",
+  "budgetTypeVariable": "Variable",
+  "budgetFilterRecurrence": "Recurrence",
+  "commonApply": "Apply",
+  "commonApplyCount": "Apply ({count})",
+  "@commonApplyCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetFreqOnce": "One-time",
+  "budgetFreqRecurring": "Recurring",
+  "budgetFreqFirstHalf": "First Half",
+  "budgetFreqSecondHalf": "Second Half",
+  "budgetPeriodMonthly": "{date}",
+  "@budgetPeriodMonthly": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMM"
+      }
+    }
+  },
+  "budgetPeriodFirstHalf": "1st Half · {month} {start}–{end}",
+  "@budgetPeriodFirstHalf": {
+    "placeholders": {
+      "month": {
+        "type": "DateTime",
+        "format": "MMM"
+      },
+      "start": {
+        "type": "int"
+      },
+      "end": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetPeriodSecondHalf": "2nd Half · {month} {start}–{end}",
+  "@budgetPeriodSecondHalf": {
+    "placeholders": {
+      "month": {
+        "type": "DateTime",
+        "format": "MMM"
+      },
+      "start": {
+        "type": "int"
+      },
+      "end": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetUsed": "used",
+  "budgetOverBudget": "Over budget",
+  "budgetRemaining": "Remaining",
+  "budgetSpent": "Spent",
+  "budgetAllocated": "Allocated",
+  "categoryCardFirstHalf": "1st half",
+  "categoryCardSecondHalf": "2nd half",
+  "categoryCardBiMonthly": "Bi-monthly",
+  "categoryMarkIncompleteTitle": "Mark as incomplete?",
+  "categoryMarkIncompleteMessage": "Auto-generated expenses will be deleted. Manually added expenses will remain and may mark this category complete again.",
+  "categoryMarkIncompleteAction": "Mark Incomplete",
+  "categoryAdd": "Add Category",
+  "categoryEdit": "Edit Category",
+  "categoryDelete": "Delete Category",
+  "categoryNameLabel": "Category Name",
+  "categoryNameHint": "e.g. Groceries, Internet Bill",
+  "categoryNameRequired": "Name is required",
+  "budgetEditCategory": "Edit Category",
+  "@budgetEditCategory": {},
+  "budgetLogTransaction": "Log Transaction",
+  "@budgetLogTransaction": {},
+  "amountLabelWithSymbol": "Amount ({symbol})",
+  "@amountLabelWithSymbol": {
+    "placeholders": {
+      "symbol": {
+        "type": "String"
+      }
+    }
+  },
+  "amountRequired": "Amount is required",
+  "amountInvalid": "Enter a valid amount",
+  "amountTooLarge": "Amount is too large",
+  "categoryTypeLabel": "Type",
+  "categoryFixedTooltip": "Fixed: Same amount each time.",
+  "categoryVariableTooltip": "Variable: Amount may change each time.",
+  "categoryRepeat": "Repeat",
+  "categoryEveryMonth": "Every month",
+  "categoryOnce": "Once",
+  "categoryEveryPeriod": "Every period",
+  "categoryBothHalves": "Both halves",
+  "categoryFirstHalf": "First half",
+  "categorySecondHalf": "Second half",
+  "categoryIcon": "Icon",
+  "commonSaveChanges": "Save Changes",
+  "transactionTabExpenses": "Expenses",
+  "transactionTabIncome": "Income",
+  "dateToday": "Today",
+  "dateYesterday": "Yesterday",
+  "dateMonthDay": "{date}",
+  "@dateMonthDay": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMd"
+      }
+    }
+  },
+  "dateMonthDayYear": "{date}",
+  "@dateMonthDayYear": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMd"
+      }
+    }
+  },
+  "expensesEmpty": "No expenses yet",
+  "expensesLoadFailed": "Failed to load expenses: {error}",
+  "@expensesLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "expensesDeleteTitle": "Delete this expense?",
+  "expensesDeleteMessage": "It will no longer count toward your spending totals.",
+  "transactionDeletedCategory": "Deleted category",
+  "transactionAutoNote": "Remaining budget (auto)",
+  "incomeEmpty": "No income entries yet",
+  "incomeLoadFailed": "Failed to load income: {error}",
+  "@incomeLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "incomeDeleteTitle": "Delete this income entry?",
+  "incomeDeleteMessage": "It will no longer be counted toward total money.",
+  "incomeEveryMonthOnDay": "Every month on day {day}",
+  "@incomeEveryMonthOnDay": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "incomeEveryMonthOnDayClamped": "Every month on day {day} (day {effective} this month)",
+  "@incomeEveryMonthOnDayClamped": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "effective": {
+        "type": "int"
+      }
+    }
+  },
+  "cashFlowInfo": "Your expected income and savings this month. No history kept.",
+  "cashFlowSavings": "Savings",
+  "expenseAdd": "Add Expense",
+  "expenseEdit": "Edit Expense",
+  "amountLabel": "Amount",
+  "expenseCategory": "Category",
+  "expenseSelectCategory": "Please select a category",
+  "expenseNoCategories": "No categories yet — add one from the Budget tab.",
+  "expenseDate": "Date",
+  "expenseNoteLabel": "Note (optional)",
+  "expenseNoteHint": "e.g. Coffee with a friend",
+  "incomeAdd": "Add Income",
+  "incomeEdit": "Edit Income",
+  "incomeSourceLabel": "Source",
+  "incomeSourceHint": "e.g. Salary, Freelance, Gift",
+  "incomeSourceRequired": "Source is required",
+  "incomeSourceTooLong": "Keep it under 50 characters",
+  "incomeDepositDay": "Deposit day",
+  "incomeCountedEveryPeriod": "Counted as income for every period, regardless of the exact day.",
+  "incomeAddedTo": "Will be added to: {date}",
+  "@incomeAddedTo": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMM"
+      }
+    }
+  },
+  "splitGroupNew": "New Group",
+  "splitGroupEdit": "Edit Group",
+  "splitGroupCreate": "Create Group",
+  "splitGroupNameLabel": "Group name",
+  "splitGroupNameHint": "e.g. Roommates, Baguio Trip",
+  "splitGroupNameRequired": "Enter a group name",
+  "splitAddMembers": "Add members",
+  "splitGroupFull": "Group is full ({count}/{count} members)",
+  "@splitGroupFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "splitNoUserFound": "No user found",
+  "splitSearchByUsername": "Search by username",
+  "splitUnknownUser": "Unknown",
+  "errorBillLimit": "This group has reached its limit of {limit, plural, =1{1 bill} other{{limit} bills}}",
+  "@errorBillLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "errorGroupLimit": "You can only have {limit, plural, =1{1 active group} other{{limit} active groups}} on the free plan",
+  "@errorGroupLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "errorMaxMembers": "Groups can have at most {limit, plural, =1{1 member} other{{limit} members}}",
+  "@errorMaxMembers": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "splitDeleteGroupTitle": "Delete this group?",
+  "splitLeaveGroupTitle": "Leave this group?",
+  "splitDeleteGroupMessage": "This deletes “{name}” and its bills for everyone.",
+  "@splitDeleteGroupMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "splitLeaveGroupMessage": "You’ll no longer see “{name}” or its bills.",
+  "@splitLeaveGroupMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "splitLeave": "Leave",
+  "splitGroupsLoadFailed": "Failed to load groups: {error}",
+  "@splitGroupsLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "splitNoGroups": "No groups yet",
+  "splitMembersCount": "{count, plural, =1{1 member} other{{count} members}}",
+  "@splitMembersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "splitSettled": "Settled",
+  "splitOwed": "Owed {amount}",
+  "@splitOwed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "splitYouOwe": "You owe {amount}",
+  "@splitYouOwe": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guestSplitTagline": "Chip in. Settle up. Stay friends.",
+  "guestSplitDescription": "Create groups, split bills, and see who owes who. Sign in to sync it all with your friends.",
+  "guestSplitCta": "Sign in to get started",
+  "splitBlockUser": "Block {username}",
+  "@splitBlockUser": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "splitReportUser": "Report {username}",
+  "@splitReportUser": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "splitBlockTitle": "Block {username}?",
+  "@splitBlockTitle": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "splitBlockMessage": "You won’t see {username}’s messages or activity in shared groups, including bill updates. You can unblock them anytime from Settings.",
+  "@splitBlockMessage": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "splitBlockAction": "Block",
+  "splitBlockedSnack": "Blocked {username}",
+  "@splitBlockedSnack": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "splitGameScoreMessage": "🎮 I scored {score} in Whack-a-Debt!",
+  "@splitGameScoreMessage": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "splitGroupLoadFailed": "Failed to load group: {error}",
+  "@splitGroupLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "splitGroupNotFound": "Group not found",
+  "splitBillsLoadFailed": "Failed to load bills: {error}",
+  "@splitBillsLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceAllSettled": "All settled up",
+  "balanceOwedToYou": "Owed to you",
+  "balanceYouOwe": "You owe",
+  "billAdd": "Add Bill",
+  "billLimitReachedPremium": "This group has reached its limit of {count, plural, =1{1 bill} other{{count} bills}}. Delete a bill to add a new one.",
+  "@billLimitReachedPremium": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billTotal": "Total {amount}",
+  "@billTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "billPaidByYou": "Paid by you",
+  "billPaidByName": "Paid by {name}",
+  "@billPaidByName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "billAllConfirmed": "All confirmed",
+  "billDisputedReview": "{count} disputed — tap to review",
+  "@billDisputedReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billWaitingOnYou": "{count} waiting on you",
+  "@billWaitingOnYou": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billWaitingPayments": "Waiting on payments",
+  "billDisputed": "Disputed",
+  "billMarkPaidAgain": "Mark paid again",
+  "billWaitingConfirmation": "Waiting on confirmation",
+  "billMarkPaid": "Mark paid",
+  "activityFormerMemberCap": "A former member",
+  "activityFormerMember": "a former member",
+  "activityABill": "a bill",
+  "activitySomeone": "someone",
+  "activityFormerBeast": "Former Beast",
+  "activityBillAdded": "{sender} added “{title}”",
+  "@activityBillAdded": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "activityBillAddedAmount": "{sender} added “{title}” — {amount}",
+  "@activityBillAddedAmount": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPaymentMarked": "{sender} marked their share as paid",
+  "@activityPaymentMarked": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPaymentConfirmedTarget": "{sender} confirmed {target}’s payment",
+  "@activityPaymentConfirmedTarget": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPaymentConfirmed": "{sender} confirmed a payment",
+  "@activityPaymentConfirmed": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPaymentDisputedTarget": "{sender} disputed {target}’s payment",
+  "@activityPaymentDisputedTarget": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPaymentDisputed": "{sender} disputed a payment",
+  "@activityPaymentDisputed": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "activityMemberAdded": "{sender} added {target} to the group",
+  "@activityMemberAdded": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPoke": "{article} {character} poked the group!",
+  "@activityPoke": {
+    "placeholders": {
+      "article": {
+        "type": "String"
+      },
+      "character": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPhotoSent": "{sender} sent a photo",
+  "@activityPhotoSent": {
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      }
+    }
+  },
+  "activityEmpty": "No activity yet",
+  "photoExpiresIn3Days": "This photo will expire in 3 days",
+  "photoExpiresInDays": "Expires in {count, plural, =1{1 day} other{{count} days}}",
+  "@photoExpiresInDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "photoExpiresInHours": "Expires in {count}h",
+  "@photoExpiresInHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "photoExpiresInMinutes": "Expires in {count}m",
+  "@photoExpiresInMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "photoExpired": "Photo expired",
+  "linkOpenTitle": "Open link?",
+  "linkOpenMessage": "You’re about to leave Salapify and open:\n\n{url}",
+  "@linkOpenMessage": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "commonOpen": "Open",
+  "linkOpenFailed": "Couldn’t open this link.",
+  "chatNotifyAll": "Notify all members",
+  "chatAddPhoto": "Add photo",
+  "chatMessageHint": "Message the group...",
+  "chatPokeGroup": "Poke the group",
+  "chatSendMessage": "Send message",
+  "reportTitle": "Report User",
+  "reportReporting": "Reporting",
+  "reportWhatsGoingOn": "What’s going on?",
+  "reportBeSpecific": "Be as specific as possible — include what happened clearly.",
+  "reportHint": "Describe what happened...",
+  "reportDescribeIssue": "Please describe the issue",
+  "reportSubmitted": "Report submitted",
+  "reportSubmit": "Submit Report",
+  "billEdit": "Edit Bill",
+  "billDetailsTitle": "Bill Details",
+  "billOnlyPayerEdit": "Only the person who paid can edit this bill.",
+  "billLockedBanner": "Total amount and split are locked — someone already has payment activity on this bill.",
+  "billSectionDetails": "Bill details",
+  "billTitleHint": "e.g. Dinner @ KFC",
+  "billTitleLabel": "Title",
+  "billTitleRequired": "Enter a title",
+  "billTotalAmountLabel": "Total amount",
+  "billAmountTooLarge": "Amount can’t exceed {amount}",
+  "@billAmountTooLarge": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "billLockedNote": "Locked — payment activity exists",
+  "billSectionSplit": "Split",
+  "billPaidByLabel": "Paid by",
+  "billSplitEqually": "Equally",
+  "billSplitCustom": "Custom",
+  "billDelete": "Delete Bill",
+  "billDeleteTitle": "Delete this bill?",
+  "billDeleteMessage": "This cannot be undone.",
+  "billDeletedSnack": "Bill deleted. You can add a new one anytime.",
+  "billFormerMember": "Former member",
+  "billPaymentStatus": "Payment status",
+  "billAwaitingReview": "{count} awaiting review",
+  "@billAwaitingReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "billStatusUnpaid": "Unpaid",
+  "billStatusSaysPaid": "Says paid — review",
+  "billStatusConfirmed": "Confirmed",
+  "billDecline": "Decline",
+  "notificationsLoadFailed": "Failed to load notifications: {error}",
+  "@notificationsLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsEmpty": "No notifications yet",
+  "notificationsEarlier": "Earlier",
+  "notificationsUnread": "{count} unread",
+  "@notificationsUnread": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationsAllCaughtUp": "You’re all caught up",
+  "notificationsMarkAllRead": "Mark all read",
+  "notificationDeletedUser": "Deleted user",
+  "notificationAddedToGroup": "{name} added you to “{group}”",
+  "@notificationAddedToGroup": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationBillAdded": "{name} added “{title}” in {group}",
+  "@notificationBillAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPaymentMarked": "{name} marked their share as paid in {group}",
+  "@notificationPaymentMarked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPaymentConfirmed": "{name} confirmed your payment in {group}",
+  "@notificationPaymentConfirmed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationPaymentDisputed": "{name} disputed your payment in {group}",
+  "@notificationPaymentDisputed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "timeJustNow": "Just now",
+  "timeMinutesAgo": "{count}m ago",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeHoursAgo": "{count}h ago",
+  "@timeHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeDaysAgo": "{count}d ago",
+  "@timeDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationGroupUnavailable": "This group is no longer available.",
+  "gameTitle": "Whack-a-Debt",
+  "gameTimeLabel": "Time",
+  "gameScoreLabel": "Score",
+  "gameSecondsShort": "{seconds} s",
+  "@gameSecondsShort": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "gameHint": "Tap your friends. Avoid the rhinos (-{penalty})!",
+  "@gameHint": {
+    "placeholders": {
+      "penalty": {
+        "type": "int"
+      }
+    }
+  },
+  "gameReady": "Ready?",
+  "gameYouHaveSeconds": "You have {seconds, plural, =1{1 second} other{{seconds} seconds}}.",
+  "@gameYouHaveSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "gameWhackBeasts": "Whack the beasts",
+  "gameWhackBeastsDesc": "+1 point for every hit",
+  "gameAvoidRhino": "Avoid the black rhino!",
+  "gameAvoidRhinoDesc": "-{penalty, plural, =1{1 point} other{{penalty} points}}. Avoid it at all cost!",
+  "@gameAvoidRhinoDesc": {
+    "placeholders": {
+      "penalty": {
+        "type": "int"
+      }
+    }
+  },
+  "gameStart": "Start",
+  "gameTimesUp": "Time’s up!",
+  "gameCountingScore": "Counting your score...",
+  "gameResultTitle": "Your result",
+  "gameYourScore": "YOUR SCORE",
+  "gameMessageWarmingUp": "Just warming up!",
+  "gameMessageNice": "Nice whacking!",
+  "gameMessageGreat": "You’re a great whacker!",
+  "gameMessageSuperstar": "Whack superstar!",
+  "gamePlayAgain": "Play again",
+  "helpTitle": "Help & FAQ",
+  "helpSearchHint": "Search for a topic...",
+  "helpNoResults": "No results for “{query}”",
+  "@helpNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "faqSectionStarted": "Getting Started",
+  "faqSectionBudgeting": "Budgeting",
+  "faqSectionTransactions": "Transactions & Income",
+  "faqSectionSplit": "Split Bills",
+  "faqSectionPeriods": "Periods & Settings",
+  "faqSectionNotifications": "Notifications",
+  "faqStartedQ1": "What does Salapify do?",
+  "faqStartedA1": "Salapify combines budget tracking with bill splitting. Use the Budget tab to allocate money into categories, the Transactions tab to log your income and spending, and the Split Bills tab to settle shared expenses with friends or other users, all in one place.",
+  "faqBudgetQ1": "How do I create a budget category?",
+  "faqBudgetA1": "Tap the + button on the Budget tab. Enter a category name, such as Internet Bill or Groceries, then set its allocation. Choose whether it’s Fixed or Variable, and set how often it repeats. Fill in the remaining fields, then save your category.",
+  "faqBudgetQ2": "What’s the difference between Fixed and Variable?",
+  "faqBudgetA2": "Fixed is for predictable costs, like an Internet Bill, where you set one exact amount. Variable is for spending that changes, like Groceries, where you set a target ceiling instead of an exact amount.",
+  "faqBudgetQ3": "What happens when I check off a category as completed?",
+  "faqBudgetA3": "Marking a category as complete automatically logs it as a transaction for the current period. The category is also marked as done and moved to the bottom of the list.",
+  "faqBudgetQ4": "Why are some categories dimmed on my Budget tab?",
+  "faqBudgetA4": "Dimmed categories belong to the other half of the period when you use bi-monthly budgeting. They’ll come back into focus automatically when their half of the period begins.",
+  "faqTxQ1": "How do I add a transaction or income?",
+  "faqTxA1": "From the Transactions tab, tap + to add an expense or income entry. For income, choose whether it’s One-time or Recurring. Recurring entries are added automatically at the start of each new period.",
+  "faqTxQ2": "How do transactions affect my budget?",
+  "faqTxA2": "When you log a transaction, you assign it to a budget category. The amount is automatically deducted from that category’s allocation, so your Budget tab always shows what’s left to spend.",
+  "faqTxQ3": "How do I delete an income or expense?",
+  "faqTxA3": "Go to the Transactions tab and swipe left on the income or expense you want to remove. Confirm the deletion if you are prompted.",
+  "faqTxQ4": "Why don’t I see last period’s transactions?",
+  "faqTxA4": "The Budget and Transactions tabs only show totals for the current period, based on the budgeting period you set in Settings. This keeps the numbers focused on what you can still act on.",
+  "faqSplitQ1": "How do I split a bill with friends?",
+  "faqSplitA1": "Create a group and add members by their usernames. Inside the group, create a bill (e.g. “Dinner @ KFC”), enter the amount you paid, and split it equally or with custom shares for each member.",
+  "faqSplitQ2": "How do I delete a Split Bills group?",
+  "faqSplitA2": "If you created the group, swipe left on it to delete it. Deleting a group also removes all of its shared bill activity.",
+  "faqSplitQ3": "How do I leave a Split Bills group?",
+  "faqSplitA3": "If you’re a member of a group, swipe left on it and choose Leave. This removes you from the group without deleting it for everyone else.",
+  "faqSplitQ4": "Can I share receipts or chat with my group?",
+  "faqSplitA4": "Yes. Every group has an Activity section where you can message members and share photos, such as receipts, alongside the bill history.",
+  "faqSplitQ5": "Do Split Bills affect my personal budget?",
+  "faqSplitA5": "No. Split Bills is kept separate from your Budget and Transactions tabs. If you want a settled bill to count toward your spending, log it manually as a transaction.",
+  "faqSplitQ6": "How do I report or block someone in a group?",
+  "faqSplitA6": "In the group’s Activity tab, press and hold a member’s avatar next to their message to open a menu with Report and Block options. Blocking hides their messages and activity, and you can undo it anytime from Settings.",
+  "faqPeriodQ1": "What’s the difference between Monthly and Bi-Monthly?",
+  "faqPeriodA1": "Monthly resets your budget on the 1st of every month. Bi-Monthly splits the month into two halves: you choose the day the first half ends, and the rest of the month becomes the second half.",
+  "faqPeriodQ2": "What happens to my categories if I change the period?",
+  "faqPeriodA2": "Existing categories are converted to match the new period and keep their amounts. Categories tied to a specific half will now count toward the full month (or vice versa), so review them afterward to check for duplicates.",
+  "faqPeriodQ3": "How does recurrence work with bi-monthly budgeting?",
+  "faqPeriodA3": "A recurring category repeats in every half you’ve assigned it to. If you switch to Monthly, the same item simply repeats once a month instead.",
+  "faqNotifQ1": "What shows up in the Notifications tab?",
+  "faqNotifA1": "You’ll see updates on Split Bills activity, as well as alerts when a payer disputes or confirms one of your shares.",
+  "faqNotifQ2": "Can I turn off notifications?",
+  "faqNotifA2": "Yes. Go to your device Settings > Apps > Salapify > Notifications, where you can turn off alerts entirely or choose which types of alerts you want to receive.",
+  "languageChangeLaterHint": "You can change this anytime in Settings.",
+  "@languageChangeLaterHint": {
+    "description": "Hint shown under the title of the first-launch language picker"
+  }
+}
