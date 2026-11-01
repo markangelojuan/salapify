@@ -119,7 +119,6 @@ flutter:
   assets:
     - assets/lottie/sleeping_squirrel.json
     - assets/lottie/curious.json
-    - assets/lottie/animated_logo.json
     - assets/images/covetous_snake.png
     - assets/images/frugal_shark.png
     - assets/images/greedy_cat.png
