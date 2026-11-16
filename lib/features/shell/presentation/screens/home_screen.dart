@@ -26,6 +26,7 @@ import 'package:salapify/features/notification/data/providers/notification_provi
 import 'package:salapify/features/premium/data/services/purchase_service.dart';
 import 'package:salapify/core/layout/breakpoints.dart';
 import 'package:salapify/core/widgets/nav_badge.dart';
+import 'dart:math' as math;
 import 'package:salapify/l10n/app_localizations.dart';
 
 import 'package:salapify/router/routes.dart';
@@ -291,12 +292,14 @@ class _FloatingNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final bottomGap = math.max(20.0, bottomInset + 8);
+    debugPrint('bottom inset: $bottomInset');
     return MediaQuery.removePadding(
       context: context,
       removeBottom: true,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+        padding: EdgeInsets.fromLTRB(16, 0, 16, bottomGap),
         child: SizedBox(
           height: _pillHeight + _fabPopOut, // fixes height first
           child: Center(
@@ -380,6 +383,17 @@ class _Pill extends ConsumerWidget {
     required this.splitKey,
   });
 
+  Widget _activeIcon(IconData icon, Color highlight) => Container(
+    width: 48,
+    height: 30,
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      color: highlight,
+      borderRadius: BorderRadius.circular(15),
+    ),
+    child: Icon(icon),
+  );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -387,6 +401,7 @@ class _Pill extends ConsumerWidget {
     final unreadSplitCount = ref.watch(totalUnreadSplitCountProvider);
     final unreadNotifCount = ref.watch(unreadNotificationCountProvider);
     final isGuest = ref.watch(currentUserProvider) == null;
+    final highlight = colors.primary.withValues(alpha: 0.25);
 
     return Container(
       decoration: BoxDecoration(
@@ -407,7 +422,8 @@ class _Pill extends ConsumerWidget {
             backgroundColor: Colors.transparent,
             surfaceTintColor: Colors.transparent,
             elevation: 0,
-            indicatorColor: colors.primary.withValues(alpha: 0.25),
+            indicatorColor: Colors.transparent,
+            overlayColor: const WidgetStatePropertyAll(Colors.transparent),
             labelTextStyle: WidgetStateProperty.resolveWith((states) {
               final selected = states.contains(WidgetState.selected);
               return TextStyle(
@@ -439,7 +455,10 @@ class _Pill extends ConsumerWidget {
                   showcaseKey: budgetKey,
                   title: l10n.tourBudgetTitle,
                   description: l10n.tourBudgetDesc,
-                  child: const Icon(Icons.account_balance_wallet_rounded),
+                  child: _activeIcon(
+                    Icons.account_balance_wallet_rounded,
+                    highlight,
+                  ),
                 ),
                 label: l10n.navBudget,
               ),
@@ -450,7 +469,7 @@ class _Pill extends ConsumerWidget {
                   description: l10n.tourTransactionsDesc,
                   child: const Icon(Icons.payments_outlined),
                 ),
-                selectedIcon: const Icon(Icons.payments_rounded),
+                selectedIcon: _activeIcon(Icons.payments_rounded, highlight),
                 label: l10n.navTransactions,
               ),
               NavigationDestination(
@@ -465,7 +484,10 @@ class _Pill extends ConsumerWidget {
                     child: const Icon(Icons.receipt_long_outlined),
                   ),
                 ),
-                selectedIcon: const Icon(Icons.receipt_long_rounded),
+                selectedIcon: _activeIcon(
+                  Icons.receipt_long_rounded,
+                  highlight,
+                ),
                 label: l10n.navSplitBill,
               ),
               NavigationDestination(
@@ -473,7 +495,10 @@ class _Pill extends ConsumerWidget {
                   count: unreadNotifCount,
                   child: const Icon(Icons.notifications_outlined),
                 ),
-                selectedIcon: const Icon(Icons.notifications_rounded),
+                selectedIcon: _activeIcon(
+                  Icons.notifications_rounded,
+                  highlight,
+                ),
                 label: l10n.navNotifications,
               ),
             ],
